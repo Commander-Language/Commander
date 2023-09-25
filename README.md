@@ -1,4 +1,4 @@
-# The Commander Language Guild
+# Commander
 
 
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://capstone-cs.eng.utah.edu/the-commander-language-guild/the-commander-language-guild.git
+git remote add origin https://capstone-cs.eng.utah.edu/commander/commander.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://capstone-cs.eng.utah.edu/the-commander-language-guild/the-commander-language-guild/-/settings/integrations)
+- [ ] [Set up project integrations](https://capstone-cs.eng.utah.edu/commander/commander/-/settings/integrations)
 
 ## Collaborate with your team
 
