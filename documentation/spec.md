@@ -63,41 +63,34 @@
     - [Grammar](#grammar-12)
     - [Examples](#examples-19)
   - [Math Operations](#math-operations)
-    - [Grammar](#grammar-13)
+    - [Grammar (Unary)](#grammar-unary)
+    - [Grammar (Binary)](#grammar-binary)
+    - [Grammar (Comparison)](#grammar-comparison)
     - [Examples](#examples-20)
   - [Boolean Operations](#boolean-operations)
-    - [Grammar](#grammar-14)
+    - [Grammar](#grammar-13)
     - [Examples](#examples-21)
   - [String Concatenation](#string-concatenation)
-    - [Grammar](#grammar-15)
+    - [Grammar](#grammar-14)
     - [Examples](#examples-22)
   - [String Interpolation](#string-interpolation)
-    - [Grammar](#grammar-16)
+    - [Grammar](#grammar-15)
     - [Examples](#examples-23)
   - [Lambda Expressions](#lambda-expressions)
-    - [Grammar](#grammar-17)
+    - [Grammar](#grammar-16)
     - [Examples](#examples-24)
   - [User Defined Scopes](#user-defined-scopes)
-    - [Grammar](#grammar-18)
+    - [Grammar](#grammar-17)
     - [Examples](#examples-25)
-  - [File I/O](#file-io)
-    - [Grammar](#grammar-19)
-    - [Examples](#examples-26)
-  - [User I/O](#user-io)
-    - [Grammar](#grammar-20)
-    - [Examples](#examples-27)
   - [Comments](#comments)
-    - [Grammar](#grammar-21)
-    - [Examples](#examples-28)
+    - [Examples](#examples-26)
   - [Code Separation and Libraries](#code-separation-and-libraries)
-    - [Grammar](#grammar-22)
-    - [Examples](#examples-29)
-  - [](#)
-    - [Grammar](#grammar-23)
-    - [Examples](#examples-30)
+    - [Grammar](#grammar-18)
+    - [Examples](#examples-27)
+  - [Expressions](#expressions)
   - [API Functions](#api-functions)
-    - [Grammar](#grammar-24)
-    - [Examples](#examples-31)
+    - [Grammar](#grammar-19)
+    - [Examples](#examples-28)
   - [Errors](#errors)
 
 <!-- TODO -->
@@ -154,8 +147,8 @@ false
 - Special characters like newlines and tabs can be included in strings via escape characters, which include:
   - ```\t``` for tabs
   - ```\n``` for new lines
-  - ```\'``` for single quotations (only nessecary if string is initialized using ```'```)
-  - ```\"``` for double quotations (only nessecary if string is initialized using ```"```)
+  - ```\'``` for single quotations (only necessary if string is initialized using ```'```)
+  - ```\"``` for double quotations (only necessary if string is initialized using ```"```)
   - ```\\``` for backslash
 - Useful string operations such as [string concatenation](#string-concatenation) and [string interpolation](#string-interpolation) are also supported
 - Default: ```""```
@@ -280,83 +273,130 @@ Commands return a tuple that contains: the standard output, the error output, an
 
 ```
 
-<!-- TODO -->
 ## Variables
+Set variables with ```=```. Use keyword ```const``` if you want the value to be immutable.
 ### Grammar
 ```
-
+<stmt> : <variable> = <expr>
+       : const <variable> = <expr>
 ```
 ### Examples
 ```
-
+const pi = 3.14159
+r = 5
+area = pi * r ** 2
 ```
 
-<!-- TODO -->
 ## While Loops
 ### Grammar
 ```
-
+<stmt> : while ( <bool> ) {
+             <stmt>
+             ...
+         }
 ```
 ### Examples
 ```
-
+x = 10
+while (x > 5) {
+    print(x--)
+}
 ```
 
-<!-- TODO -->
 ## Do-While Loops
 ### Grammar
 ```
-
+<stmt> : do {
+             <stmt>
+             ...
+         } while ( <bool> )
 ```
 ### Examples
 ```
-
+x = 10
+do {
+    print(x--)
+} while (x > 5)
 ```
 
-<!-- TODO -->
 ## For Loops
 ### Grammar
 ```
-
+<stmt> : for ( <stmt> ; <bool> ; <stmt> ) {
+             <stmt>
+             ...
+         }
 ```
 ### Examples
 ```
-
+for (i = 0; i < 10; i++) {
+    print(i)
+}
 ```
 
 <!-- TODO -->
 ## If-Else Statements
 ### Grammar
 ```
+<stmt> : if ( <bool> ) {
+             <stmt>
+             ...
+         }
 
+       | if ( <bool> ) {
+             <stmt>
+             ...
+         } else {
+             <stmt>
+             ...
+         }
+
+       | if ( <bool> ) {
+             <stmt>
+             ...
+         } else if ( <bool> ) {
+            <stmt>
+            ...
+         } ...
+
+       | if ( <bool> ) {
+             <stmt>
+             ...
+         } else if ( <bool> ) {
+            <stmt>
+            ...
+         } ... else {
+            <stmt>
+            ...
+         }
 ```
 ### Examples
 ```
 
 ```
 
-<!-- TODO -->
 ## Ternary Operator
 ### Grammar
 ```
-
+<expr> : <bool> ? <expr> : <expr>
 ```
 ### Examples
 ```
-
+x = 1
+print(x == 1 ? "One" : "Not One")
 ```
 
 ## Functions
 ### Grammar
 ```
-stmt  : <variable> ( <binding> , ... ) : <type> {
-            <stmt>
-            ...
-        }
-      | <variable> ( <binding> , ... ) {
-            <stmt>
-            ...
-        }
+<stmt> : <variable> ( <binding> , ... ) : <type> {
+             <stmt>
+             ...
+         }
+       | <variable> ( <binding> , ... ) {
+             <stmt>
+             ...
+         }
 ```
 Note that the grammar implies you may define functions inside of functions. Additionally, functions may be recursive (see examples below).
 
@@ -385,9 +425,61 @@ factorial(n: int): int {
 
 <!-- TODO -->
 ## Math Operations
-### Grammar
+### Grammar (Unary)
 ```
+<int>   : -<int>
+        | --<int>
+        | <int>--
+        | ++<int>
+        | <int>++
 
+<float> : -<float>
+        | --<float>
+        | <float>--
+        | ++<float>
+        | <float>++
+```
+### Grammar (Binary)
+```
+<int>   : <int> + <int>
+        | <int> - <int>
+        | <int> * <int>
+        | <int> / <int>
+        | <int> % <int>
+        | <int> ** <int>
+
+<float> : <float> + <float>
+        | <int> + <float>
+        | <float> + <int>
+
+        | <float> - <float>
+        | <int> - <float>
+        | <float> - <int>
+
+        | <float> * <float>
+        | <int> * <float>
+        | <float> * <int>
+
+        | <float> / <float>
+        | <int> / <float>
+        | <float> / <int>
+
+        | <float> % <float>
+        | <int> % <float>
+        | <float> % <int>
+
+        | <float> ** <float>
+        | <int> ** <float>
+        | <float> ** <int>
+```
+### Grammar (Comparison)
+```
+<bool> : <int | float> < <int | float>
+       | <int | float> <= <int | float>
+       | <int | float> > <int | float>
+       | <int | float> >= <int | float>
+       | <int | float> != <int | float>
+       | <int | float> == <int | float>
 ```
 ### Examples
 ```
@@ -398,154 +490,154 @@ factorial(n: int): int {
 ## Boolean Operations
 ### Grammar
 ```
-
+<bool> : !<bool>
+       : <bool> || <bool>
+       : <bool> && <bool>
+       : <bool> == <bool>
+       : <bool> != <bool>
 ```
 ### Examples
 ```
 
 ```
 
-<!-- TODO -->
 ## String Concatenation
 ### Grammar
 ```
-
+<string> : <string> + ... + <string>
 ```
 ### Examples
 ```
-
+hello = "Hello " + "world!\n"
 ```
 
-<!-- TODO -->
 ## String Interpolation
 ### Grammar
 ```
-
+<string> : $"...{ <expr> }..."
 ```
 ### Examples
 ```
-
+x = 4
+y = 6
+sum = $"The sum of {x} and {y} is {x + y}"
 ```
 
 <!-- TODO -->
 ## Lambda Expressions
 ### Grammar
 ```
-
+<expr> : (<binding>, ...) : <type> -> <expr>
+       | (<binding>, ...) -> <expr>
+       | (<binding>, ...) : <type> -> {
+             <stmt>
+             ...
+         }
+       | (<binding>, ...) -> {
+             <stmt>
+             ...
+         }
 ```
 ### Examples
 ```
 
 ```
 
-<!-- TODO -->
 ## User Defined Scopes
 ### Grammar
 ```
-
+<stmt> : {
+             <stmt> 
+             ...
+         }
 ```
 ### Examples
 ```
-
+{
+    x = 5
+    print(x) // Prints 5
+}
+print(x) // Throws error that x is not initialized
 ```
 
-<!-- TODO -->
-## File I/O
-### Grammar
-```
-
-```
-### Examples
-```
-
-```
-
-<!-- TODO -->
-## User I/O
-### Grammar
-```
-
-```
-### Examples
-```
-
-```
-
-<!-- TODO -->
 ## Comments
-### Grammar
-```
-
-```
+You can use ```// <comment>``` to define a single line comment, or ```/* <comment> */``` to define a multi-line comment.
 ### Examples
 ```
+// This is a single line comment
 
+/*
+This
+is
+a
+multi-line
+comment
+*/
 ```
 
-<!-- TODO -->
 ## Code Separation and Libraries
+Use the ```import``` keyword followed by the path to the commander script file with code you would like to use, as defined below.
 ### Grammar
 ```
-
+<stmt> : import <string>
 ```
 ### Examples
 ```
-
+import "add.cmdr"
+// The add() function is defined in add.cmdr, which adds two numbers.
+print(add(3, 4))
 ```
 
-<!-- TODO -->
-## 
-### Grammar
-```
+<!-- TODO: Precedence, parentheses, statements as expressions, etc. -->
+## Expressions
 
-```
-### Examples
-```
 
-```
-
-<!-- TODO: Separate into groups based on function. Add more -->
+<!-- TODO: Separate into groups based on function (e.g. one group for file I/O, one for user I/O, one for math, etc.). Add others as needed -->
 ## API Functions
 ### Grammar
-    1. parseInt(<string> | <int> | <bool>) : <int>
-    2. parseFloat(<string> | <int> | <bool>) : <float>
-    3. parseBool(<string> | <int> | <float>) : <bool>
-    4. sqrt(<int> | <float>) : <float>
-    5. ln(<int> | <float>) : <float>
-    6. log(<int> | <float>) : <float>
-    7. abs(<int>) : <int>
-    8. abs(<float>) : <float>
-    9. floor(<int> | <float>) : <int>
-    10. ceil(<int> | <float>) : <int>
-    11. round(<int> | <float>) : <int>
-    12. random() : <float>
-    13. time() : <int>
-    14. date() : <tuple>
-    15. sleep(<int>) : void
-    16. sin(<int> | <float>) : <float>
-    17. cos(<int> | <float>) : <float>
-    18. tan(<int> | <float>) : <float>
-    19. csc(<int> | <float>) : <float>
-    20. sec(<int> | <float>) : <float>
-    21. cot(<int> | <float>) : <float>
-    22. sinh(<int> | <float>) : <float>
-    23. cosh(<int> | <float>) : <float>
-    24. tanh(<int> | <float>) : <float>
-    24. csch(<int> | <float>) : <float>
-    25. sech(<int> | <float>) : <float>
-    26. coth(<int> | <float>) : <float>
-    27. arcsin(<int> | <float>) : <float>
-    28. arccos(<int> | <float>) : <float>
-    29. arctan(<int> | <float>) : <float>
-    30. arccsc(<int> | <float>) : <float>
-    31. arcsec(<int> | <float>) : <float>
-    32. arccot(<int> | <float>) : <float>
-    33. arcsinh(<int> | <float>) : <float>
-    34. arccosh(<int> | <float>) : <float>
-    35. arctanh(<int> | <float>) : <float>
-    36. arccsch(<int> | <float>) : <float>
-    37. arcsech(<int> | <float>) : <float>
-    38. arccoth(<int> | <float>) : <float>
+    1. read(<string>) : <string>
+    2. write(<string>) : <string>
+    3. scan(<string>) : <string>
+    4. print(<string>) : void
+    5. parseInt(<string> | <int> | <bool>) : <int>
+    6. parseFloat(<string> | <int> | <bool>) : <float>
+    7. parseBool(<string> | <int> | <float>) : <bool>
+    8. sqrt(<int> | <float>) : <float>
+    9. ln(<int> | <float>) : <float>
+    10. log(<int> | <float>) : <float>
+    11. abs(<int>) : <int>
+    12. abs(<float>) : <float>
+    13. floor(<int> | <float>) : <int>
+    14. ceil(<int> | <float>) : <int>
+    15. round(<int> | <float>) : <int>
+    16. random() : <float>
+    17. time() : <int>
+    18. date() : <tuple>
+    19. sleep(<int>) : void
+    20. sin(<int> | <float>) : <float>
+    21. cos(<int> | <float>) : <float>
+    22. tan(<int> | <float>) : <float>
+    23. csc(<int> | <float>) : <float>
+    24. sec(<int> | <float>) : <float>
+    25. cot(<int> | <float>) : <float>
+    26. sinh(<int> | <float>) : <float>
+    27. cosh(<int> | <float>) : <float>
+    28. tanh(<int> | <float>) : <float>
+    29. csch(<int> | <float>) : <float>
+    30. sech(<int> | <float>) : <float>
+    31. coth(<int> | <float>) : <float>
+    32. arcsin(<int> | <float>) : <float>
+    33. arccos(<int> | <float>) : <float>
+    34. arctan(<int> | <float>) : <float>
+    35. arccsc(<int> | <float>) : <float>
+    36. arcsec(<int> | <float>) : <float>
+    37. arccot(<int> | <float>) : <float>
+    38. arcsinh(<int> | <float>) : <float>
+    39. arccosh(<int> | <float>) : <float>
+    40. arctanh(<int> | <float>) : <float>
+    41. arccsch(<int> | <float>) : <float>
+    42. arcsech(<int> | <float>) : <float>
+    43. arccoth(<int> | <float>) : <float>
 ### Examples
 ```
 
