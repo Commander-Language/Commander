@@ -32,66 +32,70 @@
   - [Piping Commands](#piping-commands)
     - [Grammar](#grammar-2)
     - [Examples](#examples-9)
-  - [Command Return Value](#command-return-value)
+  - [Timeout Commands](#timeout-commands)
     - [Grammar](#grammar-3)
     - [Examples](#examples-10)
-  - [Timeout Commands](#timeout-commands)
+  - [Command Aliasing](#command-aliasing)
     - [Grammar](#grammar-4)
     - [Examples](#examples-11)
-  - [Command Aliasing](#command-aliasing)
+  - [Variables](#variables)
     - [Grammar](#grammar-5)
     - [Examples](#examples-12)
-  - [Variables](#variables)
+  - [While Loops](#while-loops)
     - [Grammar](#grammar-6)
     - [Examples](#examples-13)
-  - [While Loops](#while-loops)
+  - [Do-While Loops](#do-while-loops)
     - [Grammar](#grammar-7)
     - [Examples](#examples-14)
-  - [Do-While Loops](#do-while-loops)
+  - [For Loops](#for-loops)
     - [Grammar](#grammar-8)
     - [Examples](#examples-15)
-  - [For Loops](#for-loops)
+  - [If-Else Statements](#if-else-statements)
     - [Grammar](#grammar-9)
     - [Examples](#examples-16)
-  - [If-Else Statements](#if-else-statements)
+  - [Ternary Operator](#ternary-operator)
     - [Grammar](#grammar-10)
     - [Examples](#examples-17)
-  - [Ternary Operator](#ternary-operator)
+  - [Functions](#functions)
     - [Grammar](#grammar-11)
     - [Examples](#examples-18)
-  - [Functions](#functions)
-    - [Grammar](#grammar-12)
-    - [Examples](#examples-19)
   - [Math Operations](#math-operations)
     - [Grammar (Unary)](#grammar-unary)
     - [Grammar (Binary)](#grammar-binary)
     - [Grammar (Comparison)](#grammar-comparison)
-    - [Examples](#examples-20)
+    - [Examples](#examples-19)
   - [Boolean Operations](#boolean-operations)
+    - [Grammar](#grammar-12)
+    - [Examples](#examples-20)
+  - [String Concatenation](#string-concatenation)
     - [Grammar](#grammar-13)
     - [Examples](#examples-21)
-  - [String Concatenation](#string-concatenation)
+  - [String Interpolation](#string-interpolation)
     - [Grammar](#grammar-14)
     - [Examples](#examples-22)
-  - [String Interpolation](#string-interpolation)
+  - [Lambda Expressions](#lambda-expressions)
     - [Grammar](#grammar-15)
     - [Examples](#examples-23)
-  - [Lambda Expressions](#lambda-expressions)
+  - [User I/O](#user-io)
     - [Grammar](#grammar-16)
     - [Examples](#examples-24)
-  - [User Defined Scopes](#user-defined-scopes)
+  - [File I/O](#file-io)
     - [Grammar](#grammar-17)
     - [Examples](#examples-25)
-  - [Comments](#comments)
-    - [Examples](#examples-26)
-  - [Code Separation and Libraries](#code-separation-and-libraries)
+  - [User Defined Scopes](#user-defined-scopes)
     - [Grammar](#grammar-18)
+    - [Examples](#examples-26)
+  - [Comments](#comments)
     - [Examples](#examples-27)
-  - [Expressions](#expressions)
-  - [API Functions](#api-functions)
+  - [Code Separation and Libraries](#code-separation-and-libraries)
     - [Grammar](#grammar-19)
     - [Examples](#examples-28)
+  - [Expressions](#expressions)
+  - [API Functions](#api-functions)
+    - [Grammar](#grammar-20)
+    - [Examples](#examples-29)
   - [Errors](#errors)
+
 
 <!-- TODO -->
 ## Installation, Setup, and Execution
@@ -142,14 +146,17 @@ true
 false
 ```
 ### string
-- Strings start and end with ```"``` or ```'``` for single line strings, or ```"""``` for multi-line strings.
-- Strings can include any ASCII character from 32 to 126
-- Special characters like newlines and tabs can be included in strings via escape characters, which include:
+- In Commander, anything you type will be interpreted as a string that starts and ends with a space (or newline if it is the first or last on the new line), except for anything that can be tokenized. For example, keywords (e.g. ```read```, ```write```), variables, numbers, syntax characters like ```{```, etc. will all be tokenized. Therefore, if you wish to have these as part of strings, you will need to use explicit strings.
+- Explicit strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\``` character, in which case the new line that comes after it will not be included).
+- Strings can include any ASCII character from 32 to 126 inclusive, and ASCII characters 10 and 13.
+- Special characters like newlines and tabs can be included in strings via escape characters. These include:
   - ```\t``` for tabs
   - ```\n``` for new lines
+  - ```\r``` for carriage returns
   - ```\'``` for single quotations (only necessary if string is initialized using ```'```)
   - ```\"``` for double quotations (only necessary if string is initialized using ```"```)
   - ```\\``` for backslash
+  - ```\{``` and ```\}``` for curly braces when interpolating strings
 - Useful string operations such as [string concatenation](#string-concatenation) and [string interpolation](#string-interpolation) are also supported
 - Default: ```""```
 #### API
@@ -208,9 +215,10 @@ string
 
 <!-- TODO -->
 ## Command Execution
+Commands are simply a series of strings followed one after another create a tuple expression. This is because all commands will return a tuple of three where the first item is a string representing the standard output, the second item is a string representing the error output, and the third item is an int representing the exit code of the command. 
 ### Grammar
 ```
-
+<tuple> : <string> ... <string>
 ```
 ### Examples
 ```
@@ -240,18 +248,6 @@ string
 ```
 
 <!-- TODO -->
-## Command Return Value
-### Grammar
-```
-
-```
-Commands return a tuple that contains: the standard output, the error output, and the exit code.
-### Examples
-```
-
-```
-
-<!-- TODO -->
 ## Timeout Commands
 ### Grammar
 ```
@@ -274,11 +270,13 @@ Commands return a tuple that contains: the standard output, the error output, an
 ```
 
 ## Variables
-Set variables with ```=```. Use keyword ```const``` if you want the value to be immutable.
+Variables must be Set variables with ```=```. Use keyword ```const``` if you want the value to be immutable.
+
+Any variables set this way will be tokenized from there on afterwards for the remainder of the current scope.
 ### Grammar
 ```
-<stmt> : <variable> = <expr>
-       : const <variable> = <expr>
+<stmt> : <binding> = <expr>
+       | const <binding> = <expr>
 ```
 ### Examples
 ```
@@ -471,6 +469,13 @@ factorial(n: int): int {
         | <float> ** <float>
         | <int> ** <float>
         | <float> ** <int>
+
+<stmt> : <variable> += <int | float>
+       | <variable> -= <int | float>
+       | <variable> *= <int | float>
+       | <variable> /= <int | float>
+       | <variable> %= <int | float>
+       | <variable> **= <int | float>
 ```
 ### Grammar (Comparison)
 ```
@@ -527,16 +532,46 @@ sum = $"The sum of {x} and {y} is {x + y}"
 ## Lambda Expressions
 ### Grammar
 ```
-<expr> : (<binding>, ...) : <type> -> <expr>
-       | (<binding>, ...) -> <expr>
-       | (<binding>, ...) : <type> -> {
-             <stmt>
-             ...
-         }
-       | (<binding>, ...) -> {
-             <stmt>
-             ...
-         }
+<function> : (<binding>, ...) : <type> -> <expr>
+           | (<binding>, ...) -> <expr>
+           | (<binding>, ...) : <type> -> {
+                 <stmt>
+                 ...
+             }
+           | (<binding>, ...) -> {
+                 <stmt>
+                 ...
+             }
+```
+### Examples
+```
+
+```
+
+<!-- TODO -->
+## User I/O
+### Grammar
+```
+<string> : scan <string>
+         | scan( <string> )
+
+<stmt>   : echo <string>
+         | print( <string> )
+         | println( <string> )
+```
+### Examples
+```
+
+```
+
+<!-- TODO -->
+## File I/O
+### Grammar
+```
+<string> : read <string>
+         | read( <string> )
+         | write <string> <string>
+         | write( <string>, <string> )
 ```
 ### Examples
 ```
@@ -595,37 +630,33 @@ print(add(3, 4))
 <!-- TODO: Separate into groups based on function (e.g. one group for file I/O, one for user I/O, one for math, etc.). Add others as needed -->
 ## API Functions
 ### Grammar
-    1. read(<string>) : <string>
-    2. write(<string>) : <string>
-    3. scan(<string>) : <string>
-    4. print(<string>) : void
-    5. parseInt(<string> | <int> | <bool>) : <int>
-    6. parseFloat(<string> | <int> | <bool>) : <float>
-    7. parseBool(<string> | <int> | <float>) : <bool>
-    8. sqrt(<int> | <float>) : <float>
-    9. ln(<int> | <float>) : <float>
-    10. log(<int> | <float>) : <float>
-    11. abs(<int>) : <int>
-    12. abs(<float>) : <float>
-    13. floor(<int> | <float>) : <int>
-    14. ceil(<int> | <float>) : <int>
-    15. round(<int> | <float>) : <int>
-    16. random() : <float>
-    17. time() : <int>
-    18. date() : <tuple>
-    19. sleep(<int>) : void
-    20. sin(<int> | <float>) : <float>
-    21. cos(<int> | <float>) : <float>
-    22. tan(<int> | <float>) : <float>
-    23. csc(<int> | <float>) : <float>
-    24. sec(<int> | <float>) : <float>
-    25. cot(<int> | <float>) : <float>
-    26. sinh(<int> | <float>) : <float>
-    27. cosh(<int> | <float>) : <float>
-    28. tanh(<int> | <float>) : <float>
-    29. csch(<int> | <float>) : <float>
-    30. sech(<int> | <float>) : <float>
-    31. coth(<int> | <float>) : <float>
+    1. parseInt(<string> | <int> | <bool>) : <int>
+    2. parseFloat(<string> | <int> | <bool>) : <float>
+    3. parseBool(<string> | <int> | <float>) : <bool>
+    4. sqrt(<int> | <float>) : <float>
+    5. ln(<int> | <float>) : <float>
+    6.  log(<int> | <float>) : <float>
+    7.  abs(<int>) : <int>
+    8.  abs(<float>) : <float>
+    9.  floor(<int> | <float>) : <int>
+    10. ceil(<int> | <float>) : <int>
+    11. round(<int> | <float>) : <int>
+    12. random() : <float>
+    13. time() : <int>
+    14. date() : <tuple>
+    15. sleep(<int>) : void
+    16. sin(<int> | <float>) : <float>
+    17. cos(<int> | <float>) : <float>
+    18. tan(<int> | <float>) : <float>
+    19. csc(<int> | <float>) : <float>
+    20. sec(<int> | <float>) : <float>
+    21. cot(<int> | <float>) : <float>
+    22. sinh(<int> | <float>) : <float>
+    23. cosh(<int> | <float>) : <float>
+    24. tanh(<int> | <float>) : <float>
+    25. csch(<int> | <float>) : <float>
+    26. sech(<int> | <float>) : <float>
+    27. coth(<int> | <float>) : <float>
     32. arcsin(<int> | <float>) : <float>
     33. arccos(<int> | <float>) : <float>
     34. arctan(<int> | <float>) : <float>
