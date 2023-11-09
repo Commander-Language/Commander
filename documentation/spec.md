@@ -1,6 +1,5 @@
 # Commander Specification
 - [Commander Specification](#commander-specification)
-  - [Installation, Setup, and Execution](#installation-setup-and-execution)
   - [Types](#types)
     - [int](#int)
       - [API](#api)
@@ -96,10 +95,6 @@
     - [Examples](#examples-29)
   - [Errors](#errors)
 
-
-<!-- TODO -->
-## Installation, Setup, and Execution
-
 <!-- TODO: List all types, with details. What is initialization syntax? What are the type specific functions/operations you can perform on them (toString() will be required for all of them) -->
 ## Types
 ### int
@@ -146,8 +141,8 @@ true
 false
 ```
 ### string
-- In Commander, anything you type will be interpreted as a string that starts and ends with a space (or newline if it is the first or last on the new line), except for anything that can be tokenized. For example, keywords (e.g. ```read```, ```write```), variables, numbers, syntax characters like ```{```, etc. will all be tokenized. Therefore, if you wish to have these as part of strings, you will need to use explicit strings.
-- Explicit strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\``` character, in which case the new line that comes after it will not be included).
+- Note: Strings are NOT to be confused with command strings, which are not a type (see [command execution](#command-execution) for more details).
+- Strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\``` character, in which case the new line that comes after it will not be included).
 - Strings can include any ASCII character from 32 to 126 inclusive, and ASCII characters 10 and 13.
 - Special characters like newlines and tabs can be included in strings via escape characters. These include:
   - ```\t``` for tabs
@@ -215,10 +210,16 @@ string
 
 <!-- TODO -->
 ## Command Execution
-Commands are simply a series of strings followed one after another create a tuple expression. This is because all commands will return a tuple of three where the first item is a string representing the standard output, the second item is a string representing the error output, and the third item is an int representing the exit code of the command. 
+Commands are simply a series of strings, command strings, or variables followed one after another. If surrounded in backticks ``` `` ```, the command will return a tuple of three where the first item is a string representing the standard output, the second item is a string representing the error output, and the third item is an int representing the exit code of the command. 
+
+Command strings are not a string, but strings can be interpreted as command strings. Basically, a command string is anything that cannot be lexed into an existing token or variable. If you wish to have a command that includes tokens, use strings instead. Additionally, note that the following tokens ```-```, ```--```, ```=``` will not be lexed as tokens due to their common usage in commands, so long as they appear in backticks ``` `` ``` or after an initial command statement.
+
+Note that you may also use variables, so long as they are of type string.
 ### Grammar
 ```
-<tuple> : <string> ... <string>
+<command> : <command_string | string | variable> <command_string | string | variable> ... <command_string | string | variable>
+<stmt>    : <command>
+<tuple>   : `<command>`
 ```
 ### Examples
 ```
@@ -229,7 +230,7 @@ Commands are simply a series of strings followed one after another create a tupl
 ## Background (Asynchronous) Commands
 ### Grammar
 ```
-
+<command> : <command> &
 ```
 ### Examples
 ```
@@ -240,7 +241,7 @@ Commands are simply a series of strings followed one after another create a tupl
 ## Piping Commands
 ### Grammar
 ```
-
+<command> : <command> | ... | <command>
 ```
 ### Examples
 ```
@@ -260,9 +261,11 @@ Commands are simply a series of strings followed one after another create a tupl
 
 <!-- TODO -->
 ## Command Aliasing
+You can alias a command, which is especially useful for frequently used commands that you wish to not have to type out a lot. The alias variable is in turn interpreted as a command, and follows all command rules as defined in [Command Execution](#command-execution)
 ### Grammar
 ```
-
+<stmt>    : alias <command_variable> = <command>
+<command> : <command_variable>
 ```
 ### Examples
 ```
@@ -270,13 +273,18 @@ Commands are simply a series of strings followed one after another create a tupl
 ```
 
 ## Variables
-Variables must be Set variables with ```=```. Use keyword ```const``` if you want the value to be immutable.
+Variables must be set with ```=```. Use keyword ```const``` if you want the value to be immutable.
 
 Any variables set this way will be tokenized from there on afterwards for the remainder of the current scope.
+
+
 ### Grammar
 ```
 <stmt> : <binding> = <expr>
        | const <binding> = <expr>
+       | <variable> = <expr>
+       
+<expr> : <variable>
 ```
 ### Examples
 ```
