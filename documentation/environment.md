@@ -4,9 +4,9 @@
 
 Requirements:
 
-* CMake 3.10+
-* A generator (GNU make, ninja, ...) (usually included with CMake installation)
-* A C++ compiler (GCC, Clang, MSVC, MinGW, ...)
+- CMake 3.10+
+- A generator (GNU make, ninja, ...) (usually included with CMake installation)
+- A C++ compiler (GCC, Clang, MSVC, MinGW, ...)
 
 Building is simple: invoke CMake and let it take care of the rest.
 
@@ -47,7 +47,7 @@ you'll be able to find a lot of good advice on Stack Overflow and elsewhere.
 **All code must pass Clang-Tidy's checks before committing.**
 This will make a **huge difference** when it comes to code correctness and
 robustness.
-It won't save you from *every* segmentation fault,
+It won't save you from _every_ segmentation fault,
 but it will save you from most.
 
 It doesn't take long to get the hang of it and naturally start writing
@@ -55,7 +55,7 @@ code that passes the checks.
 
 ## ClangFormat
 
-Notice that *Clang-Tidy* has a hyphen and *ClangFormat* does not.
+Notice that _Clang-Tidy_ has a hyphen and _ClangFormat_ does not.
 This is not a typo.
 
 [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) is a handy tool
@@ -93,45 +93,154 @@ style changes.
 
 ## Code Style
 
+### Documentation
+
+All files, classes, functions, and member variables (i.e., fields of a class) need to be documented.
+The documentation style that we will use is [Doxygen](https://www.doxygen.nl/manual/docblocks.html),
+specifically the Javadoc style.
+
+Documentation comments begin with `/**` and end with `*/`.
+Each line of a documentation comment must begin with `*`.
+
+All files need to have a header comment with the following information:
+
+- `@file`: The filename.
+- `@brief`: A brief description of **what the file _contains_**.
+  Should be one line long.
+  Every file must have this, even if the file has a `@details` field.
+- `@details`: _(as necessary)_ A more in-depth description of the purpose of the file.
+  Use this when `@brief` doesn't describe as much as you'd like.
+
+Example:
+
+```c++
+/**
+ * @file main.cpp
+ * @brief Contains the main method of the program.
+ *
+ */
+
+
+/**
+ * @brief Main program entry point.
+ *
+ * @return 0 on success.
+ */
+int main() {
+    return 0;
+}
+```
+
+All classes must be documented with the following information:
+
+- `@brief`: A brief description of **what the class _is_**.
+  Should be one line long.
+  Every class must have this, even if the class has a `@details` field.
+- `@details`: _(as necessary)_ A more in-depth description of the purpose of the class.
+  Use this when `@brief` doesn't describe as much as you'd like.
+- `@tparam`: _(as necessary)_ One of these for each template argument.
+  Made of the template argument's name, and then what the argument is.
+
+All class members must be documented with the following information:
+
+- `@brief`: A brief description of **what the member _is_**.
+  Should be one line long.
+  Every member must have this, even if the member has a `@details` field.
+- `@details`: _(as necessary)_ A more in-depth description of the purpose of the member, or what it represents.
+  Use this when `@brief` doesn't describe as much as you'd like.
+
+Example:
+
+```c++
+/**
+ * @brief Represents a matrix of data.
+ *
+ * @tparam DataType The type of data stored in the matrix.
+ */
+template<typename DataType>
+struct Matrix {
+    /**
+     * @brief The matrix's data.
+     *
+     */
+    std::vector<std::vector<DataType>> values;
+};
+```
+
+All functions must be documented with the following information:
+
+- `@brief`: A brief description of **what the function _does_**.
+  Should be one line long.
+  Every function must have this, even if the function has a `@details` field.
+- `@details`: _(as necessary)_ A more in-depth description of the purpose of the function.
+  Use this when `@brief` doesn't describe as much as you'd like.
+- `@param`: _(as necessary)_ One of these for each function argument.
+  Made of the function argument's name, and then what the argument is.
+- `@tparam`: _(as necessary)_ One of these for each template argument.
+  Made of the template argument's name, and then what the argument is.
+- `@return`: _(as necessary)_ The returned value of the function.
+
+Example:
+
+```c++
+/**
+ * @brief Triples the given number.
+ *
+ * @param number The number to triple.
+ * @return Three times the given number.
+ */
+int triple(int number);
+```
+
 ### Naming Conventions
 
 The following case definitions come from
 [Clang-Tidy documentation](https://clang.llvm.org/extra/clang-tidy/checks/readability/identifier-naming.html):
 
-* `lower_case`
-* `UPPER_CASE`
-* `camelBack`
-* `CamelCase`
-* `camel_Snake_Back`
-* `Camel_Snake_Case`
-* `aNy_CasE`
-* `Leading_upper_snake_case`
+- `lower_case`
+- `UPPER_CASE`
+- `camelBack`
+- `CamelCase`
+- `camel_Snake_Back`
+- `Camel_Snake_Case`
+- `aNy_CasE`
+- `Leading_upper_snake_case`
 
 Here are the naming conventions for each symbol type:
 
-* `class`es and `struct`s:
-  * `CamelCase`
-  * At least three letters.
-  * Should be named after `WhatItRepresents`.
-  * Up to three words are allowed,
-      not including its super class if it's a derived type.
+- Functions:
 
-      For example, `WordWordWordExpr` would be allowed
-      if it's a derived type of a class named `Expr`.
-* Members of `class`es and `struct`s:
-  * `camelBack`
-  * At least three letters.
-  * Includes both member functions and member variables.
-  * Also includes static functions of a `class` or `struct`.
-  * Should be named after `WhatItRepresents`.
-  * Up to three words are allowed.
-  * Should be `private` **unless** one of the following is true:
-    * It's constant.
-    * It makes sense for outsiders to directly modify it.
-    * It needs to be used by a derived class
+  - `camelBack`
+  - At least three letters.
+  - Should be named after **what the function _does_**.
+  - Up to three words are allowed.
+
+- `class`es and `struct`s:
+
+  - `CamelCase`
+  - At least three letters.
+  - Should be named after **what the class _is_**.
+  - Up to three words are allowed,
+    not including its super class if it's a derived type.
+
+    For example, `WordWordWordExpr` would be allowed
+    if it's a derived type of a class named `Expr`.
+
+- Members of `class`es and `struct`s:
+
+  - `camelBack`
+  - At least three letters.
+  - Includes both member functions and member variables.
+  - Also includes static functions of a `class` or `struct`.
+  - Should be named after **what the member _is_**.
+  - Up to three words are allowed.
+  - Should be `private` **unless** one of the following is true:
+    - It's constant.
+    - It makes sense for outsiders to directly modify it.
+    - It needs to be used by a derived class
       (in which case it should be `protected`).
-  * If the member is private or protected, it **must have the prefix** `_`.
-  * Example:
+  - If the member is private or protected, it **must have the prefix** `_`.
+  - Example:
 
     ```c++
     class Vehicle {
@@ -150,7 +259,7 @@ Here are the naming conventions for each symbol type:
         //             need to know the fuel type.
         FuelType _fuelType;
 
-    public:      
+    public:
         //  Public: anyone can construct the vehicle.
         Vehicle(Vin vin);
 
@@ -166,16 +275,19 @@ Here are the naming conventions for each symbol type:
     };
     ```
 
-* `union`s:
-  * Don't use `union`s.
-* Variables, functions, and parameters:
-  * `camelBack` (just like `class`/`struct` members)
-  * At least three letters.
-* `enum`s:
-  * `CamelCase` (just like `class`es)
-  * At least three letters.
-  * Items in an `enum` are in `UPPER_CASE`.
-  * Example:
+- `union`s:
+  - Don't use `union`s.
+- Variables and parameters:
+  - `camelBack` (just like `class`/`struct` members)
+  - At least three letters.
+  - At most three words.
+- `enum`s:
+
+  - `CamelCase` (just like `class`es)
+  - At least three letters.
+  - At most three words.
+  - Items in an `enum` are in `UPPER_CASE`.
+  - Example:
 
     ```c++
     enum FuelType {
@@ -186,10 +298,12 @@ Here are the naming conventions for each symbol type:
     };
     ```
 
-* `namespace`s:
-  * `CamelCase` (just like `class`es)
-  * At least three letters.
-  * Example:
+- `namespace`s:
+
+  - `CamelCase` (just like `class`es)
+  - At least three letters.
+  - At most three words.
+  - Example:
 
     ```c++
     namespace MiscFunctions {
@@ -199,15 +313,18 @@ Here are the naming conventions for each symbol type:
     }
     ```
 
-* Macros:
-  * Don't use macros.
+- Macros:
 
-* Template parameters:
-  * `CamelCase`
-  * At least three letters.
-  * Types must have the suffix `Type`.
-  * Values must have the suffix `Val`.
-  * Example:
+  - Don't use macros.
+
+- Template parameters:
+
+  - `CamelCase`
+  - At least three letters.
+  - At most three words.
+  - Types must have the suffix `Type`.
+  - Values must have the suffix `Val`.
+  - Example:
 
     ```c++
     template <typename DataType, int SizeVal>
@@ -216,13 +333,16 @@ Here are the naming conventions for each symbol type:
     };
     ```
 
-* Type Aliases:
-  * `CamelCase`
-  * A type alias is when you use the `using` keyword
+- Type Aliases:
+
+  - `CamelCase`
+  - At least three letters.
+  - At most three words.
+  - A type alias is when you use the `using` keyword
     to define a new alias to a type.
-  * **Never** use type aliases outside of a class or function.
-  * **Never** use the `typedef` keyword.
-  * Example:
+  - **Never** use type aliases outside of a class or function.
+  - **Never** use the `typedef` keyword.
+  - Example:
 
     ```c++
     using TokenVec = std::vector<Token>;
@@ -234,10 +354,10 @@ It's far too lengthy to write out in Markdown.
 The highlights are below.
 For details, see the `.clang-format` file.
 
-* Indentation is 4 spaces.
-* `public`/`private`/`protected` keywords are lined up
+- Indentation is 4 spaces.
+- `public`/`private`/`protected` keywords are lined up
   evenly with the `class`/`struct` that contains them.
-* Short `if`/loop statements are allowed on a single line.
-* The maximum length of a line is 120 characters.
-* Pointer asterisks are aligned to the left, next to the data type
+- Short `if`/loop statements are allowed on a single line.
+- The maximum length of a line is 120 characters.
+- Pointer asterisks are aligned to the left, next to the data type
   (that is, `int* variable` instead of `int *variable`).
