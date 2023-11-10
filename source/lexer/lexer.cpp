@@ -6,6 +6,4 @@
 
 #include "lexer.hpp"
 
-namespace Lexer {
-
-} // Lexer
+namespace Lexer {}  // namespace Lexer
