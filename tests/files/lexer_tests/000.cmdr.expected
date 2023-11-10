@@ -1,0 +1,7 @@
+CMDSTRING 'echo'
+STRINGVAL
+[
+STRING_LITERAL 'Hello World!'
+]
+SEMICOLON ';'
+END_OF_FILE

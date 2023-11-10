@@ -1,0 +1,6 @@
+add(a : int,b:float):float {
+    return a+b;
+};
+echo "a + b = ${add(a+b)}";
+echo 'a + b = ${add(a+b)}';
+echo $"a + b = {add(a + b)}";
