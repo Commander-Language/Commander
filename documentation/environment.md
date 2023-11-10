@@ -93,6 +93,36 @@ style changes.
 
 ## Code Style
 
+### File Naming
+
+All files and folders should be lower-case.
+They should contain underscores instead of spaces.
+
+All source files should be split into two parts:
+the header file (with the suffix `.hpp`)
+and the implementation file (with the suffix `.cpp`).
+
+**Exception:** Templated functions **require**
+that the implementation be directly in the header file,
+or the compiler won't be able to compile an object file
+because it won't know what the template parameters
+are going to be.
+All non-templated functions should go in the `.cpp` file.
+
+### Project Layout
+
+The project repository will be organized according to the following structure:
+
+* `/documentation`: All documentation, except for the Doxygen documentation inside code files.
+* `/source`: All source files go inside here.
+  They are organized by namespaces.
+  * `/source/lexer`: Contains all lexer-related files. All classes and functions go in the namespace `Lexer::`.
+  * `/source/parser`: Contains all parser-related files. All classes and functions go in the namespace `Parser::`.
+  * `/source/type_checker`: Contains all type-checker-related files. All classes and functions go in the namespace `TypeChecker::`.
+  * (Etc.)
+* `/tests`: All unit tests go inside here.
+  These don't need to be organized into directories; all tests for a particular module of the code should be in one file.
+
 ### Documentation
 
 All files, classes, functions, and member variables (i.e., fields of a class) need to be documented.
