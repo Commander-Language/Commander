@@ -1,0 +1,52 @@
+VARIABLE 'add'
+LPAREN '('
+VARIABLE 'a'
+COLON ':'
+INT 'int'
+COMMA ','
+VARIABLE 'b'
+COLON ':'
+FLOAT 'float'
+RPAREN ')'
+COLON ':'
+FLOAT 'float'
+LCURLY '{'
+RETURN 'return'
+VARIABLE 'a'
+OP '+'
+VARIABLE 'b'
+OP '+'
+INTVAL '1'
+SEMICOLON ';'
+RCURLY '}'
+CMDSTRING 'echo'
+STRINGVAL
+[
+STRINGLITERAL 'a + b + 1 = '
+VARIABLE 'add'
+LPAREN '('
+INTVAL '1'
+COMMA ','
+INTVAL '2'
+RPAREN ')'
+]
+SEMICOLON ';'
+CMDSTRING 'echo'
+STRINGVAL
+[
+STRINGLITERAL 'a + b + 1 = ${add(1,2)}'
+]
+SEMICOLON ';'
+CMDSTRING 'echo'
+STRINGVAL
+[
+STRINGLITERAL 'a + b + 1 = '
+VARIABLE 'add'
+LPAREN '('
+INTVAL '1'
+COMMA ','
+INTVAL '2'
+RPAREN ')'
+]
+SEMICOLON ';'
+END_OF_FILE
