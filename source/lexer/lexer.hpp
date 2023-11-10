@@ -7,10 +7,10 @@
 #ifndef COMMANDER_LEXER_HPP
 #define COMMANDER_LEXER_HPP
 
-#include <vector>
-#include <string>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace Lexer {
 
@@ -28,8 +28,7 @@ namespace Lexer {
         CONST,
         DO,
         ELSE,
-        END_OF_FILE
-        EQUALS,
+        END_OF_FILE EQUALS,
         FALSE,
         FLOAT,
         FLOATVAL,
@@ -60,72 +59,66 @@ namespace Lexer {
     /**
      * Map of string token literals that are keywords
      */
-    const std::unordered_map<std::string, TokenType> KEYWORD_TOKEN_LITERALS({
-        {"alias", ALIAS},
-        {"bool", BOOL},
-        {"const", CONST},
-        {"do", DO},
-        {"else", ELSE},
-        {"false", FALSE},
-        {"float", FLOAT},
-        {"for", FOR},
-        {"if", IF},
-        {"import", IMPORT},
-        {"int", INT},
-        {"string", STRING},
-        {"true", TRUE},
-        {"type", TYPE},
-        {"while", WHILE}
-    });
+    const std::unordered_map<std::string, TokenType> KEYWORD_TOKEN_LITERALS({{"alias", ALIAS},
+                                                                             {"bool", BOOL},
+                                                                             {"const", CONST},
+                                                                             {"do", DO},
+                                                                             {"else", ELSE},
+                                                                             {"false", FALSE},
+                                                                             {"float", FLOAT},
+                                                                             {"for", FOR},
+                                                                             {"if", IF},
+                                                                             {"import", IMPORT},
+                                                                             {"int", INT},
+                                                                             {"string", STRING},
+                                                                             {"true", TRUE},
+                                                                             {"type", TYPE},
+                                                                             {"while", WHILE}});
 
     /**
      * Map of string token literals that are not keywords
      */
-    const std::unordered_map<std::string, TokenType> TOKEN_LITERALS({
-        {"&", AMPERSAND},
-        {":", COLON},
-        {",", COMMA},
-        {"=", EQUALS},
-        {"->", LAMBDA},
-        {"{", LCURLY},
-        {"(", LPAREN},
-        {"[", LSQUARE},
-        {"|", PIPE},
-        {"?", QUESTION},
-        {"}", RCURLY},
-        {")", RPAREN},
-        {"]", RSQUARE},
-        {";", SEMICOLON}
-    });
+    const std::unordered_map<std::string, TokenType> TOKEN_LITERALS({{"&", AMPERSAND},
+                                                                     {":", COLON},
+                                                                     {",", COMMA},
+                                                                     {"=", EQUALS},
+                                                                     {"->", LAMBDA},
+                                                                     {"{", LCURLY},
+                                                                     {"(", LPAREN},
+                                                                     {"[", LSQUARE},
+                                                                     {"|", PIPE},
+                                                                     {"?", QUESTION},
+                                                                     {"}", RCURLY},
+                                                                     {")", RPAREN},
+                                                                     {"]", RSQUARE},
+                                                                     {";", SEMICOLON}});
 
     /**
      * List of OP token literals
      */
-    const std::vector<std::string> OPS({
-        "**="
-        "==",
-        "!=",
-        "<=",
-        ">=",
-        "&&",
-        "||",
-        "**",
-        "%=",
-        "/=",
-        "*=",
-        "-=",
-        "+=",
-        "++",
-        "--",
-        '+',
-        '-',
-        '*',
-        '/',
-        '%',
-        '>',
-        '<',
-        '!'
-    });
+    const std::vector<std::string> OPS({"**="
+                                        "==",
+                                        "!=",
+                                        "<=",
+                                        ">=",
+                                        "&&",
+                                        "||",
+                                        "**",
+                                        "%=",
+                                        "/=",
+                                        "*=",
+                                        "-=",
+                                        "+=",
+                                        "++",
+                                        "--",
+                                        '+',
+                                        '-',
+                                        '*',
+                                        '/',
+                                        '%',
+                                        '>',
+                                        '<',
+                                        '!'});
 
     /**
      * @brief Represents a position in a file
@@ -140,9 +133,7 @@ namespace Lexer {
          * Returns the string representation of the FilePosition
          * @return The string representation of the FilePosition
          */
-        std::string toString() {
-            return *fileName + ":" + line + ":" + column;
-        }
+        std::string toString() { return *fileName + ":" + line + ":" + column; }
     };
 
     /**
@@ -157,9 +148,7 @@ namespace Lexer {
          * Returns the string representation of the Token
          * @return The string representation of the Token
          */
-        std::string toString() {
-            return tokenTypeToString(type) + " '" + contents + "'";
-        }
+        std::string toString() { return tokenTypeToString(type) + " '" + contents + "'"; }
     };
 
     using TokenList = std::vector<Token>;
@@ -285,6 +274,6 @@ namespace Lexer {
      */
     bool isIllegalCharacter(const char& character);
 
-} // Lexer
+}  // namespace Lexer
 
-#endif //COMMANDER_LEXER_HPP
+#endif  // COMMANDER_LEXER_HPP
