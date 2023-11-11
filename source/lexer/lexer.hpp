@@ -28,7 +28,8 @@ namespace Lexer {
         CONST,
         DO,
         ELSE,
-        END_OF_FILE EQUALS,
+        END_OF_FILE,
+        EQUALS,
         FALSE,
         FLOAT,
         FLOATVAL,
@@ -55,6 +56,12 @@ namespace Lexer {
         VARIABLE,
         WHILE
     };
+
+    /**
+     * @brief Helper that turns TokenType into a string
+     * @return The string representation of the TokenType
+     */
+    std::string tokenTypeToString(const TokenType& type);
 
     /**
      * Map of string token literals that are keywords
@@ -96,7 +103,7 @@ namespace Lexer {
     /**
      * List of OP token literals
      */
-    const std::vector<std::string> OPS({"**="
+    const std::vector<std::string> OPS {"**="
                                         "==",
                                         "!=",
                                         "<=",
@@ -111,14 +118,14 @@ namespace Lexer {
                                         "+=",
                                         "++",
                                         "--",
-                                        '+',
-                                        '-',
-                                        '*',
-                                        '/',
-                                        '%',
-                                        '>',
-                                        '<',
-                                        '!'});
+                                        "+",
+                                        "-",
+                                        "*",
+                                        "/",
+                                        "%",
+                                        ">",
+                                        "<",
+                                        "!"};
 
     /**
      * @brief Represents a position in a file
@@ -133,7 +140,7 @@ namespace Lexer {
          * Returns the string representation of the FilePosition
          * @return The string representation of the FilePosition
          */
-        std::string toString() { return *fileName + ":" + line + ":" + column; }
+        std::string toString() const { return *fileName + ":" + std::to_string(line) + ":" + std::to_string(column); }
     };
 
     /**
@@ -148,7 +155,7 @@ namespace Lexer {
          * Returns the string representation of the Token
          * @return The string representation of the Token
          */
-        std::string toString() { return tokenTypeToString(type) + " '" + contents + "'"; }
+        std::string toString() const { return tokenTypeToString(type) + " '" + contents + "'"; }
     };
 
     using TokenList = std::vector<Token>;
@@ -167,12 +174,6 @@ namespace Lexer {
      * @return The string representing the file contents
      */
     std::string readFile(const std::string& filePath);
-
-    /**
-     * @brief Helper that turns TokenType into a string
-     * @return The string representation of the TokenType
-     */
-    std::string tokenTypeToString(const TokenType& type);
 
     /**
      * @brief Skips whitespace

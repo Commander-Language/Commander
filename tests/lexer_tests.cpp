@@ -11,9 +11,9 @@
  * @param tokens The list of tokens
  * @param expectedOutput The expected token output
  */
-void expectOutputEqualsTokens(const TokenList tokens, const std::string& expectedOutput) {
+void expectOutputEqualsTokens(const Lexer::TokenList& tokens, const std::string& expectedOutput) {
     std::ostringstream builder;
-    for (const Token token : tokens) { builder << token.toString() << "\n"; }
+    for (const Lexer::Token token : tokens) builder << token.toString() << "\n";
     builder << "Compilation succeeded: lexical analysis complete\n";
     EXPECT_EQ(expectedOutput, builder.str());
 }
@@ -27,9 +27,9 @@ TEST_P(LexerTests, ShouldLexFileAndMatchExpectedExamples) {
     std::string filePath = "tests/files/lexer_tests/" + std::get<0>(params);
     std::string expectedFilePath = "tests/files/lexer_tests/" + std::get<1>(params);
 
-    TokenList tokens;
+    Lexer::TokenList tokens;
     Lexer::tokenize(tokens, filePath);
-    std::string expectedOutput = readFile(expectedFilePath);
+    std::string expectedOutput = Lexer::readFile(expectedFilePath);
     expectOutputEqualsTokens(tokens, expectedOutput);
 }
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(cpp_utilities)
+project(commander)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS_RELEASE -O3)
 
 include_directories(.)
-
 
 #  ===========================
 #  ||  Main Build Configs:  ||
@@ -123,3 +122,15 @@ include(GoogleTest)
 #      This is useful when you're trying to test something for which you've already made a `add_library` configuration.
 #      (Can be empty if all source files are specified in the the line above.)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
+
+#find_package(GTest REQUIRED)
+
+#include_directories(
+#    ${GTEST_INCLUDE_DIRS}
+#    .
+#)
+
+add_executable(lexerTests source/lexer/lexer.cpp tests/lexer_tests.cpp)
+
+#target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
+
