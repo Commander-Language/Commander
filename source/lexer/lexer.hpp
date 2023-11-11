@@ -7,10 +7,13 @@
 #ifndef COMMANDER_LEXER_HPP
 #define COMMANDER_LEXER_HPP
 
+#include <fstream>
 #include <functional>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
+
 
 namespace Lexer {
 
@@ -50,18 +53,13 @@ namespace Lexer {
         RSQUARE,
         SEMICOLON,
         STRING,
+        STRINGLITERAL,
         STRINGVAL,
         TRUE,
         TYPE,
         VARIABLE,
         WHILE
     };
-
-    /**
-     * @brief Helper that turns TokenType into a string
-     * @return The string representation of the TokenType
-     */
-    std::string tokenTypeToString(const TokenType& type);
 
     /**
      * Map of string token literals that are keywords
@@ -140,7 +138,7 @@ namespace Lexer {
          * Returns the string representation of the FilePosition
          * @return The string representation of the FilePosition
          */
-        std::string toString() const { return *fileName + ":" + std::to_string(line) + ":" + std::to_string(column); }
+        std::string toString() const;
     };
 
     /**
@@ -155,18 +153,35 @@ namespace Lexer {
          * Returns the string representation of the Token
          * @return The string representation of the Token
          */
-        std::string toString() const { return tokenTypeToString(type) + " '" + contents + "'"; }
+        virtual std::string toString() const;
     };
 
     using TokenList = std::vector<Token>;
-    using LexerFunction = std::function<Token(const std::string&, FilePosition&)>;
+
+    /**
+     * @brief Represents specifically a string token, since strings can have sub tokens due to interpolation
+     */
+    struct StringToken : Token {
+        TokenList subTokens;
+        /**
+         * Returns the string representation of the Token
+         * @return The string representation of the Token
+         */
+        std::string toString() const override;
+    };
+
+    /**
+     * @brief Helper that turns TokenType into a string
+     * @return The string representation of the TokenType
+     */
+    std::string tokenTypeToString(const TokenType& type);
 
     /**
      * @brief Takes in a path to a file, and tokenizes its contents.
      * @param tokens The vector that will hold all the tokens.
      * @param filePath The path to the file.
      */
-    void tokenize(const TokenList& tokens, const std::string& filePath);
+    void tokenize(TokenList& tokens, const std::string& filePath);
 
     /**
      * @brief Helper that reads in a file given a path and returns it as a string.
@@ -182,6 +197,14 @@ namespace Lexer {
      * @returns The new file position
      */
     FilePosition skipWhitespace(const std::string& file, FilePosition& position);
+
+    /**
+     * @brief Lex a token, if it exists
+     * @param file The file contents being lexed
+     * @param position The position in the file
+     * @returns The token, if it finds one
+     */
+    Token lexToken(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an OP token, if it exists
