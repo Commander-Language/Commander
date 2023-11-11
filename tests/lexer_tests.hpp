@@ -14,7 +14,7 @@
  * @brief Represents the format for lexer tests. Tests take in a file path to file to lex, and another file path to file
  * with expected token output.
  */
-struct LexerTests : ::testing::TestWithParam<std::tuple<const std::string&, const std::string&>> {};
+struct LexerTests : ::testing::TestWithParam<std::tuple<std::string, std::string>> {};
 
 INSTANTIATE_TEST_SUITE_P(LexerTestFiles, LexerTests,
                          ::testing::Values(std::make_tuple("000.cmdr", "000.cmdr.output"),
