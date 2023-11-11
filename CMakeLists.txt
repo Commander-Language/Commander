@@ -12,6 +12,6 @@ include_directories(
     .
 )
 
-add_executable(lexerTests source/lexer/lexer.cpp tests/lexer_tests.cpp)
+add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
 
 target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
