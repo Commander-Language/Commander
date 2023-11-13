@@ -23,6 +23,7 @@ namespace Lexer {
     enum TokenType {
         ALIAS,
         AMPERSAND,
+        BACKTICK,
         BOOL,
         BREAK,
         CMDSTRINGVAL,
@@ -88,13 +89,18 @@ namespace Lexer {
      * Map of string token literals that are not keywords
      */
     const std::unordered_map<std::string, TokenType> TOKEN_LITERALS(
-            {{"**=", OP},     {"==", OP},   {"!=", OP},      {"<=", OP},     {">=", OP},    {"&&", OP},
-             {"||", OP},      {"**", OP},   {"%=", OP},      {"/=", OP},     {"*=", OP},    {"-=", OP},
-             {"+=", OP},      {"++", OP},   {"--", OP},      {"+", OP},      {"-", OP},     {"*", OP},
-             {"/", OP},       {"%", OP},    {">", OP},       {"<", OP},      {"!", OP},     {"&", AMPERSAND},
-             {":", COLON},    {",", COMMA}, {"=", EQUALS},   {"->", LAMBDA}, {"{", LCURLY}, {"(", LPAREN},
-             {"[", LSQUARE},  {"|", PIPE},  {"?", QUESTION}, {"}", RCURLY},  {")", RPAREN}, {"]", RSQUARE},
-             {";", SEMICOLON}});
+            {{"**=", OP},     {"==", OP},    {"!=", OP},     {"<=", OP},    {">=", OP},    {"&&", OP},
+             {"||", OP},      {"**", OP},    {"%=", OP},     {"/=", OP},    {"*=", OP},    {"-=", OP},
+             {"+=", OP},      {"++", OP},    {"--", OP},     {"+", OP},     {"-", OP},     {"*", OP},
+             {"/", OP},       {"%", OP},     {">", OP},      {"<", OP},     {"!", OP},     {":", COLON},
+             {",", COMMA},    {"=", EQUALS}, {"->", LAMBDA}, {"{", LCURLY}, {"(", LPAREN}, {"[", LSQUARE},
+             {"?", QUESTION}, {"}", RCURLY}, {")", RPAREN},  {"]", RSQUARE}});
+
+    /**
+     * Map of string token literals specifically for commands
+     */
+    const std::unordered_map<std::string, TokenType>
+            COMMAND_TOKEN_LITERALS({{"`", BACKTICK}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
 
     /**
      * @brief Represents a position in a file
@@ -175,17 +181,27 @@ namespace Lexer {
      * @brief Lex a token, if it exists
      * @param file The file contents being lexed
      * @param position The position in the file
+     * @param isCommand Tells whether a command is being lexed or not
+     * @param isFirst Tells whether the token is the first token of a statement or not
      * @returns The token, if it finds one
      */
-    Token lexToken(const std::string& file, FilePosition& position);
+    Token lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst);
 
     /**
-     * @brief Lex an literal token, if it exists
+     * @brief Lex a literal token, if it exists
      * @param file The file contents being lexed
      * @param position The position in the file
      * @returns The literal token, if it finds one
      */
     Token lexTokenLiteral(const std::string& file, FilePosition& position);
+
+    /**
+     * @brief Lex a literal token specifically for commands, if it exists
+     * @param file The file contents being lexed
+     * @param position The position in the file
+     * @returns The literal token for the command, if it finds one
+     */
+    Token lexCommandTokenLiteral(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an keyword token, if it exists
@@ -218,6 +234,14 @@ namespace Lexer {
      * @returns The literal string token, if it finds one
      */
     Token lexString(const std::string& file, FilePosition& position);
+
+    /**
+     * @brief Lex an VARIABLE token specifically for commands (i.e. starts with $), if it exists
+     * @param file The file contents being lexed
+     * @param position The position in the file
+     * @returns The VARIABLE token, if it finds one
+     */
+    Token lexCommandVariable(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an VARIABLE token, if it exists
