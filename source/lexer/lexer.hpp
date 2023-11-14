@@ -12,15 +12,16 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 
-namespace Lexer {
+namespace lexer {
 
     /**
      * @brief Enumeration of different types of tokens.
      */
-    enum TokenType {
+    enum tokenType {
         ALIAS,
         AMPERSAND,
         BACKTICK,
@@ -67,7 +68,7 @@ namespace Lexer {
     /**
      * Map of string token literals that are keywords
      */
-    const std::unordered_map<std::string, TokenType> KEYWORDS({{"alias", ALIAS},
+    const std::unordered_map<std::string, tokenType> keywords({{"alias", ALIAS},
                                                                {"bool", BOOL},
                                                                {"break", BREAK},
                                                                {"const", CONST},
@@ -88,7 +89,7 @@ namespace Lexer {
     /**
      * Map of string token literals that are not keywords
      */
-    const std::unordered_map<std::string, TokenType> TOKEN_LITERALS(
+    const std::unordered_map<std::string, tokenType> tokenLiterals(
             {{"**=", OP},     {"==", OP},    {"!=", OP},     {"<=", OP},    {">=", OP},    {"&&", OP},
              {"||", OP},      {"**", OP},    {"%=", OP},     {"/=", OP},    {"*=", OP},    {"-=", OP},
              {"+=", OP},      {"++", OP},    {"--", OP},     {"+", OP},     {"-", OP},     {"*", OP},
@@ -99,8 +100,8 @@ namespace Lexer {
     /**
      * Map of string token literals specifically for commands
      */
-    const std::unordered_map<std::string, TokenType>
-            COMMAND_TOKEN_LITERALS({{"`", BACKTICK}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
+    const std::unordered_map<std::string, tokenType>
+            commandTokenLiterals({{"`", BACKTICK}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
 
     /**
      * @brief Represents a position in a file
@@ -115,7 +116,7 @@ namespace Lexer {
          * Returns the string representation of the FilePosition
          * @return The string representation of the FilePosition
          */
-        std::string toString() const;
+        [[nodiscard]] std::string toString() const;
     };
 
     /**
@@ -123,16 +124,17 @@ namespace Lexer {
      */
     struct Token {
         std::string contents;
-        TokenType type;
+        tokenType type;
         FilePosition position;
 
         Token();
-        Token(std::string c, TokenType t, FilePosition p);
+        Token(std::string contents, tokenType type, FilePosition position);
+        virtual ~Token() = default;
         /**
          * Returns the string representation of the Token
          * @return The string representation of the Token
          */
-        virtual std::string toString() const;
+        [[nodiscard]] virtual std::string toString() const;
     };
 
     using TokenList = std::vector<Token>;
@@ -146,14 +148,14 @@ namespace Lexer {
          * Returns the string representation of the Token
          * @return The string representation of the Token
          */
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
     };
 
     /**
      * @brief Helper that turns TokenType into a string
      * @return The string representation of the TokenType
      */
-    std::string tokenTypeToString(const TokenType& type);
+    std::string tokenTypeToString(const tokenType& type);
 
     /**
      * @brief Takes in a path to a file, and tokenizes its contents.
@@ -301,6 +303,6 @@ namespace Lexer {
      */
     bool isIllegalCharacter(const char& character);
 
-}  // namespace Lexer
+}  // namespace lexer
 
 #endif  // COMMANDER_LEXER_HPP
