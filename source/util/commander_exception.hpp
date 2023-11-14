@@ -9,25 +9,26 @@
 
 #include "../lexer/lexer.hpp"
 #include <string>
+#include <utility>
 
-namespace Util {
+namespace util {
 
     class CommanderException : std::exception {
     public:
-        CommanderException(std::string message) : errorMessage(message) {}
-        CommanderException(std::string message, Lexer::FilePosition position)
-            : errorMessage(message + "\n" + position.toString()) {}
+        CommanderException(std::string message) : _errorMessage(std::move(message)) {}
+        CommanderException(const std::string& message, const lexer::FilePosition& position)
+            : _errorMessage(message + "\n" + position.toString()) {}
 
         /**
          * Returns the error message associated with the exception
          * @return The error message
          */
-        const char* what() const noexcept override;
+        [[nodiscard]] const char* what() const noexcept override;
 
     private:
-        std::string errorMessage;
+        std::string _errorMessage;
     };
 
-}  // namespace Util
+}  // namespace util
 
 #endif  // COMMANDER_COMMANDER_EXCEPTION_HPP

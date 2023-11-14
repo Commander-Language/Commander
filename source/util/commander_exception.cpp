@@ -5,6 +5,6 @@
  */
 #include "commander_exception.hpp"
 
-namespace Util {
-    const char* CommanderException::what() const noexcept { return errorMessage.c_str(); }
-}  // namespace Util
+namespace util {
+    const char* CommanderException::what() const noexcept { return _errorMessage.c_str(); }
+}  // namespace util
