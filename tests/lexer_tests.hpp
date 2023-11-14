@@ -17,9 +17,9 @@
 struct LexerTests : ::testing::TestWithParam<std::tuple<std::string, std::string>> {};
 
 INSTANTIATE_TEST_SUITE_P(LexerTestFiles, LexerTests,
-                         ::testing::Values(std::make_tuple("000.cmdr", "000.cmdr.output"),
-                                           std::make_tuple("001.cmdr", "001.cmdr.output"),
-                                           std::make_tuple("002.cmdr", "002.cmdr.output")));
+                         ::testing::Values(std::make_tuple("000.cmdr", "000.cmdr.expected"),
+                                           std::make_tuple("001.cmdr", "001.cmdr.expected"),
+                                           std::make_tuple("002.cmdr", "002.cmdr.expected")));
 
 /**
  * @brief Takes in the list of tokens, and ensures they match what is contained in the expected output string
