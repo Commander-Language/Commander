@@ -8,6 +8,7 @@
 #define COMMANDER_LEXER_TESTS_HPP
 
 #include "../source/lexer/lexer.hpp"
+#include "../source/util/commander_exception.hpp"
 #include <gtest/gtest.h>
 
 /**

@@ -27,10 +27,16 @@ TEST_P(LexerTests, ShouldLexFileAndMatchExpectedExamples) {
     std::string filePath = "tests/files/lexer_tests/" + std::get<0>(params);
     std::string expectedFilePath = "tests/files/lexer_tests/" + std::get<1>(params);
 
-    lexer::TokenList tokens;
-    lexer::tokenize(tokens, filePath);
-    const std::string expectedOutput = lexer::readFile(expectedFilePath);
-    expectOutputEqualsTokens(tokens, expectedOutput);
+    try {
+        lexer::TokenList tokens;
+        lexer::tokenize(tokens, filePath);
+        const std::string expectedOutput = lexer::readFile(expectedFilePath);
+
+        expectOutputEqualsTokens(tokens, expectedOutput);
+    } catch(const util::CommanderException &e) {
+        std::cout << "Lexer Error: " << e.what() << "\n";
+        FAIL();
+    }
 }
 
 /**
