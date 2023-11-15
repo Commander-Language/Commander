@@ -61,7 +61,7 @@ bool Scope::hasVariable(std::string variableID) {
         }
         return nullptr;
     }
-    return *variableData.find(variableID);
+    return variableData[variableID];
 }
 
 /**

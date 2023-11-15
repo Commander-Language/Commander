@@ -5,6 +5,7 @@
 #ifndef CPP_UTILITIES_SYMBOLTABLEORGANIZER_HPP
 #define CPP_UTILITIES_SYMBOLTABLEORGANIZER_HPP
 #include "Scope.hpp"
+#include <string>
 
 
 class SymbolTableOrganizer {
