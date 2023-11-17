@@ -33,7 +33,7 @@ TEST_P(LexerTests, ShouldLexFileAndMatchExpectedExamples) {
         const std::string expectedOutput = lexer::readFile(expectedFilePath);
 
         expectOutputEqualsTokens(tokens, expectedOutput);
-    } catch(const util::CommanderException &e) {
+    } catch (const util::CommanderException& e) {
         std::cout << "Lexer Error: " << e.what() << "\n";
         FAIL();
     }
