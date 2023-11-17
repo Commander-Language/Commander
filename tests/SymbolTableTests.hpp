@@ -6,8 +6,9 @@
 #define CPP_UTILITIES_SYMBOLTABLETESTS_HPP
 
 #include <string>
-#include "Scope.hpp"
-#include "SymbolTableOrganizer.hpp"
+#include "source/symbol_table/Scope.hpp"
+#include "source/symbol_table/SymbolTableOrganizer.hpp"
+#include <objbase.h>
 
 class symbol_table_tests {
 

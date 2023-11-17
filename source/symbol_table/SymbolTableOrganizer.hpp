@@ -4,9 +4,11 @@
 
 #ifndef CPP_UTILITIES_SYMBOLTABLEORGANIZER_HPP
 #define CPP_UTILITIES_SYMBOLTABLEORGANIZER_HPP
-#include "Scope.hpp"
+#include "source/symbol_table/Scope.hpp"
 #include <string>
+#include <vector>
 
+//TODO: replace int data with a generic object
 
 class SymbolTableOrganizer {
 public:
@@ -17,8 +19,8 @@ public:
     void pushSymbolTable(); //Add a new symbol table to the stack
     void popSymbolTable(); //remove a symbol table from the stack
 
-    void addVariable(std::string variableID, Object data); //add a variable to the current scope
-    void updateVariable(std::string variableID, Object data); //update a variable which may not be present in the current scope
+    void addVariable(std::string variableID, int data); //add a variable to the current scope
+    void updateVariable(std::string variableID, int data); //update a variable which may not be present in the current scope
 
     bool varExistsInCurrentSymbolTable(std::string variableID); //return TRUE if the variable exists at the top of the stack
     bool varExistsInScope(std::string variableID); //return TRUE if the variable can be found anywhere in the stack (recursive)

@@ -22,8 +22,9 @@ Scope::~Scope() {
 
 //Copy Constructor
 Scope::Scope(Scope &otherScope) {
-    parentScope = otherScope.getParentScopePointer;
-    variableData = std::map<std::string, Object> newVariableData(otherScope.variableData);
+    parentScope = otherScope.getParentScopePointer();
+    std::map<std::string, int> copyData(otherScope.variableData);
+    variableData = copyData;
 }
 
 /**
@@ -31,7 +32,7 @@ Scope::Scope(Scope &otherScope) {
  * @param variableID - A String ID which the variable will be referenced by (e.g. "cat")
  * @param data - An object which will be stored as data (e.g. 14, "dog", std::vector<int>, etc.)
  */
-void Scope::addOrUpdateVariable(std::string variableID, Object data) {
+void Scope::addOrUpdateVariable(std::string variableID, int data) {
     variableData.insert_or_assign(variableID, data);
 }
 
@@ -42,7 +43,7 @@ void Scope::addOrUpdateVariable(std::string variableID, Object data) {
  * @return - TRUE if the variable exists in the current scope, otherwise FALSE is returned
  */
 bool Scope::hasVariable(std::string variableID) {
-    if(variableData.contains(variableID)) {
+    if(hasKey(variableID)) {
         return true;
     }
     return false;
@@ -54,21 +55,21 @@ bool Scope::hasVariable(std::string variableID) {
  * @param variableID - A string ID which the variable will be referenced by
  * @return - A pointer to the specified data if it exists, otherwise a nullptr will return
  */
-*Object Scope::getVariable(std::string variableID) {
-    if(!variableData.contains(variableID)) {
+int* Scope::getVariable(std::string variableID) {
+    if(!hasKey(variableID)) {
         if(parentScope != nullptr) {
-            return *parentScope.getVariable(variableID);
+            return parentScope->getVariable(variableID);
         }
         return nullptr;
     }
-    return variableData[variableID];
+    return &variableData[variableID];
 }
 
 /**
  * getParenScopePointer() returns a pointer to the parent of this scope
  * @return - A pointer to the parent of this scope
  */
-*Scope Scope::getParentScopePointer() {
+Scope* Scope::getParentScopePointer() {
     return parentScope;
 }
 
@@ -78,4 +79,16 @@ bool Scope::hasVariable(std::string variableID) {
  */
 bool Scope::isGlobal() {
     return parentScope == nullptr;
+}
+
+/**
+ * hasKey() returns a boolean value according to whether variableData has an entry of the specified name
+ * @param key - A string value representing a variable ID
+ * @return - TRUE if the variable exists in variableData, otherwise FALSE is returned
+ */
+bool Scope::hasKey(std::string key) {
+    if(variableData.find(key) == variableData.end()) { //.end() returns one index out-of-bounds from the data's contents (i.e. the equivalent of variableData.size())
+        return false;
+    }
+    return true;
 }

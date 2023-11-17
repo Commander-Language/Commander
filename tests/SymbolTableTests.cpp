@@ -4,8 +4,8 @@
 
 #include "SymbolTableTests.hpp"
 #include <string>
-#include "symbol_table/Scope.hpp"
-#include "symbol_table/SymbolTableOrganizer.hpp"
+#include "source/symbol_table/Scope.hpp"
+#include "source/symbol_table/SymbolTableOrganizer.hpp"
 #include "gtest/gtest.h"
 
 //SCOPE TESTS
@@ -31,7 +31,7 @@ TEST(SCOPETEST, globalTest) {
     Scope childScope = Scope(*parentScope);
 
     EXPECT_TRUE(parentScope.isGlobal());
-    EXPECT_FALSE(childScope.isGloabl());
+    EXPECT_FALSE(childScope.isGlobal());
 
     Scope otherChildScope = Scope(*childScope);
 
