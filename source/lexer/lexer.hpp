@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
 /**
  * @file lexer.hpp
  * @brief Contains header content for lexer.cpp
@@ -21,7 +23,7 @@ namespace lexer {
     /**
      * @brief Enumeration of different types of tokens.
      */
-    enum tokenType {
+    enum tokenType : std::uint8_t {
         ALIAS,
         AMPERSAND,
         BACKTICK,
@@ -89,13 +91,13 @@ namespace lexer {
     /**
      * Map of string token literals that are not keywords
      */
-    const std::unordered_map<std::string, tokenType> tokenLiterals(
-            {{"**=", OP},     {"==", OP},    {"!=", OP},     {"<=", OP},    {">=", OP},    {"&&", OP},
-             {"||", OP},      {"**", OP},    {"%=", OP},     {"/=", OP},    {"*=", OP},    {"-=", OP},
-             {"+=", OP},      {"++", OP},    {"--", OP},     {"+", OP},     {"-", OP},     {"*", OP},
-             {"/", OP},       {"%", OP},     {">", OP},      {"<", OP},     {"!", OP},     {":", COLON},
-             {",", COMMA},    {"=", EQUALS}, {"->", LAMBDA}, {"{", LCURLY}, {"(", LPAREN}, {"[", LSQUARE},
-             {"?", QUESTION}, {"}", RCURLY}, {")", RPAREN},  {"]", RSQUARE}});
+    const std::unordered_map<std::string, tokenType>
+            tokenLiterals({{"**=", OP},     {"==", OP},    {"!=", OP},     {"<=", OP},    {">=", OP},    {"&&", OP},
+                           {"||", OP},      {"**", OP},    {"%=", OP},     {"/=", OP},    {"*=", OP},    {"-=", OP},
+                           {"+=", OP},      {"++", OP},    {"--", OP},     {"+", OP},     {"-", OP},     {"*", OP},
+                           {"/", OP},       {"%", OP},     {">", OP},      {"<", OP},     {"!", OP},     {":", COLON},
+                           {",", COMMA},    {"=", EQUALS}, {"->", LAMBDA}, {"{", LCURLY}, {"(", LPAREN}, {"[", LSQUARE},
+                           {"?", QUESTION}, {"}", RCURLY}, {")", RPAREN},  {"]", RSQUARE}});
 
     /**
      * Map of string token literals specifically for commands
@@ -235,7 +237,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The literal string token, if it finds one
      */
-    Token lexString(const std::string& file, FilePosition& position);
+    StringToken lexString(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an VARIABLE token specifically for commands (i.e. starts with $), if it exists
@@ -306,3 +308,4 @@ namespace lexer {
 }  // namespace lexer
 
 #endif  // COMMANDER_LEXER_HPP
+#pragma clang diagnostic pop
