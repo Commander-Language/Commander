@@ -17,8 +17,12 @@ public:
     void pushSymbolTable(); //Add a new symbol table to the stack
     void popSymbolTable(); //remove a symbol table from the stack
 
+    void addVariable(std::string variableID, Object data); //add a variable to the current scope
+    void updateVariable(std::string variableID, Object data); //update a variable which may not be present in the current scope
+
     bool varExistsInCurrentSymbolTable(std::string variableID); //return TRUE if the variable exists at the top of the stack
     bool varExistsInScope(std::string variableID); //return TRUE if the variable can be found anywhere in the stack (recursive)
+    bool isScopeGlobal(); //return TRUE if the current scope is a global scope
 
 private:
     std::vector<Scope> symbolTables; //A vector containing each symbol table; some methods will use this to find a value while others will rely on Scope's recursiveness
