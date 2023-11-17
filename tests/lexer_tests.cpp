@@ -13,7 +13,7 @@
  */
 void expectOutputEqualsTokens(const lexer::TokenList& tokens, const std::string& expectedOutput) {
     std::ostringstream builder;
-    for (const lexer::Token& token : tokens) builder << token.toString() << "\n";
+    for (const lexer::TokenPtr& token : tokens) builder << token->toString() << "\n";
     builder << "Compilation succeeded: lexical analysis complete\n";
     EXPECT_EQ(expectedOutput, builder.str());
 }

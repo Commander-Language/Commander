@@ -4,8 +4,8 @@
  *
  */
 
-#include "lexer.hpp"
 #include "../util/commander_exception.hpp"
+#include "lexer.hpp"
 
 namespace lexer {
 
@@ -111,7 +111,7 @@ namespace lexer {
 
     std::string StringToken::toString() const {
         std::ostringstream builder;
-        for (const Token& token : subTokens) builder << token.toString() << "\n";
+        for (const TokenPtr& token : subTokens) builder << token->toString() << "\n";
         return tokenTypeToString(type) + "\n[\n" + builder.str() + "]";
     }
 
@@ -134,35 +134,34 @@ namespace lexer {
         FilePosition commandPosition;
         skipWhitespace(file, position);
         while (position.index < file.length()) {
-            Token token = lexToken(file, position, isCommand, isFirst);
-            if (token.type == SEMICOLON) {
+            const TokenPtr token = lexToken(file, position, isCommand, isFirst);
+            if (!token) {
+                if (isIllegalCharacter(file[position.index])) {
+                    throw util::CommanderException(
+                            "Illegal character (ascii " + std::to_string((int)(file[position.index])) + ")", position);
+                }
+                throw util::CommanderException("Unrecognized token", position);
+            }
+            if (token->type == SEMICOLON) {
                 isCommand = false;
                 isFirst = true;
             }
-            if (isCommand && isFirst) { commandPosition = token.position; }
-            if (token.type == BACKTICK) {
+            if (isCommand && isFirst) { commandPosition = token->position; }
+            if (token->type == BACKTICK) {
                 if (!isCommand) {
-                    commandPosition = token.position;
+                    commandPosition = token->position;
                     isCommand = true;
                     isBacktickCommand = true;
                 } else if (!isBacktickCommand) {
-                    throw util::CommanderException("Cannot use backticks in command", token.position);
+                    throw util::CommanderException("Cannot use backticks in command", token->position);
                 } else {
                     isCommand = false;
                     isBacktickCommand = false;
                 }
             }
-            if (isFirst && token.type != SEMICOLON) { isFirst = false; }
-            if (token.type != UNKNOWN) {
-                tokens.push_back(token);
-                skipWhitespace(file, position);
-                continue;
-            }
-            if (isIllegalCharacter(file[position.index])) {
-                throw util::CommanderException(
-                        "Illegal character (ascii " + std::to_string((int)(file[position.index])) + ")", position);
-            }
-            throw util::CommanderException("Unrecognized token", position);
+            if (isFirst && token->type != SEMICOLON) { isFirst = false; }
+            tokens.push_back(token);
+            skipWhitespace(file, position);
         }
         if (isCommand && isBacktickCommand) {
             throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
@@ -172,7 +171,8 @@ namespace lexer {
         }
         // ASCII character 5 is the EOF character
         const char endOfFile = (char)5;
-        tokens.emplace_back(std::string(1, endOfFile), END_OF_FILE, position);
+        const Token eofToken = {std::string(1, endOfFile), END_OF_FILE, position};
+        tokens.push_back(std::make_shared<Token>(eofToken));
     }
 
     void skipWhitespace(const std::string& file, FilePosition& position) {
@@ -180,7 +180,7 @@ namespace lexer {
         bool isBlockComment = false;
         FilePosition blockCommentPosition;
         while (position.index < file.length()) {
-            char character = file[position.index];
+            const char character = file[position.index];
             if (character == '\n') {
                 if (isLineComment) { isLineComment = false; }
                 position.line++;
@@ -194,14 +194,14 @@ namespace lexer {
                 position.column++;
                 continue;
             }
-            char nextCharacter = position.index + 1 < file.length() ? file[position.index + 1] : '\0';
+            const char nextCharacter = position.index + 1 < file.length() ? file[position.index + 1] : '\0';
             // At this point, the character is not whitespace, so if it is not a comment (or end of block comment),
             // return
             if (!isBlockComment && (character != '/' || (nextCharacter != '/' && nextCharacter != '*'))) { return; }
             // Determine if there is a comment that is being started or terminated
-            bool terminateBlockComment = isBlockComment && nextCharacter == '/';
-            bool startBlockComment = character == '/' && nextCharacter == '*';
-            bool startLineComment = character == '/' && nextCharacter == '/';
+            const bool terminateBlockComment = isBlockComment && nextCharacter == '/';
+            const bool startBlockComment = character == '/' && nextCharacter == '*';
+            const bool startLineComment = character == '/' && nextCharacter == '/';
             if (terminateBlockComment) { isBlockComment = false; }
             if (startBlockComment) {
                 isBlockComment = true;
@@ -222,91 +222,97 @@ namespace lexer {
         if (isBlockComment) { throw util::CommanderException("Unterminated block comment", blockCommentPosition); }
     }
 
-    Token lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst) {
-        Token token;
+    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst) {
+        TokenPtr token;
         if (!isCommand) {
             token = lexTokenLiteral(file, position);
-            if (token.type != UNKNOWN) return token;
+            if (token) return token;
         }
         token = lexCommandTokenLiteral(file, position);
-        if (token.type != UNKNOWN) return token;
+        if (token) return token;
         if (!isCommand) {
             token = lexKeyword(file, position);
-            if (token.type != UNKNOWN) return token;
+            if (token) return token;
             token = lexFloat(file, position);
-            if (token.type != UNKNOWN) return token;
+            if (token) return token;
             token = lexInt(file, position);
-            if (token.type != UNKNOWN) return token;
+            if (token) return token;
         }
         token = lexString(file, position);
-        if (isFirst && token.type == STRINGVAL) isCommand = true;
-        if (token.type != UNKNOWN) return token;
+        if (token) {
+            if (isFirst && token->type == STRINGVAL) isCommand = true;
+            return token;
+        }
         token = lexCommandVariable(file, position);
-        if (isFirst && token.type == VARIABLE) isCommand = true;
-        if (token.type != UNKNOWN) return token;
+        if (token) {
+            if (isFirst && token->type == VARIABLE) isCommand = true;
+            return token;
+        }
         if (!isCommand) {
             token = lexVariable(file, position);
-            if (token.type != UNKNOWN) return token;
+            if (token) return token;
         }
         token = lexCommandString(file, position);
-        if (isFirst && token.type == CMDSTRINGVAL) isCommand = true;
-        if (token.type != UNKNOWN) return token;
+        if (token) {
+            if (isFirst && token->type == CMDSTRINGVAL) isCommand = true;
+            return token;
+        }
         return {};
     }
 
-    Token lexTokenLiteral(const std::string& file, FilePosition& position) {
+    TokenPtr lexTokenLiteral(const std::string& file, FilePosition& position) {
         for (const auto& literal : tokenLiterals) {
-            int length = (int)literal.first.length();
+            const int length = (int)literal.first.length();
             if (position.index + length > file.length() || literal.first != std::string(file, position.index, length)) {
                 continue;
             }
-            Token token = {literal.first, literal.second, position};
+            const Token token = {literal.first, literal.second, position};
             position.index += length;
             position.column += length;
-            return token;
+            return std::make_shared<Token>(token);
         }
         return {};
     }
 
-    Token lexCommandTokenLiteral(const std::string& file, FilePosition& position) {
-        // TODO: Very similar to lexTokenLiteral, perhaps create a helper method to improve code reuse
+    TokenPtr lexCommandTokenLiteral(const std::string& file, FilePosition& position) {
+        // TODO(phales): Very similar to lexTokenLiteral, perhaps create a helper method to improve code reuse
         for (const auto& literal : commandTokenLiterals) {
-            int length = (int)literal.first.length();
-            int fileLength = (int)file.length();
-            std::string tmp = std::string(file, position.index, length);
-            std::string tmp2 = literal.first;
+            const int length = (int)literal.first.length();
+            const int fileLength = (int)file.length();
+            const std::string tmp = std::string(file, position.index, length);
+            const std::string tmp2 = literal.first;
             if (position.index + length > fileLength || tmp2 != tmp) { continue; }
-            Token token = {literal.first, literal.second, position};
+            const Token token = {literal.first, literal.second, position};
             position.index += length;
             position.column += length;
-            return token;
+            return std::make_shared<Token>(token);
         }
         return {};
     }
 
-    Token lexKeyword(const std::string& file, FilePosition& position) {
-        // TODO: Very similar to lexTokenLiteral, perhaps create a helper method to improve code reuse
+    TokenPtr lexKeyword(const std::string& file, FilePosition& position) {
+        // TODO(phales): Very similar to lexTokenLiteral, perhaps create a helper method to improve code reuse
         for (const auto& keyword : keywords) {
-            int length = (int)keyword.first.length();
+            const int length = (int)keyword.first.length();
             if (position.index + length > file.length() || keyword.first != std::string(file, position.index, length)
                 || (position.index + length + 1 < file.length()
                     && !isVariableCharacter(file[position.index + length]))) {
                 continue;
             }
-            Token token = {keyword.first, keyword.second, position};
+            const Token token = {keyword.first, keyword.second, position};
             position.index += length;
             position.column += length;
-            return token;
+            return std::make_shared<Token>(token);
         }
         return {};
     }
 
-    Token lexFloat(const std::string& file, FilePosition& position) {
+    TokenPtr lexFloat(const std::string& file, FilePosition& position) {
         bool hasDigit = false;
         bool hasDot = false;
         int index = position.index;
         while (index < file.length()) {
-            char character = file[index];
+            const char character = file[index];
             if (isDigit(character)) {
                 hasDigit = true;
             } else if (character == '.' && !hasDot) {
@@ -317,33 +323,35 @@ namespace lexer {
             index++;
         }
         if (hasDot && hasDigit) {
-            int length = index - position.index;
-            Token token = {std::string(file, position.index, length), FLOATVAL, position};
+            const int length = index - position.index;
+            const Token token = {std::string(file, position.index, length), FLOATVAL, position};
             position.index += length;
             position.column += length;
-            return token;
+            return std::make_shared<Token>(token);
         }
         return {};
     }
 
-    Token lexInt(const std::string& file, FilePosition& position) {
+    TokenPtr lexInt(const std::string& file, FilePosition& position) {
         // The first character must be a digit
         if (!isDigit(file[position.index])) { return {}; }
         // The token is definitely an int (assuming float has already been tried), so determine the length/contents
-        FilePosition startPosition = position;
+        const FilePosition startPosition = position;
         while (position.index < file.length() && isDigit(file[position.index])) {
             position.index++;
             position.column++;
         }
-        return {std::string(file, startPosition.index, position.index - startPosition.index), INTVAL, startPosition};
+        const Token token = {std::string(file, startPosition.index, position.index - startPosition.index), INTVAL,
+                       startPosition};
+        return std::make_shared<Token>(token);
     }
 
-    StringToken lexString(const std::string& file, FilePosition& position) {
-        bool isFormat = file[position.index] == '$';
+    TokenPtr lexString(const std::string& file, FilePosition& position) {
+        const bool isFormat = file[position.index] == '$';
         bool isSingle = file[position.index] == '\'';
         bool isDouble = file[position.index] == '"';
         if (isFormat) {
-            bool secondExists = position.index + 1 < file.length();
+            const bool secondExists = position.index + 1 < file.length();
             isSingle = secondExists && file[position.index + 1] == '\'';
             isDouble = secondExists && file[position.index + 1] == '"';
         }
@@ -359,7 +367,7 @@ namespace lexer {
         FilePosition currentStringPosition = position;
         // The token is definitely a string, so determine the length/contents
         while (position.index < file.length()) {
-            char character = file[position.index++];
+            const char character = file[position.index++];
             position.column++;
             // Ensure the string contains no illegal characters
             if (isIllegalCharacter(character)) {
@@ -369,9 +377,10 @@ namespace lexer {
             // Check if string is terminated
             if ((isSingle && character == '\'') || (isDouble && character == '"')) {
                 stringTerminated = true;
-                std::string str = currentString.str();
+                const std::string str = currentString.str();
                 if (!str.empty()) {
-                    token.subTokens.emplace_back(currentString.str(), STRINGLITERAL, currentStringPosition);
+                    const Token strToken = {currentString.str(), STRINGLITERAL, currentStringPosition};
+                    token.subTokens.push_back(std::make_shared<Token>(strToken));
                 }
                 break;
             }
@@ -379,7 +388,7 @@ namespace lexer {
             if (position.index >= file.length()) { break; }
             // Handle escape characters
             if (character == '\\') {
-                char secondCharacter = file[position.index++];
+                const char secondCharacter = file[position.index++];
                 position.column++;
                 if (isFormat && secondCharacter == '{') {
                     currentString << '{';
@@ -436,9 +445,10 @@ namespace lexer {
             }
             // Handle variables
             if (character == '$' && isDouble && isFirstVariableCharacter(file[position.index])) {
-                std::string str = currentString.str();
+                const std::string str = currentString.str();
                 if (!str.empty()) {
-                    token.subTokens.emplace_back(currentString.str(), STRINGLITERAL, currentStringPosition);
+                    const Token strToken = {currentString.str(), STRINGLITERAL, currentStringPosition};
+                    token.subTokens.push_back(std::make_shared<Token>(strToken));
                     currentString.str("");
                 }
                 token.subTokens.push_back(lexVariable(file, position));
@@ -452,39 +462,39 @@ namespace lexer {
                     position.index++;
                     position.column++;
                 }
-                std::string str = currentString.str();
+                const std::string str = currentString.str();
                 if (!str.empty()) {
-                    token.subTokens.emplace_back(currentString.str(), STRINGLITERAL, currentStringPosition);
+                    const Token strToken = {currentString.str(), STRINGLITERAL, currentStringPosition};
+                    token.subTokens.push_back(std::make_shared<Token>(strToken));
                     currentString.str("");
                 }
-                FilePosition startPosition = {position.fileName, position.line, position.column - 1,
+                const FilePosition startPosition = {position.fileName, position.line, position.column - 1,
                                               position.index - 1};
-                // TODO: This part is very similar to tokenize, so possibly create helper or something to reduce code
+                // TODO(phales): This part is very similar to tokenize, so possibly create helper or something to reduce code
                 bool isCommand = false;
                 FilePosition commandPosition;
                 skipWhitespace(file, position);
                 while (position.index < file.length()) {
-                    Token tok = lexToken(file, position, isCommand, false);
-                    if (tok.type == BACKTICK) {
+                    const TokenPtr tok = lexToken(file, position, isCommand, false);
+                    if (!tok) {
+                        if (isIllegalCharacter(file[position.index])) {
+                            throw util::CommanderException("Illegal character (ascii "
+                                                                   + std::to_string((int)(file[position.index])) + ")",
+                                                           position);
+                        }
+                        throw util::CommanderException("Unrecognized token", position);
+                    }
+                    if (tok->type == BACKTICK) {
                         if (!isCommand) {
-                            commandPosition = tok.position;
+                            commandPosition = tok->position;
                             isCommand = true;
                         } else {
                             isCommand = false;
                         }
                     }
-                    if (tok.type != UNKNOWN) {
-                        if (tok.type == RCURLY) { break; }
-                        token.subTokens.push_back(tok);
-                        skipWhitespace(file, position);
-                        continue;
-                    }
-                    if (isIllegalCharacter(file[position.index])) {
-                        throw util::CommanderException("Illegal character (ascii "
-                                                               + std::to_string((int)(file[position.index])) + ")",
-                                                       position);
-                    }
-                    throw util::CommanderException("Unrecognized token", position);
+                    if (tok->type == RCURLY) { break; }
+                    token.subTokens.push_back(tok);
+                    skipWhitespace(file, position);
                 }
                 if (isCommand) {
                     throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
@@ -501,10 +511,10 @@ namespace lexer {
             throw util::CommanderException("String wasn't terminated with " + std::string((isSingle ? "'" : "\"")),
                                            token.position);
         }
-        return token;
+        return std::make_shared<Token>(token);
     }
 
-    Token lexCommandVariable(const std::string& file, FilePosition& position) {
+    TokenPtr lexCommandVariable(const std::string& file, FilePosition& position) {
         // First character must be $
         if (file[position.index] != '$') { return {}; }
         // Next character of variable must be a letter or an underscore
@@ -514,24 +524,25 @@ namespace lexer {
         return lexVariable(file, position);
     }
 
-    Token lexVariable(const std::string& file, FilePosition& position) {
+    TokenPtr lexVariable(const std::string& file, FilePosition& position) {
         // First character of variable must be a letter or an underscore
         if (!isFirstVariableCharacter(file[position.index])) { return {}; }
         // Token is definitely a variable, so determine length/contents
         std::ostringstream builder;
-        FilePosition startPosition = position;
+        const FilePosition startPosition = position;
         while (position.index < file.length() && isVariableCharacter(file[position.index])) {
             builder << file[position.index++];
             position.column++;
         }
-        return {std::string(builder.str()), VARIABLE, startPosition};
+        const Token token = {std::string(builder.str()), VARIABLE, startPosition};
+        return std::make_shared<Token>(token);
     }
 
-    Token lexCommandString(const std::string& file, FilePosition& position) {
+    TokenPtr lexCommandString(const std::string& file, FilePosition& position) {
         std::ostringstream builder;
-        FilePosition startPosition = position;
+        const FilePosition startPosition = position;
         while (position.index < file.length()) {
-            char character = file[position.index];
+            const char character = file[position.index];
             if (isWhitespace(character)
                 || (commandTokenLiterals.find(std::string(1, character)) != commandTokenLiterals.end())) {
                 break;
@@ -540,7 +551,8 @@ namespace lexer {
             position.index++;
             position.column++;
         }
-        return {std::string(builder.str()), CMDSTRINGVAL, startPosition};
+        const Token token = {std::string(builder.str()), CMDSTRINGVAL, startPosition};
+        return std::make_shared<Token>(token);
     }
 
     bool isFirstVariableCharacter(const char& character) {

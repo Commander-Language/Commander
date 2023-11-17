@@ -14,9 +14,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
-
 
 namespace lexer {
 
@@ -68,6 +66,55 @@ namespace lexer {
     };
 
     /**
+     * @brief Represents a position in a file
+     */
+    struct FilePosition {
+        std::shared_ptr<std::string> fileName;
+        int line;
+        int column;
+        int index;
+
+        /**
+         * Returns the string representation of the FilePosition
+         * @return The string representation of the FilePosition
+         */
+        [[nodiscard]] std::string toString() const;
+    };
+
+    /**
+     * @brief Represents a token from the lexer
+     */
+    struct Token {
+        std::string contents;
+        tokenType type;
+        FilePosition position;
+
+        Token();
+        Token(std::string contents, tokenType type, FilePosition position);
+        virtual ~Token() = default;
+        /**
+         * Returns the string representation of the Token
+         * @return The string representation of the Token
+         */
+        [[nodiscard]] virtual std::string toString() const;
+    };
+
+    using TokenPtr = std::shared_ptr<Token>;
+    using TokenList = std::vector<TokenPtr>;
+
+    /**
+     * @brief Represents specifically a string token, since strings can have sub tokens due to interpolation
+     */
+    struct StringToken : Token {
+        TokenList subTokens;
+        /**
+         * Returns the string representation of the Token
+         * @return The string representation of the Token
+         */
+        [[nodiscard]] std::string toString() const override;
+    };
+
+    /**
      * Map of string token literals that are keywords
      */
     const std::unordered_map<std::string, tokenType> keywords({{"alias", ALIAS},
@@ -106,54 +153,6 @@ namespace lexer {
             commandTokenLiterals({{"`", BACKTICK}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
 
     /**
-     * @brief Represents a position in a file
-     */
-    struct FilePosition {
-        std::shared_ptr<std::string> fileName;
-        int line;
-        int column;
-        int index;
-
-        /**
-         * Returns the string representation of the FilePosition
-         * @return The string representation of the FilePosition
-         */
-        [[nodiscard]] std::string toString() const;
-    };
-
-    /**
-     * @brief Represents a token from the lexer
-     */
-    struct Token {
-        std::string contents;
-        tokenType type;
-        FilePosition position;
-
-        Token();
-        Token(std::string contents, tokenType type, FilePosition position);
-        virtual ~Token() = default;
-        /**
-         * Returns the string representation of the Token
-         * @return The string representation of the Token
-         */
-        [[nodiscard]] virtual std::string toString() const;
-    };
-
-    using TokenList = std::vector<Token>;
-
-    /**
-     * @brief Represents specifically a string token, since strings can have sub tokens due to interpolation
-     */
-    struct StringToken : Token {
-        TokenList subTokens;
-        /**
-         * Returns the string representation of the Token
-         * @return The string representation of the Token
-         */
-        [[nodiscard]] std::string toString() const override;
-    };
-
-    /**
      * @brief Helper that turns TokenType into a string
      * @return The string representation of the TokenType
      */
@@ -189,7 +188,7 @@ namespace lexer {
      * @param isFirst Tells whether the token is the first token of a statement or not
      * @returns The token, if it finds one
      */
-    Token lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst);
+    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst);
 
     /**
      * @brief Lex a literal token, if it exists
@@ -197,7 +196,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The literal token, if it finds one
      */
-    Token lexTokenLiteral(const std::string& file, FilePosition& position);
+    TokenPtr lexTokenLiteral(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex a literal token specifically for commands, if it exists
@@ -205,7 +204,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The literal token for the command, if it finds one
      */
-    Token lexCommandTokenLiteral(const std::string& file, FilePosition& position);
+    TokenPtr lexCommandTokenLiteral(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an keyword token, if it exists
@@ -213,7 +212,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The keyword token, if it finds one
      */
-    Token lexKeyword(const std::string& file, FilePosition& position);
+    TokenPtr lexKeyword(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an literal float token, if it exists
@@ -221,7 +220,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The literal float token, if it finds one
      */
-    Token lexFloat(const std::string& file, FilePosition& position);
+    TokenPtr lexFloat(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an literal int token, if it exists
@@ -229,7 +228,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The literal int token, if it finds one
      */
-    Token lexInt(const std::string& file, FilePosition& position);
+    TokenPtr lexInt(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an literal string token, if it exists
@@ -237,7 +236,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The literal string token, if it finds one
      */
-    StringToken lexString(const std::string& file, FilePosition& position);
+    TokenPtr lexString(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an VARIABLE token specifically for commands (i.e. starts with $), if it exists
@@ -245,7 +244,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The VARIABLE token, if it finds one
      */
-    Token lexCommandVariable(const std::string& file, FilePosition& position);
+    TokenPtr lexCommandVariable(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex an VARIABLE token, if it exists
@@ -253,7 +252,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The VARIABLE token, if it finds one
      */
-    Token lexVariable(const std::string& file, FilePosition& position);
+    TokenPtr lexVariable(const std::string& file, FilePosition& position);
 
     /**
      * @brief Lex a command string token, if it exists
@@ -261,7 +260,7 @@ namespace lexer {
      * @param position The position in the file
      * @returns The command string token, if it finds one
      */
-    Token lexCommandString(const std::string& file, FilePosition& position);
+    TokenPtr lexCommandString(const std::string& file, FilePosition& position);
 
     /**
      * Helper function that checks if a character is a valid first character for a variable
