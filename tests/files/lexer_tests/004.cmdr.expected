@@ -1,0 +1,5 @@
+ALIAS 'alias'
+VARIABLE 'x'
+EQUALS '='
+CMDSTRINGVAL 'ls'
+SEMICOLON ';'
