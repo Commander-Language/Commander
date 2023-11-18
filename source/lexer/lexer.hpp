@@ -105,7 +105,8 @@ namespace lexer {
     /**
      * @brief Represents specifically a string token, since strings can have sub tokens due to interpolation
      */
-    struct StringToken : Token {
+    struct StringToken : public Token {
+        using Token::Token;
         TokenList subTokens;
         /**
          * Returns the string representation of the Token
