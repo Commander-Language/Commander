@@ -4,8 +4,8 @@
  *
  */
 
-#include "../util/commander_exception.hpp"
 #include "lexer.hpp"
+#include "../util/commander_exception.hpp"
 
 namespace lexer {
 
@@ -342,7 +342,7 @@ namespace lexer {
             position.column++;
         }
         const Token token = {std::string(file, startPosition.index, position.index - startPosition.index), INTVAL,
-                       startPosition};
+                             startPosition};
         return std::make_shared<Token>(token);
     }
 
@@ -469,8 +469,9 @@ namespace lexer {
                     currentString.str("");
                 }
                 const FilePosition startPosition = {position.fileName, position.line, position.column - 1,
-                                              position.index - 1};
-                // TODO(phales): This part is very similar to tokenize, so possibly create helper or something to reduce code
+                                                    position.index - 1};
+                // TODO(phales): This part is very similar to tokenize, so possibly create helper or something to reduce
+                // code
                 bool isCommand = false;
                 FilePosition commandPosition;
                 skipWhitespace(file, position);
@@ -511,7 +512,7 @@ namespace lexer {
             throw util::CommanderException("String wasn't terminated with " + std::string((isSingle ? "'" : "\"")),
                                            token.position);
         }
-        return std::make_shared<Token>(token);
+        return std::make_shared<StringToken>(token);
     }
 
     TokenPtr lexCommandVariable(const std::string& file, FilePosition& position) {
