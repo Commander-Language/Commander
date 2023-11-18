@@ -1,0 +1,9 @@
+LPAREN '('
+VARIABLE 'x'
+COMMA ','
+VARIABLE 'y'
+RPAREN ')'
+LAMBDA '->'
+LCURLY '{'
+RCURLY '}'
+END_OF_FILE

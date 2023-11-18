@@ -1,0 +1,6 @@
+IMPORT 'import'
+STRINGVAL
+[
+STRINGLITERAL 'lib.cmdr'
+]
+SEMICOLON ';'

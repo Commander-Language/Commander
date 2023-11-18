@@ -1,0 +1,5 @@
+VARIABLE 'x'
+OP '%='
+VARIABLE 'y'
+SEMICOLON ';'
+END_OF_FILE

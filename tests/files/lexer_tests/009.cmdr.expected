@@ -1,0 +1,5 @@
+VARIABLE 'isFalse'
+EQUALS '='
+BOOL 'false'
+SEMICOLON ';'
+END_OF_FILE

@@ -1,0 +1,4 @@
+OP '-'
+VARIABLE 'x'
+SEMICOLON ';'
+END_OF_FILE

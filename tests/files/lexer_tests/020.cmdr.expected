@@ -1,0 +1,9 @@
+DO 'do'
+LCURLY '{'
+RCURLY '}'
+WHILE 'while'
+LPAREN '('
+BOOL 'true'
+RPAREN ')'
+SEMICOLON ';'
+END_OF_FILE

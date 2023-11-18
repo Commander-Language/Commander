@@ -1,0 +1,13 @@
+LPAREN '('
+VARIABLE 'x'
+COMMA ','
+VARIABLE 'y'
+RPAREN ')'
+COLON ':'
+TYPE 'int'
+LAMBDA '->'
+VARIABLE 'x'
+OP '+'
+INTVAL '1'
+SEMICOLON ';'
+END_OF_FILE

@@ -1,0 +1,11 @@
+LPAREN '('
+VARIABLE 'x'
+COMMA ','
+VARIABLE 'y'
+RPAREN ')'
+COLON ':'
+TYPE 'int'
+LAMBDA '->'
+LCURLY '{'
+RCURLY '}'
+END_OF_FILE

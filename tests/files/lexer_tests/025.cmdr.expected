@@ -1,0 +1,13 @@
+VARIABLE 'foo'
+LPAREN '('
+VARIABLE 'a'
+COMMA ','
+VARIABLE 'b'
+COMMA ','
+VARIABLE 'c'
+RPAREN ')'
+COLON ':'
+TYPE 'int'
+LCURLY '{'
+RCURLY '}'
+END_OF_FILE

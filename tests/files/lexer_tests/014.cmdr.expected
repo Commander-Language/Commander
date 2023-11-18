@@ -1,0 +1,5 @@
+VARIABLE 'isFun'
+LPAREN '('
+RPAREN ')'
+SEMICOLON ';'
+END_OF_FILE
