@@ -1,0 +1,9 @@
+VARIABLE 'isString'
+EQUALS '='
+STRINGVAL
+[
+STRINGLITERAL 'Hello, world!
+'"\'
+]
+SEMICOLON ';'
+END_OF_FILE

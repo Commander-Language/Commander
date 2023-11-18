@@ -1,0 +1,6 @@
+BOOL 'true'
+QUESTION '?'
+INTVAL '1'
+COLON ':'
+INTVAL '2'
+END_OF_FILE

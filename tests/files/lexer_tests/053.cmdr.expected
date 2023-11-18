@@ -1,0 +1,4 @@
+BOOL 'true'
+OP '!='
+BOOL 'false'
+END_OF_FILE

@@ -1,0 +1,6 @@
+ALIAS 'alias'
+VARIABLE 'ls'
+EQUALS '='
+CMDSTRINGVAL 'dir'
+SEMICOLON ';'
+END_OF_FILE

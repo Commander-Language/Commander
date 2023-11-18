@@ -1,0 +1,5 @@
+VARIABLE 'isTrue'
+EQUALS '='
+BOOL 'true'
+SEMICOLON ';'
+END_OF_FILE

@@ -1,0 +1,4 @@
+FLOATVAL '1.0'
+OP '>'
+INTVAL '2'
+END_OF_FILE

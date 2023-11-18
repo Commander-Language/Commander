@@ -1,0 +1,6 @@
+VARIABLE 'isArray'
+EQUALS '='
+LSQUARE '['
+RSQUARE ']'
+SEMICOLON ';'
+END_OF_FILE

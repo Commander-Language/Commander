@@ -1,0 +1,6 @@
+VARIABLE 'isTuple'
+EQUALS '='
+LPAREN '('
+RPAREN ')'
+SEMICOLON ';'
+END_OF_FILE

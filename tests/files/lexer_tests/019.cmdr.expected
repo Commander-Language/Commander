@@ -1,0 +1,7 @@
+WHILE 'while'
+LPAREN '('
+BOOL 'true'
+RPAREN ')'
+LCURLY '{'
+RCURLY '}'
+END_OF_FILE
