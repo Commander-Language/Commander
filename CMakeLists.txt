@@ -83,6 +83,9 @@ include_directories(.)
 #      target_link_libraries(commander lexer parser type-checker)
 #      ```
 
+add_library(parser source/parser/parser.cpp)
+
+
 #  =========================
 #  ||  GoogleTest Setup:  ||
 #  =========================
@@ -124,7 +127,9 @@ include(GoogleTest)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
 
 find_package(GTest REQUIRED)
-
 add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
-
 target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
+
+add_executable(parserTests tests/parser_tests.cpp)
+target_link_libraries(parserTests parser GTest::gtest_main)
+gtest_discover_tests(parserTests)
