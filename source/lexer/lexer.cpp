@@ -71,6 +71,8 @@ namespace lexer {
                 return "QUESTION";
             case RCURLY:
                 return "RCURLY";
+            case RETURN:
+                return "RETURN";
             case RPAREN:
                 return "RPAREN";
             case RSQUARE:
@@ -135,13 +137,6 @@ namespace lexer {
         skipWhitespace(file, position);
         while (position.index < file.length()) {
             const TokenPtr token = lexToken(file, position, isCommand, isFirst);
-            if (!token) {
-                if (isIllegalCharacter(file[position.index])) {
-                    throw util::CommanderException(
-                            "Illegal character (ascii " + std::to_string((int)(file[position.index])) + ")", position);
-                }
-                throw util::CommanderException("Unrecognized token", position);
-            }
             if (token->type == SEMICOLON) {
                 isCommand = false;
                 isFirst = true;
@@ -159,9 +154,59 @@ namespace lexer {
                     isBacktickCommand = false;
                 }
             }
-            if (isFirst && token->type != SEMICOLON) { isFirst = false; }
             tokens.push_back(token);
+            // Look ahead for variables
+            if (token->type == VARIABLE && isFirst && !isCommand) {
+                // Get the next token
+                skipWhitespace(file, position);
+                if (position.index >= file.length()) {
+                    isCommand = true;
+                    break;
+                }
+                const TokenPtr nextToken = lexToken(file, position, isCommand, false);
+                // Determine if the next token implies a variable (i.e. it is LPAREN, COLON, EQUALS, or an OP ending in
+                // =).
+                if (nextToken->type == LPAREN || nextToken->type == COLON || nextToken->type == EQUALS
+                    || (nextToken->type == OP && nextToken->contents.back() == '=')) {
+                    tokens.push_back(nextToken);
+                } else {
+                    // If it isn't a variable, change it to a command string, and reset the position index so that the
+                    // next token will be lexed properly.
+                    token->type = CMDSTRINGVAL;
+                    isCommand = true;
+                    commandPosition = token->position;
+                    position = nextToken->position;
+                }
+            }
+            // Look ahead for alias
+            if (token->type == ALIAS && isFirst) {
+                skipWhitespace(file, position);
+                if (position.index >= file.length()) {
+                    throw util::CommanderException("alias statement is not complete.", token->position);
+                }
+                const TokenPtr varToken = lexToken(file, position, isCommand, false);
+                if (varToken->type != VARIABLE) {
+                    throw util::CommanderException("Keyword 'alias' not followed by a variable name.",
+                                                   varToken->position);
+                }
+                tokens.push_back(varToken);
+                skipWhitespace(file, position);
+                if (position.index >= file.length()) {
+                    throw util::CommanderException("alias statement is not complete.", token->position);
+                }
+                const TokenPtr equalsToken = lexToken(file, position, isCommand, false);
+                if (equalsToken->type != EQUALS) {
+                    throw util::CommanderException("No '=' follows the variable '" + varToken->contents + "'",
+                                                   equalsToken->position);
+                }
+                tokens.push_back(equalsToken);
+                isCommand = true;
+            }
+            // Look ahead for for-loop
+            if (token->type == FOR && isFirst && !isCommand) {}
             skipWhitespace(file, position);
+            if (token->type == ALIAS && isFirst) { commandPosition = position; }
+            if (isFirst && token->type != SEMICOLON) { isFirst = false; }
         }
         if (isCommand && isBacktickCommand) {
             throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
@@ -257,7 +302,11 @@ namespace lexer {
             if (isFirst && token->type == CMDSTRINGVAL) isCommand = true;
             return token;
         }
-        return {};
+        if (isIllegalCharacter(file[position.index])) {
+            throw util::CommanderException(
+                    "Illegal character (ascii " + std::to_string((int)(file[position.index])) + ")", position);
+        }
+        throw util::CommanderException("Unrecognized token", position);
     }
 
     TokenPtr lexTokenLiteral(const std::string& file, FilePosition& position) {
@@ -296,7 +345,7 @@ namespace lexer {
             const int length = (int)keyword.first.length();
             if (position.index + length > file.length() || keyword.first != std::string(file, position.index, length)
                 || (position.index + length + 1 < file.length()
-                    && !isVariableCharacter(file[position.index + length]))) {
+                    && isVariableCharacter(file[position.index + length]))) {
                 continue;
             }
             const Token token = {keyword.first, keyword.second, position};
@@ -407,7 +456,7 @@ namespace lexer {
                         currentString << '\'';
                     } else {
                         throw util::CommanderException(
-                                "Unknown escape sequence",
+                                "Unknown escape sequence \\" + std::string(1, secondCharacter),
                                 {position.fileName, position.line, position.index - 2, position.index - 2});
                     }
                     continue;
@@ -438,7 +487,7 @@ namespace lexer {
                         break;
                     default:
                         throw util::CommanderException(
-                                "Unknown escape sequence",
+                                "Unknown escape sequence \\" + std::string(1, secondCharacter),
                                 {position.fileName, position.line, position.index - 2, position.index - 2});
                 }
                 continue;
@@ -477,14 +526,6 @@ namespace lexer {
                 skipWhitespace(file, position);
                 while (position.index < file.length()) {
                     const TokenPtr tok = lexToken(file, position, isCommand, false);
-                    if (!tok) {
-                        if (isIllegalCharacter(file[position.index])) {
-                            throw util::CommanderException("Illegal character (ascii "
-                                                                   + std::to_string((int)(file[position.index])) + ")",
-                                                           position);
-                        }
-                        throw util::CommanderException("Unrecognized token", position);
-                    }
                     if (tok->type == BACKTICK) {
                         if (!isCommand) {
                             commandPosition = tok->position;

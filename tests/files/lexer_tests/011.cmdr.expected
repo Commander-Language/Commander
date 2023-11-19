@@ -2,7 +2,7 @@ VARIABLE 'isString'
 EQUALS '='
 STRINGVAL
 [
-STRINGLITERAL 'Hello, world!
+STRINGLITERAL 'Hello, world!	
 '"\'
 ]
 SEMICOLON ';'

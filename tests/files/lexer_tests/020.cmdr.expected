@@ -3,7 +3,7 @@ LCURLY '{'
 RCURLY '}'
 WHILE 'while'
 LPAREN '('
-BOOL 'true'
+TRUE 'true'
 RPAREN ')'
 SEMICOLON ';'
 END_OF_FILE
