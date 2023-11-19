@@ -1,3 +1,5 @@
+VARIABLE 'addOne'
+EQUALS '='
 LPAREN '('
 VARIABLE 'x'
 COMMA ','

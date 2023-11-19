@@ -7,7 +7,7 @@ COMMA ','
 VARIABLE 'c'
 RPAREN ')'
 COLON ':'
-TYPE 'int'
+INT 'int'
 LCURLY '{'
 RCURLY '}'
 END_OF_FILE

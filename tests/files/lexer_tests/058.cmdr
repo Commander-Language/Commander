@@ -1,2 +1,2 @@
-(x,y) : int -> {
+nada = (x,y) : int -> {
 }

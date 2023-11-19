@@ -1,3 +1,5 @@
+VARIABLE 'nada'
+EQUALS '='
 LPAREN '('
 VARIABLE 'x'
 COMMA ','

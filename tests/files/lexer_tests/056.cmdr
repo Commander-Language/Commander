@@ -1,1 +1,1 @@
-(x,y) : int -> x+1;
+myFunction = (x,y) : int -> x+1;

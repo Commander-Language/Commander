@@ -50,7 +50,8 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("054.cmdr", "054.cmdr.expected"), std::make_tuple("055.cmdr", "055.cmdr.expected"),
                 std::make_tuple("056.cmdr", "056.cmdr.expected"), std::make_tuple("057.cmdr", "057.cmdr.expected"),
                 std::make_tuple("058.cmdr", "058.cmdr.expected"), std::make_tuple("059.cmdr", "059.cmdr.expected"),
-                std::make_tuple("060.cmdr", "060.cmdr.expected"), std::make_tuple("061.cmdr", "061.cmdr.expected")));
+                std::make_tuple("060.cmdr", "060.cmdr.expected"), std::make_tuple("061.cmdr", "061.cmdr.expected"),
+                std::make_tuple("062.cmdr", "062.cmdr.expected")));
 
 /**
  * @brief Takes in the list of tokens, and ensures they match what is contained in the expected output string
