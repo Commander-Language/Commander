@@ -1,4 +1,4 @@
-BOOL 'true'
+TRUE 'true'
 OP '!='
-BOOL 'false'
+FALSE 'false'
 END_OF_FILE

@@ -1,3 +1,3 @@
-echo """int float bool string array tuple funciton echo \"Hello, World!\"
+echo "int float bool string array tuple funciton echo \"Hello, World!\"
         length() [] () &  | alias = const while do for if else + - / %  ** += -=
-        /= %= **= \"UT\" + \"AH\" ${} (x) -> {return 0;} scan read \\ // ln\""";
+        /= %= **= \"UT\" + \"AH\" ${} (x) -> {return 0;} scan read \\\\ // ln\"";

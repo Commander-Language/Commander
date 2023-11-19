@@ -1,4 +1,4 @@
-BOOL 'true'
+TRUE 'true'
 QUESTION '?'
 INTVAL '1'
 COLON ':'

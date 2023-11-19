@@ -1,6 +1,6 @@
 WHILE 'while'
 LPAREN '('
-BOOL 'true'
+TRUE 'true'
 RPAREN ')'
 LCURLY '{'
 RCURLY '}'

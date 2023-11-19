@@ -1,1 +1,1 @@
-isString = "Hello, world!\t\n\r\'\"\\";
+isString = "Hello, world!\t\r\n'\"\\";
