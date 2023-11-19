@@ -1,3 +1,5 @@
+VARIABLE 'val'
+EQUALS '='
 VARIABLE 'x'
 OP '+'
 VARIABLE 'y'

@@ -158,24 +158,29 @@ namespace lexer {
             // Look ahead for variables
             if (token->type == VARIABLE && isFirst && !isCommand) {
                 // Get the next token
+                const int indexBeforeSkip = position.index;
                 skipWhitespace(file, position);
                 if (position.index >= file.length()) {
                     isCommand = true;
                     break;
                 }
+                const bool noSpace = indexBeforeSkip == position.index;
                 const TokenPtr nextToken = lexToken(file, position, isCommand, false);
                 // Determine if the next token implies a variable (i.e. it is LPAREN, COLON, EQUALS, or an OP ending in
                 // =).
                 if (nextToken->type == LPAREN || nextToken->type == COLON || nextToken->type == EQUALS
-                    || (nextToken->type == OP && nextToken->contents.back() == '=')) {
+                    || (nextToken->type == OP
+                        && (nextToken->contents.back() == '='
+                            || (noSpace && (nextToken->contents == "++" || nextToken->contents == "--"))))) {
                     tokens.push_back(nextToken);
                 } else {
-                    // If it isn't a variable, change it to a command string, and reset the position index so that the
-                    // next token will be lexed properly.
+                    // If it isn't a variable, it's a command, so reset the position index so that the command string
+                    // will be properly lexed.
+                    tokens.pop_back();
                     token->type = CMDSTRINGVAL;
                     isCommand = true;
                     commandPosition = token->position;
-                    position = nextToken->position;
+                    position = token->position;
                 }
             }
             // Look ahead for alias
@@ -202,7 +207,7 @@ namespace lexer {
                 tokens.push_back(equalsToken);
                 isCommand = true;
             }
-            // Look ahead for for-loop
+            // TODO(phales): Look ahead for for-loop
             if (token->type == FOR && isFirst && !isCommand) {}
             skipWhitespace(file, position);
             if (token->type == ALIAS && isFirst) { commandPosition = position; }

@@ -11,6 +11,7 @@
 
 #include <fstream>
 #include <functional>
+#include <map>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -139,15 +140,14 @@ namespace lexer {
                                                                {"while", WHILE}});
 
     /**
-     * Map of string token literals that are not keywords
+     * Map of string token literals that are not keywords (using vector data structure since iteration order matters)
      */
-    const std::unordered_map<std::string, tokenType>
-            tokenLiterals({{"**=", OP},     {"==", OP},    {"!=", OP},     {"<=", OP},    {">=", OP},    {"&&", OP},
-                           {"||", OP},      {"**", OP},    {"%=", OP},     {"/=", OP},    {"*=", OP},    {"-=", OP},
-                           {"+=", OP},      {"++", OP},    {"--", OP},     {"+", OP},     {"-", OP},     {"*", OP},
-                           {"/", OP},       {"%", OP},     {">", OP},      {"<", OP},     {"!", OP},     {":", COLON},
-                           {",", COMMA},    {"=", EQUALS}, {"->", LAMBDA}, {"{", LCURLY}, {"(", LPAREN}, {"[", LSQUARE},
-                           {"?", QUESTION}, {"}", RCURLY}, {")", RPAREN},  {"]", RSQUARE}});
+    const std::vector<std::pair<std::string, tokenType>> tokenLiterals(
+            {{"**=", OP},   {"->", LAMBDA}, {"==", OP},      {"!=", OP},    {"<=", OP},    {">=", OP},    {"&&", OP},
+             {"||", OP},    {"**", OP},     {"%=", OP},      {"/=", OP},    {"*=", OP},    {"-=", OP},    {"+=", OP},
+             {"++", OP},    {"--", OP},     {"+", OP},       {"-", OP},     {"*", OP},     {"/", OP},     {"%", OP},
+             {">", OP},     {"<", OP},      {"!", OP},       {":", COLON},  {",", COMMA},  {"=", EQUALS}, {"{", LCURLY},
+             {"(", LPAREN}, {"[", LSQUARE}, {"?", QUESTION}, {"}", RCURLY}, {")", RPAREN}, {"]", RSQUARE}});
 
     /**
      * Map of string token literals specifically for commands
