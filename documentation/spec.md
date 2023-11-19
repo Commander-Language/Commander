@@ -1,5 +1,9 @@
 # Commander Specification
 - [Commander Specification](#commander-specification)
+  - [General Info](#general-info)
+    - [Legal Characters](#legal-characters)
+    - [Precedence](#precedence)
+  - [Grammar Explanation](#grammar-explanation)
   - [Types](#types)
     - [int](#int)
       - [API](#api)
@@ -89,13 +93,41 @@
   - [Code Separation and Libraries](#code-separation-and-libraries)
     - [Grammar](#grammar-19)
     - [Examples](#examples-28)
-  - [Expressions](#expressions)
-  - [API Functions](#api-functions)
+  - [Custom Types](#custom-types)
     - [Grammar](#grammar-20)
     - [Examples](#examples-29)
+  - [API Functions](#api-functions)
+    - [Grammar](#grammar-21)
   - [Errors](#errors)
 
-<!-- TODO: List all types, with details. What is initialization syntax? What are the type specific functions/operations you can perform on them (toString() will be required for all of them) -->
+
+## General Info
+### Legal Characters
+Commander scripts can only contain ascii characters 32 through 126, with a couple exceptions, which are ascii 9 (tab), 10 (new line), and 13 (carriage return). Any other character included in the script will result in an error being thrown.
+
+### Precedence
+Operator precedence is define as follows, from highest precedence to lowest precedence:
+- Postfix ```[]``` for indexing arrays or tuples, or ```++``` and ```--``` for incrementing and decrementing.
+- Prefix operations ```!```, ```-```, ```++```, or ```--```.
+- Exponential operator ```**```.
+- Multiplicative binary operators ```*```, ```/```, and ```%```
+- Additive binary operators ```+``` and ```-```
+- Binary comparisons ```<```, ```>```, ```<=```, ```>=```, ```==```, ```!=```
+- Boolean binary operators ```&&``` and ```||```
+
+Note: you may override precedence anytime using parentheses ```()```.
+
+## Grammar Explanation
+- Statements, expressed with ```<stmt>```, are either a line or multiple lines of code that ultimately end with a ```;```. They are simply executed at runtime, and don't return anything.
+- Expresions, expressed with ```<expr>```, is code that evaluates to a value of a certain type, and returns that value at runtime.
+- Variables, expressed with ```<variable>```, represent a variable name.
+- Bindings, expressed with ```<binding>```, have the grammar 
+    ```
+    <binding> : <variable> : <type>
+    ```
+- Types are expressed as ```<int>``` for ints, ```<bool>``` for booleans, ```<string>``` for strings, etc. A general type (any type) would be expressed as ```<type>```. These are mostly used in API function definitions.
+- Expressions that are of a particular type will be expressed as ```<int_expr>``` for int expressions, ```bool_expr``` for boolean expressions, etc.
+- If, for some reason, multiple grammars apply, then they are separated using |. For example, commands are a sequence of strings, command strings, or variables, and so each command argument would be represented as ```<string | command_string | variable>```.
 ## Types
 ### int
 - 64 bit two's complement
@@ -141,18 +173,21 @@ true
 false
 ```
 ### string
-- Note: Strings are NOT to be confused with command strings, which are not a type (see [command execution](#command-execution) for more details).
-- Strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\``` character, in which case the new line that comes after it will not be included).
-- Strings can include any ASCII character from 32 to 126 inclusive, and ASCII characters 10 and 13.
-- Special characters like newlines and tabs can be included in strings via escape characters. These include:
-  - ```\t``` for tabs
-  - ```\n``` for new lines
-  - ```\r``` for carriage returns
-  - ```\'``` for single quotations (only necessary if string is initialized using ```'```)
-  - ```\"``` for double quotations (only necessary if string is initialized using ```"```)
-  - ```\\``` for backslash
-  - ```\{``` and ```\}``` for curly braces when interpolating strings
-- Useful string operations such as [string concatenation](#string-concatenation) and [string interpolation](#string-interpolation) are also supported
+- Strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\``` character, in which case the new line that comes after it will not be included in the final string).
+- Useful string operations such as [string concatenation](#string-concatenation) and [string interpolation](#string-interpolation) are supported.
+- Strings that start and end with ```'``` are very literal strings. Anything inside of them will be considered a string, including escape characters, with the exception of:
+  - Curly braces, if the string is an interpolated string (i.e. has ```$``` right before the starting ```'```). Curly braces can be escaped with ```\{``` or ```\}```
+  - Single quotations, which require the escape character ```\'``` to be included in the string.
+  - Backslashes, which can be escaped with ```\\```
+- Strings that start and end with ```"``` are literal strings, but can have other special escape characters and can also have variable interpolation (see [string interpolation](#string-interpolation)). The following characaters can be escaped in double quotation strings:
+  - Curly braces, if the string is an interpolated string (i.e. has ```$``` right before the starting ```'```). Curly braces can be escaped with ```\{``` or ```\}```
+  - Double quotations, which require the escape character ```\"``` to be included in the string.
+  - Backslashes, which can be escaped with ```\\```.
+  - Newlines, with escape character ```\n```.
+  - Tabs, with escape character ```\t```.
+  - Carriage return, with escape character ```\r```.
+  - Dollarsign, with escape character ```\$```.
+- Additionally, comparisons are defined for strings, for example ```==``` to check if two strings are the same, or ```<``` to check if a string come before another string alphabetically.
 - Default: ```""```
 #### API
     1. charAt(<int>) : <string>
@@ -173,79 +208,106 @@ false
 ```
 "Hello World!"
 
-'My favorite number is 3.\n\tIt is super cool!'
+'I have $0 in my wallet :('
 
-"""
+"
 This
 is
 a
 multi-line
 string
-"""
+"
+
+$'1 + 2 = {1 + 2}'
+
+"3 + 4 = ${3 + 4}"
+
+"My name is $name"
 ```
 ### array
+Arrays contain multiple elements of a single type. To index an array, you use the following grammar: ```<expr> : <variable> [ <int> ]```, i.e. use postfix ```[]``` with a number inside (which is zero-based, so 0 gets you the first element). If an attempt to index a non-existent item, an error is thrown.
 - Default: ```[]```
 #### API
     1. toString() : <string>
 #### Examples
 ```
+myNumbers = [1, 2, 3]
 
+one = myNumbers[0]
 ```
 ### tuple
+Tuples contain multiple elements of different types. To index a tuple, you use the following grammar: ```<expr> : <variable> [ <int> ]```, i.e. use postfix ```[]``` with a number inside (which is zero-based, so 0 gets you the first element). If an attempt to index a non-existent item, an error is thrown.
 - Default: ```()```
 #### API
     1. toString() : <string>
 #### Examples
 ```
+myItems = ("hello", 2, 3.14, true)
 
+pi = myItems[2]
 ```
+Functions are types that represent a single function, and can be called. Functions can be initialized in two different ways (see [Functions](#functions) and [Lambda Expressions](#lambda-expressions)), but either way the function is stored into a variable.
 ### function
 - Default: ```() => void```
 #### API
     1. toString() : <string>
 #### Examples
 ```
+add(a, b) {
+    return a + b;
+};
 
+subtract = (a, b) => a - b;
 ```
 
-<!-- TODO -->
 ## Command Execution
-Commands are simply a series of strings, command strings, or variables followed one after another. If surrounded in backticks ``` `` ```, the command will return a tuple of three where the first item is a string representing the standard output, the second item is a string representing the error output, and the third item is an int representing the exit code of the command. 
+Commands are simply a series of strings or variables followed one after another. For commands, quotations are not required for strings (which we call command strings) unless the command arguments involve the following special characters:
+- backticks ``` ` ```,
+- semicolons ```;```, 
+- pipes ```|```, 
+- or ampersands ```&```. 
 
-Command strings are not a string, but strings can be interpreted as command strings. Basically, a command string is anything that cannot be lexed into an existing token or variable. If you wish to have a command that includes tokens, use strings instead. Additionally, note that the following tokens ```-```, ```--```, ```=``` will not be lexed as tokens due to their common usage in commands, so long as they appear in backticks ``` `` ``` or after an initial command statement.
+For variables to be used as a command argument, they must be of type string, and must be preceded by a ```$```. 
 
-Note that you may also use variables, so long as they are of type string.
+If a command is surrounded in backticks ``` `` ```, the command will return a tuple of three where the first item is a string representing the standard output, the second item is a string representing the error output, and the third item is an int representing the exit code of the command. Backticks around commands are the only way to run commands as an expression as opposed to a statement.
+
 ### Grammar
 ```
 <command> : <command_string | string | variable> <command_string | string | variable> ... <command_string | string | variable>
 <stmt>    : <command>
-<tuple>   : `<command>`
+<tuple_expr>   : `<command>`
 ```
 ### Examples
 ```
+echo "Hello World!";
 
+git clone $url;
+
+ls -a | grep directoryName;
+
+output = `cat myfile.txt`;
 ```
 
-<!-- TODO -->
 ## Background (Asynchronous) Commands
+Commands may be run in the background as opposed to the foreground if they end with an ```&```. In the background, they run asynchronously, so the command will be running concurrently with the rest of the script that follows after. Additionally, since it will be run in the background, any output the command normally prints out will not be printed out. 
 ### Grammar
 ```
 <command> : <command> &
 ```
 ### Examples
 ```
-
+git clone $url1 &;
 ```
 
-<!-- TODO -->
 ## Piping Commands
+The output from one command may be used as input to another through piping, using the ```|``` character. The output of the command on the left hand side of ```|``` is piped into the command on the right hand side as input to it. There can be many commands chained like this, and they get evaluated from left to right.
 ### Grammar
 ```
 <command> : <command> | ... | <command>
 ```
 ### Examples
 ```
-
+ls -a | grep myDirectory;
 ```
 
 <!-- TODO -->
@@ -259,9 +321,8 @@ Note that you may also use variables, so long as they are of type string.
 
 ```
 
-<!-- TODO -->
 ## Command Aliasing
-You can alias a command, which is especially useful for frequently used commands that you wish to not have to type out a lot. The alias variable is in turn interpreted as a command, and follows all command rules as defined in [Command Execution](#command-execution)
+You can alias a command, which is especially useful for frequently used commands that you wish to not have to type out all the time. The alias variable is in turn interpreted as a command, and follows all command rules as defined in [Command Execution](#command-execution)
 ### Grammar
 ```
 <stmt>    : alias <command_variable> = <command>
@@ -269,15 +330,13 @@ You can alias a command, which is especially useful for frequently used commands
 ```
 ### Examples
 ```
+alias listAll = ls -a;
 
+listAll | grep myDirectory;
 ```
 
 ## Variables
-Variables must be set with ```=```. Use keyword ```const``` if you want the value to be immutable.
-
-Any variables set this way will be tokenized from there on afterwards for the remainder of the current scope.
-
-
+Variables must be set with ```=```. Use keyword ```const``` if you want the value to be immutable. Each variable has a type, which may be optionally expressed.
 ### Grammar
 ```
 <stmt> : <binding> = <expr>
@@ -288,68 +347,72 @@ Any variables set this way will be tokenized from there on afterwards for the re
 ```
 ### Examples
 ```
-const pi = 3.14159
-r = 5
-area = pi * r ** 2
+const pi = 3.14159;
+r = 5;
+area = pi * r ** 2;
 ```
 
 ## While Loops
+Execute lines of code multiple times, so long as the ```<bool_expr>``` is true before it starts executing the statements each iteration. You may break out of the loop early with the ```break;``` statement, or begin a new iteration of the loop with the ```continue;``` statement.
 ### Grammar
 ```
-<stmt> : while ( <bool> ) {
+<stmt> : while ( <bool_expr> ) {
              <stmt>
              ...
          }
 ```
 ### Examples
 ```
-x = 10
+x = 10;
 while (x > 5) {
-    print(x--)
-}
+    print(x--);
+};
 ```
 
 ## Do-While Loops
+Like a while loop, but will execute all statements first before considering the ```<bool_expr>```. You may break out of the loop early with the ```break;``` statement, or begin a new iteration of the loop with the ```continue;``` statement.
 ### Grammar
 ```
 <stmt> : do {
              <stmt>
              ...
-         } while ( <bool> )
+         } while ( <bool_expr> );
 ```
 ### Examples
 ```
-x = 10
+x = 10;
 do {
-    print(x--)
-} while (x > 5)
+    print(x--);
+} while (x > 5);
 ```
 
 ## For Loops
+Similar to a while loop in that it will only execute one iteration of the statements if the ```<bool_expr>``` is true. However, it also executes the first statement in the parentheses before running the loop, and after iteration will execute the last statement contained in the parentheses.
 ### Grammar
 ```
-<stmt> : for ( <stmt> ; <bool> ; <stmt> ) {
+<stmt> : for ( <stmt> ; <bool_expr> ; <stmt> ) {
              <stmt>
              ...
-         }
+         };
 ```
 ### Examples
 ```
 for (i = 0; i < 10; i++) {
-    print(i)
+    print(i);
 }
 ```
 
-<!-- TODO -->
 ## If-Else Statements
+Good for controlling code flow. Code within an ```if``` statement is only executed if the ```<bool_expr>``` is true. If it isn't, it will execute what's in the ```else``` statement. A chain of if and else if can occur as well, and which ever ```if``` statement is true first will be the one to execute.
 ### Grammar
 ```
-<stmt> : if ( <bool> ) {
+<stmt> : if ( <booL_expr> ) <stmt>;
+       | if ( <booL_expr> ) {
              <stmt>
              ...
          }
 
-       | if ( <bool> ) {
+       | if ( <booL_expr> ) {
              <stmt>
              ...
          } else {
@@ -357,18 +420,18 @@ for (i = 0; i < 10; i++) {
              ...
          }
 
-       | if ( <bool> ) {
+       | if ( <booL_expr> ) {
              <stmt>
              ...
-         } else if ( <bool> ) {
+         } else if ( <booL_expr> ) {
             <stmt>
             ...
          } ...
 
-       | if ( <bool> ) {
+       | if ( <booL_expr> ) {
              <stmt>
              ...
-         } else if ( <bool> ) {
+         } else if ( <booL_expr> ) {
             <stmt>
             ...
          } ... else {
@@ -378,21 +441,27 @@ for (i = 0; i < 10; i++) {
 ```
 ### Examples
 ```
-
+if (true) {
+    echo "true";
+} else {
+    echo "false";
+}
 ```
 
 ## Ternary Operator
+Similar to an ```if``` statement, but is evaluated as an expression. If ```<bool_expr>``` is true, then the first expression is evaluated and returned, otherwise the second expression is evaluated and returned.
 ### Grammar
 ```
-<expr> : <bool> ? <expr> : <expr>
+<expr> : <booL_expr> ? <expr> : <expr>
 ```
 ### Examples
 ```
-x = 1
-print(x == 1 ? "One" : "Not One")
+x = 1;
+print(x == 1 ? "One" : "Not One");
 ```
 
 ## Functions
+Functions contain statements that can be called anywhere after it is defined. You call a function by name followed by parentheses containing any parameter values that wish to be passed into it. Functions can have any number of parameters, and an optional return type. Exit from a function with the ```return;``` statement if the return type is ```void```, otherwise an expression must follow (i.e. the grammar ```return <expr>;```). Note that the grammar implies you may define functions inside of functions. Additionally, functions may be recursive, meaning you can call the same function from within itself (see examples below).
 ### Grammar
 ```
 <stmt> : <variable> ( <binding> , ... ) : <type> {
@@ -403,9 +472,9 @@ print(x == 1 ? "One" : "Not One")
              <stmt>
              ...
          }
-```
-Note that the grammar implies you may define functions inside of functions. Additionally, functions may be recursive (see examples below).
 
+<stmt | expr> : <variable> ( <expr>, ... )
+```
 ### Examples
 ```
 hello() {
@@ -429,95 +498,106 @@ factorial(n: int): int {
 }
 ```
 
-<!-- TODO -->
 ## Math Operations
+Math operations are used for doing basic math, namely addition (e.g. ```+```, ```++```, ```+=```), subtraction (e.g. ```-```, ```--```, or ```-=```), multiplication (e.g. ```*``` or ```*=```), division (e.g. ```/``` or ```/=```), modulo (e.g. ```%``` or ```%=```), and powers (e.g. ```**``` or ```**=```). Usually, expressions involving only ints will evaulate to an int, and expressions involving ints and floats or only floats will evaluate to a float. Additionally, it is important to note that modulo is defined for floats.
+
+There are also comparison operations for numbers (i.e. ints and floats) that will compare whether numbers are equal, greater than, or less than each other.
 ### Grammar (Unary)
 ```
-<int>   : -<int>
-        | --<int>
-        | <int>--
-        | ++<int>
-        | <int>++
+<int_expr>   : -<int_expr>
+             | --<int_expr>
+             | <int_expr>--
+             | ++<int_expr>
+             | <int_expr>++
 
-<float> : -<float>
-        | --<float>
-        | <float>--
-        | ++<float>
-        | <float>++
+<float_expr> : -<float_expr>
+             | --<float_expr>
+             | <float_expr>--
+             | ++<float_expr>
+             | <float_expr>++
 ```
 ### Grammar (Binary)
 ```
-<int>   : <int> + <int>
-        | <int> - <int>
-        | <int> * <int>
-        | <int> / <int>
-        | <int> % <int>
-        | <int> ** <int>
+<int_expr>   : <int_expr> + <int_expr>
+             | <int_expr> - <int_expr>
+             | <int_expr> * <int_expr>
+             | <int_expr> / <int_expr>
+             | <int_expr> % <int_expr>
+             | <int_expr> ** <int_expr>
 
-<float> : <float> + <float>
-        | <int> + <float>
-        | <float> + <int>
+<float_expr> : <float_expr> + <float_expr>
+             | <int_expr> + <float_expr>
+             | <float_expr> + <int_expr>
 
-        | <float> - <float>
-        | <int> - <float>
-        | <float> - <int>
+             | <float_expr> - <float_expr>
+             | <int_expr> - <float_expr>
+             | <float_expr> - <int_expr>
 
-        | <float> * <float>
-        | <int> * <float>
-        | <float> * <int>
+             | <float_expr> * <float_expr>
+             | <int_expr> * <float_expr>
+             | <float_expr> * <int_expr>
 
-        | <float> / <float>
-        | <int> / <float>
-        | <float> / <int>
+             | <float_expr> / <float_expr>
+             | <int_expr> / <float_expr>
+             | <float_expr> / <int_expr>
 
-        | <float> % <float>
-        | <int> % <float>
-        | <float> % <int>
+             | <float_expr> % <float_expr>
+             | <int_expr> % <float_expr>
+             | <float_expr> % <int_expr>
 
-        | <float> ** <float>
-        | <int> ** <float>
-        | <float> ** <int>
+             | <float_expr> ** <float_expr>
+             | <int_expr> ** <float_expr>
+             | <float_expr> ** <int_expr>
 
-<stmt> : <variable> += <int | float>
-       | <variable> -= <int | float>
-       | <variable> *= <int | float>
-       | <variable> /= <int | float>
-       | <variable> %= <int | float>
-       | <variable> **= <int | float>
+<stmt> : <variable> += <int_expr | float_expr>
+       | <variable> -= <int_expr | float_expr>
+       | <variable> *= <int_expr | float_expr>
+       | <variable> /= <int_expr | float_expr>
+       | <variable> %= <int_expr | float_expr>
+       | <variable> **= <int_expr | float_expr>
 ```
 ### Grammar (Comparison)
 ```
-<bool> : <int | float> < <int | float>
-       | <int | float> <= <int | float>
-       | <int | float> > <int | float>
-       | <int | float> >= <int | float>
-       | <int | float> != <int | float>
-       | <int | float> == <int | float>
+<bool_expr> : <int_expr | float_expr> < <int_expr | float_expr>
+            | <int_expr | float_expr> <= <int_expr | float_expr>
+            | <int_expr | float_expr> > <int_expr | float_expr>
+            | <int_expr | float_expr> >= <int_expr | float_expr>
+            | <int_expr | float_expr> != <int_expr | float_expr>
+            | <int_expr | float_expr> == <int_expr | float_expr>
 ```
 ### Examples
 ```
+x = 2
 
+y += x
+
+z = (x <= y) ? 3 ** 2 : 2 % 4;
 ```
 
-<!-- TODO -->
 ## Boolean Operations
+Operations for boolean logic comparison: ```!``` for not, ```||``` for or, and ```&&``` for and. Additionally, ```==``` and ```!=``` can be used.
 ### Grammar
 ```
-<bool> : !<bool>
-       : <bool> || <bool>
-       : <bool> && <bool>
-       : <bool> == <bool>
-       : <bool> != <bool>
+<bool_expr> : !<bool_expr>
+            | <bool_expr> || <bool_expr>
+            | <bool_expr> && <bool_expr>
+            | <bool_expr> == <bool_expr>
+            | <bool_expr> != <bool_expr>
+            | true
+            | false
 ```
 ### Examples
 ```
-
+if (true || false) {
+    x = true != false;
+}
 ```
 
 ## String Concatenation
+Strings may be combined into new strings this way.
 ### Grammar
 ```
-<string> : <string> + ... + <string>
+<string_expr> : <string_expr> + ... + <string_expr>
 ```
 ### Examples
 ```
@@ -525,9 +605,13 @@ hello = "Hello " + "world!\n"
 ```
 
 ## String Interpolation
+Way to evaulate expressions and insert them, or variables into strings. In double quotation strings, you can interpolate the value of a variable with the variable name preceded by ```$```. A string preceded by a ```$``` before the quotations will allow for expressions to be interpolated within curly braces. Additionally, in double quotation strings, you may interpolate as well, you just need to include a ```$``` before the curly braces in the string.
 ### Grammar
 ```
 <string> : $"...{ <expr> }..."
+         | "...${ <expr> }..."
+         | $'...{ <expr> }'
+         | "...$<variable>..."
 ```
 ### Examples
 ```
@@ -536,44 +620,50 @@ y = 6
 sum = $"The sum of {x} and {y} is {x + y}"
 ```
 
-<!-- TODO -->
 ## Lambda Expressions
+Similar to functions, but evaulate to an expression, allowing them to be stored in variables or passed as parameters on the fly.
 ### Grammar
 ```
-<function> : (<binding>, ...) : <type> -> <expr>
-           | (<binding>, ...) -> <expr>
-           | (<binding>, ...) : <type> -> {
-                 <stmt>
-                 ...
-             }
-           | (<binding>, ...) -> {
-                 <stmt>
-                 ...
-             }
+<function_expr> : (<binding>, ...) : <type> -> <expr>
+                | (<binding>, ...) -> <expr>
+                | (<binding>, ...) : <type> -> {
+                        <stmt>
+                        ...
+                    }
+                | (<binding>, ...) -> {
+                        <stmt>
+                        ...
+                    }
 ```
 ### Examples
 ```
+add = (a, b) -> a+b;
 
+subtract = () -> {
+    return 3 - 1;
+}
 ```
 
-<!-- TODO -->
 ## User I/O
+You may either read user input using ```scan```, which takes in a string to prompt the user with. Additionally, you may output strings to the console using ```echo``` or ```print``` along with the string being printed.
 ### Grammar
 ```
-<string> : scan <string>
-         | scan( <string> )
+<string_expr> : scan <string_expr>
+              | scan( <string_expr> )
 
-<stmt>   : echo <string>
-         | print( <string> )
-         | println( <string> )
+<stmt>   : echo <string_expr>
+         | print( <string_expr> )
+         | println( <string_expr> )
 ```
 ### Examples
 ```
+name = read "Tell me your name: ";
 
+echo $"Your name is {name}";
 ```
 
-<!-- TODO -->
 ## File I/O
+You may read in a file as a string using ```read``` followed by the path to the file, or write a string to a file using ```write``` followed by the path to write to first and then followed by the content being written to the file. 
 ### Grammar
 ```
 <string> : read <string>
@@ -583,10 +673,13 @@ sum = $"The sum of {x} and {y} is {x + y}"
 ```
 ### Examples
 ```
+userinfo = read "documents/userinfo.txt";
 
+write "documents/name.txt" "My name is Bob";
 ```
 
 ## User Defined Scopes
+You may defined a custom scope in your commander script. Any variables or functions initialize within the scope will no longer exist once the scope is left.
 ### Grammar
 ```
 <stmt> : {
@@ -622,7 +715,7 @@ comment
 Use the ```import``` keyword followed by the path to the commander script file with code you would like to use, as defined below.
 ### Grammar
 ```
-<stmt> : import <string>
+<stmt> : import <string_expr>
 ```
 ### Examples
 ```
@@ -631,9 +724,18 @@ import "add.cmdr"
 print(add(3, 4))
 ```
 
-<!-- TODO: Precedence, parentheses, statements as expressions, etc. -->
-## Expressions
+## Custom Types
+Use the ```type``` keyword followed by a type to defined a custom type.
+### Grammar
+```
+<stmt> : type <type>
+```
+### Examples
+```
+type AddFunction (a: int, b: int) -> int;
 
+add: AddFunction = (a, b) -> a + b;
+```
 
 <!-- TODO: Separate into groups based on function (e.g. one group for file I/O, one for user I/O, one for math, etc.). Add others as needed -->
 ## API Functions
@@ -677,11 +779,7 @@ print(add(3, 4))
     41. arccsch(<int> | <float>) : <float>
     42. arcsech(<int> | <float>) : <float>
     43. arccoth(<int> | <float>) : <float>
-### Examples
-```
-
-```
-
 
 <!-- TODO -->
 ## Errors
+- Divide by zero is an error that will be thrown at runtime if an attempt is made to divide by zero.
