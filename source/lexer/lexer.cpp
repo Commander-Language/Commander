@@ -138,6 +138,7 @@ namespace lexer {
         while (position.index < file.length()) {
             const TokenPtr token = lexToken(file, position, isCommand, isFirst);
             if (token->type == SEMICOLON) {
+                if (isBacktickCommand && isCommand) { break; }
                 isCommand = false;
                 isFirst = true;
             }
@@ -456,6 +457,14 @@ namespace lexer {
                     currentString << '\\';
                     continue;
                 }
+                if (secondCharacter == '\n' || secondCharacter == '\r') {
+                    if (secondCharacter == '\r' && position.index < file.length() && file[position.index] == '\n') {
+                        position.index++;
+                    }
+                    position.column = 1;
+                    position.line++;
+                    continue;
+                }
                 if (isSingle) {
                     if (secondCharacter == '\'') {
                         currentString << '\'';
@@ -481,14 +490,6 @@ namespace lexer {
                         break;
                     case '$':
                         currentString << '$';
-                        break;
-                    case '\n':
-                    case '\r':  // If a backslash appears before newline, don't include newline in resulting string
-                        if (secondCharacter == '\r' && position.index < file.length() && file[position.index] == '\n') {
-                            position.index++;
-                        }
-                        position.column = 1;
-                        position.line++;
                         break;
                     default:
                         throw util::CommanderException(
@@ -590,6 +591,7 @@ namespace lexer {
         const FilePosition startPosition = position;
         while (position.index < file.length()) {
             const char character = file[position.index];
+            if (isIllegalCharacter(character)) { return {}; }
             if (isWhitespace(character)
                 || (commandTokenLiterals.find(std::string(1, character)) != commandTokenLiterals.end())) {
                 break;

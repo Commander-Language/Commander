@@ -12,13 +12,18 @@
 #include <gtest/gtest.h>
 
 /**
- * @brief Represents the format for lexer tests. Tests take in a file path to file to lex, and another file path to file
- * with expected token output.
+ * @brief Represents the format for lexer tests that successfully lex. Tests take in a file path to file to lex, and
+ * another file path to file with expected token output.
  */
-struct LexerTests : ::testing::TestWithParam<std::tuple<std::string, std::string>> {};
+struct LexerLexTests : ::testing::TestWithParam<std::tuple<std::string, std::string>> {};
+
+/**
+ * @brief Represents the format for lexer tests that should fail (i.e. throw an exception). Tests take in a file to lex.
+ */
+struct LexerFailTests : ::testing::TestWithParam<std::string> {};
 
 INSTANTIATE_TEST_SUITE_P(
-        LexerTestFiles, LexerTests,
+        LexerTestFiles, LexerLexTests,
         ::testing::Values(
                 std::make_tuple("000.cmdr", "000.cmdr.expected"), std::make_tuple("001.cmdr", "001.cmdr.expected"),
                 std::make_tuple("002.cmdr", "002.cmdr.expected"), std::make_tuple("003.cmdr", "003.cmdr.expected"),
@@ -51,7 +56,24 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("056.cmdr", "056.cmdr.expected"), std::make_tuple("057.cmdr", "057.cmdr.expected"),
                 std::make_tuple("058.cmdr", "058.cmdr.expected"), std::make_tuple("059.cmdr", "059.cmdr.expected"),
                 std::make_tuple("060.cmdr", "060.cmdr.expected"), std::make_tuple("061.cmdr", "061.cmdr.expected"),
-                std::make_tuple("062.cmdr", "062.cmdr.expected")));
+                std::make_tuple("062.cmdr", "062.cmdr.expected"), std::make_tuple("063.cmdr", "063.cmdr.expected"),
+                std::make_tuple("064.cmdr", "064.cmdr.expected"), std::make_tuple("065.cmdr", "065.cmdr.expected"),
+                std::make_tuple("066.cmdr", "066.cmdr.expected"), std::make_tuple("067.cmdr", "067.cmdr.expected")));
+
+INSTANTIATE_TEST_SUITE_P(LexerTestFiles, LexerFailTests,
+                         ::testing::Values("000.cmdr", "001.cmdr", "002.cmdr", "003.cmdr", "004.cmdr", "005.cmdr",
+                                           "006.cmdr", "007.cmdr", "008.cmdr", "009.cmdr", "010.cmdr", "011.cmdr",
+                                           "012.cmdr", "013.cmdr", "014.cmdr", "015.cmdr", "016.cmdr", "017.cmdr",
+                                           "018.cmdr", "019.cmdr", "020.cmdr", "021.cmdr", "022.cmdr", "023.cmdr",
+                                           "024.cmdr", "025.cmdr", "026.cmdr", "027.cmdr", "028.cmdr", "029.cmdr",
+                                           "030.cmdr", "031.cmdr", "032.cmdr", "033.cmdr", "034.cmdr", "035.cmdr",
+                                           "036.cmdr", "037.cmdr", "038.cmdr", "039.cmdr", "040.cmdr", "041.cmdr",
+                                           "042.cmdr", "043.cmdr", "044.cmdr", "045.cmdr", "046.cmdr", "047.cmdr",
+                                           "048.cmdr", "049.cmdr", "050.cmdr", "051.cmdr", "052.cmdr", "053.cmdr",
+                                           "054.cmdr", "055.cmdr", "056.cmdr", "057.cmdr", "058.cmdr", "059.cmdr",
+                                           "060.cmdr", "061.cmdr", "062.cmdr", "063.cmdr", "064.cmdr", "065.cmdr",
+                                           "066.cmdr", "067.cmdr", "068.cmdr", "069.cmdr", "070.cmdr", "071.cmdr",
+                                           "072.cmdr", "073.cmdr", "074.cmdr"));
 
 /**
  * @brief Takes in the list of tokens, and ensures they match what is contained in the expected output string

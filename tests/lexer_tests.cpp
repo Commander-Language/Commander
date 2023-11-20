@@ -18,13 +18,13 @@ void expectOutputEqualsTokens(const lexer::TokenList& tokens, const std::string&
 }
 
 /**
- * Runs the lexer tests from the tests/files/lexer_tests directory
+ * Runs the lexer tests from the tests/files/lexer_tests/should_lex directory
  */
-TEST_P(LexerTests, ShouldLexFileAndMatchExpectedExamples) {
+TEST_P(LexerLexTests, ShouldLexFileAndMatchExpectedExamples) {
     auto params = GetParam();
 
-    const std::string filePath = "tests/files/lexer_tests/" + std::get<0>(params);
-    const std::string expectedFilePath = "tests/files/lexer_tests/" + std::get<1>(params);
+    const std::string filePath = "tests/files/lexer_tests/should_lex/" + std::get<0>(params);
+    const std::string expectedFilePath = "tests/files/lexer_tests/should_lex/" + std::get<1>(params);
 
     try {
         lexer::TokenList tokens;
@@ -36,6 +36,24 @@ TEST_P(LexerTests, ShouldLexFileAndMatchExpectedExamples) {
         std::cout << "Lexer Error: " << e.what() << "\n";
         FAIL();
     }
+}
+
+/**
+ * Runs the lexer tests from the tests/files/lexer_tests/should_fail directory
+ */
+TEST_P(LexerFailTests, ShouldNotLexFile) {
+    auto param = GetParam();
+    const std::string filePath = "tests/files/lexer_tests/should_fail/" + param;
+    lexer::TokenList tokens;
+    ASSERT_THROW(lexer::tokenize(tokens, filePath), util::CommanderException);
+}
+
+/**
+ * Tests that passing in a non-existent file path results in an exception being thrown
+ */
+TEST(LexerFailTests, ShouldFailIfFileNotFound) {
+    lexer::TokenList tokens;
+    ASSERT_THROW(lexer::tokenize(tokens, "non-existent-file-name.txt"), util::CommanderException);
 }
 
 /**
