@@ -137,7 +137,7 @@ namespace lexer {
         skipWhitespace(file, position);
         while (position.index < file.length()) {
             const TokenPtr token = lexToken(file, position, isCommand, isFirst);
-            if (token->type == SEMICOLON) {
+            if (token->type == SEMICOLON || token->type == LCURLY) {
                 if (isBacktickCommand && isCommand) { break; }
                 isCommand = false;
                 isFirst = true;
@@ -212,7 +212,7 @@ namespace lexer {
             if (token->type == FOR && isFirst && !isCommand) {}
             skipWhitespace(file, position);
             if (token->type == ALIAS && isFirst) { commandPosition = position; }
-            if (isFirst && token->type != SEMICOLON) { isFirst = false; }
+            if (isFirst && token->type != SEMICOLON && token->type != LCURLY) { isFirst = false; }
         }
         if (isCommand && isBacktickCommand) {
             throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
@@ -232,11 +232,14 @@ namespace lexer {
         FilePosition blockCommentPosition;
         while (position.index < file.length()) {
             const char character = file[position.index];
-            if (character == '\n') {
+            if (character == '\n' || character == '\r') {
                 if (isLineComment) { isLineComment = false; }
                 position.line++;
                 position.column = 1;
                 position.index++;
+                if (position.index < file.length() && character == '\r' && file[position.index] == '\n') {
+                    position.index++;
+                }
                 continue;
             }
             // Ignore all characters in a comment (except '*' in block comments) as well as spaces and \'s
@@ -423,6 +426,10 @@ namespace lexer {
         // The token is definitely a string, so determine the length/contents
         while (position.index < file.length()) {
             const char character = file[position.index++];
+            //Ignore tab characters in strings
+            if (character == '\t') {
+                continue;
+            }
             position.column++;
             // Ensure the string contains no illegal characters
             if (isIllegalCharacter(character)) {

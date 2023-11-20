@@ -1,4 +1,4 @@
-// Comment
+// Test that comments lex properly
 /*
 *  Multi-Line
 *  Comment

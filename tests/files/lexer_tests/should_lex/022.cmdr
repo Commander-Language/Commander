@@ -1,3 +1,4 @@
+// Test that if, else if, and else statements lex properly
 if(true){
 } else if(true){
 } else {

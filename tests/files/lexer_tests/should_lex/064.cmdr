@@ -1,2 +1,3 @@
+// Test that commands containing file paths lex correctly
 a = 3;
 cd ./hello/dir;

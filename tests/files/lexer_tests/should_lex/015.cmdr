@@ -1,1 +1,2 @@
+// Test that back tick command expressions lex properly.
 `echo "Hi" &`;

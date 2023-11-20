@@ -1,1 +1,2 @@
+// Test that const variables lex properly
 const _abc123_ = "_abc123_";
