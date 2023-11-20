@@ -50,11 +50,23 @@ std::string TypeChecker::getType(std::string variableID) {
  * @return - TRUE if a compatible type exists, otherwise FALSE is returned
  */
 bool TypeChecker::verifyType(std::string variableID, std::string expected) {
-    if(assignedTypes.find(variableID) == assignedTypes.end()) {
+    if(!hasVariable(variableID)) {
         return false; //return false if the variable doesnt exist
     }
     else if(assignedTypes[variableID] == expected) {
         return true;
     }
     return true; //TODO: determine how similar types should be handled
+}
+
+/**
+ * hasVariable() returns a boolean value according to whether the specified variable is present in the TypeChecker
+ * @param variableID - The desired variable to locate
+ * @return TRUE if the variable exists, otherwise FALSE is returned
+ */
+bool TypeChecker::hasVariable(std::string variableID) {
+    if(assignedTypes.find(variableID) == assignedTypes.end()) {
+        return false;
+    }
+    return true;
 }

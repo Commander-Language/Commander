@@ -18,6 +18,7 @@ public:
     std::string getType(std::string variableID); //Returns the type of a variable
     void setOrUpdateType(std::string variableID, std::string type); //Sets or updates the type of a variable
     bool verifyType(std::string variableID, std::string expected); //returns TRUE if the expected is equal to the actual type or can be used as the expected type
+    bool hasVariable(std::string variableID); //returns a boolean according to whether a specified variable exists
 
 private:
     std::map<std::string, std::string> assignedTypes{}; //A dictionary which stores a string id and returns a string type
