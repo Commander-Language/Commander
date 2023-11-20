@@ -1,1 +1,1 @@
-a = 'Hi \there \bob';
+// Test that line endings for multi-line strings work for CR line endingsa = 'Hi \there \bob';

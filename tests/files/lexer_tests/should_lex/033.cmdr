@@ -1,1 +1,2 @@
+// Test that * operation lexes properly
 val = x * y;

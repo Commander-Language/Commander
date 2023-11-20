@@ -1,1 +1,2 @@
+// Test that comments inside of comments lex properly
 ////

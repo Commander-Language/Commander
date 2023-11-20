@@ -1,1 +1,2 @@
+// Test that tuples lex properly
 isTuple = ();

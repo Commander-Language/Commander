@@ -1,0 +1,44 @@
+VARIABLE 'message'
+LPAREN '('
+VARIABLE 'msg'
+COLON ':'
+STRING 'string'
+RPAREN ')'
+COLON ':'
+STRING 'string'
+LCURLY '{'
+CMDSTRINGVAL 'echo'
+CMDSTRINGVAL 'Hello'
+CMDSTRINGVAL 'World!'
+SEMICOLON ';'
+VARIABLE 'a'
+COLON ':'
+INT 'int'
+EQUALS '='
+INTVAL '1'
+OP '-'
+INTVAL '2'
+SEMICOLON ';'
+RETURN 'return'
+STRINGVAL
+[
+STRINGLITERAL 'This is my multiline string.
+This is my message: '
+VARIABLE 'msg'
+STRINGLITERAL '
+That is all!'
+]
+SEMICOLON ';'
+RCURLY '}'
+SEMICOLON ';'
+VARIABLE 'a'
+EQUALS '='
+VARIABLE 'message'
+LPAREN '('
+STRINGVAL
+[
+STRINGLITERAL 'Hello World!'
+]
+RPAREN ')'
+SEMICOLON ';'
+END_OF_FILE

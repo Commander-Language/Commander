@@ -1,2 +1,3 @@
+// Test that lambda expressions lex without types
 nada = (x,y) -> {
 }

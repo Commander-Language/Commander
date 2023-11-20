@@ -1,1 +1,2 @@
+// Test that double quotation strinsg lex properly with escape characters
 isString = "Hello, world!\t\r\n'\"\\";

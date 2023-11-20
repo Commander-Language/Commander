@@ -1,1 +1,2 @@
+// Test that arrays lex properly
 isArray = [];

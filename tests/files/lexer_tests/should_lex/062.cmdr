@@ -1,1 +1,2 @@
+//Test that 'x+y' is interpreted as a command, not as x + y
 x+y;
