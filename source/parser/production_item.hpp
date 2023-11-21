@@ -12,7 +12,7 @@
 
 #include "source/lexer/lexer.hpp"
 
-#include <optional>
+#include <vector>
 
 namespace Parser {
 
@@ -26,14 +26,20 @@ namespace Parser {
          * @brief The token, if this is a token.
          *
          */
-        std::optional<lexer::Token> token;
+        lexer::TokenPtr token;
 
         /**
          * @brief The AST node, if this is an AST node.
          *
          */
-        std::optional<ASTNodePtr> node;
+        ASTNodePtr node;
     };
+
+    /**
+     * @brief A list of `ProductionItem`s.
+     *
+     */
+    using ProductionItemList = std::vector<ProductionItem>;
 
 }  //  namespace Parser
 
