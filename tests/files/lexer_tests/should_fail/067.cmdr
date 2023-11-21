@@ -1,1 +1,2 @@
+// Syntax error using unterminated backtick and no command
 result = `;

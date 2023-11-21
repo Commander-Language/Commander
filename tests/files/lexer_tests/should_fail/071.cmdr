@@ -1,1 +1,2 @@
+// Missing right curly bracket for string interpolation
 a = "Unterminated format string ${3 + 5 right here";
