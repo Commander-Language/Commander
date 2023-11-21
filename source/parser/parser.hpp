@@ -37,6 +37,17 @@ namespace Parser {
      *     Supported production rules:
      *
      *     To-be-done production rules:
+     *         Statements:
+     *           * <IfStmt>         :  [IF] [LPAREN] <Expr> [RPAREN] <Stmt> ([ELSE] <Stmt>)?
+     *           * <ForStmt>        :  [FOR] [LPAREN] <Stmt> [SEMICOLON] <Expr> [SEMICOLON] <Stmt> [RPAREN] <Stmt>
+     *           * <WhileStmt>      :  [WHILE] [LPAREN] <Expr> [RPAREN] <Stmt>
+     *           * <DoWhileStmt>    :  [DO] <Stmt> [WHILE] [LPAREN] <Expr> [RPAREN]
+     *
+     *           * <ScopeStmt>      :  [LCURLY] (<Stmt>)* [RCURLY]
+     *
+     *           * <CmdStmt>        :  <Cmd>
+     *           * <AliasStmt>      :  [ALIAS] [VARIABLE] [EQUALS] <Cmd>
+     *
      *         Expressions:
      *           * <IntExpr>        :  [INTVAL]
      *           * <FloatExpr>      :  [FLOATVAL]
@@ -60,17 +71,6 @@ namespace Parser {
      *           * <ScanExpr>       :  [SCAN] [STRINGVAL]
      *           * <EchoExpr>       :  [ECHO] <STRINGVAL>
      *           * <CmdExpr>        :  [BACKTICK] <Cmd> [BACKTICK]
-     *
-     *         Statements:
-     *           * <IfStmt>         :  [IF] [LPAREN] <Expr> [RPAREN] <Stmt> ([ELSE] <Stmt>)?
-     *           * <ForStmt>        :  [FOR] [LPAREN] <Stmt> [SEMICOLON] <Expr> [SEMICOLON] <Stmt> [RPAREN] <Stmt>
-     *           * <WhileStmt>      :  [WHILE] [LPAREN] <Expr> [RPAREN] <Stmt>
-     *           * <DoWhileStmt>    :  [DO] <Stmt> [WHILE] [LPAREN] <Expr> [RPAREN]
-     *
-     *           * <ScopeStmt>      :  [LCURLY] (<Stmt>)* [RCURLY]
-     *
-     *           * <CmdStmt>        :  <Cmd>
-     *           * <AliasStmt>      :  [ALIAS] [VARIABLE] [EQUALS] <Cmd>
      *
      *         Commands:
      *           * <Cmd>            :  ([CMDSTRINGVAL] | [STRINGVAL] | [VARIABLE])+
