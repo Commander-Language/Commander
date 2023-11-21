@@ -1,1 +1,2 @@
+// Lexer should throw an error when encountering an unknown escape (single quote)
 a = 'This is an unknown escape: \y ';

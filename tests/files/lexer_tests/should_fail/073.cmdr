@@ -1,1 +1,2 @@
+// Lexer should fail with an unterminated string (using double quotation)
 a = "Unterminated string;
