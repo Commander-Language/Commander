@@ -33,7 +33,7 @@ namespace Parser {
          * @details Constructs the AST node from a list of production items.
          *
          */
-        using NodeConstructor = std::function<ASTNodePtr(const std::vector<ProductionItem>&)>;
+        using NodeConstructor = std::function<ASTNodePtr(const ProductionItemList&)>;
 
         /**
          * @brief Whether the parser should perform a shift or a reduce action.
