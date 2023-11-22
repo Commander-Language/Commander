@@ -27,11 +27,11 @@ SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer &otherTableOrgan
 void SymbolTableOrganizer::pushSymbolTable() {
     if(symbolTables.size() < 1) {
         Scope headScope = Scope();
-        symbolTables.push_back(headScope);
+        symbolTables.push_back(&headScope);
     }
     else {
-        Scope nextScope = Scope(symbolTables.back().getParentScopePointer());
-        symbolTables.push_back(nextScope);
+        Scope nextScope = Scope(symbolTables.back()->getParentScopePointer());
+        symbolTables.push_back(&nextScope);
     }
 }
 
@@ -48,7 +48,7 @@ void SymbolTableOrganizer::popSymbolTable() {
  * @return - TRUE if the variable exists in the top of the stack, otherwise FALSE is returned
  */
 bool SymbolTableOrganizer::varExistsInCurrentSymbolTable(std::string variableID) {
-    if(symbolTables.back().hasVariable(variableID)) {
+    if(symbolTables.back()->hasVariable(variableID)) {
         return true;
     }
     return false;
@@ -61,7 +61,7 @@ bool SymbolTableOrganizer::varExistsInCurrentSymbolTable(std::string variableID)
  * @return - TRUE if the variable exists anywhere in the vector, otherwise FALSE is returned
  */
 bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
-    if(symbolTables[symbolTables.size() - 1].getVariable(variableID) == nullptr) {
+    if(symbolTables[symbolTables.size() - 1]->getVariable(variableID) == nullptr) {
         return false;
     }
     return true;
@@ -73,7 +73,7 @@ bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
  */
 bool SymbolTableOrganizer::isScopeGlobal() {
     //TODO: try-catch
-    return symbolTables[symbolTables.size() - 1].isGlobal();
+    return symbolTables[symbolTables.size() - 1]->isGlobal();
 }
 
 /**
@@ -83,7 +83,7 @@ bool SymbolTableOrganizer::isScopeGlobal() {
  * @param data - An object which the variable should be associated with
  */
 void SymbolTableOrganizer::addVariable(std::string variableID, int data) {
-    symbolTables[symbolTables.size() - 1].addOrUpdateVariable(variableID, data);
+    symbolTables[symbolTables.size() - 1]->addOrUpdateVariable(variableID, data);
 }
 
 /**
@@ -95,8 +95,8 @@ void SymbolTableOrganizer::addVariable(std::string variableID, int data) {
  */
 void SymbolTableOrganizer::updateVariable(std::string variableID, int data) {
     for(int currentScope = 0; currentScope < symbolTables.size(); currentScope++) {
-        if(symbolTables[currentScope].hasVariable(variableID)) {
-            symbolTables[currentScope].addOrUpdateVariable(variableID, data);
+        if(symbolTables[currentScope]->hasVariable(variableID)) {
+            symbolTables[currentScope]->addOrUpdateVariable(variableID, data);
             return; //Quit early if we've updated our requested variable
         }
     }

@@ -7,11 +7,11 @@
 
 //Default Constructor
 Scope::Scope() {
-    parentScope = nullptr;
+    //parentScope = nullptr;
 }
 
 //Constructor for specifying a parent
-Scope::Scope(Scope *parent) {
+Scope::Scope(Scope* parent) {
     parentScope = parent;
 }
 

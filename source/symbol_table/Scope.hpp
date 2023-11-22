@@ -12,7 +12,7 @@
 class Scope {
 public:
     Scope(); //Constructor - will set parent to NULLPTR
-    Scope(Scope *parent); //Constructor
+    Scope(Scope* parent); //Constructor
     ~Scope(); //Destructor
     Scope(Scope &otherScope); //Copy Constructor
     void addOrUpdateVariable(std::string variableID, int data); //Set or update the current variable
@@ -23,7 +23,7 @@ public:
 
 private:
     std::map<std::string, int> variableData{}; //uses a Key variableName to find it's associated object
-    Scope* parentScope{}; //Pointer to the parent scope object (i.e. this scope exists within another scope)
+    Scope* parentScope = nullptr; //Pointer to the parent scope object (i.e. this scope exists within another scope)
 
     bool hasKey(std::string key); //Helper method to find if variableData has a given key (map.contains available in C++20+)
 };
