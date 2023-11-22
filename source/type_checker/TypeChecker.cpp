@@ -56,7 +56,7 @@ bool TypeChecker::verifyType(std::string variableID, std::string expected) {
     else if(assignedTypes[variableID] == expected) {
         return true;
     }
-    return true; //TODO: determine how similar types should be handled
+    return isVariantOfExpected(assignedTypes[variableID], expected);
 }
 
 /**
@@ -69,4 +69,15 @@ bool TypeChecker::hasVariable(std::string variableID) {
         return false;
     }
     return true;
+}
+
+bool TypeChecker::isVariantOfExpected(std::string variableType, std::string expectedType) {
+    //TODO: refactor and accound for additional types (i.e. STRING and CHAR, etc.)
+    bool variableStatus = (variableType == "INTEGER" || variableType == "FLOAT" || variableType == "DOUBLE");
+    bool expectedStatus = (expectedType == "INTEGER" || expectedType == "FLOAT" || expectedType == "DOUBLE");
+
+    if(variableStatus == expectedStatus) {
+        return true;
+    }
+    return false;
 }

@@ -123,6 +123,6 @@ include(GoogleTest)
 #      This is useful when you're trying to test something for which you've already made a `add_library` configuration.
 #      (Can be empty if all source files are specified in the the line above.)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
-add_executable(TypeCheckerTests tests/TypeCheckerTests.cpp)
+add_executable(TypeCheckerTests tests/TypeCheckerTests.cpp source/type_checker/TypeChecker.cpp)
 target_link_libraries(TypeCheckerTests GTest::gtest_main)
 gtest_discover_tests(TypeCheckerTests)

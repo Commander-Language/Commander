@@ -23,6 +23,7 @@ public:
 private:
     std::map<std::string, std::string> assignedTypes{}; //A dictionary which stores a string id and returns a string type
 
+    bool isVariantOfExpected(std::string variableType, std::string expectedType); //A helper method which will compare compatible types.
 };
 
 

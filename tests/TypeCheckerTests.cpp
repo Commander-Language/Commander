@@ -3,8 +3,6 @@
  */
 
 #include "TypeCheckerTests.hpp"
-#include <string>
-#include "gtest/gtest.h"
 
 TEST(BASICTESTS, stringTypeTests) {
     TypeChecker testChecker = TypeChecker();
