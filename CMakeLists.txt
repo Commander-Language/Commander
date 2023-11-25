@@ -128,3 +128,7 @@ find_package(GTest REQUIRED)
 add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
 
 target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
+
+add_executable(jobRunnerTests source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
+target_link_libraries(jobRunnerTests GTest::gtest_main)
+gtest_discover_tests(jobRunnerTests)
