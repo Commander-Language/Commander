@@ -1,2 +1,2 @@
 // Illegal character in string (ascii 28)
-var = ''
+var = '';

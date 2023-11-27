@@ -77,7 +77,7 @@ INSTANTIATE_TEST_SUITE_P(LexerTestFiles, LexerFailTests,
                                            "054.cmdr", "055.cmdr", "056.cmdr", "057.cmdr", "058.cmdr", "059.cmdr",
                                            "060.cmdr", "061.cmdr", "062.cmdr", "063.cmdr", "064.cmdr", "065.cmdr",
                                            "066.cmdr", "067.cmdr", "068.cmdr", "069.cmdr", "070.cmdr", "071.cmdr",
-                                           "072.cmdr", "073.cmdr", "074.cmdr"));
+                                           "072.cmdr", "073.cmdr", "074.cmdr", "075.cmdr"));
 
 /**
  * @brief Takes in the list of tokens, and ensures they match what is contained in the expected output string

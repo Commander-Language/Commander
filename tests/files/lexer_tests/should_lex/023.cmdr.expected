@@ -1,6 +1,9 @@
+VARIABLE 'num'
+EQUALS '='
 TRUE 'true'
 QUESTION '?'
 INTVAL '1'
 COLON ':'
 INTVAL '2'
+SEMICOLON ';'
 END_OF_FILE

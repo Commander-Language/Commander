@@ -1,3 +1,4 @@
 OP '!'
 TRUE 'true'
+SEMICOLON ';'
 END_OF_FILE

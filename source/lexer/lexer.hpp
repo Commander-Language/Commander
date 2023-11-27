@@ -137,17 +137,17 @@ namespace lexer {
      * Map of string token literals that are not keywords (using vector data structure since iteration order matters)
      */
     const std::vector<std::pair<std::string, tokenType>> tokenLiterals(
-            {{"**=", OP},   {"->", LAMBDA}, {"==", OP},      {"!=", OP},    {"<=", OP},    {">=", OP},    {"&&", OP},
-             {"||", OP},    {"**", OP},     {"%=", OP},      {"/=", OP},    {"*=", OP},    {"-=", OP},    {"+=", OP},
-             {"++", OP},    {"--", OP},     {"+", OP},       {"-", OP},     {"*", OP},     {"/", OP},     {"%", OP},
-             {">", OP},     {"<", OP},      {"!", OP},       {":", COLON},  {",", COMMA},  {"=", EQUALS}, {"{", LCURLY},
-             {"(", LPAREN}, {"[", LSQUARE}, {"?", QUESTION}, {"}", RCURLY}, {")", RPAREN}, {"]", RSQUARE}});
+            {{"**=", OP},    {"->", LAMBDA},  {"==", OP},    {"!=", OP},    {"<=", OP},   {">=", OP},    {"&&", OP},
+             {"||", OP},     {"**", OP},      {"%=", OP},    {"/=", OP},    {"*=", OP},   {"-=", OP},    {"+=", OP},
+             {"++", OP},     {"--", OP},      {"+", OP},     {"-", OP},     {"*", OP},    {"/", OP},     {"%", OP},
+             {">", OP},      {"<", OP},       {"!", OP},     {":", COLON},  {",", COMMA}, {"=", EQUALS}, {"{", LCURLY},
+             {"[", LSQUARE}, {"?", QUESTION}, {"}", RCURLY}, {"]", RSQUARE}});
 
     /**
      * Map of string token literals specifically for commands
      */
-    const std::unordered_map<std::string, tokenType>
-            commandTokenLiterals({{"`", BACKTICK}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
+    const std::unordered_map<std::string, tokenType> commandTokenLiterals(
+            {{"`", BACKTICK}, {"(", LPAREN}, {")", RPAREN}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
 
     /**
      * @brief Helper that turns TokenType into a string
@@ -300,6 +300,36 @@ namespace lexer {
      * @return If the character is an illegal character
      */
     bool isIllegalCharacter(const char& character);
+
+    /**
+     * Helper function that gets the next token, and ensures its type is what is expected
+     * @param type The type of token being expected
+     * @param file The file being lexed
+     * @param position The current position in the file
+     * @param isCommand Tells whether a command is being lexed or not
+     * @return The token if the next token is the correct type
+     */
+    TokenPtr expectToken(const tokenType& type, const std::string& file, FilePosition& position, bool& isCommand);
+
+    /**
+     * Helper function that lexes a statement
+     * @param tokens The vector that will hold all the tokens
+     * @param file The file being lexed
+     * @param position The current position in the file
+     * @param terminatingToken The token to look for to stop lexing the expression
+     */
+    void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position,
+                      const tokenType& terminatingToken);
+
+    /**
+     * Helper function that lexes an expression
+     * @param tokens The vector that will hold all the tokens
+     * @param file The file being lexed
+     * @param position The current position in the file
+     * @param terminatingToken The token to look for to stop lexing the expression
+     */
+    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position,
+                       const tokenType& terminatingToken);
 
 }  // namespace lexer
 

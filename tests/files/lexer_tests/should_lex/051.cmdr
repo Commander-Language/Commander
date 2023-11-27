@@ -1,2 +1,2 @@
 // Test that && operation lexes properly
-true && false
+true && false;
