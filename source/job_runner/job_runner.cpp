@@ -71,9 +71,7 @@ namespace jobRunner {
             // TODO: Implement background process
             // We double fork here, since runProcess() should be called in a fork!
             int pid = Fork();
-            if(pid == 0){
-                execvp(process->name.c_str(), process->args.getArgs());
-            }
+            if (pid == 0) { execvp(process->name.c_str(), process->args.getArgs()); }
         } else if (checkFlagSet(jobRunner::SAVE_RETURN, process->flags)) {
             // TODO: Implement save return process process
         } else

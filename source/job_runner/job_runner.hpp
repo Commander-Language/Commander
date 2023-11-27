@@ -8,6 +8,7 @@
  *              1) ls -la
  *              2) ls -la | grep *.txt | wc -l
  *              3) ls -la | grep *.txt > output.txt | wc -l
+ *
  */
 
 #include <string>
@@ -58,21 +59,21 @@ namespace jobRunner {
     };
 
     /**
-     * @breif Run a given process
-     * @details Run a given process, but let the system do all the work.
+     * @breif Helper to run a process
+     * @details This will use system() to mock running a process
      */
     void runProcessMock(Process*);
-   /**
-    *
-    */
+    /**
+     * Helper to run a process
+     */
     void runNoPipeProcess(Process* process);
     /**
-     *
+     * @brief Helper to run processes in a pipe
      */
     void runPipeProcess(Process* process);
     /**
-     * @brief Run a process
-     * @details Runs a process. Should support background an
+     * @brief Run a single process
+     * @details Run a process normally, in background, or with save return.
      */
     void runProcess(Process* process);
 
