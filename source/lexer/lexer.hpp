@@ -51,20 +51,26 @@ namespace lexer {
         LSQUARE,
         OP,
         PIPE,
+        PRINT,
+        PRINTLN,
         QUESTION,
         RCURLY,
+        READ,
         RETURN,
         RPAREN,
         RSQUARE,
+        SCAN,
         SEMICOLON,
         STRING,
         STRINGLITERAL,
         STRINGVAL,
+        TO,
         TRUE,
         TYPE,
         UNKNOWN,
         VARIABLE,
-        WHILE
+        WHILE,
+        WRITE
     };
 
     /**
@@ -120,24 +126,12 @@ namespace lexer {
     /**
      * Map of string token literals that are keywords
      */
-    const std::unordered_map<std::string, tokenType> keywords({{"alias", ALIAS},
-                                                               {"bool", BOOL},
-                                                               {"break", BREAK},
-                                                               {"const", CONST},
-                                                               {"continue", CONTINUE},
-                                                               {"do", DO},
-                                                               {"else", ELSE},
-                                                               {"false", FALSE},
-                                                               {"float", FLOAT},
-                                                               {"for", FOR},
-                                                               {"if", IF},
-                                                               {"import", IMPORT},
-                                                               {"int", INT},
-                                                               {"return", RETURN},
-                                                               {"string", STRING},
-                                                               {"true", TRUE},
-                                                               {"type", TYPE},
-                                                               {"while", WHILE}});
+    const std::unordered_map<std::string, tokenType> keywords(
+            {{"alias", ALIAS}, {"bool", BOOL},     {"break", BREAK}, {"const", CONST},   {"continue", CONTINUE},
+             {"do", DO},       {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
+             {"if", IF},       {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
+             {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"to", TO},
+             {"true", TRUE},   {"type", TYPE},     {"while", WHILE}, {"write", WRITE}});
 
     /**
      * Map of string token literals that are not keywords (using vector data structure since iteration order matters)
