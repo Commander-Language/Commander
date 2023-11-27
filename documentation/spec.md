@@ -121,9 +121,10 @@ Note: you may override precedence anytime using parentheses ```()```.
 - Statements, expressed with ```<stmt>```, are either a line or multiple lines of code that ultimately end with a ```;```. They are simply executed at runtime, and don't return anything.
 - Expresions, expressed with ```<expr>```, is code that evaluates to a value of a certain type, and returns that value at runtime.
 - Variables, expressed with ```<variable>```, represent a variable name.
-- Bindings, expressed with ```<binding>```, have the grammar 
+- Bindings, expressed with ```<binding>```, are a variable name followed by an optional type. In other words, they have the following grammar:
     ```
     <binding> : <variable> : <type>
+              | <variable>
     ```
 - Types are expressed as ```<int>``` for ints, ```<bool>``` for booleans, ```<string>``` for strings, etc. A general type (any type) would be expressed as ```<type>```. These are mostly used in API function definitions.
 - Expressions that are of a particular type will be expressed as ```<int_expr>``` for int expressions, ```bool_expr``` for boolean expressions, etc.
@@ -645,37 +646,43 @@ subtract = () -> {
 ```
 
 ## User I/O
-You may either read user input using ```scan```, which takes in a string to prompt the user with. Additionally, you may output strings to the console using ```echo``` or ```print``` along with the string being printed.
+You may read in user input using ```scan```, which takes in a string to prompt the user with (use ```""``` if no prompt is necessary). 
+
+You may output strings to the console using ```print``` along with the string being printed (you may alternatively use ```println``` to print with a newline following the string, or use the built-in command ```echo```).
 ### Grammar
 ```
 <string_expr> : scan <string_expr>
               | scan( <string_expr> )
 
-<stmt>   : echo <string_expr>
+<stmt>   : print <string_expr>
          | print( <string_expr> )
+         | println <string_expr>
          | println( <string_expr> )
 ```
 ### Examples
 ```
-name = read "Tell me your name: ";
+name = scan "Tell me your name: ";
+
+println($'Your name is {name}');
 
 echo $"Your name is {name}";
 ```
 
 ## File I/O
-You may read in a file as a string using ```read``` followed by the path to the file, or write a string to a file using ```write``` followed by the path to write to first and then followed by the content being written to the file. 
+You may read in a file as a string using ```read``` followed by the path to the file, or write a string to a file using ```write``` followed by the content being written to the file first, and then followed by the file path. 
 ### Grammar
 ```
-<string> : read <string>
-         | read( <string> )
-         | write <string> <string>
-         | write( <string>, <string> )
+<string_expr> : read <string_expr>
+              | read( <string_expr> )
+              
+<stmt> : write <string_expr> to <string_expr>
+       | write( <string_expr>, <string_expr> )
 ```
 ### Examples
 ```
 userinfo = read "documents/userinfo.txt";
 
-write "documents/name.txt" "My name is Bob";
+write "My name is Bob" to "documents/name.txt";
 ```
 
 ## User Defined Scopes
