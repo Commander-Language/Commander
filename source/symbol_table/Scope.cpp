@@ -78,7 +78,7 @@ Scope* Scope::getParentScopePointer() {
  * @return - FALSE if the scope has a parent, TRUE if the scope returns a nullptr
  */
 bool Scope::isGlobal() {
-    return parentScope == nullptr;
+    return parentScope == NULL;
 }
 
 /**

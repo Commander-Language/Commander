@@ -72,8 +72,11 @@ bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
  * @return TRUE if the scope can be seen everywhere, otherwise FALSE is returned.
  */
 bool SymbolTableOrganizer::isScopeGlobal() {
-    //TODO: try-catch
-    return symbolTables[symbolTables.size() - 1]->isGlobal();
+    if(symbolTables.size() == 0) {
+        return true; //Error case - Assume true if nothing exists
+    }
+    bool global = symbolTables[symbolTables.size() - 1]->isGlobal(); //removing this causes tests to fail
+    return global;
 }
 
 /**
