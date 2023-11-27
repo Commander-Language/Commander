@@ -1,0 +1,2 @@
+// Test that write statements lex properly
+write "Hello World!" to "helloWorld.txt";

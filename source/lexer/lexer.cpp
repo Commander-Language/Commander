@@ -67,16 +67,24 @@ namespace lexer {
                 return "OP";
             case PIPE:
                 return "PIPE";
+            case PRINT:
+                return "PRINT";
+            case PRINTLN:
+                return "PRINTLN";
             case QUESTION:
                 return "QUESTION";
             case RCURLY:
                 return "RCURLY";
+            case READ:
+                return "READ";
             case RETURN:
                 return "RETURN";
             case RPAREN:
                 return "RPAREN";
             case RSQUARE:
                 return "RSQUARE";
+            case SCAN:
+                return "SCAN";
             case SEMICOLON:
                 return "SEMICOLON";
             case STRING:
@@ -85,6 +93,8 @@ namespace lexer {
                 return "STRINGLITERAL";
             case STRINGVAL:
                 return "STRINGVAL";
+            case TO:
+                return "TO";
             case TRUE:
                 return "TRUE";
             case TYPE:
@@ -93,6 +103,8 @@ namespace lexer {
                 return "VARIABLE";
             case WHILE:
                 return "WHILE";
+            case WRITE:
+                return "WRITE";
             default:
                 return "UNKNOWN";
         }
@@ -426,10 +438,8 @@ namespace lexer {
         // The token is definitely a string, so determine the length/contents
         while (position.index < file.length()) {
             const char character = file[position.index++];
-            //Ignore tab characters in strings
-            if (character == '\t') {
-                continue;
-            }
+            // Ignore tab characters in strings
+            if (character == '\t') { continue; }
             position.column++;
             // Ensure the string contains no illegal characters
             if (isIllegalCharacter(character)) {

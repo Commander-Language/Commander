@@ -60,7 +60,9 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("064.cmdr", "064.cmdr.expected"), std::make_tuple("065.cmdr", "065.cmdr.expected"),
                 std::make_tuple("066.cmdr", "066.cmdr.expected"), std::make_tuple("067.cmdr", "067.cmdr.expected"),
                 std::make_tuple("068.cmdr", "068.cmdr.expected"), std::make_tuple("069.cmdr", "069.cmdr.expected"),
-                std::make_tuple("070.cmdr", "070.cmdr.expected")));
+                std::make_tuple("070.cmdr", "070.cmdr.expected"), std::make_tuple("071.cmdr", "071.cmdr.expected"),
+                std::make_tuple("072.cmdr", "072.cmdr.expected"), std::make_tuple("073.cmdr", "073.cmdr.expected"),
+                std::make_tuple("074.cmdr", "074.cmdr.expected"), std::make_tuple("075.cmdr", "075.cmdr.expected")));
 
 INSTANTIATE_TEST_SUITE_P(LexerTestFiles, LexerFailTests,
                          ::testing::Values("000.cmdr", "001.cmdr", "002.cmdr", "003.cmdr", "004.cmdr", "005.cmdr",
