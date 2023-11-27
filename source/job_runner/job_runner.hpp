@@ -35,7 +35,7 @@ namespace jobRunner {
      * @brief Enum of types of process
      */
     enum processType {
-        NONE,
+        NO_PIPE = 1,
         BACKGROUND,
         BUILT_IN,
         PIPE,
@@ -58,10 +58,23 @@ namespace jobRunner {
     };
 
     /**
-     * @breif Run a given job
-     * @details Run a given job, but let the system do all the work.
+     * @breif Run a given process
+     * @details Run a given process, but let the system do all the work.
      */
-    void runJobMock(Process*);
+    void runProcessMock(Process*);
+   /**
+    *
+    */
+    void runNoPipeProcess(Process* process);
+    /**
+     *
+     */
+    void runPipeProcess(Process* process);
+    /**
+     * @brief Run a process
+     * @details Runs a process. Should support background an
+     */
+    void runProcess(Process* process);
 
     /**
      * @brief Run a given job
@@ -74,5 +87,9 @@ namespace jobRunner {
      * for a process type
      */
     bool checkFlagSet(processType, int);
+    /*
+     * @brief fork() with error checking
+     */
+    int Fork();
 }  // namespace jobRunner
 #endif
