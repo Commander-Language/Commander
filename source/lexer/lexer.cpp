@@ -245,51 +245,54 @@ namespace lexer {
         throw util::CommanderException("Unrecognized token", position);
     }
 
-    TokenPtr lexTokenLiteral(const std::string& file, FilePosition& position) {
-        for (const auto& literal : tokenLiterals) {
+    TokenPtr
+    lexLiteral(const std::string& file, FilePosition& position,
+               const std::vector<std::pair<std::basic_string<char>, tokenType>>& literals,
+               const std::function<bool(const std::pair<std::basic_string<char>, tokenType>& literal,
+                                        const std::string& file, FilePosition& position)>& notLiteralCondition) {
+        for (const auto& literal : literals) {
             const int length = (int)literal.first.length();
-            if (position.index + length > file.length() || literal.first != std::string(file, position.index, length)) {
-                continue;
-            }
+            if (notLiteralCondition(literal, file, position)) { continue; }
             const Token token = {literal.first, literal.second, position};
             position.index += length;
             position.column += length;
             return std::make_shared<Token>(token);
         }
         return {};
+    }
+
+    TokenPtr lexTokenLiteral(const std::string& file, FilePosition& position) {
+        return lexLiteral(file, position, tokenLiterals,
+                          [](const std::pair<std::basic_string<char>, tokenType>& literal, const std::string& file,
+                             FilePosition& position) {
+                              const int length = (int)literal.first.length();
+                              return position.index + length > file.length()
+                                  || literal.first != std::string(file, position.index, length);
+                          });
     }
 
     TokenPtr lexCommandTokenLiteral(const std::string& file, FilePosition& position) {
-        // TODO(phales): Very similar to lexTokenLiteral, perhaps create a helper method to improve code reuse
-        for (const auto& literal : commandTokenLiterals) {
-            const int length = (int)literal.first.length();
-            const int fileLength = (int)file.length();
-            const std::string tmp = std::string(file, position.index, length);
-            const std::string tmp2 = literal.first;
-            if (position.index + length > fileLength || tmp2 != tmp) { continue; }
-            const Token token = {literal.first, literal.second, position};
-            position.index += length;
-            position.column += length;
-            return std::make_shared<Token>(token);
-        }
-        return {};
+        return lexLiteral(file, position, commandTokenLiterals,
+                          [](const std::pair<std::basic_string<char>, tokenType>& literal, const std::string& file,
+                             FilePosition& position) {
+                              const int length = (int)literal.first.length();
+                              const int fileLength = (int)file.length();
+                              const std::string word = std::string(file, position.index, length);
+                              const std::string literalWord = literal.first;
+                              return position.index + length > fileLength || literalWord != word;
+                          });
     }
 
     TokenPtr lexKeyword(const std::string& file, FilePosition& position) {
-        // TODO(phales): Very similar to lexTokenLiteral, perhaps create a helper method to improve code reuse
-        for (const auto& keyword : keywords) {
-            const int length = (int)keyword.first.length();
-            if (position.index + length > file.length() || keyword.first != std::string(file, position.index, length)
-                || (position.index + length + 1 < file.length()
-                    && isVariableCharacter(file[position.index + length]))) {
-                continue;
-            }
-            const Token token = {keyword.first, keyword.second, position};
-            position.index += length;
-            position.column += length;
-            return std::make_shared<Token>(token);
-        }
-        return {};
+        return lexLiteral(file, position, keywords,
+                          [](const std::pair<std::basic_string<char>, tokenType>& literal, const std::string& file,
+                             FilePosition& position) {
+                              const int length = (int)literal.first.length();
+                              return position.index + length > file.length()
+                                  || literal.first != std::string(file, position.index, length)
+                                  || (position.index + length + 1 < file.length()
+                                      && isVariableCharacter(file[position.index + length]));
+                          });
     }
 
     TokenPtr lexFloat(const std::string& file, FilePosition& position) {
@@ -499,9 +502,13 @@ namespace lexer {
         while (position.index < file.length()) {
             const char character = file[position.index];
             if (isIllegalCharacter(character)) { return {}; }
-            if (isWhitespace(character)
-                || (commandTokenLiterals.find(std::string(1, character)) != commandTokenLiterals.end())) {
-                break;
+            if (isWhitespace(character)) { break; }
+            const std::string characterString = std::string(1, character);
+            for (const auto& literal : commandTokenLiterals) {
+                if (characterString == literal.first) {
+                    const Token token = {std::string(builder.str()), CMDSTRINGVAL, startPosition};
+                    return std::make_shared<Token>(token);
+                }
             }
             builder << character;
             position.index++;
