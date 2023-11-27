@@ -142,95 +142,10 @@ namespace lexer {
         const std::string file = readFile(filePath);
         const std::shared_ptr<std::string> filePathShared = std::make_shared<std::string>(filePath);
         FilePosition position = {filePathShared, 1, 1, 0};
-        bool isCommand = false;
-        bool isBacktickCommand = false;
-        bool isFirst = true;
-        FilePosition commandPosition;
         skipWhitespace(file, position);
         while (position.index < file.length()) {
-            const TokenPtr token = lexToken(file, position, isCommand, isFirst);
-            if (token->type == SEMICOLON || token->type == LCURLY) {
-                if (isBacktickCommand && isCommand) { break; }
-                isCommand = false;
-                isFirst = true;
-            }
-            if (isCommand && isFirst) { commandPosition = token->position; }
-            if (token->type == BACKTICK) {
-                if (!isCommand) {
-                    commandPosition = token->position;
-                    isCommand = true;
-                    isBacktickCommand = true;
-                } else if (!isBacktickCommand) {
-                    throw util::CommanderException("Cannot use backticks in command", token->position);
-                } else {
-                    isCommand = false;
-                    isBacktickCommand = false;
-                }
-            }
-            tokens.push_back(token);
-            // Look ahead for variables
-            if (token->type == VARIABLE && isFirst && !isCommand) {
-                // Get the next token
-                const int indexBeforeSkip = position.index;
-                skipWhitespace(file, position);
-                if (position.index >= file.length()) {
-                    isCommand = true;
-                    break;
-                }
-                const bool noSpace = indexBeforeSkip == position.index;
-                const TokenPtr nextToken = lexToken(file, position, isCommand, false);
-                // Determine if the next token implies a variable (i.e. it is LPAREN, COLON, EQUALS, or an OP ending in
-                // =).
-                if (nextToken->type == LPAREN || nextToken->type == COLON || nextToken->type == EQUALS
-                    || (nextToken->type == OP
-                        && (nextToken->contents.back() == '='
-                            || (noSpace && (nextToken->contents == "++" || nextToken->contents == "--"))))) {
-                    tokens.push_back(nextToken);
-                } else {
-                    // If it isn't a variable, it's a command, so reset the position index so that the command string
-                    // will be properly lexed.
-                    tokens.pop_back();
-                    token->type = CMDSTRINGVAL;
-                    isCommand = true;
-                    commandPosition = token->position;
-                    position = token->position;
-                }
-            }
-            // Look ahead for alias
-            if (token->type == ALIAS && isFirst) {
-                skipWhitespace(file, position);
-                if (position.index >= file.length()) {
-                    throw util::CommanderException("alias statement is not complete.", token->position);
-                }
-                const TokenPtr varToken = lexToken(file, position, isCommand, false);
-                if (varToken->type != VARIABLE) {
-                    throw util::CommanderException("Keyword 'alias' not followed by a variable name.",
-                                                   varToken->position);
-                }
-                tokens.push_back(varToken);
-                skipWhitespace(file, position);
-                if (position.index >= file.length()) {
-                    throw util::CommanderException("alias statement is not complete.", token->position);
-                }
-                const TokenPtr equalsToken = lexToken(file, position, isCommand, false);
-                if (equalsToken->type != EQUALS) {
-                    throw util::CommanderException("No '=' follows the variable '" + varToken->contents + "'",
-                                                   equalsToken->position);
-                }
-                tokens.push_back(equalsToken);
-                isCommand = true;
-            }
-            // TODO(phales): Look ahead for for-loop
-            if (token->type == FOR && isFirst && !isCommand) {}
+            lexStatement(tokens, file, position, SEMICOLON);
             skipWhitespace(file, position);
-            if (token->type == ALIAS && isFirst) { commandPosition = position; }
-            if (isFirst && token->type != SEMICOLON && token->type != LCURLY) { isFirst = false; }
-        }
-        if (isCommand && isBacktickCommand) {
-            throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
-        }
-        if (isCommand) {
-            throw util::CommanderException("Command was not terminated with a semicolon", commandPosition);
         }
         // ASCII character 5 is the EOF character
         const char endOfFile = (char)5;
@@ -540,33 +455,8 @@ namespace lexer {
                     token.subTokens.push_back(std::make_shared<Token>(strToken));
                     currentString.str("");
                 }
-                const FilePosition startPosition = {position.fileName, position.line, position.column - 1,
-                                                    position.index - 1};
-                // TODO(phales): This part is very similar to tokenize, so possibly create helper or something to reduce
-                // code
-                bool isCommand = false;
-                FilePosition commandPosition;
-                skipWhitespace(file, position);
-                while (position.index < file.length()) {
-                    const TokenPtr tok = lexToken(file, position, isCommand, false);
-                    if (tok->type == BACKTICK) {
-                        if (!isCommand) {
-                            commandPosition = tok->position;
-                            isCommand = true;
-                        } else {
-                            isCommand = false;
-                        }
-                    }
-                    if (tok->type == RCURLY) { break; }
-                    token.subTokens.push_back(tok);
-                    skipWhitespace(file, position);
-                }
-                if (isCommand) {
-                    throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
-                }
-                if (file[position.index - 1] != '}') {
-                    throw util::CommanderException("Unterminated format expression in string", startPosition);
-                }
+                lexExpression(token.subTokens, file, position, RCURLY);
+                token.subTokens.pop_back();
                 currentStringPosition = position;
                 continue;
             }
@@ -642,6 +532,144 @@ namespace lexer {
     bool isIllegalCharacter(const char& character) {
         // ' ' is ascii 32, and '~' is ascii 126. Anything below or above these, that isn't whitespace, is illegal
         return !isWhitespace(character) && (character < ' ' || character > '~');
+    }
+
+    TokenPtr expectToken(const tokenType& type, const std::string& file, FilePosition& position, bool& isCommand) {
+        skipWhitespace(file, position);
+        if (position.index >= file.length()) {
+            throw util::CommanderException("Expected " + tokenTypeToString(type) + " token, but file ended.", position);
+        }
+        const TokenPtr token = lexToken(file, position, isCommand, false);
+        if (token->type != type) {
+            throw util::CommanderException("Expected " + tokenTypeToString(type) + " token, but found "
+                                                   + tokenTypeToString(token->type) + " token.",
+                                           token->position);
+        }
+        return token;
+    }
+
+    void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position,
+                      const tokenType& terminatingToken) {
+        bool isCommand = false;
+        bool isBacktickCommand = false;
+        bool isFirst = true;
+        const FilePosition startPosition = position;
+        FilePosition commandPosition;
+        skipWhitespace(file, position);
+        while (position.index < file.length()) {
+            const TokenPtr token = lexToken(file, position, isCommand, isFirst);
+            tokens.push_back(token);
+            if (token->type == terminatingToken && isBacktickCommand) { break; }
+            if (token->type == terminatingToken) { return; }
+            // Lex scope
+            if (token->type == LCURLY) {
+                skipWhitespace(file, position);
+                while (position.index < file.length()) {
+                    if (file[position.index] == '}') {
+                        tokens.push_back(expectToken(RCURLY, file, position, isCommand));
+                        return;
+                    }
+                    lexStatement(tokens, file, position, SEMICOLON);
+                    skipWhitespace(file, position);
+                }
+                throw util::CommanderException("Unterminated scope", token->position);
+            }
+            if (isCommand && isFirst) { commandPosition = token->position; }
+            if (token->type == BACKTICK) {
+                if (!isCommand) {
+                    commandPosition = token->position;
+                    isCommand = true;
+                    isBacktickCommand = true;
+                } else if (!isBacktickCommand) {
+                    throw util::CommanderException("Cannot use backticks in command", token->position);
+                } else {
+                    isCommand = false;
+                    isBacktickCommand = false;
+                }
+            }
+            // Look ahead for variables
+            if (token->type == VARIABLE && isFirst && !isCommand) {
+                // Get the next token
+                const int indexBeforeSkip = position.index;
+                skipWhitespace(file, position);
+                if (position.index >= file.length()) {
+                    isCommand = true;
+                    break;
+                }
+                const bool noSpace = indexBeforeSkip == position.index;
+                const TokenPtr nextToken = lexToken(file, position, isCommand, false);
+                // Determine if the next token implies a variable (i.e. it is LPAREN, COLON, EQUALS, or an OP ending in
+                // =).
+                if (nextToken->type == LPAREN || nextToken->type == COLON || nextToken->type == EQUALS
+                    || (nextToken->type == OP
+                        && (nextToken->contents.back() == '='
+                            || (noSpace && (nextToken->contents == "++" || nextToken->contents == "--"))))) {
+                    tokens.push_back(nextToken);
+                } else {
+                    // If it isn't a variable, it's a command, so reset the position index so that the command string
+                    // will be properly lexed.
+                    tokens.pop_back();
+                    token->type = CMDSTRINGVAL;
+                    isCommand = true;
+                    commandPosition = token->position;
+                    position = token->position;
+                }
+            }
+            // Look ahead for alias
+            if (token->type == ALIAS && isFirst) {
+                tokens.push_back(expectToken(VARIABLE, file, position, isCommand));
+                tokens.push_back(expectToken(EQUALS, file, position, isCommand));
+                isCommand = true;
+            }
+            // Look ahead for for-loop
+            if (token->type == FOR && isFirst && !isCommand) {
+                tokens.push_back(expectToken(LPAREN, file, position, isCommand));
+                lexStatement(tokens, file, position, SEMICOLON);
+                lexExpression(tokens, file, position, SEMICOLON);
+                lexStatement(tokens, file, position, RPAREN);
+            }
+            skipWhitespace(file, position);
+            if (token->type == ALIAS && isFirst) { commandPosition = position; }
+            if (isFirst) { isFirst = false; }
+        }
+        if (isCommand && isBacktickCommand) {
+            throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
+        }
+        if (isCommand) {
+            throw util::CommanderException("Command was not terminated with " + tokenTypeToString(terminatingToken)
+                                                   + " token",
+                                           commandPosition);
+        }
+        throw util::CommanderException(
+                "Statement was not terminated with " + tokenTypeToString(terminatingToken) + " token", startPosition);
+    }
+
+    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position,
+                       const tokenType& terminatingToken) {
+        const FilePosition startPosition = position;
+        bool isCommand = false;
+        FilePosition commandPosition;
+        skipWhitespace(file, position);
+        while (position.index < file.length()) {
+            const TokenPtr token = lexToken(file, position, isCommand, false);
+            if (token->type == BACKTICK) {
+                if (!isCommand) {
+                    commandPosition = token->position;
+                    isCommand = true;
+                } else {
+                    isCommand = false;
+                }
+            }
+            tokens.push_back(token);
+            if (token->type == terminatingToken && isCommand) { break; }
+            if (token->type == terminatingToken) { return; }
+            skipWhitespace(file, position);
+        }
+        if (isCommand) {
+            throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
+        }
+        throw util::CommanderException("Expression not terminated by " + tokenTypeToString(terminatingToken) + " token",
+                                       startPosition);
     }
 
 }  // namespace lexer
