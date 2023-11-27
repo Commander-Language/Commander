@@ -11,7 +11,6 @@
 
 #include <fstream>
 #include <functional>
-#include <map>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -124,9 +123,9 @@ namespace lexer {
     };
 
     /**
-     * Map of string token literals that are keywords
+     * Vector of string token literal pairs that are keywords
      */
-    const std::unordered_map<std::string, tokenType> keywords(
+    const std::vector<std::pair<std::string, tokenType>> keywords(
             {{"alias", ALIAS}, {"bool", BOOL},     {"break", BREAK}, {"const", CONST},   {"continue", CONTINUE},
              {"do", DO},       {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
              {"if", IF},       {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
@@ -134,7 +133,7 @@ namespace lexer {
              {"true", TRUE},   {"type", TYPE},     {"while", WHILE}, {"write", WRITE}});
 
     /**
-     * Map of string token literals that are not keywords (using vector data structure since iteration order matters)
+     * Vector of string token literal pairs that are not keywords
      */
     const std::vector<std::pair<std::string, tokenType>> tokenLiterals(
             {{"**=", OP},    {"->", LAMBDA},  {"==", OP},    {"!=", OP},    {"<=", OP},   {">=", OP},    {"&&", OP},
@@ -144,9 +143,9 @@ namespace lexer {
              {"[", LSQUARE}, {"?", QUESTION}, {"}", RCURLY}, {"]", RSQUARE}});
 
     /**
-     * Map of string token literals specifically for commands
+     * Vector of string token literal pairs specifically for commands
      */
-    const std::unordered_map<std::string, tokenType> commandTokenLiterals(
+    const std::vector<std::pair<std::string, tokenType>> commandTokenLiterals(
             {{"`", BACKTICK}, {"(", LPAREN}, {")", RPAREN}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
 
     /**
@@ -186,6 +185,18 @@ namespace lexer {
      * @returns The token, if it finds one
      */
     TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst);
+
+    /**
+     * @brief Helper for lexing a literal token, if it exists
+     * @param file The file contents being lexed
+     * @param position The position in the file
+     * @returns The literal token, if it finds one
+     */
+    TokenPtr
+    lexLiteral(const std::string& file, FilePosition& position,
+               const std::vector<std::pair<std::basic_string<char>, tokenType>>& literals,
+               const std::function<bool(const std::pair<std::basic_string<char>, tokenType>& literal,
+                                        const std::string& file, FilePosition& position)>& notLiteralCondition);
 
     /**
      * @brief Lex a literal token, if it exists
