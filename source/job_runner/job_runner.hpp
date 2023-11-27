@@ -15,15 +15,30 @@
 #include <vector>
 
 namespace jobRunner {
+
+    /**
+     * @brief Helper class for a process struct.
+     * @details C functions like exec, use old style strings and string arrays, so use this class to easily use new c++
+     * strings/arrays and convert to old style C when needed
+     */
+    class ProcessArgs {
+    private:
+        std::vector<std::string> _args;
+        std::vector<char*> _cargs;
+
+    public:
+        void pushArg(const std::string&);
+        char** getArgs();
+    };
+
     /**
      * @brief Enum of types of process
      */
     enum processType {
+        NONE,
         BACKGROUND,
         BUILT_IN,
-        PIPE_START,
-        PIPE_BETWEEN,
-        PIPE_END,
+        PIPE,
         SAVE_RETURN,
         REDIRECTION,
     };
@@ -34,18 +49,30 @@ namespace jobRunner {
      * is determined by given flags.
      */
     struct Process {
-        int flags;
-        std::string name;
-        std::string fileToRedirect;
-        Process* pipe;
+        int flags {};
+        std::string name {};
+        std::string fileToRedirect {};
+        Process* pipe {};
+        ProcessArgs args {};
+        std::tuple<std::string, std::string, int> jobReturn {};
     };
 
-    using JobReturn = std::tuple<std::string, std::string, int>;
+    /**
+     * @breif Run a given job
+     * @details Run a given job, but let the system do all the work.
+     */
+    void runJobMock(Process*);
 
     /**
      * @brief Run a given job
      */
-    JobReturn runJob(Process*);
+    void runJob(Process*);
 
+    /**
+     * @brief Check if given flag set in process
+     * @details Helper method for Process struct that checks if flags are set
+     * for a process type
+     */
+    bool checkFlagSet(processType, int);
 }  // namespace jobRunner
 #endif
