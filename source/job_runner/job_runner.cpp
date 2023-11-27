@@ -64,17 +64,19 @@ namespace jobRunner {
         close(fd[1]);
         wait(nullptr);
         wait(nullptr);
-
     }
 
     void runProcess(Process* process) {
         if (checkFlagSet(jobRunner::BACKGROUND, process->flags)) {
             // TODO: Implement background process
-        }
-        else if (checkFlagSet(jobRunner::SAVE_RETURN, process->flags)) {
+            // We double fork here, since runProcess() should be called in a fork!
+            int pid = Fork();
+            if(pid == 0){
+                execvp(process->name.c_str(), process->args.getArgs());
+            }
+        } else if (checkFlagSet(jobRunner::SAVE_RETURN, process->flags)) {
             // TODO: Implement save return process process
-        }
-        else
+        } else
             execvp(process->name.c_str(), process->args.getArgs());
     }
 

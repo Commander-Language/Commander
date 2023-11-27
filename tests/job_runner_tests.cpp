@@ -12,6 +12,18 @@ TEST(RunSimpleJobs, RunLS) {
 
     EXPECT_NO_FATAL_FAILURE(jobRunner::runJob(&processLS));
 }
+TEST(RunBackgroundJob, RunSleep) {
+    // >> sleep 20s
+    jobRunner::ProcessArgs args;
+    args.pushArg("sleep");
+    args.pushArg("20s");
+    jobRunner::Process processSleep;
+    processSleep.name = "sleep";
+    processSleep.args = args;
+    processSleep.flags = jobRunner::BACKGROUND;
+
+    EXPECT_NO_FATAL_FAILURE(jobRunner::runJob(&processSleep));
+}
 TEST(RunPipeJobs, RunLSWC) {
     // >> ls -la | wc -l
     jobRunner::ProcessArgs argsWC;
