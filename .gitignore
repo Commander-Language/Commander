@@ -8,3 +8,6 @@ lexerTests
 commander.cbp
 .cmake
 Testing
+CTestTestfile.cmake
+_deps/
+lib/
