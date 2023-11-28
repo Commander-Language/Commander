@@ -1,9 +1,9 @@
-DO 'do'
-LCURLY '{'
-RCURLY '}'
-WHILE 'while'
-LPAREN '('
-TRUE 'true'
-RPAREN ')'
-SEMICOLON ';'
-END_OF_FILE
+DO 'do' 2:1
+LCURLY '{' 2:3
+RCURLY '}' 3:1
+WHILE 'while' 3:3
+LPAREN '(' 3:8
+TRUE 'true' 3:9
+RPAREN ')' 3:13
+SEMICOLON ';' 3:14
+END_OF_FILE 4:1

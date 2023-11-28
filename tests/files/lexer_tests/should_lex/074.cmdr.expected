@@ -1,9 +1,9 @@
-VARIABLE 'fileContents'
-EQUALS '='
-READ 'read'
-STRINGVAL
+VARIABLE 'fileContents' 2:1
+EQUALS '=' 2:14
+READ 'read' 2:16
+STRINGVAL 2:21
 [
-STRINGLITERAL 'myfile.txt'
+STRINGLITERAL 'myfile.txt' 2:22
 ]
-SEMICOLON ';'
-END_OF_FILE
+SEMICOLON ';' 2:33
+END_OF_FILE 3:1
