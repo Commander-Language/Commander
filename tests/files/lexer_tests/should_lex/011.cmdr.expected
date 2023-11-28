@@ -1,9 +1,9 @@
-VARIABLE 'isString'
-EQUALS '='
-STRINGVAL
+VARIABLE 'isString' 2:1
+EQUALS '=' 2:10
+STRINGVAL 2:12
 [
 STRINGLITERAL 'Hello, world!	
-'"\'
+'"\' 2:13
 ]
-SEMICOLON ';'
-END_OF_FILE
+SEMICOLON ';' 2:38
+END_OF_FILE 3:1

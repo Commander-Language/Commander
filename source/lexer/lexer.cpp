@@ -120,13 +120,15 @@ namespace lexer {
         : contents(std::move(contents)), type(type), position(std::move(position)) {}
 
     std::string Token::toString() const {
-        return type != END_OF_FILE ? tokenTypeToString(type) + " '" + contents + "'" : tokenTypeToString(type);
+        return (type != END_OF_FILE ? tokenTypeToString(type) + " '" + contents + "'" : tokenTypeToString(type)) + " "
+             + std::to_string(position.line) + ":" + std::to_string(position.column);
     }
 
     std::string StringToken::toString() const {
         std::ostringstream builder;
         for (const TokenPtr& token : subTokens) builder << token->toString() << "\n";
-        return tokenTypeToString(type) + "\n[\n" + builder.str() + "]";
+        return tokenTypeToString(type) + " " + std::to_string(position.line) + ":" + std::to_string(position.column)
+             + "\n[\n" + builder.str() + "]";
     }
 
     std::string readFile(const std::string& filePath) {
@@ -172,7 +174,11 @@ namespace lexer {
             // Ignore all characters in a comment (except '*' in block comments) as well as spaces and \'s
             if (isLineComment || (isBlockComment && character != '*') || isWhitespace(character)) {
                 position.index++;
-                position.column++;
+                if (character == '\t') {
+                    position.column += 4;
+                } else {
+                    position.column++;
+                }
                 continue;
             }
             const char nextCharacter = position.index + 1 < file.length() ? file[position.index + 1] : '\0';
@@ -192,13 +198,14 @@ namespace lexer {
             if (terminateBlockComment || startBlockComment || startLineComment) {
                 position.index += 2;
                 position.column += 2;
+            } else {
+                position.index++;
+                position.column++;
             }
             // If a comment is started incorrectly, throw an error
             if (character == '/' && !startLineComment && !startBlockComment) {
                 throw util::CommanderException("Expected either '*' or '/' after '/'", position);
             }
-            position.index++;
-            position.column++;
         }
         if (isBlockComment) { throw util::CommanderException("Unterminated block comment", blockCommentPosition); }
     }
@@ -357,7 +364,10 @@ namespace lexer {
         while (position.index < file.length()) {
             const char character = file[position.index++];
             // Ignore tab characters in strings
-            if (character == '\t') { continue; }
+            if (character == '\t') {
+                position.column += 4;
+                continue;
+            }
             position.column++;
             // Ensure the string contains no illegal characters
             if (isIllegalCharacter(character)) {
@@ -376,6 +386,13 @@ namespace lexer {
             }
             // Break out so that it can throw string not terminated error if it is at end of file
             if (position.index >= file.length()) { break; }
+            // Handle new lines
+            if (character == '\r' || character == '\n') {
+                const char secondCharacter = file[position.index++];
+                position.column = 1;
+                position.line++;
+                if (character == '\n' || (character == '\r' && secondCharacter != '\n')) { position.index--; }
+            }
             // Handle escape characters
             if (character == '\\') {
                 const char secondCharacter = file[position.index++];
