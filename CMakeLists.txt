@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS_RELEASE -O3)
 
-include_directories(.)
+find_package(GTest REQUIRED)
 
 #  ===========================
 #  ||  Main Build Configs:  ||
@@ -128,4 +128,3 @@ find_package(GTest REQUIRED)
 add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
 
 target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
-
