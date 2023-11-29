@@ -76,7 +76,7 @@ namespace lexer {
      * @brief Represents a position in a file
      */
     struct FilePosition {
-        std::shared_ptr<std::string> fileName;
+        std::string fileName;
         int line;
         int column;
         int index;

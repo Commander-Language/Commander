@@ -111,10 +111,10 @@ namespace lexer {
     }
 
     std::string FilePosition::toString() const {
-        return *fileName + ":" + std::to_string(line) + ":" + std::to_string(column);
+        return fileName + ":" + std::to_string(line) + ":" + std::to_string(column);
     }
 
-    Token::Token() : type(UNKNOWN), position({std::make_shared<std::string>(""), -1, -1, -1}) {}
+    Token::Token() : type(UNKNOWN), position({"", -1, -1, -1}) {}
 
     Token::Token(std::string contents, tokenType type, FilePosition position)
         : contents(std::move(contents)), type(type), position(std::move(position)) {}
@@ -142,8 +142,7 @@ namespace lexer {
 
     void tokenize(TokenList& tokens, const std::string& filePath) {
         const std::string file = readFile(filePath);
-        const std::shared_ptr<std::string> filePathShared = std::make_shared<std::string>(filePath);
-        FilePosition position = {filePathShared, 1, 1, 0};
+        FilePosition position = {filePath, 1, 1, 0};
         skipWhitespace(file, position);
         while (position.index < file.length()) {
             lexStatement(tokens, file, position, SEMICOLON);
@@ -174,11 +173,7 @@ namespace lexer {
             // Ignore all characters in a comment (except '*' in block comments) as well as spaces and \'s
             if (isLineComment || (isBlockComment && character != '*') || isWhitespace(character)) {
                 position.index++;
-                if (character == '\t') {
-                    position.column += 4;
-                } else {
-                    position.column++;
-                }
+                position.column++;
                 continue;
             }
             const char nextCharacter = position.index + 1 < file.length() ? file[position.index + 1] : '\0';
@@ -363,12 +358,9 @@ namespace lexer {
         // The token is definitely a string, so determine the length/contents
         while (position.index < file.length()) {
             const char character = file[position.index++];
-            // Ignore tab characters in strings
-            if (character == '\t') {
-                position.column += 4;
-                continue;
-            }
             position.column++;
+            // Ignore tab characters in strings
+            if (character == '\t') { continue; }
             // Ensure the string contains no illegal characters
             if (isIllegalCharacter(character)) {
                 throw util::CommanderException(
