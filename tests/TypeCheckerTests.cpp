@@ -4,6 +4,28 @@
 
 #include "TypeCheckerTests.hpp"
 
+TEST(BASICTESTS, setOrUpdateTest) {
+    TypeChecker testChecker = TypeChecker();
+
+    EXPECT_FALSE(testChecker.hasVariable("cat"));
+    EXPECT_FALSE(testChecker.hasVariable("dog"));
+    EXPECT_FALSE(testChecker.hasVariable("bird"));
+
+    testChecker.setOrUpdateType("cat", "INTEGER");
+    testChecker.setOrUpdateType("dog", "FLOAT");
+
+    EXPECT_TRUE(testChecker.hasVariable("cat"));
+    EXPECT_TRUE(testChecker.hasVariable("dog"));
+    EXPECT_FALSE(testChecker.hasVariable("bird"));
+    EXPECT_TRUE(testChecker.getType("cat") == "INTEGER");
+    EXPECT_TRUE(testChecker.getType("dog") == "FLOAT");
+
+    testChecker.setOrUpdateType("cat", "STRING");
+    testChecker.setOrUpdateType("dog", "NULL");
+    EXPECT_TRUE(testChecker.getType("cat") == "STRING");
+    EXPECT_TRUE(testChecker.getType("dog") == "NULL");
+}
+
 TEST(BASICTESTS, stringTypeTests) {
     TypeChecker testChecker = TypeChecker();
     testChecker.setOrUpdateType("cat", "INTEGER");
@@ -24,6 +46,24 @@ TEST(BASICTESTS, verifyTests) {
     EXPECT_FALSE(testChecker.hasVariable("dog"));
     EXPECT_FALSE(testChecker.verifyType("dog", "INTEGER"));
     EXPECT_FALSE(testChecker.verifyType("dog", "STRING"));
+}
+
+TEST(BASICTESTS, verifySimilarTypesTest) {
+    TypeChecker testChecker = TypeChecker();
+    testChecker.setOrUpdateType("cat", "INTEGER");
+    EXPECT_TRUE(testChecker.verifyType("cat", "INTEGER"));
+    EXPECT_TRUE(testChecker.verifyType("cat", "FLOAT"));
+    EXPECT_TRUE(testChecker.verifyType("cat", "DOUBLE"));
+
+    testChecker.setOrUpdateType("cat", "DOUBLE");
+    EXPECT_TRUE(testChecker.verifyType("cat", "INTEGER"));
+    EXPECT_TRUE(testChecker.verifyType("cat", "FLOAT"));
+    EXPECT_TRUE(testChecker.verifyType("cat", "DOUBLE"));
+
+    testChecker.setOrUpdateType("cat", "STRING");
+    EXPECT_FALSE(testChecker.verifyType("cat", "INTEGER"));
+    EXPECT_FALSE(testChecker.verifyType("cat", "FLOAT"));
+    EXPECT_FALSE(testChecker.verifyType("cat", "DOUBLE"));
 }
 
 TEST(BASICTESTS, varsExist) {
