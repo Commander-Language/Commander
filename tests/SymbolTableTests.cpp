@@ -114,9 +114,16 @@ TEST(SYMORGTEST, globalTests) {
 
     testOrg.pushSymbolTable();
     EXPECT_TRUE(testOrg.isScopeGlobal());
+    //TODO: somewhere between here and pushSymbolTable(), a copy-contructor is called when it shouldn't
     testOrg.pushSymbolTable();
     EXPECT_FALSE(testOrg.isScopeGlobal());
 
     testOrg.popSymbolTable();
     EXPECT_TRUE(testOrg.isScopeGlobal());
+}
+
+TEST(SYMORGTEST, addItemsTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    testOrg.pushSymbolTable();
+    testOrg.addVariable("cat", 3);
 }

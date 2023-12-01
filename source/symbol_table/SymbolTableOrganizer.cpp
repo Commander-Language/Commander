@@ -30,7 +30,7 @@ void SymbolTableOrganizer::pushSymbolTable() {
         symbolTables.push_back(&headScope);
     }
     else {
-        Scope nextScope = Scope(symbolTables.back()->getParentScopePointer());
+        Scope nextScope = Scope(symbolTables.back());
         symbolTables.push_back(&nextScope);
     }
 }
@@ -75,7 +75,8 @@ bool SymbolTableOrganizer::isScopeGlobal() {
     if(symbolTables.size() == 0) {
         return true; //Error case - Assume true if nothing exists
     }
-    bool global = symbolTables[symbolTables.size() - 1]->isGlobal(); //removing this causes tests to fail
+    //bool global = symbolTables[symbolTables.size() - 1]->isGlobal(); //removing this causes tests to fail
+    bool global = symbolTables.size() <= 1;
     return global;
 }
 
@@ -86,7 +87,7 @@ bool SymbolTableOrganizer::isScopeGlobal() {
  * @param data - An object which the variable should be associated with
  */
 void SymbolTableOrganizer::addVariable(std::string variableID, int data) {
-    symbolTables[symbolTables.size() - 1]->addOrUpdateVariable(variableID, data);
+    symbolTables.back()->addOrUpdateVariable(variableID, data);
 }
 
 /**

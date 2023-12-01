@@ -7,7 +7,7 @@
 
 //Default Constructor
 Scope::Scope() {
-    //parentScope = nullptr;
+    parentScope = nullptr;
 }
 
 //Constructor for specifying a parent
@@ -78,7 +78,7 @@ Scope* Scope::getParentScopePointer() {
  * @return - FALSE if the scope has a parent, TRUE if the scope returns a nullptr
  */
 bool Scope::isGlobal() {
-    return parentScope == NULL;
+    return parentScope == NULL || parentScope == nullptr;
 }
 
 /**
