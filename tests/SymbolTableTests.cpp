@@ -125,5 +125,9 @@ TEST(SYMORGTEST, globalTests) {
 TEST(SYMORGTEST, addItemsTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
-    testOrg.addVariable("cat", 3);
+    testOrg.getScope()->addOrUpdateVariable("cat", 3);
+    EXPECT_TRUE(testOrg.getScope()->hasVariable("cat"));
+    //std::string testString = "cat";
+    //int value = 3;
+    //testOrg.addVariable(testString, value);
 }

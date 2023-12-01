@@ -11,21 +11,74 @@
 
 class Scope {
 public:
-    Scope(); //Constructor - will set parent to NULLPTR
-    Scope(Scope* parent); //Constructor
-    ~Scope(); //Destructor
-    Scope(Scope &otherScope); //Copy Constructor
-    void addOrUpdateVariable(std::string variableID, int data); //Set or update the current variable
-    bool hasVariable(std::string variableID); //returns TRUE if the specified variable exists in this scope
-    int* getVariable(std::string variableID); //returns a pointer to the specified variable. If not in this scope, we'll traverse up the scope stack
-    Scope* getParentScopePointer(); //returns a pointer to the parent scope or NULLPTR
-    bool isGlobal(); //A boolean which determines whether this is the head of all scopes
+    /**
+     * Scope() serves as a default constructor for the scope object. Its parent will default to nullptr
+     */
+    Scope();
+
+    /**
+     * Scope(Scope* parent) is a constructor which specifies the parent scope object.
+     * @param parent - A pointer to the parent of the scope
+     */
+    Scope(Scope* parent);
+
+    /**
+     * ~Scope() serves as a destructor for the Scope object
+     */
+    ~Scope();
+
+    /**
+     * Not to be confused with Scope(Scope* parent), this method serves as a copy constructor
+     * @param otherScope - The scope one wishes to copy
+     */
+    Scope(Scope &otherScope);
+
+    /**
+     * addOrUpdateVariable will attempt to add the relevant data to the scope.
+     * @param variableID - A String ID which the variable will be referenced by (e.g. "cat")
+     * @param data - An object which will be stored as data (e.g. 14, "dog", std::vector<int>, etc.)
+     */
+    void addOrUpdateVariable(std::string variableID, int data);
+
+    /**
+     * hasVariable returns a boolean value according to whether the specified variable exists in this scope.
+     * For scanning all scopes for a variable, use getVariable()
+     * @param variableID - A string ID which the variable will be referenced by
+     * @return - TRUE if the variable exists in the current scope, otherwise FALSE is returned
+     */
+    bool hasVariable(std::string variableID);
+
+    /**
+     * getVariable returns a pointer to the desired variable in the scope. If the variable does not exist in this scope,
+     * the parent scope will be scanned for the variable
+     * @param variableID - A string ID which the variable will be referenced by
+     * @return - A pointer to the specified data if it exists, otherwise a nullptr will return
+     */
+    int* getVariable(std::string variableID);
+
+    /**
+     * getParenScopePointer() returns a pointer to the parent of this scope
+     * @return - A pointer to the parent of this scope
+     */
+    Scope* getParentScopePointer();
+
+    /**
+     * isGlobal() will return a value according to whether the Scope has a parent
+     * @return - FALSE if the scope has a parent, TRUE if the scope returns a nullptr
+     */
+    bool isGlobal();
 
 private:
     std::map<std::string, int> variableData{}; //uses a Key variableName to find it's associated object
     Scope* parentScope = nullptr; //Pointer to the parent scope object (i.e. this scope exists within another scope)
 
-    bool hasKey(std::string key); //Helper method to find if variableData has a given key (map.contains available in C++20+)
+
+    /**
+     * hasKey() returns a boolean value according to whether variableData has an entry of the specified name
+     * @param key - A string value representing a variable ID
+     * @return - TRUE if the variable exists in variableData, otherwise FALSE is returned
+     */
+    bool hasKey(std::string key);
 };
 
 
