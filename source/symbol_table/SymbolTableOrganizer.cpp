@@ -11,7 +11,9 @@ SymbolTableOrganizer::SymbolTableOrganizer() {
 
 //Destructor
 SymbolTableOrganizer::~SymbolTableOrganizer() {
-
+    //for(int currentScopeObject = 0; currentScopeObject < symbolTables.size(); currentScopeObject++) {
+    //    delete symbolTables[currentScopeObject];
+    //}
 }
 
 //Copy-Constructor
@@ -23,17 +25,22 @@ SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer &otherTableOrgan
 
 void SymbolTableOrganizer::pushSymbolTable() {
     if(symbolTables.size() < 1) {
-        Scope headScope = Scope();
+        Scope headScope = new Scope();
         symbolTables.push_back(&headScope);
     }
     else {
-        Scope nextScope = Scope(symbolTables.back());
+        Scope nextScope = new Scope(symbolTables.back());
         symbolTables.push_back(&nextScope);
     }
 }
 
+//TODO: consider smart pointers
 void SymbolTableOrganizer::popSymbolTable() {
-    symbolTables.pop_back();
+    if(symbolTables.empty()) {
+        return; //return early if no scopes are present
+    }
+    delete symbolTables.back();
+    symbolTables.pop_back(); //despite the name, pop_back does not return the last item while removing it
 }
 
 void SymbolTableOrganizer::addVariable(std::string variableID, int data) {

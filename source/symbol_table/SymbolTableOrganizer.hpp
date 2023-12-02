@@ -71,7 +71,7 @@ public:
     bool isScopeGlobal(); //return TRUE if the current scope is a global scope
 
 private:
-    std::vector<Scope*> symbolTables; //A vector containing each symbol table; some methods will use this to find a value while others will rely on Scope's recursiveness
+    std::vector<Scope*> symbolTables{}; //A vector containing each symbol table; some methods will use this to find a value while others will rely on Scope's recursiveness
 };
 
 
