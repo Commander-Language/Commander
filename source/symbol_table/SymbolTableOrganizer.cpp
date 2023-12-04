@@ -11,9 +11,9 @@ SymbolTableOrganizer::SymbolTableOrganizer() {
 
 //Destructor
 SymbolTableOrganizer::~SymbolTableOrganizer() {
-    //for(int currentScopeObject = 0; currentScopeObject < symbolTables.size(); currentScopeObject++) {
-    //    delete symbolTables[currentScopeObject];
-    //}
+    for(int currentScopeObject = 0; currentScopeObject < symbolTables.size(); currentScopeObject++) {
+        delete symbolTables[currentScopeObject];
+    }
 }
 
 //Copy-Constructor
@@ -34,7 +34,6 @@ void SymbolTableOrganizer::pushSymbolTable() {
     }
 }
 
-//TODO: consider smart pointers
 void SymbolTableOrganizer::popSymbolTable() {
     if(symbolTables.empty()) {
         return; //return early if no scopes are present
