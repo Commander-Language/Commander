@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <sstream>
 
 namespace Parser {
 
@@ -26,9 +27,23 @@ namespace Parser {
     enum Unop { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
 
     /**
+     * @brief Helper method that gets the string representation of the Unop enum type
+     * @param unop The unop to get the string version of
+     * @return The string of the unop
+     */
+    std::string unopToString(const Unop& unop);
+
+    /**
      * @brief The types of binop expressions
      */
     enum Binop { LESSER, GREATER, LESSER_EQUAL, GREATER_EQUAL, MODULO, DIVIDE, MULTIPLY, SUBTRACT, ADD, EXPONENTIATE, AND, OR, EQUAL, NOT_EQUAL, ADD_EQUAL, SUBTRACT_EQUAL, MULTIPLY_EQUAL, DIVIDE_EQUAL, MODULO_EQUAL, EXPONENTIATE_EQUAL };
+
+    /**
+     * @brief Helper method that gets the string representation of the Binop enum type
+     * @param binop The binop to get the string version of
+     * @return The string of the binop
+     */
+    std::string binopToString(const Binop& binop);
 
     /**
      * @brief Represents a single Abstract Syntax Tree node.
@@ -120,7 +135,7 @@ namespace Parser {
          *
          * @return The s-expression string of the binding node
          */
-        [[nodiscard]] virtual std::string sExpression() const override;
+        [[nodiscard]] std::string sExpression() const override;
     };
     /**
      * @brief A pointer to a binding node.
@@ -178,6 +193,13 @@ namespace Parser {
          * @return `CMD` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
     /**
      * @brief A smart pointer to a command node.
@@ -331,6 +353,13 @@ namespace Parser {
          * @return `STRING` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
     using StringNodePtr = std::shared_ptr<StringNode>;
 
@@ -358,6 +387,13 @@ namespace Parser {
          * @return `PRGM` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
 
@@ -418,6 +454,13 @@ namespace Parser {
          * @param rightCmd The "destination" command on the right. The pipe goes into its input.
          */
         PipeCmdNode(const CmdNodePtr& leftCmd, const CmdNodePtr& rightCmd);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
 
@@ -443,6 +486,13 @@ namespace Parser {
          * @param value The value of this AST node.
          */
         IntExprNode(int64_t value);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -462,6 +512,13 @@ namespace Parser {
          * @param value The value of this AST node.
          */
         FloatExprNode(double value);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -482,6 +539,13 @@ namespace Parser {
          * @param value The value of this AST node.
          */
         BoolExprNode(bool value);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -502,6 +566,13 @@ namespace Parser {
          * @param variable The variable to reference.
          */
         VarExprNode(const std::string& variable);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -522,6 +593,45 @@ namespace Parser {
          * @param expressions The elements that go inside the array.
          */
         ArrayExprNode(const std::vector<ExprNodePtr>& expressions);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+    };
+
+    /**
+     * @brief An array index expression node.
+     *
+     */
+    class ArrayIndexExprNode : public ExprNode {
+    public:
+
+        /**
+         * The expression being indexed
+         */
+        ExprNodePtr expression;
+
+        /**
+         * The expressions that make up the array indeces
+         */
+        std::vector<ExprNodePtr> expressions;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expressions The elements that go inside the array.
+         */
+        ArrayIndexExprNode(const ExprNodePtr& expression, const std::vector<ExprNodePtr>& expressions);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -542,6 +652,45 @@ namespace Parser {
          * @param expressions The elements that go inside the tuple.
          */
         TupleExprNode(const std::vector<ExprNodePtr>& expressions);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+    };
+
+    /**
+     * @brief An tuple index expression node.
+     *
+     */
+    class TupleIndexExprNode : public ExprNode {
+    public:
+
+        /**
+         * The expression being indexed
+         */
+        ExprNodePtr expression;
+
+        /**
+         * The expression for the tuple index
+         */
+        ExprNodePtr indexExpression;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expressions The elements that go inside the array.
+         */
+        TupleIndexExprNode(const ExprNodePtr& expression, const ExprNodePtr& indexExpression);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -574,6 +723,13 @@ namespace Parser {
          * @param negative The expression to evaluate if the condition was false.
          */
         TernaryExprNode(const ExprNodePtr& condition, const ExprNodePtr& positive, const ExprNodePtr& negative);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -599,6 +755,13 @@ namespace Parser {
          *
          */
         UnOpExprNode();
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -624,6 +787,13 @@ namespace Parser {
          *
          */
         BinOpExprNode();
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -650,6 +820,13 @@ namespace Parser {
          * @param args The arguments for the function call.
          */
         CallExprNode(const ExprNodePtr& func, const std::vector<ExprNodePtr>& args);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -709,6 +886,13 @@ namespace Parser {
          */
         LambdaExprNode(const std::vector<BindingNodePtr>& bindings, const ExprNodePtr& body,
                        const TypeNodePtr& type);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -729,6 +913,13 @@ namespace Parser {
          * @param cmd The command to run.
          */
         CmdExprNode(const CmdNodePtr& cmd);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
 
@@ -766,7 +957,12 @@ namespace Parser {
          */
         IfStmtNode(const std::vector<ExprNodePtr>& conditions, const std::vector<StmtNodePtr>& positive, const StmtNodePtr negative = nullptr);
 
-
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -806,6 +1002,13 @@ namespace Parser {
          */
         ForStmtNode(const StmtNodePtr& initial, const ExprNodePtr& condition, const StmtNodePtr& update,
                     const StmtNodePtr& body);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -832,6 +1035,13 @@ namespace Parser {
          * @param body The body of the loop.
          */
         WhileStmtNode(const ExprNodePtr& condition, const StmtNodePtr& body);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -858,6 +1068,13 @@ namespace Parser {
          * @param stmts The body of the loop.
          */
         DoWhileStmtNode(const ExprNodePtr& condition, const StmtNodePtr& stmts);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -878,6 +1095,13 @@ namespace Parser {
          * @param stmts The body of the scope.
          */
         ScopeStmtNode(const std::vector<StmtNodePtr>& stmts);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -898,6 +1122,13 @@ namespace Parser {
          * @param command The command to run.
          */
         CmdStmtNode(const CmdNodePtr& command);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -924,6 +1155,13 @@ namespace Parser {
          * @param command The alias's command.
          */
         AliasStmtNode(const std::string& variable, const CmdNodePtr& command);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
 
@@ -942,6 +1180,13 @@ namespace Parser {
          *
          */
         IntTypeNode();
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -955,6 +1200,13 @@ namespace Parser {
          *
          */
         FloatTypeNode();
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -969,6 +1221,13 @@ namespace Parser {
          * @param subtype The type of the array's items.
          */
         ArrayTypeNode(const TypeNodePtr& subtype);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
     /**
@@ -983,6 +1242,13 @@ namespace Parser {
          * @param subtypes The type of each of the tuple's items.
          */
         TupleTypeNode(const std::vector<TypeNodePtr>& subtypes);
+
+        /**
+         * @brief Gets the string representation of the binding node as an s-expression
+         *
+         * @return The s-expression string of the binding node
+         */
+        [[nodiscard]] std::string sExpression() const override;
     };
 
 }  //  namespace Parser
