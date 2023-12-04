@@ -58,7 +58,7 @@ namespace jobRunner {
     private:
         /**
          * @brief Helper method to execute a command
-         * @details Should be called in a fork if not a builtin
+         * @details Should be called in a fork
          */
         void _execCommand();
 
