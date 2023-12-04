@@ -196,5 +196,25 @@ namespace jobRunner {
         // pipeline is greater than one so run the helper
         return _runPipeHelper();
     }
+    /*
+     * Job Class
+     */
+    JobInfo Job::runJob() { return _pipeline.runPipeLine(_save); }
+
+    void Job::addCommandToPipeline(Command* cmd) { _pipeline.addCommand(cmd); }
+
+    void Job::setJobToSave(bool save) { _save = save; }
+
+    /*
+     * Helper Methods
+     */
+    int forkCheckErrors() {
+        int const processID = fork();
+        if (processID < 0) {
+            // TODO: Throw CommanderException
+            throw "Bad fork";
+        }
+        return processID;
+    }
 
 }  // namespace jobRunner
