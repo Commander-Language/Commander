@@ -19,13 +19,13 @@ namespace util {
     class CommanderException : std::exception {
     public:
         /**
-         * Constructor for the exception that stores a single message directly
+         * @brief Constructor for the exception that stores a single message directly
          * @param message The message of the exception
          */
         CommanderException(std::string message) : _errorMessage(std::move(message)) {}
 
         /**
-         * Constructor for the exception that creates the message with the include position in the file
+         * @brief Constructor for the exception that creates the message with the include position in the file
          * @param message The message of the exception
          * @param position The position in the file that the exception occurs
          */
@@ -39,6 +39,9 @@ namespace util {
         [[nodiscard]] const char* what() const noexcept override;
 
     private:
+        /**
+         * The error message of the exception
+         */
         std::string _errorMessage;
     };
 

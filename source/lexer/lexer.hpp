@@ -77,13 +77,28 @@ namespace lexer {
      * @brief Represents a position in a file
      */
     struct FilePosition {
+        /**
+         * The file name and path
+         */
         std::string fileName;
+
+        /**
+         * The line position in the file
+         */
         int line;
+
+        /**
+         * The column position in the file
+         */
         int column;
+
+        /**
+         * The index position in the file
+         */
         int index;
 
         /**
-         * Returns the string representation of the FilePosition
+         * @brief Returns the string representation of the FilePosition
          * @return The string representation of the FilePosition
          */
         [[nodiscard]] std::string toString() const;
@@ -93,15 +108,41 @@ namespace lexer {
      * @brief Represents a token from the lexer
      */
     struct Token {
+        /**
+         * The contents of the token
+         */
         std::string contents;
+
+        /**
+         * The type of the token
+         */
         tokenType type;
+
+        /**
+         * The position the token appears in the file
+         */
         FilePosition position;
 
-        Token();
-        Token(std::string contents, tokenType type, FilePosition position);
-        virtual ~Token() = default;
         /**
-         * Returns the string representation of the Token
+         * @brief The default constructor for the token
+         */
+        Token();
+
+        /**
+         * @brief Constructor for the token
+         * @param contents The string contents of the token
+         * @param type The token type
+         * @param position The position the token appears in the file
+         */
+        Token(std::string contents, tokenType type, FilePosition position);
+
+        /**
+         * @brief Use default contructor
+         */
+        virtual ~Token() = default;
+
+        /**
+         * @brief Returns the string representation of the Token
          * @return The string representation of the Token
          */
         [[nodiscard]] virtual std::string toString() const;
@@ -115,9 +156,15 @@ namespace lexer {
      */
     struct StringToken : public Token {
         using Token::Token;
-        TokenList subTokens;
+
         /**
-         * Returns the string representation of the Token
+         * Sub-tokens of a string, which include multiple string literals and other tokens if there is any string
+         * interpolation.
+         */
+        TokenList subTokens;
+
+        /**
+         * @brief Returns the string representation of the Token
          * @return The string representation of the Token
          */
         [[nodiscard]] std::string toString() const override;
@@ -272,49 +319,49 @@ namespace lexer {
     TokenPtr lexCommandString(const std::string& file, FilePosition& position);
 
     /**
-     * Helper function that checks if a character is a valid first character for a variable
+     * @brief Helper function that checks if a character is a valid first character for a variable
      * @param character The character
      * @return True if the character is a valid first character for a variable
      */
     bool isFirstVariableCharacter(const char& character);
 
     /**
-     * Helper function that checks if a character is a valid variable character
+     * @brief Helper function that checks if a character is a valid variable character
      * @param character The character
      * @return True if the character is a valid variable character
      */
     bool isVariableCharacter(const char& character);
 
     /**
-     * Helper function that checks if a character is a letter
+     * @brief Helper function that checks if a character is a letter
      * @param character The character
      * @return True if the character is a letter
      */
     bool isLetter(const char& character);
 
     /**
-     * Helper function that checks if a character is a digit
+     * @brief Helper function that checks if a character is a digit
      * @param character The character
      * @return True if the character is a digit
      */
     bool isDigit(const char& character);
 
     /**
-     * Helper function that checks if a character is whitespace
+     * @brief Helper function that checks if a character is whitespace
      * @param character The character
      * @return True if the character is whitespace
      */
     bool isWhitespace(const char& character);
 
     /**
-     * Helper function that checks if a character is an illegal character
+     * @brief Helper function that checks if a character is an illegal character
      * @param character The character
      * @return If the character is an illegal character
      */
     bool isIllegalCharacter(const char& character);
 
     /**
-     * Helper function that gets the next token, and ensures its type is what is expected
+     * @brief Helper function that gets the next token, and ensures its type is what is expected
      * @param type The type of token being expected
      * @param file The file being lexed
      * @param position The current position in the file
@@ -324,7 +371,7 @@ namespace lexer {
     TokenPtr expectToken(const tokenType& type, const std::string& file, FilePosition& position, bool& isCommand);
 
     /**
-     * Helper function that lexes a statement
+     * @brief Helper function that lexes a statement
      * @param tokens The vector that will hold all the tokens
      * @param file The file being lexed
      * @param position The current position in the file
@@ -334,7 +381,7 @@ namespace lexer {
                       const tokenType& terminatingToken);
 
     /**
-     * Helper function that lexes an expression
+     * @brief Helper function that lexes an expression
      * @param tokens The vector that will hold all the tokens
      * @param file The file being lexed
      * @param position The current position in the file

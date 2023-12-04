@@ -22,6 +22,9 @@ struct LexerLexTests : ::testing::TestWithParam<std::tuple<std::string, std::str
  */
 struct LexerFailTests : ::testing::TestWithParam<std::string> {};
 
+/**
+ * Creates test suite, with list of all the files that need to be lexed with their expected token output
+ */
 INSTANTIATE_TEST_SUITE_P(
         LexerTestFiles, LexerLexTests,
         ::testing::Values(
@@ -64,6 +67,10 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("072.cmdr", "072.cmdr.expected"), std::make_tuple("073.cmdr", "073.cmdr.expected"),
                 std::make_tuple("074.cmdr", "074.cmdr.expected"), std::make_tuple("075.cmdr", "075.cmdr.expected")));
 
+/**
+ * Creates test suite, with list of all the files that need to be lexed that are expected to fail (as a result of a
+ * CommanderException being thrown)
+ */
 INSTANTIATE_TEST_SUITE_P(LexerTestFiles, LexerFailTests,
                          ::testing::Values("000.cmdr", "001.cmdr", "002.cmdr", "003.cmdr", "004.cmdr", "005.cmdr",
                                            "006.cmdr", "007.cmdr", "008.cmdr", "009.cmdr", "010.cmdr", "011.cmdr",
