@@ -13,9 +13,22 @@
 
 namespace util {
 
+    /**
+     * @brief Class that represents an exception that gets thrown as a result of an error when running Commander.
+     */
     class CommanderException : std::exception {
     public:
+        /**
+         * Constructor for the exception that stores a single message directly
+         * @param message The message of the exception
+         */
         CommanderException(std::string message) : _errorMessage(std::move(message)) {}
+
+        /**
+         * Constructor for the exception that creates the message with the include position in the file
+         * @param message The message of the exception
+         * @param position The position in the file that the exception occurs
+         */
         CommanderException(const std::string& message, const lexer::FilePosition& position)
             : _errorMessage(message + "\n" + position.toString()) {}
 

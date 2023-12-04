@@ -134,10 +134,7 @@ namespace lexer {
     std::string readFile(const std::string& filePath) {
         std::ifstream input(filePath);
         if (!input.is_open()) { throw util::CommanderException("File not found at " + filePath); }
-        std::string expectedOutput = std::string(std::istreambuf_iterator<char>(input),
-                                                 std::istreambuf_iterator<char>());
-        input.close();
-        return expectedOutput;
+        return std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
     }
 
     void tokenize(TokenList& tokens, const std::string& filePath) {

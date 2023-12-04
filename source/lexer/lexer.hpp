@@ -1,10 +1,11 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err58-cpp"
 /**
  * @file lexer.hpp
  * @brief Contains header content for lexer.cpp
  *
  */
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
 
 #ifndef COMMANDER_LEXER_HPP
 #define COMMANDER_LEXER_HPP
