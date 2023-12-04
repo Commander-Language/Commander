@@ -10,5 +10,15 @@
 // #include <Windows.h>
 
 namespace jobRunner {
+    /*
+     * CommandArgs Class
+     */
+    void CommandArgs::addArg(const std::string& arg) { _args.emplace_back(arg); }
+
+    char** CommandArgs::getArgs() {
+        _cargs.reserve(_args.size());
+        for (auto& arg : _args) _cargs.emplace_back(arg.data());
+        return _cargs.data();
+    }
 
 }  // namespace jobRunner
