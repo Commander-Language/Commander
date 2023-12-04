@@ -123,4 +123,78 @@ namespace jobRunner {
         return {stdoutString, stderrString, WEXITSTATUS(stat)};
     }
 
+    /*
+     * PipeCommands Class
+     */
+    JobInfo PipeCommands::_runPipeHelper() {
+        JobInfo result;
+
+        size_t const numOfCommands = _pipeline.size();
+        size_t const numOfFileDescriptors = (numOfCommands - 1) * 2;
+
+        // an array of pipes for the pipeline
+        int pipes[numOfFileDescriptors];
+
+        // keep track of indices of previous/current pipes
+        int prevPipeIndices[2] = {0, 1};
+        int currPipeIndices[2] = {0, 1};
+
+        // initialize our pipes
+        for (int i = 0; i < numOfFileDescriptors; i += 2) pipe2(&pipes[i], O_CLOEXEC);
+
+        for (int i = 0; i < numOfCommands; i++) {
+            int const pid = forkCheckErrors();
+            if (pid == 0) {
+                if (i == 0) {
+                    // dup just write end for first command
+                    dup2(pipes[currPipeIndices[1]], 1);
+                } else if (i == (numOfCommands - 1)) {
+                    // dup just read end for last command
+                    dup2(pipes[prevPipeIndices[0]], 0);
+                } else {
+                    // read from prevPipe and write to current pipe
+                    dup2(pipes[prevPipeIndices[0]], 0);
+                    dup2(pipes[currPipeIndices[1]], 1);
+                }
+
+                // close open pipes
+                for (int j = 0; j < numOfFileDescriptors; j++) close(pipes[j]);
+
+                _pipeline[i]->runCommand();  // shouldn't run a background process here
+            }
+
+            // set previous pipe indices and increment current pipe indices
+            prevPipeIndices[0] = currPipeIndices[0];
+            prevPipeIndices[1] = currPipeIndices[1];
+            currPipeIndices[0] += 2;
+            currPipeIndices[1] += 2;
+
+        }  // for
+
+        // close open pipes in parent
+        for (int j = 0; j < numOfFileDescriptors; j++) close(pipes[j]);
+        // wait for all processes
+        for (int i = 0; i < numOfCommands; i++) wait(nullptr);
+
+        return result;
+    }
+
+    void PipeCommands::addCommand(Command* cmd) { _pipeline.emplace_back(cmd); }
+
+    JobInfo PipeCommands::runPipeLine(bool save) {
+        if (save) {
+            if (_pipeline.size() == 1) return _pipeline[0]->runCommandSave();
+            return {};
+        }
+
+        if (_pipeline.size() == 1) {
+            int const pid = forkCheckErrors();
+            if (pid == 0) _pipeline[0]->runCommand();
+            wait(nullptr);
+            return {};
+        }
+        // pipeline is greater than one so run the helper
+        return _runPipeHelper();
+    }
+
 }  // namespace jobRunner

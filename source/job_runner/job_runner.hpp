@@ -113,7 +113,7 @@ namespace jobRunner {
          * @brief Run the pipeline
          *
          */
-        JobInfo runPipeLine();
+        JobInfo runPipeLine(bool save);
     };
 
     /**
