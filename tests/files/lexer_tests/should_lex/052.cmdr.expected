@@ -1,0 +1,5 @@
+TRUE 'true' 2:1
+DOUBLE_EQUALS '==' 2:6
+FALSE 'false' 2:9
+SEMICOLON ';' 2:14
+END_OF_FILE 3:1

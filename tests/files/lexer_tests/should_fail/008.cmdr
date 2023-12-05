@@ -1,0 +1,2 @@
+// Illegal character in string (ascii 8)
+var = '';

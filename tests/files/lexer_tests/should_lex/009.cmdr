@@ -1,0 +1,2 @@
+// Test that false lexes properly
+isFalse = false;

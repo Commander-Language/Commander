@@ -1,0 +1,2 @@
+// Test that a simple command lexes properly
+echo "Hello World!";

@@ -1,0 +1,2 @@
+// Test that read expressions lex properly
+fileContents = read "myfile.txt";

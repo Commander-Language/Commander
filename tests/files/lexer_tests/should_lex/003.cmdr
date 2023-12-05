@@ -1,0 +1,4 @@
+// Test that strings don't lex special characters into tokens
+echo "int float bool string array tuple funciton echo \"Hello, World!\"
+        length() [] () &  | alias = const while do for if else + - / %  ** += -=
+        /= %= **= \"UT\" + \"AH\" ${} (x) -> {return 0;} scan read \\\\ // ln\"";

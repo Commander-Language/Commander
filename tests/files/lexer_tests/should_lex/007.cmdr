@@ -1,0 +1,2 @@
+// Test that float values lex properly
+isFloat = 9.8;

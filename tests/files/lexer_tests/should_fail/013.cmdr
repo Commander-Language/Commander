@@ -1,0 +1,3 @@
+/* alias bad syntax
+    expected: alias <command_varible> = <command> */
+alias 3;

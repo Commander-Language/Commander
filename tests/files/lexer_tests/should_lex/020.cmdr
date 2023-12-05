@@ -1,0 +1,3 @@
+// Test that do while loops lex properly
+do{
+} while(true);

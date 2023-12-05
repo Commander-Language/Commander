@@ -1,0 +1,3 @@
+// Test that for loops lex properly
+for(x=0;x<0;x++){
+}

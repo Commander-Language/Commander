@@ -1,0 +1,7 @@
+WHILE 'while' 2:1
+LPAREN '(' 2:6
+TRUE 'true' 2:7
+RPAREN ')' 2:11
+LCURLY '{' 2:12
+RCURLY '}' 3:1
+END_OF_FILE 4:1

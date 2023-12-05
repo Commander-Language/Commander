@@ -3,6 +3,7 @@ Checks: '
     -*-avoid-c-arrays,
     -*-braces-around-statements,
     -*-non-private-member-variables-in-classes,
+    -*-statically-constructed-objects,
     -*-vararg,
     -altera-id-dependent-backward-branch,
     -altera-unroll-loops,

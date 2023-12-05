@@ -1,0 +1,6 @@
+// Test that statements across multiple lines lex properly
+alias
+x
+=
+ls
+;

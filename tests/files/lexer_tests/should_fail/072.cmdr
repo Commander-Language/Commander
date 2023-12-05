@@ -1,0 +1,2 @@
+// Lexer should fail because of an unterminated backtick
+a = $"Unterminated command in format {`echo "hello"} right here";

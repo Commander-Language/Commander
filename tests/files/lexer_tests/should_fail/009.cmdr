@@ -1,0 +1,3 @@
+/* command followed by <tuple_expr>
+    expected: <command_string>, <string> or <variable> */
+echo `echo '4'`;

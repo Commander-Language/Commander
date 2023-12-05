@@ -1,0 +1,2 @@
+// Test that function calls lex properly
+isFun();

@@ -1,0 +1,2 @@
+// Test that print statements lex properly
+print "Hello";

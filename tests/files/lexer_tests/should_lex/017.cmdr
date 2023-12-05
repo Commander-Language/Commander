@@ -1,0 +1,2 @@
+// Test that alias lexes properly
+alias ls = dir;

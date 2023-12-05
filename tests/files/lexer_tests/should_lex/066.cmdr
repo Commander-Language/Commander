@@ -1,0 +1,4 @@
+// Test that line endings for multi-line strings work for CRLF line endings
+a = 'Hi \
+there \
+bob';

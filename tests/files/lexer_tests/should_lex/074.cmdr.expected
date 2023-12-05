@@ -1,0 +1,9 @@
+VARIABLE 'fileContents' 2:1
+EQUALS '=' 2:14
+READ 'read' 2:16
+STRINGVAL 2:21
+[
+STRINGLITERAL 'myfile.txt' 2:22
+]
+SEMICOLON ';' 2:33
+END_OF_FILE 3:1
