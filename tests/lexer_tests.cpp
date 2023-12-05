@@ -23,8 +23,8 @@ void expectOutputEqualsTokens(const lexer::TokenList& tokens, const std::string&
 TEST_P(LexerLexTests, ShouldLexFileAndMatchExpectedExamples) {
     auto params = GetParam();
 
-    const std::string filePath = "tests/files/lexer_tests/should_lex/" + std::get<0>(params);
-    const std::string expectedFilePath = "tests/files/lexer_tests/should_lex/" + std::get<1>(params);
+    const std::string filePath = "../tests/files/lexer_tests/should_lex/" + std::get<0>(params);
+    const std::string expectedFilePath = "../tests/files/lexer_tests/should_lex/" + std::get<1>(params);
 
     try {
         lexer::TokenList tokens;
@@ -43,7 +43,7 @@ TEST_P(LexerLexTests, ShouldLexFileAndMatchExpectedExamples) {
  */
 TEST_P(LexerFailTests, ShouldNotLexFile) {
     auto param = GetParam();
-    const std::string filePath = "tests/files/lexer_tests/should_fail/" + param;
+    const std::string filePath = "../tests/files/lexer_tests/should_fail/" + param;
     lexer::TokenList tokens;
     ASSERT_THROW(lexer::tokenize(tokens, filePath), util::CommanderException);
 }

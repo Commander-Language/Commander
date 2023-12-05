@@ -1,13 +1,6 @@
 .idea/
 cmake-build-*/
 CMakeFiles
-CMakeCache.txt
-Makefile
-cmake_install.cmake
-lexerTests
 commander.cbp
 .cmake
 Testing
-CTestTestfile.cmake
-_deps/
-lib/

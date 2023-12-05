@@ -1,13 +1,12 @@
 #!/bin/bash
-# This script runs clang-format on all source files given below
-files=(
-  "source/lexer/lexer.cpp"
-  "source/lexer/lexer.hpp"
-  "source/util/commander_exception.cpp"
-  "source/util/commander_exception.hpp"
-  "tests/lexer_tests.cpp"
-  "tests/lexer_tests.hpp"
-)
-for file in "${files[@]}"; do
+
+# List of directories to format (recursively)
+directories=("source" "tests")
+
+# Use find to locate all .cpp and .hpp files recursively in specified directories
+files=$(find "${directories[@]}" -type f \( -name "*.cpp" -or -name "*.hpp" \))
+
+# Format all the found files
+for file in $files; do
   clang-format -i -style=file "$file"
 done

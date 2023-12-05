@@ -10,11 +10,11 @@
 #ifndef COMMANDER_LEXER_HPP
 #define COMMANDER_LEXER_HPP
 
-#include <fstream>
+#include <cstdint>
 #include <functional>
 #include <memory>
-#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace lexer {

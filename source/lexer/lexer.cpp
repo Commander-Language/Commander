@@ -4,8 +4,11 @@
  *
  */
 
-#include "lexer.hpp"
+#include <fstream>
+#include <sstream>
+
 #include "../util/commander_exception.hpp"
+#include "lexer.hpp"
 
 namespace lexer {
 
