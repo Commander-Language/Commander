@@ -3,10 +3,13 @@
  * @brief Job Runner Implementation
  */
 #include "job_runner.hpp"
+#include <iostream>
 /* Unix/Mac specific includes */
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <cerrno>
+#include <cstring>
 /* Windows specific includes */
 // #include <Windows.h>
 
@@ -17,8 +20,11 @@ namespace jobRunner {
     void CommandArgs::addArg(const std::string& arg) { _args.emplace_back(arg); }
 
     char** CommandArgs::getArgs() {
-        _cargs.reserve(_args.size());
+        _cargs.reserve(_args.size() + 1);
         for (auto& arg : _args) _cargs.emplace_back(arg.data());
+
+        // execvp expects a null terminated array
+        _cargs.emplace_back(nullptr);
         return _cargs.data();
     }
 
@@ -33,20 +39,26 @@ namespace jobRunner {
         switch (_type) {
             case commandType::EXEC: {
                 _execCommand();
+                break;
             }
             case commandType::BACKGROUND: {
                 // we double fork here, letting system deal with lifetime of process
                 int const pid = forkCheckErrors();
                 if (pid == 0) { _execCommand(); }
                 _exit(1);
+                break;
             }
             case commandType::BUILT_IN: {
                 // TODO(): Implement built ins
+                break;
             }
         }
     }
 
-    void Command::_execCommand() { execvp(_name.c_str(), _args.getArgs()); }
+    void Command::_execCommand() {
+        execvp(_name.c_str(), _args.getArgs());
+        _exit(1);
+    }
 
     JobInfo Command::runCommandSave() {
         // bufferSize
