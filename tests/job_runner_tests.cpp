@@ -104,8 +104,22 @@ TEST(JobRunnerTests, RunSaveReturnJob){
     SUCCEED();
 }
 TEST(JobRunnerTests, RunSaveReturnJob2){
-    jobRunner::Command cmdLS("cat", jobRunner::commandType::EXEC);
-    cmdLS.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
+    jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
+    cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
+
+    jobRunner::Job job;
+    job.addCommandToPipeline(&cmdCat);
+    job.setJobToSave(true);
+
+    jobRunner::JobInfo returnInfo = job.runJob();
+    std::cout << "Standard Output:\n" << std::get<0>(returnInfo) << "\n";
+    std::cout << "Standard Error:\n" << std::get<1>(returnInfo) << "\n";
+    std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
+    SUCCEED();
+}
+TEST(JobRunnerTests, RunReturnJob3){
+    jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
+    cmdLS.addArg("badDirectory/");
 
     jobRunner::Job job;
     job.addCommandToPipeline(&cmdLS);
@@ -117,13 +131,13 @@ TEST(JobRunnerTests, RunSaveReturnJob2){
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
-TEST(JobRunnerTests, RunReturnJob3){
-
-    jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
-    cmdLS.addArg("badDirectory/");
+TEST(JobRunnerTests, RunSaveReturnJob4){
+    // Need to save in a much bigger buffer for this cat
+    jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
+    cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat2.txt");
 
     jobRunner::Job job;
-    job.addCommandToPipeline(&cmdLS);
+    job.addCommandToPipeline(&cmdCat);
     job.setJobToSave(true);
 
     jobRunner::JobInfo returnInfo = job.runJob();

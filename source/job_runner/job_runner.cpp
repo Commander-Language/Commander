@@ -3,13 +3,11 @@
  * @brief Job Runner Implementation
  */
 #include "job_runner.hpp"
-#include <iostream>
+#include <cstring>
 /* Unix/Mac specific includes */
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <cerrno>
-#include <cstring>
 /* Windows specific includes */
 // #include <Windows.h>
 
@@ -60,10 +58,14 @@ namespace jobRunner {
         _exit(1);
     }
 
-    JobInfo Command::runCommandSave() {
-        // bufferSize
-        const int bufferSize = 4096;
+    void resizeArrayHelper(char** arr, size_t currentSize) {
+        char* newArr = new char[currentSize * 2];
+        memcpy(newArr, *arr, currentSize * sizeof(char));
+        delete[] *arr;
+        *arr = newArr;
+    }
 
+    JobInfo Command::runCommandSave() {
         // create two pipes; one for stdout and another for stderr
         int stdoutPipe[2];
         int stderrPipe[2];
@@ -88,9 +90,13 @@ namespace jobRunner {
         close(stdoutPipe[1]);
         close(stderrPipe[1]);
 
+        // bufferSizeOut
+        int bufferSizeOut = 4096;
+        int bufferSizeErr = 4096;
+
         // we will save output here
-        char stdoutBuffer[bufferSize];
-        char stderrBuffer[bufferSize];
+        char* stdoutBuffer = new char[bufferSizeOut];
+        char* stderrBuffer = new char[bufferSizeErr];
 
         bool stillReading = true;
 
@@ -102,13 +108,21 @@ namespace jobRunner {
         size_t stdoutRead;
 
         while (stillReading) {
-            stdoutRead = read(stdoutPipe[0], stdoutBuffer, sizeof(stdoutBuffer));
-            stderrRead = read(stderrPipe[0], stderrBuffer, sizeof(stderrBuffer));
+            stdoutRead = read(stdoutPipe[0], &stdoutBuffer[stdoutSize], bufferSizeOut - stdoutSize);
+            stderrRead = read(stderrPipe[0], &stderrBuffer[stderrSize], bufferSizeErr - stderrSize);
 
             if (stdoutRead == 0 && stderrRead == 0) stillReading = false;
-            else {
-                stderrSize += stderrRead;
-                stdoutSize += stdoutRead;
+
+            stderrSize += stderrRead;
+            stdoutSize += stdoutRead;
+
+            if (stdoutSize >= bufferSizeOut) {
+                resizeArrayHelper(&stdoutBuffer, bufferSizeOut);
+                bufferSizeOut *= 2;
+            }
+            if (stderrSize >= bufferSizeErr) {
+                resizeArrayHelper(&stderrBuffer, bufferSizeErr);
+                bufferSizeErr *= 2;
             }
         }
 
@@ -117,12 +131,16 @@ namespace jobRunner {
         close(stderrPipe[0]);
 
         // null terminate our char arrays
-        if (stderrSize > bufferSize) stderrBuffer[bufferSize - 1] = '\0';
+        if (stderrSize >= bufferSizeErr) {
+            resizeArrayHelper(&stderrBuffer, stderrSize);
+            stderrBuffer[stderrSize] = '\0';
+        }
         else
             stderrBuffer[stderrSize] = '\0';
-
-        if (stdoutSize > bufferSize - 1) stdoutBuffer[bufferSize - 1] = '\0';
-        else
+        if (stdoutSize >= bufferSizeOut) {
+            resizeArrayHelper(&stdoutBuffer, stdoutSize);
+            stdoutBuffer[stdoutSize] = '\0';
+        } else
             stdoutBuffer[stdoutSize] = '\0';
 
         // we want stats process

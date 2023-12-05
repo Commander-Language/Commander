@@ -155,5 +155,7 @@ namespace jobRunner {
      */
     int forkCheckErrors();
 
+    void resizeArrayHelper(char**, size_t);
+
 }  // namespace jobRunner
 #endif
