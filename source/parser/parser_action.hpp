@@ -42,6 +42,13 @@ namespace Parser {
         enum ActionType { SHIFT, REDUCE };
 
         /**
+         * @brief Default constructor.
+         * @details Necessary for use in a `std::unordered_map`.
+         *
+         */
+        ParserAction();
+
+        /**
          * @brief Class constructor for a shift action.
          *
          * @param nextState The next state, to which the parser needs to transition.
@@ -54,7 +61,7 @@ namespace Parser {
          * @param ruleSize The number of production items to pop from the stack, and to provide to the node constructor.
          * @param nodeConstructor A function that constructs a new AST node smart pointer.
          */
-        ParserAction(const size_t ruleSize, const NodeConstructor& nodeConstructor);
+        ParserAction(size_t ruleSize, const NodeConstructor& nodeConstructor);
 
         /**
          * @brief Whether the parser should perform a shift or a reduce action.
