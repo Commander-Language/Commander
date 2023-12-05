@@ -75,8 +75,8 @@ namespace jobRunner {
             close(stdoutPipe[0]);
             close(stderrPipe[0]);
 
-            dup2(stdoutPipe[1], 1);
-            dup2(stderrPipe[1], 2);
+            dup2(stdoutPipe[1], STDOUT_FILENO);
+            dup2(stderrPipe[1], STDERR_FILENO);
 
             close(stdoutPipe[1]);
             close(stderrPipe[1]);
@@ -159,14 +159,14 @@ namespace jobRunner {
             if (pid == 0) {
                 if (i == 0) {
                     // dup just write end for first command
-                    dup2(pipes[currPipeIndices[1]], 1);
+                    dup2(pipes[currPipeIndices[1]], STDOUT_FILENO);
                 } else if (i == (numOfCommands - 1)) {
                     // dup just read end for last command
-                    dup2(pipes[prevPipeIndices[0]], 0);
+                    dup2(pipes[prevPipeIndices[0]], STDIN_FILENO);
                 } else {
                     // read from prevPipe and write to current pipe
-                    dup2(pipes[prevPipeIndices[0]], 0);
-                    dup2(pipes[currPipeIndices[1]], 1);
+                    dup2(pipes[prevPipeIndices[0]], STDIN_FILENO);
+                    dup2(pipes[currPipeIndices[1]], STDOUT_FILENO);
                 }
 
                 // close open pipes
