@@ -9,7 +9,7 @@ COLON ':' 2:20
 INT 'int' 2:22
 LAMBDA '->' 2:26
 VARIABLE 'x' 2:29
-OP '+' 2:30
+ADD '+' 2:30
 INTVAL '1' 2:31
 SEMICOLON ';' 2:32
 END_OF_FILE 3:1

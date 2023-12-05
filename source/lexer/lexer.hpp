@@ -23,8 +23,11 @@ namespace lexer {
      * @brief Enumeration of different types of tokens.
      */
     enum tokenType : std::uint8_t {
+        ADD,
+        ADD_EQUALS,
         ALIAS,
         AMPERSAND,
+        AND,
         BACKTICK,
         BOOL,
         BREAK,
@@ -33,23 +36,42 @@ namespace lexer {
         COMMA,
         CONST,
         CONTINUE,
+        DECREMENT,
+        DIVIDE,
+        DIVIDE_EQUALS,
         DO,
+        DOUBLE_EQUALS,
         ELSE,
         END_OF_FILE,
+        EXPONENTIATE,
+        EXPONENTIATE_EQUALS,
         EQUALS,
         FALSE,
         FLOAT,
         FLOATVAL,
         FOR,
+        GREATER,
+        GREATER_EQUAL,
         IF,
         IMPORT,
+        INCREMENT,
         INT,
         INTVAL,
         LAMBDA,
         LCURLY,
+        LESSER,
+        LESSER_EQUAL,
         LPAREN,
         LSQUARE,
-        OP,
+        MINUS,
+        MINUS_EQUALS,
+        MODULO,
+        MODULO_EQUALS,
+        MULTIPLY,
+        MULTIPLY_EQUALS,
+        NOT,
+        NOT_EQUALS,
+        OR,
         PIPE,
         PRINT,
         PRINTLN,
@@ -181,17 +203,43 @@ namespace lexer {
              {"true", TRUE},   {"type", TYPE},     {"while", WHILE}, {"write", WRITE}});
 
     /**
-     * Vector of string token literal pairs that are not keywords
+     * Vector of string token literal pairs that are not keywords (order matters here; longest to shortest)
      */
-    const std::vector<std::pair<std::string, tokenType>> tokenLiterals(
-            {{"**=", OP},    {"->", LAMBDA},  {"==", OP},    {"!=", OP},    {"<=", OP},   {">=", OP},    {"&&", OP},
-             {"||", OP},     {"**", OP},      {"%=", OP},    {"/=", OP},    {"*=", OP},   {"-=", OP},    {"+=", OP},
-             {"++", OP},     {"--", OP},      {"+", OP},     {"-", OP},     {"*", OP},    {"/", OP},     {"%", OP},
-             {">", OP},      {"<", OP},       {"!", OP},     {":", COLON},  {",", COMMA}, {"=", EQUALS}, {"{", LCURLY},
-             {"[", LSQUARE}, {"?", QUESTION}, {"}", RCURLY}, {"]", RSQUARE}});
+    const std::vector<std::pair<std::string, tokenType>> tokenLiterals({{"**=", EXPONENTIATE_EQUALS},
+                                                                        {"->", LAMBDA},
+                                                                        {"==", DOUBLE_EQUALS},
+                                                                        {"!=", NOT_EQUALS},
+                                                                        {"<=", LESSER_EQUAL},
+                                                                        {">=", GREATER_EQUAL},
+                                                                        {"&&", AND},
+                                                                        {"||", OR},
+                                                                        {"**", EXPONENTIATE},
+                                                                        {"%=", MODULO_EQUALS},
+                                                                        {"/=", DIVIDE_EQUALS},
+                                                                        {"*=", MULTIPLY_EQUALS},
+                                                                        {"-=", MINUS_EQUALS},
+                                                                        {"+=", ADD_EQUALS},
+                                                                        {"++", INCREMENT},
+                                                                        {"--", DECREMENT},
+                                                                        {"+", ADD},
+                                                                        {"-", MINUS},
+                                                                        {"*", MULTIPLY},
+                                                                        {"/", DIVIDE},
+                                                                        {"%", MODULO},
+                                                                        {">", GREATER},
+                                                                        {"<", LESSER},
+                                                                        {"!", NOT},
+                                                                        {":", COLON},
+                                                                        {",", COMMA},
+                                                                        {"=", EQUALS},
+                                                                        {"{", LCURLY},
+                                                                        {"[", LSQUARE},
+                                                                        {"?", QUESTION},
+                                                                        {"}", RCURLY},
+                                                                        {"]", RSQUARE}});
 
     /**
-     * Vector of string token literal pairs specifically for commands
+     * Vector of string token literal pairs that can be parsed in commands as well as normally
      */
     const std::vector<std::pair<std::string, tokenType>> commandTokenLiterals(
             {{"`", BACKTICK}, {"(", LPAREN}, {")", RPAREN}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});

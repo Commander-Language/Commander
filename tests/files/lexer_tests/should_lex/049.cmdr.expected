@@ -1,4 +1,4 @@
-OP '!' 2:1
+NOT '!' 2:1
 TRUE 'true' 2:2
 SEMICOLON ';' 2:6
 END_OF_FILE 3:1

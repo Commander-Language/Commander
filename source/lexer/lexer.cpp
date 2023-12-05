@@ -11,10 +11,16 @@ namespace lexer {
 
     std::string tokenTypeToString(const tokenType& type) {
         switch (type) {
+            case ADD:
+                return "ADD";
+            case ADD_EQUALS:
+                return "ADD_EQUALS";
             case ALIAS:
                 return "ALIAS";
             case AMPERSAND:
                 return "AMPERSAND";
+            case AND:
+                return "AND";
             case BACKTICK:
                 return "BACKTICK";
             case BOOL:
@@ -31,12 +37,24 @@ namespace lexer {
                 return "CONST";
             case CONTINUE:
                 return "CONTINUE";
+            case DECREMENT:
+                return "DECREMENT";
+            case DIVIDE:
+                return "DIVIDE";
+            case DIVIDE_EQUALS:
+                return "DIVIDE_EQUALS";
             case DO:
                 return "DO";
+            case DOUBLE_EQUALS:
+                return "DOUBLE_EQUALS";
             case ELSE:
                 return "ELSE";
             case END_OF_FILE:
                 return "END_OF_FILE";
+            case EXPONENTIATE:
+                return "EXPONENTIATE";
+            case EXPONENTIATE_EQUALS:
+                return "EXPONENTIATE_EQUALS";
             case EQUALS:
                 return "EQUALS";
             case FALSE:
@@ -47,10 +65,16 @@ namespace lexer {
                 return "FLOATVAL";
             case FOR:
                 return "FOR";
+            case GREATER:
+                return "GREATER";
+            case GREATER_EQUAL:
+                return "GREATER_EQUAL";
             case IF:
                 return "IF";
             case IMPORT:
                 return "IMPORT";
+            case INCREMENT:
+                return "INCREMENT";
             case INT:
                 return "INT";
             case INTVAL:
@@ -59,12 +83,32 @@ namespace lexer {
                 return "LAMBDA";
             case LCURLY:
                 return "LCURLY";
+            case LESSER:
+                return "LESSER";
+            case LESSER_EQUAL:
+                return "LESSER_EQUAL";
             case LPAREN:
                 return "LPAREN";
             case LSQUARE:
                 return "LSQUARE";
-            case OP:
-                return "OP";
+            case MINUS:
+                return "MINUS";
+            case MINUS_EQUALS:
+                return "MINUS_EQUALS";
+            case MODULO:
+                return "MODULO";
+            case MODULO_EQUALS:
+                return "MODULO_EQUALS";
+            case MULTIPLY:
+                return "MULTIPLY";
+            case MULTIPLY_EQUALS:
+                return "MULTIPLY_EQUALS";
+            case NOT:
+                return "NOT";
+            case NOT_EQUALS:
+                return "NOT_EQUALS";
+            case OR:
+                return "OR";
             case PIPE:
                 return "PIPE";
             case PRINT:
@@ -381,6 +425,9 @@ namespace lexer {
                 position.column = 1;
                 position.line++;
                 if (character == '\n' || (character == '\r' && secondCharacter != '\n')) { position.index--; }
+                currentString << character;
+                if (character == '\r' && secondCharacter == '\n') { currentString << secondCharacter; }
+                continue;
             }
             // Handle escape characters
             if (character == '\\') {
@@ -611,12 +658,15 @@ namespace lexer {
                 }
                 const bool noSpace = indexBeforeSkip == position.index;
                 const TokenPtr nextToken = lexToken(file, position, isCommand, false);
-                // Determine if the next token implies a variable (i.e. it is LPAREN, COLON, EQUALS, or an OP ending in
-                // =).
+                // Determine if the next token implies a variable (i.e. it is LPAREN, COLON, EQUALS, or an operation
+                // token).
                 if (nextToken->type == LPAREN || nextToken->type == COLON || nextToken->type == EQUALS
-                    || (nextToken->type == OP
-                        && (nextToken->contents.back() == '='
-                            || (noSpace && (nextToken->contents == "++" || nextToken->contents == "--"))))) {
+                    || nextToken->type == EXPONENTIATE_EQUALS || nextToken->type == DOUBLE_EQUALS
+                    || nextToken->type == NOT_EQUALS || nextToken->type == LESSER_EQUAL
+                    || nextToken->type == GREATER_EQUAL || nextToken->type == MODULO_EQUALS
+                    || nextToken->type == DIVIDE_EQUALS || nextToken->type == MULTIPLY_EQUALS
+                    || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS
+                    || (noSpace && (nextToken->type == DECREMENT || nextToken->type == INCREMENT))) {
                     tokens.push_back(nextToken);
                 } else {
                     // If it isn't a variable, it's a command, so reset the position index so that the command string

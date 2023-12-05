@@ -1,7 +1,7 @@
 VARIABLE 'val' 2:1
 EQUALS '=' 2:4
 VARIABLE 'x' 2:5
-OP '-' 2:6
+MINUS '-' 2:6
 VARIABLE 'y' 2:7
 SEMICOLON ';' 2:8
 END_OF_FILE 3:1

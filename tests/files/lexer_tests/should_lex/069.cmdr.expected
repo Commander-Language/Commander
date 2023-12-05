@@ -16,15 +16,17 @@ COLON ':' 12:3
 INT 'int' 13:2
 EQUALS '=' 13:6
 INTVAL '1' 14:2
-OP '-' 14:4
+MINUS '-' 14:4
 INTVAL '2' 15:2
 SEMICOLON ';' 15:3
 RETURN 'return' 21:5
 STRINGVAL 21:12
 [
-STRINGLITERAL 'This is my multiline string.This is my message: ' 21:13
+STRINGLITERAL 'This is my multiline string.
+This is my message: ' 21:13
 VARIABLE 'msg' 24:4
-STRINGLITERAL 'That is all!' 25:4
+STRINGLITERAL '
+That is all!' 25:4
 ]
 SEMICOLON ';' 27:3
 RCURLY '}' 28:1
