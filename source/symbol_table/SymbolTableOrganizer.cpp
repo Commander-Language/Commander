@@ -25,12 +25,12 @@ SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer &otherTableOrgan
 
 void SymbolTableOrganizer::pushSymbolTable() {
     if(symbolTables.size() < 1) {
-        Scope headScope = new Scope();
-        symbolTables.push_back(&headScope);
+        Scope* headScope = new Scope();
+        symbolTables.push_back(headScope);
     }
     else {
-        Scope nextScope = new Scope(symbolTables.back());
-        symbolTables.push_back(&nextScope);
+        Scope* nextScope = new Scope(symbolTables.back());
+        symbolTables.push_back(nextScope);
     }
 }
 
