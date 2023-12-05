@@ -150,12 +150,19 @@ namespace jobRunner {
         void setJobToSave(bool);
     };
 
-    /*
+    /**
      * @brief fork() with error handling
      */
     int forkCheckErrors();
 
-    void resizeArrayHelper(char**, size_t);
+    /**
+     * @brief Resize the given array
+     * @param Array to be resized
+     * @param currentSize Number of elements in the array
+     * @details Creates a new array of double size, then copies old array data to it.
+     *          Then set the old array to this new array.
+     */
+    void resizeArrayHelper(char** arr, size_t currentSize);
 
 }  // namespace jobRunner
 #endif

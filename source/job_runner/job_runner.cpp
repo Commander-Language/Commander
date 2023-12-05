@@ -58,13 +58,6 @@ namespace jobRunner {
         _exit(1);
     }
 
-    void resizeArrayHelper(char** arr, size_t currentSize) {
-        char* newArr = new char[currentSize * 2];
-        memcpy(newArr, *arr, currentSize * sizeof(char));
-        delete[] *arr;
-        *arr = newArr;
-    }
-
     JobInfo Command::runCommandSave() {
         // create two pipes; one for stdout and another for stderr
         int stdoutPipe[2];
@@ -245,6 +238,13 @@ namespace jobRunner {
             throw "Bad fork";
         }
         return processID;
+    }
+
+    void resizeArrayHelper(char** arr, size_t currentSize) {
+        char* newArr = new char[currentSize * 2];
+        memcpy(newArr, *arr, currentSize * sizeof(char));
+        delete[] *arr;
+        *arr = newArr;
     }
 
 }  // namespace jobRunner
