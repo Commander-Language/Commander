@@ -3,6 +3,7 @@
  * @brief Job Runner Implementation
  */
 #include "job_runner.hpp"
+#include "builtins/builtins.hpp"
 #include <cstring>
 /* Unix/Mac specific includes */
 #include <fcntl.h>
@@ -17,13 +18,18 @@ namespace jobRunner {
      */
     void CommandArgs::addArg(const std::string& arg) { _args.emplace_back(arg); }
 
-    char** CommandArgs::getArgs() {
+    char** CommandArgs::getCArgs() {
         _cargs.reserve(_args.size() + 1);
         for (auto& arg : _args) _cargs.emplace_back(arg.data());
 
         // execvp expects a null terminated array
         _cargs.emplace_back(nullptr);
         return _cargs.data();
+    }
+    std::vector<std::string> CommandArgs::getArgs() {
+        std::vector<std::string> result;
+        for (auto& arg : _args) { result.emplace_back(arg); }
+        return result;
     }
 
     /*
@@ -36,25 +42,33 @@ namespace jobRunner {
     void Command::runCommand() {
         switch (_type) {
             case commandType::EXEC: {
-                _execCommand();
+                _execCommand();  // shouldn't return
                 break;
             }
             case commandType::BACKGROUND: {
                 // we double fork here, letting system deal with lifetime of process
                 int const pid = forkCheckErrors();
                 if (pid == 0) { _execCommand(); }
-                _exit(1);
                 break;
             }
             case commandType::BUILT_IN: {
-                // TODO(): Implement built ins
+                _execBuiltin();
                 break;
             }
         }
     }
-
+    void Command::_execBuiltin() {
+        // for right now use if statements
+        // find a better way
+        std::string const name = _args.getArgs()[0];
+        if (name == "scan") {
+            builtins::scan(_args.getArgs());
+        } else if (name == "print" || name == "println") {
+            builtins::print(_args.getArgs());
+        }
+    }
     void Command::_execCommand() {
-        execvp(_name.c_str(), _args.getArgs());
+        execvp(_name.c_str(), _args.getCArgs());
         _exit(1);
     }
 
@@ -127,8 +141,7 @@ namespace jobRunner {
         if (stderrSize >= bufferSizeErr) {
             resizeArrayHelper(&stderrBuffer, stderrSize);
             stderrBuffer[stderrSize] = '\0';
-        }
-        else
+        } else
             stderrBuffer[stderrSize] = '\0';
         if (stdoutSize >= bufferSizeOut) {
             resizeArrayHelper(&stdoutBuffer, stdoutSize);
@@ -140,8 +153,8 @@ namespace jobRunner {
         int stat;
         waitpid(processID, &stat, 0);
 
-        std::string stdoutString(stdoutBuffer);
-        std::string stderrString(stderrBuffer);
+        std::string const stdoutString(stdoutBuffer);
+        std::string const stderrString(stderrBuffer);
 
         return {stdoutString, stderrString, WEXITSTATUS(stat)};
     }

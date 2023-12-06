@@ -52,9 +52,13 @@ namespace jobRunner {
         void addArg(const std::string&);
 
         /**
-         * @brief Get the list of arguments
+         * @brief Get the list of arguments as C style array
          */
-        char** getArgs();
+        char** getCArgs();
+        /**
+         * @brief Get the list of arguments as C++ style vector
+         */
+        std::vector<std::string> getArgs();
     };
 
     /**
@@ -67,6 +71,11 @@ namespace jobRunner {
          * @details Should be called in a fork
          */
         void _execCommand();
+        /**
+         * @brief Helper method to execute a builtin
+         * @details Should be called in a fork
+         */
+        void _execBuiltin();
 
         const commandType _type;
         CommandArgs _args;
@@ -80,6 +89,8 @@ namespace jobRunner {
 
         /**
          * @brief Run this command
+         * @details Currently this should be run in a fork, but
+         *          might have to reconsider as we add more builtins
          */
         void runCommand();
 

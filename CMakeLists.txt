@@ -129,6 +129,7 @@ add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception
 
 target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
 
-add_executable(jobRunnerTests source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
+FILE(GLOB builtins source/job_runner/builtins/*.cpp)
+add_executable(jobRunnerTests ${builtins} source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
 target_link_libraries(jobRunnerTests GTest::gtest_main)
 gtest_discover_tests(jobRunnerTests)

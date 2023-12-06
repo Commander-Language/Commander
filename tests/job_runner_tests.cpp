@@ -2,15 +2,70 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <iostream>
-std::string getFileContents(std::string filePath){
+std::string getFileContents(std::string filePath) {
     std::ifstream file(filePath);
-    if(!file.is_open())
-        throw "Can't find file";
+    if (!file.is_open()) throw "Can't find file";
     std::stringstream buf;
     buf << file.rdbuf();
     return buf.str();
 }
-TEST(JobRunnerTests, RunSimpleJobCat){
+
+TEST(JobRunnerTests, RunBuiltinInPipe) {
+    jobRunner::Command cmdPrintln("println", jobRunner::commandType::BUILT_IN);
+    cmdPrintln.addArg("cat and dog");
+
+    jobRunner::Command cmdGrep("grep", jobRunner::commandType::EXEC);
+    cmdGrep.addArg("cat");
+
+    jobRunner::Command cmdWC("wc", jobRunner::commandType::EXEC);
+    cmdWC.addArg("-l");
+
+    jobRunner::Job job;
+    job.addCommandToPipeline(&cmdPrintln);
+    job.addCommandToPipeline(&cmdGrep);
+    job.addCommandToPipeline(&cmdWC);
+
+    job.runJob();
+    SUCCEED();
+}
+
+TEST(JobRunnerTests, RunBuiltin3) {
+    jobRunner::Command cmdPrintln("println", jobRunner::commandType::BUILT_IN);
+    cmdPrintln.addArg("Hello, world!");
+
+    jobRunner::Job job;
+    job.addCommandToPipeline(&cmdPrintln);
+
+    job.runJob();
+    SUCCEED();
+}
+TEST(JobRunnerTests, RunBuiltin2) {
+    std::streambuf* cinSave = std::cin.rdbuf();
+    std::istringstream input("Cats");
+    std::cin.rdbuf(input.rdbuf());
+
+    jobRunner::Command cmdScan("scan", jobRunner::commandType::BUILT_IN);
+    cmdScan.addArg("Hello, what is your favorite animal? ");
+
+    jobRunner::Job job;
+    job.addCommandToPipeline(&cmdScan);
+    job.runJob();
+
+    std::cin.rdbuf(cinSave);
+}
+
+TEST(JobRunnerTests, RunBuiltin) {
+    jobRunner::Command cmdPrint("print", jobRunner::commandType::BUILT_IN);
+    cmdPrint.addArg("Hello, world!");
+    cmdPrint.addArg("Hello");
+
+    jobRunner::Job job;
+    job.addCommandToPipeline(&cmdPrint);
+
+    job.runJob();
+    SUCCEED();
+}
+TEST(JobRunnerTests, RunSimpleJobCat) {
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
     cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
 
@@ -20,7 +75,7 @@ TEST(JobRunnerTests, RunSimpleJobCat){
     job.runJob();
     SUCCEED();
 }
-TEST(JobRunnerTests, RunSimpleJobLS){
+TEST(JobRunnerTests, RunSimpleJobLS) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-Ggh");
     cmdLS.addArg("--time-style=+");
@@ -32,7 +87,7 @@ TEST(JobRunnerTests, RunSimpleJobLS){
     job.runJob();
     SUCCEED();
 }
-TEST(JobRunnerTests, RunSimpleJobCat2){
+TEST(JobRunnerTests, RunSimpleJobCat2) {
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
     cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
 
@@ -43,7 +98,7 @@ TEST(JobRunnerTests, RunSimpleJobCat2){
 
     SUCCEED();
 }
-TEST(JobRunnerTests, RunBackgroundJob){
+TEST(JobRunnerTests, RunBackgroundJob) {
     jobRunner::Command cmdSleep("sleep", jobRunner::commandType::EXEC);
     cmdSleep.addArg("20s");
 
@@ -52,7 +107,7 @@ TEST(JobRunnerTests, RunBackgroundJob){
 
     SUCCEED();
 }
-TEST(JobRunnerTests, RunPipeJob1){
+TEST(JobRunnerTests, RunPipeJob1) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-la");
     cmdLS.addArg("../tests/files/job_runner_tests/testDirectory");
@@ -67,7 +122,7 @@ TEST(JobRunnerTests, RunPipeJob1){
     job.runJob();
     SUCCEED();
 }
-TEST(JobRunnerTests, RunPipeJob2){
+TEST(JobRunnerTests, RunPipeJob2) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-Ggh");
     cmdLS.addArg("-la");
@@ -87,7 +142,7 @@ TEST(JobRunnerTests, RunPipeJob2){
     job.runJob();
     SUCCEED();
 }
-TEST(JobRunnerTests, RunSaveReturnJob){
+TEST(JobRunnerTests, RunSaveReturnJob) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-Ggh");
     cmdLS.addArg("--time-style=+");
@@ -103,7 +158,7 @@ TEST(JobRunnerTests, RunSaveReturnJob){
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
-TEST(JobRunnerTests, RunSaveReturnJob2){
+TEST(JobRunnerTests, RunSaveReturnJob2) {
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
     cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
 
@@ -117,7 +172,7 @@ TEST(JobRunnerTests, RunSaveReturnJob2){
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
-TEST(JobRunnerTests, RunReturnJob3){
+TEST(JobRunnerTests, RunReturnJob3) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("badDirectory/");
 
@@ -131,7 +186,7 @@ TEST(JobRunnerTests, RunReturnJob3){
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
-TEST(JobRunnerTests, RunSaveReturnJob4){
+TEST(JobRunnerTests, RunSaveReturnJob4) {
     // Need to save in a much bigger buffer for this cat
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
     cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat2.txt");
