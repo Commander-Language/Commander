@@ -41,14 +41,23 @@ namespace jobRunner {
      */
     class CommandArgs {
     private:
+        /**
+         * @brief Vector to hold arguments to a string
+         */
         std::vector<std::string> _args;
+        /**
+         * @brief Vector to hold arguments to a string
+         * @details Like _cargs, but holds pointers of char
+         *          to be able to use in C functions
+         */
         std::vector<char*> _cargs;
 
     public:
         /**
          * @brief Add an arg
+         * @param  arg Argument of command to add to list of arguments
          */
-        void addArg(const std::string&);
+        void addArg(const std::string& arg);
 
         /**
          * @brief Get the list of arguments as C style array
@@ -70,21 +79,37 @@ namespace jobRunner {
          * @details Should be called in a fork
          */
         void _execCommand();
+
         /**
          * @brief Helper method to execute a builtin
          * @details Should be called in a fork
          */
         void _execBuiltin();
 
+        /**
+         * @brief Type of command
+         */
         const commandType _type;
+
+        /**
+         * @brief Arguments to a command
+         */
         CommandArgs _args;
+
+        /**
+         * @brief Name of command
+         */
         std::string _name;
 
     public:
         /**
          * @brief Constructor
+         * @param name The name of the command
+         * @param type Type of command
+         * @details Pushes the name of the command to the arguments,
+         *          since by convention the program name is the first argument
          */
-        Command(std::string, commandType);
+        Command(std::string name, commandType type);
 
         /**
          * @brief Run this command
@@ -101,8 +126,9 @@ namespace jobRunner {
 
         /**
          * @brief Add an argument to the command
+         * @param arg Argument of command to add
          */
-        void addArg(const std::string&);
+        void addArg(const std::string& arg);
     };
 
     /**
@@ -111,6 +137,9 @@ namespace jobRunner {
      */
     class PipeCommands {
     private:
+        /**
+         * @brief Vector of command pointers
+         */
         std::vector<Command*> _pipeline;
 
         /**
@@ -127,7 +156,7 @@ namespace jobRunner {
 
         /**
          * @brief Run the pipeline
-         *
+         * @param save Determine to save job information or not
          */
         JobInfo runPipeLine(bool save);
     };
@@ -139,7 +168,14 @@ namespace jobRunner {
      */
     class Job {
     private:
+        /**
+         * @brief The pipeline of commands
+         */
         PipeCommands _pipeline;
+
+        /**
+         * @brief Determine if we want to redirect job return information
+         */
         bool _save = false;
 
     public:
@@ -151,13 +187,15 @@ namespace jobRunner {
 
         /**
          * @brief Add a command to the pipeline
+         * @param command Command to add to pipeline
          */
-        void addCommandToPipeline(Command*);
+        void addCommandToPipeline(Command* command);
 
         /**
          * @brief Set if job should return job information
+         * @param save Set true or false to save job info
          */
-        void setJobToSave(bool);
+        void setJobToSave(bool save);
     };
 
     /**
@@ -167,7 +205,7 @@ namespace jobRunner {
 
     /**
      * @brief Resize the given array
-     * @param Array to be resized
+     * @param arr Array to be resized
      * @param currentSize Number of elements in the array
      * @details Creates a new array of double size, then copies old array data to it.
      *          Then set the old array to this new array.

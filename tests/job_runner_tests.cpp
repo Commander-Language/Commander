@@ -1,3 +1,7 @@
+/**
+ * @file job_runner_tests.cpp
+ * @brief Tests for the job runner
+ */
 #include "source/job_runner/job_runner.hpp"
 #include "source/util/commander_exception.hpp"
 #include <fstream>
@@ -10,7 +14,9 @@ std::string getFileContents(const std::string& filePath) {
     buf << file.rdbuf();
     return buf.str();
 }
-
+/**
+ * @brief Run a pipeline of more than one with a builtin command
+ */
 TEST(JobRunnerTests, RunBuiltinInPipe) {
     jobRunner::Command cmdPrintln("println", jobRunner::commandType::BUILT_IN);
     cmdPrintln.addArg("cat and dog");
@@ -29,7 +35,9 @@ TEST(JobRunnerTests, RunBuiltinInPipe) {
     job.runJob();
     SUCCEED();
 }
-
+/**
+ * @brief Run the builtin println
+ */
 TEST(JobRunnerTests, RunBuiltin3) {
     jobRunner::Command cmdPrintln("println", jobRunner::commandType::BUILT_IN);
     cmdPrintln.addArg("Hello, world!");
@@ -40,9 +48,12 @@ TEST(JobRunnerTests, RunBuiltin3) {
     job.runJob();
     SUCCEED();
 }
+/**
+ * @brief Run the builtin scan
+ */
 TEST(JobRunnerTests, RunBuiltin2) {
     std::streambuf* cinSave = std::cin.rdbuf();
-    std::istringstream input("Cats");
+    std::istringstream const input("Cats");
     std::cin.rdbuf(input.rdbuf());
 
     jobRunner::Command cmdScan("scan", jobRunner::commandType::BUILT_IN);
@@ -55,6 +66,9 @@ TEST(JobRunnerTests, RunBuiltin2) {
     std::cin.rdbuf(cinSave);
 }
 
+/**
+ * @brief Run the builtin print
+ */
 TEST(JobRunnerTests, RunBuiltin) {
     jobRunner::Command cmdPrint("print", jobRunner::commandType::BUILT_IN);
     cmdPrint.addArg("Hello, world!");
@@ -66,6 +80,9 @@ TEST(JobRunnerTests, RunBuiltin) {
     job.runJob();
     SUCCEED();
 }
+/**
+ * @brief Run a simple command
+ */
 TEST(JobRunnerTests, RunSimpleJobCat) {
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
     cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
@@ -76,6 +93,9 @@ TEST(JobRunnerTests, RunSimpleJobCat) {
     job.runJob();
     SUCCEED();
 }
+/**
+ * @brief Run a simple command with more than one argument
+ */
 TEST(JobRunnerTests, RunSimpleJobLS) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-Ggh");
@@ -88,6 +108,9 @@ TEST(JobRunnerTests, RunSimpleJobLS) {
     job.runJob();
     SUCCEED();
 }
+/**
+ * Run a simple command with big output to terminal
+ */
 TEST(JobRunnerTests, RunSimpleJobCat2) {
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
     cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
@@ -99,6 +122,9 @@ TEST(JobRunnerTests, RunSimpleJobCat2) {
 
     SUCCEED();
 }
+/**
+ * @brief Run a command in the background
+ */
 TEST(JobRunnerTests, RunBackgroundJob) {
     jobRunner::Command cmdSleep("sleep", jobRunner::commandType::EXEC);
     cmdSleep.addArg("20s");
@@ -108,6 +134,9 @@ TEST(JobRunnerTests, RunBackgroundJob) {
 
     SUCCEED();
 }
+/**
+ * @brief Run a pipe of commands of size two
+ */
 TEST(JobRunnerTests, RunPipeJob1) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-la");
@@ -123,6 +152,9 @@ TEST(JobRunnerTests, RunPipeJob1) {
     job.runJob();
     SUCCEED();
 }
+/**
+ * @brief Run a pipe of commands of size three
+ */
 TEST(JobRunnerTests, RunPipeJob2) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-Ggh");
@@ -143,6 +175,9 @@ TEST(JobRunnerTests, RunPipeJob2) {
     job.runJob();
     SUCCEED();
 }
+/**
+ * @brief Run a command job where we want to save return info
+ */
 TEST(JobRunnerTests, RunSaveReturnJob) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("-Ggh");
@@ -159,6 +194,9 @@ TEST(JobRunnerTests, RunSaveReturnJob) {
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
+/**
+ * @brief Run a command job where we want to save return info and big output
+ */
 TEST(JobRunnerTests, RunSaveReturnJob2) {
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
     cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
@@ -173,6 +211,10 @@ TEST(JobRunnerTests, RunSaveReturnJob2) {
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
+/**
+ * @brief Run a command job where we want to save return info, but
+ *        the command returns an error code
+ */
 TEST(JobRunnerTests, RunReturnJob3) {
     jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
     cmdLS.addArg("badDirectory/");
@@ -187,6 +229,10 @@ TEST(JobRunnerTests, RunReturnJob3) {
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
+/**
+ * @brief Run a command job where we want to save return info and output bigger than
+ *        buffer size
+ */
 TEST(JobRunnerTests, RunSaveReturnJob4) {
     // Need to save in a much bigger buffer for this cat
     jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);

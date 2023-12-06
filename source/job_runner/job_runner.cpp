@@ -139,16 +139,11 @@ namespace jobRunner {
         close(stderrPipe[0]);
 
         // null terminate our char arrays
-        if (stderrSize >= bufferSizeErr) {
-            resizeArrayHelper(&stderrBuffer, stderrSize);
-            stderrBuffer[stderrSize] = '\0';
-        } else
-            stderrBuffer[stderrSize] = '\0';
-        if (stdoutSize >= bufferSizeOut) {
-            resizeArrayHelper(&stdoutBuffer, stdoutSize);
-            stdoutBuffer[stdoutSize] = '\0';
-        } else
-            stdoutBuffer[stdoutSize] = '\0';
+        if (stderrSize >= bufferSizeErr) resizeArrayHelper(&stderrBuffer, stderrSize);
+        stderrBuffer[stderrSize] = '\0';
+
+        if (stdoutSize >= bufferSizeOut) resizeArrayHelper(&stdoutBuffer, stdoutSize);
+        stdoutBuffer[stdoutSize] = '\0';
 
         // we want stats process
         int stat;
@@ -216,7 +211,7 @@ namespace jobRunner {
         return result;
     }
 
-    void PipeCommands::addCommand(Command* cmd) { _pipeline.emplace_back(cmd); }
+    void PipeCommands::addCommand(Command* command) { _pipeline.emplace_back(command); }
 
     JobInfo PipeCommands::runPipeLine(bool save) {
         if (save) {
@@ -238,7 +233,7 @@ namespace jobRunner {
      */
     JobInfo Job::runJob() { return _pipeline.runPipeLine(_save); }
 
-    void Job::addCommandToPipeline(Command* cmd) { _pipeline.addCommand(cmd); }
+    void Job::addCommandToPipeline(Command* command) { _pipeline.addCommand(command); }
 
     void Job::setJobToSave(bool save) { _save = save; }
 
