@@ -4,6 +4,7 @@
  */
 #include "job_runner.hpp"
 #include "builtins/builtins.hpp"
+#include "source/util/commander_exception.hpp"
 #include <cstring>
 /* Unix/Mac specific includes */
 #include <fcntl.h>
@@ -69,7 +70,7 @@ namespace jobRunner {
     }
     void Command::_execCommand() {
         execvp(_name.c_str(), _args.getCArgs());
-        _exit(1);
+        throw util::CommanderException("Job Runner: error trying to exec command");
     }
 
     JobInfo Command::runCommandSave() {
@@ -246,10 +247,7 @@ namespace jobRunner {
      */
     int forkCheckErrors() {
         int const processID = fork();
-        if (processID < 0) {
-            // TODO: Throw CommanderException
-            throw "Bad fork";
-        }
+        if (processID < 0) { throw util::CommanderException("Job Runner: error trying to fork"); }
         return processID;
     }
 

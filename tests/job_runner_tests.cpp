@@ -1,10 +1,11 @@
 #include "source/job_runner/job_runner.hpp"
+#include "source/util/commander_exception.hpp"
 #include <fstream>
 #include <gtest/gtest.h>
 #include <iostream>
-std::string getFileContents(std::string filePath) {
+std::string getFileContents(const std::string& filePath) {
     std::ifstream file(filePath);
-    if (!file.is_open()) throw "Can't find file";
+    if (!file.is_open()) throw util::CommanderException("Job Runner Tests: Can't find file");
     std::stringstream buf;
     buf << file.rdbuf();
     return buf.str();
