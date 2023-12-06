@@ -265,7 +265,7 @@ namespace Parser {
              * @details Performs a calculation on the first query; saves results for subsequent queries.
              *
              * @param kernels The kernels for which to report the reachable kernels.
-             * @return The vector of all possible reachable kernels from the given kernel.
+             * @return The vector of all possible reachable kernels from the given kernels.
              */
             std::vector<Kernel> operator[](const std::vector<Kernel>& kernels);
 
