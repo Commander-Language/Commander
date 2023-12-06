@@ -9,9 +9,9 @@
 
 #include <cstdint>
 #include <memory>
-#include <vector>
-#include <string>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace Parser {
 
@@ -36,7 +36,28 @@ namespace Parser {
     /**
      * @brief The types of binop expressions
      */
-    enum Binop { LESSER, GREATER, LESSER_EQUAL, GREATER_EQUAL, MODULO, DIVIDE, MULTIPLY, SUBTRACT, ADD, EXPONENTIATE, AND, OR, EQUAL, NOT_EQUAL, ADD_EQUAL, SUBTRACT_EQUAL, MULTIPLY_EQUAL, DIVIDE_EQUAL, MODULO_EQUAL, EXPONENTIATE_EQUAL };
+    enum Binop {
+        LESSER,
+        GREATER,
+        LESSER_EQUAL,
+        GREATER_EQUAL,
+        MODULO,
+        DIVIDE,
+        MULTIPLY,
+        SUBTRACT,
+        ADD,
+        EXPONENTIATE,
+        AND,
+        OR,
+        EQUAL,
+        NOT_EQUAL,
+        ADD_EQUAL,
+        SUBTRACT_EQUAL,
+        MULTIPLY_EQUAL,
+        DIVIDE_EQUAL,
+        MODULO_EQUAL,
+        EXPONENTIATE_EQUAL
+    };
 
     /**
      * @brief Helper method that gets the string representation of the Binop enum type
@@ -112,7 +133,6 @@ namespace Parser {
      */
     class BindingNode : public ASTNode {
     public:
-
         /**
          * The variable name of the associated binding
          */
@@ -407,7 +427,6 @@ namespace Parser {
      */
     class CmdCmdNode : public CmdNode {
     public:
-
         /**
          * @brief Class constructor.
          * @details TODO: This.
@@ -436,7 +455,6 @@ namespace Parser {
      */
     class PipeCmdNode : public CmdNode {
     public:
-
         /**
          * The left command, whose output will be the input of the right command
          */
@@ -474,7 +492,6 @@ namespace Parser {
      */
     class IntExprNode : public ExprNode {
     public:
-
         /**
          * The integer value of the node
          */
@@ -500,7 +517,6 @@ namespace Parser {
      */
     class FloatExprNode : public ExprNode {
     public:
-
         /**
          * The double value of the floating point number of the node
          */
@@ -527,7 +543,6 @@ namespace Parser {
      */
     class BoolExprNode : public ExprNode {
     public:
-
         /**
          * The boolean value of the node
          */
@@ -554,7 +569,6 @@ namespace Parser {
      */
     class VarExprNode : public ExprNode {
     public:
-
         /**
          * The variable name
          */
@@ -581,7 +595,6 @@ namespace Parser {
      */
     class ArrayExprNode : public ExprNode {
     public:
-
         /**
          * The expressions that make up the array's values
          */
@@ -608,7 +621,6 @@ namespace Parser {
      */
     class ArrayIndexExprNode : public ExprNode {
     public:
-
         /**
          * The expression being indexed
          */
@@ -640,7 +652,6 @@ namespace Parser {
      */
     class TupleExprNode : public ExprNode {
     public:
-
         /**
          * The expressions that make up the tuple's values
          */
@@ -667,7 +678,6 @@ namespace Parser {
      */
     class TupleIndexExprNode : public ExprNode {
     public:
-
         /**
          * The expression being indexed
          */
@@ -699,7 +709,6 @@ namespace Parser {
      */
     class TernaryExprNode : public ExprNode {
     public:
-
         /**
          * The expression representing the boolean condition
          */
@@ -738,7 +747,6 @@ namespace Parser {
      */
     class UnOpExprNode : public ExprNode {
     public:
-
         /**
          * The type of Unop
          */
@@ -770,7 +778,6 @@ namespace Parser {
      */
     class BinOpExprNode : public ExprNode {
     public:
-
         /**
          * The type of Binop
          */
@@ -802,7 +809,6 @@ namespace Parser {
      */
     class CallExprNode : public ExprNode {
     public:
-
         /**
          * The function to call (usually a variable, but might be a lambda expression)
          */
@@ -835,7 +841,6 @@ namespace Parser {
      */
     class LambdaExprNode : public ExprNode {
     public:
-
         /**
          * The bindings representing the arguments of the function
          */
@@ -884,8 +889,7 @@ namespace Parser {
          * @param body The body of the function.
          * @param type The return type of the function.
          */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, const ExprNodePtr& body,
-                       const TypeNodePtr& type);
+        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, const ExprNodePtr& body, const TypeNodePtr& type);
 
         /**
          * @brief Gets the string representation of the binding node as an s-expression
@@ -901,7 +905,6 @@ namespace Parser {
      */
     class CmdExprNode : public ExprNode {
     public:
-
         /**
          * The command for the expression
          */
@@ -955,7 +958,8 @@ namespace Parser {
          * @param positive The statements to evaluate if true.
          * @param negative The statement to evaluate if false. (Defaults to `nullptr`).
          */
-        IfStmtNode(const std::vector<ExprNodePtr>& conditions, const std::vector<StmtNodePtr>& positive, const StmtNodePtr negative = nullptr);
+        IfStmtNode(const std::vector<ExprNodePtr>& conditions, const std::vector<StmtNodePtr>& positive,
+                   const StmtNodePtr negative = nullptr);
 
         /**
          * @brief Gets the string representation of the binding node as an s-expression
@@ -971,7 +975,6 @@ namespace Parser {
      */
     class ForStmtNode : public StmtNode {
     public:
-
         /**
          * The statement for the initialization step of the loop
          */
@@ -1017,7 +1020,6 @@ namespace Parser {
      */
     class WhileStmtNode : public StmtNode {
     public:
-
         /**
          * The condition expression
          */
@@ -1050,7 +1052,6 @@ namespace Parser {
      */
     class DoWhileStmtNode : public StmtNode {
     public:
-
         /**
          * The condition expression
          */
@@ -1083,7 +1084,6 @@ namespace Parser {
      */
     class ScopeStmtNode : public StmtNode {
     public:
-
         /**
          * The statements contained within the scope
          */
@@ -1110,7 +1110,6 @@ namespace Parser {
      */
     class CmdStmtNode : public StmtNode {
     public:
-
         /**
          * The command
          */
@@ -1137,7 +1136,6 @@ namespace Parser {
      */
     class AliasStmtNode : public StmtNode {
     public:
-
         /**
          * The alias name
          */

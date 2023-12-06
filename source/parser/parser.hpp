@@ -7,6 +7,8 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
+#include <stack>
+
 #include "ast_node.hpp"
 #include "parse_table.hpp"
 
