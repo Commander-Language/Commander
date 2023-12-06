@@ -1,19 +1,25 @@
 /**
- * TypeChecker.hpp contains the prototypes for methods in the TypeChecker class.
- * For an implementation, see TypeChecker.cpp
+ * @file type_checker.hpp
+ * @brief type_checker.hpp contains the prototypes for methods in the type_checker class
+ * @details For an implementation, see type_checker
  */
 
-#ifndef CPP_UTILITIES_TYPECHECKER_HPP
-#define CPP_UTILITIES_TYPECHECKER_HPP
+#ifndef CPP_UTILITIES_TYPE_CHECKER_HPP
+#define CPP_UTILITIES_TYPE_CHECKER_HPP
 #include <string>
-#include <map>
+#include <unordered_map>
 
 
 class TypeChecker {
 public:
     TypeChecker(); //Default Constructor
-    ~TypeChecker(); //Destructor
-    TypeChecker(TypeChecker *otherTypeChecker); //Copy-Constructor
+    ~TypeChecker(); //Default Destructor
+
+    /**
+     * TypeChecker(otherTypeChecker) is a copy-constructor for the TypeChecker class.
+     * @param otherTypeChecker - The TypeChecker object to copy from
+     */
+    TypeChecker(TypeChecker *otherTypeChecker);
 
     /**
      * getType() will attempt to return the variable type if present
@@ -23,7 +29,7 @@ public:
     std::string getType(std::string variableID); //Returns the type of a variable
 
     /**
-     * setOrUpdateType() will attempt to assign a new variable to the current TypeChecker or update the current variable
+     * setOrUpdateType() will attempt to assign a new variable to the current type_checker or update the current variable
      * @param variableID - The desired variableID to update or add
      * @param type - A string Type to associate the variable with
      */
@@ -40,14 +46,14 @@ public:
     bool verifyType(std::string variableID, std::string expected); //returns TRUE if the expected is equal to the actual type or can be used as the expected type
 
     /**
-     * hasVariable() returns a boolean value according to whether the specified variable is present in the TypeChecker
+     * hasVariable() returns a boolean value according to whether the specified variable is present in the type_checker
      * @param variableID - The desired variable to locate
      * @return TRUE if the variable exists, otherwise FALSE is returned
      */
     bool hasVariable(std::string variableID); //returns a boolean according to whether a specified variable exists
 
 private:
-    std::map<std::string, std::string> assignedTypes{}; //A dictionary which stores a string id and returns a string type
+    std::unordered_map<std::string, std::string> assignedTypes{}; //A dictionary which stores a string id and returns a string type
 
     /**
      * isVariantOfExpected is a helper method which determines if the provided type is compatible with the expected type
@@ -59,4 +65,4 @@ private:
 };
 
 
-#endif //CPP_UTILITIES_TYPECHECKER_HPP
+#endif // CPP_UTILITIES_TYPE_CHECKER_HPP
