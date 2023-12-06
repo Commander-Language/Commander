@@ -27,21 +27,12 @@ public:
     void popSymbolTable(); //remove a symbol table from the stack
 
     /**
-     * addVariable() will add a provided variable to the top of the stack (i.e. current scope)
+     * addOrUpdateVariable() will add a provided variable to the top of the stack (i.e. current scope)
      * For updating a previously-established variable, use updateVariable().
      * @param variableID - A string representing the variable's ID (e.g. cat)
      * @param data - An object which the variable should be associated with
      */
-    void addVariable(std::string variableID, int data); //add a variable to the current scope
-
-    /**
-     * updateVariable() will attempt to update a variable from anywhere in the scope. If the variable does not exist, nothing
-     * will be updated.
-     * @note - This method assumes no duplicate variables exist in the scope!
-     * @param variableID - A string representing the variable's ID
-     * @param data - A new object which the variable should be associated with
-     */
-    void updateVariable(std::string variableID, int data); //update a variable which may not be present in the current scope
+    void addOrUpdateVariable(std::string variableID, int data); //add a variable to the current scope
 
     /**
      * getScope() returns a pointer to the last scope in the SymbolTableOrganizer
@@ -69,6 +60,13 @@ public:
      * @return TRUE if the scope can be seen everywhere, otherwise FALSE is returned.
      */
     bool isScopeGlobal(); //return TRUE if the current scope is a global scope
+
+    /**
+     * getVariable() returns the data value of the requested item. This method will search the entire symbol table for the requested item
+     * @param variableID - A string representing the ID of a variable
+     * @return - data associated with the specified variable
+     */
+    int* getVariable(std::string variableID);
 
 private:
     std::vector<Scope*> symbolTables{}; //A vector containing each symbol table; some methods will use this to find a value while others will rely on Scope's recursiveness

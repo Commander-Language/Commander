@@ -13,8 +13,8 @@ TEST(SCOPETEST, addToScope) {
     Scope testScope = Scope();
     int testValue = 3;
     testScope.addOrUpdateVariable("cat", testValue);
-    EXPECT_TRUE(testScope.hasVariable("cat"));
-    EXPECT_FALSE(testScope.hasVariable("dog"));
+    EXPECT_TRUE(testScope.hasLocalVariable("cat"));
+    EXPECT_FALSE(testScope.hasLocalVariable("dog"));
 }
 
 TEST(SCOPETEST, scopeParents) {
@@ -75,24 +75,6 @@ TEST(SCOPESTRESSTEST, addStressTestLarge) {
     }
 }
 
-//TODO: fix
-//TEST(SCOPESTRESSTEST, recursionTest) {
-//    Scope head = Scope();
-//    int testData = 38;
-//    head.addOrUpdateVariable("cat", testData);
-//    Scope* previousScope = &head;
-//    Scope* currentScope = &head;
-//    for(int currentScope = 0; currentScope < 100; currentScope++) {
-//        Scope newScope = Scope(previousScope);
-//        currentScope = &newScope; //may need to change
-//        previousScope = &newScope;
-//    }
-//
-//    EXPECT_TRUE(*currentScope.hasVariable("cat"));
-//    EXPECT_FALSE(*currentScope.hasVariable("dog"));
-//}
-
-
 ////SYMBOLTABLEORGANIZER TESTS
 
 TEST(SYMORGTEST, pushTest) {
@@ -104,9 +86,22 @@ TEST(SYMORGTEST, pushTest) {
     EXPECT_FALSE(testOrg.isScopeGlobal());
 }
 
-//TEST(SYMORGTEST, pushStressTest) {
-//    //TODO:
-//}
+TEST(SYMORGTEST, pushStressTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    for(int currentScope = 0; currentScope < 100; currentScope++) {
+        testOrg.pushSymbolTable();
+    }
+
+    for(int currentScope = 100; currentScope > 0; currentScope--) {
+        if(currentScope == 1) {
+            EXPECT_TRUE(testOrg.isScopeGlobal());
+        }
+        else {
+            EXPECT_FALSE(testOrg.isScopeGlobal());
+        }
+        testOrg.popSymbolTable();
+    }
+}
 
 TEST(SYMORGTEST, globalTests) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
@@ -114,7 +109,6 @@ TEST(SYMORGTEST, globalTests) {
 
     testOrg.pushSymbolTable();
     EXPECT_TRUE(testOrg.isScopeGlobal());
-    //TODO: somewhere between here and pushSymbolTable(), a copy-contructor is called when it shouldn't
     testOrg.pushSymbolTable();
     EXPECT_FALSE(testOrg.isScopeGlobal());
 
@@ -125,9 +119,41 @@ TEST(SYMORGTEST, globalTests) {
 TEST(SYMORGTEST, addItemsTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
-    testOrg.getScope()->addOrUpdateVariable("cat", 3);
-    EXPECT_TRUE(testOrg.getScope()->hasVariable("cat"));
-    //std::string testString = "cat";
-    //int value = 3;
-    //testOrg.addVariable(testString, value);
+    testOrg.getScope()->addOrUpdateVariable("cat", 3); //first test: updating via the usage of getScope()
+    EXPECT_TRUE(testOrg.getScope()->hasLocalVariable("cat"));
+    EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 3);
+    testOrg.addOrUpdateVariable("dog", 6); //second test: updating via the usage of addVariable()
+    EXPECT_TRUE(testOrg.getScope()->hasLocalVariable("dog"));
+    EXPECT_EQ(*testOrg.getScope()->getVariable("dog"), 6);
+}
+
+TEST(SYMORGTEST, addItemsStressTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    for(int currentScope = 0; currentScope < 5; currentScope++) {
+        testOrg.pushSymbolTable();
+        for(int currentVariable = 0; currentVariable < 20; currentVariable++) {
+            testOrg.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
+        }
+    }
+
+    for(int currentScope = 0; currentScope < 5; currentScope++) {
+        for(int currentVariable = 0; currentVariable < 20; currentVariable++) {
+            EXPECT_TRUE(testOrg.varExistsInCurrentSymbolTable(std::to_string(currentVariable)));
+            EXPECT_EQ(*testOrg.getVariable(std::to_string(currentVariable)), currentVariable);
+        }
+        testOrg.popSymbolTable();
+    }
+}
+
+TEST(SYMORGTEST, recursionTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("cat", 8);
+
+    for(int currentScope = 0; currentScope < 99; currentScope++) {
+        testOrg.pushSymbolTable();
+    }
+
+    EXPECT_TRUE(testOrg.getScope()->hasGlobalVariable("cat"));
+    EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 8);
 }

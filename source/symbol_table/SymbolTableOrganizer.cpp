@@ -42,17 +42,8 @@ void SymbolTableOrganizer::popSymbolTable() {
     symbolTables.pop_back(); //despite the name, pop_back does not return the last item while removing it
 }
 
-void SymbolTableOrganizer::addVariable(std::string variableID, int data) {
+void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data) {
     symbolTables.back()->addOrUpdateVariable(variableID, data);
-}
-
-void SymbolTableOrganizer::updateVariable(std::string variableID, int data) {
-    for(int currentScope = 0; currentScope < symbolTables.size(); currentScope++) {
-        if(symbolTables[currentScope]->hasVariable(variableID)) {
-            symbolTables[currentScope]->addOrUpdateVariable(variableID, data);
-            return; //Quit early if we've updated our requested variable
-        }
-    }
 }
 
 Scope* SymbolTableOrganizer::getScope() {
@@ -63,17 +54,15 @@ Scope* SymbolTableOrganizer::getScope() {
 }
 
 bool SymbolTableOrganizer::varExistsInCurrentSymbolTable(std::string variableID) {
-    if(symbolTables.back()->hasVariable(variableID)) {
-        return true;
-    }
-    return false;
+    return symbolTables.back()->hasLocalVariable(variableID);
 }
 
 bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
-    if(symbolTables[symbolTables.size() - 1]->getVariable(variableID) == nullptr) {
-        return false;
-    }
-    return true;
+    return symbolTables.back()->hasGlobalVariable(variableID);
+}
+
+int* SymbolTableOrganizer::getVariable(std::string variableID) {
+    return symbolTables.back()->getVariable(variableID);
 }
 
 bool SymbolTableOrganizer::isScopeGlobal() {

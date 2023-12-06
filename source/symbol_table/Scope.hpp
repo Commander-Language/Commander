@@ -41,12 +41,19 @@ public:
     void addOrUpdateVariable(std::string variableID, int data);
 
     /**
-     * hasVariable returns a boolean value according to whether the specified variable exists in this scope.
+     * hasLocalVariable returns a boolean value according to whether the specified variable exists in this scope.
      * For scanning all scopes for a variable, use getVariable()
      * @param variableID - A string ID which the variable will be referenced by
      * @return - TRUE if the variable exists in the current scope, otherwise FALSE is returned
      */
-    bool hasVariable(std::string variableID);
+    bool hasLocalVariable(std::string variableID);
+
+    /**
+     * hasGlobalVariable returns a boolean value according to whether the entire scope collection contains the specified variable
+     * @param variableID - A string ID which the variable will be referenced by
+     * @return - TRUE if the variable exists in any scope, otherwise FALSE is returned
+     */
+    bool hasGlobalVariable(std::string variableID);
 
     /**
      * getVariable returns a pointer to the desired variable in the scope. If the variable does not exist in this scope,

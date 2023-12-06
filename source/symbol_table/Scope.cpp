@@ -31,11 +31,21 @@ void Scope::addOrUpdateVariable(std::string variableID, int data) {
     variableData.insert_or_assign(variableID, data);
 }
 
-bool Scope::hasVariable(std::string variableID) {
+bool Scope::hasLocalVariable(std::string variableID) {
     if(hasKey(variableID)) {
         return true;
     }
     return false;
+}
+
+bool Scope::hasGlobalVariable(std::string variableID) {
+    if(!hasKey(variableID)) {
+        if(parentScope != nullptr) {
+            return parentScope->hasGlobalVariable(variableID);
+        }
+        return false;
+    }
+    return true;
 }
 
 int* Scope::getVariable(std::string variableID) {
