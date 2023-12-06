@@ -11,7 +11,6 @@
  *          Missing features/Known Bugs TODO:
  *              1) Backtick for pipeline bigger than one Ex. `ls -la | grep *.txt | head`
  *              2) Background job for pipeline bigger than one Ex. ls -la | grep *.txt | head &
- *              3) Save return doesn't have dynamic memory. Max size for backtick is currently 4096
  *              4) Need to gracefully exit pipeline if process fails in middle of pipeline
  */
 
