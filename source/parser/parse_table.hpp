@@ -47,10 +47,10 @@ namespace Parser {
         ParserAction getNextAction(StateNum stateNum, lexer::tokenType tokenType);
 
         /**
-         * @brief After performing a reduction, reports the next state to use.
+         * @brief Given the top AST node on the stack, reports the next state to use.
          *
          * @param stateNum The current state of the parser.
-         * @param nodeType The type of the top AST node on the stack.
+         * @param nodeType The AST node type of the top AST node on the stack.
          * @return The next state, to which the parser will transition.
          */
         StateNum getNextState(StateNum stateNum, ASTNodeType nodeType);
