@@ -142,6 +142,10 @@ add_executable(parserTests tests/parser_tests.cpp)
 target_link_libraries(parserTests parser GTest::gtest_main)
 gtest_discover_tests(parserTests)
 
+add_executable(TypeCheckerTests tests/type_checker_tests.cpp source/type_checker/type_checker.cpp)
+target_link_libraries(TypeCheckerTests GTest::gtest_main)
+gtest_discover_tests(TypeCheckerTests)
+
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 add_executable(jobRunnerTests ${builtins} source/util/commander_exception.cpp source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
 target_link_libraries(jobRunnerTests GTest::gtest_main)
