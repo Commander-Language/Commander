@@ -248,6 +248,29 @@ TEST(JobRunnerTests, RunSaveReturnJob4) {
     std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
     SUCCEED();
 }
+/**
+ * @brief Run a command job where we want to save return info and output bigger than
+ *        buffer size
+ */
+TEST(JobRunnerTests, RunMockedCommand) {
+    jobRunner::Command cmdLS("ls", jobRunner::EXEC);
+    cmdLS.addArg("-la");
+    cmdLS.addArg("-h");
+
+    jobRunner::Command cmdGrep("grep", jobRunner::EXEC);
+    cmdGrep.addArg("C");
+
+    jobRunner::Command cmdWC("wc", jobRunner::EXEC);
+    cmdWC.addArg("-l");
+
+    jobRunner::Job job;
+    job.addCommandToPipeline(&cmdLS);
+    job.addCommandToPipeline(&cmdGrep);
+    job.addCommandToPipeline(&cmdWC);
+    job.setJobToMock(true);
+
+    job.runJob();
+}
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

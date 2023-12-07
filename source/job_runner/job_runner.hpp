@@ -63,6 +63,7 @@ namespace jobRunner {
          * @brief Get the list of arguments as C style array
          */
         char** getCArgs();
+
         /**
          * @brief Get the list of arguments as C++ style vector
          */
@@ -129,6 +130,12 @@ namespace jobRunner {
          * @param arg Argument of command to add
          */
         void addArg(const std::string& arg);
+
+        /**
+         * @brief Get args of command
+         * @details Just for mock (demo day)
+         */
+        CommandArgs getArgs();
     };
 
     /**
@@ -159,6 +166,12 @@ namespace jobRunner {
          * @param save Determine to save job information or not
          */
         JobInfo runPipeLine(bool save);
+
+        /**
+         * @brief Run the pipeline mocked
+         * @details Just for mock (demo day)
+         */
+        JobInfo runPipeLineMocked();
     };
 
     /**
@@ -178,6 +191,19 @@ namespace jobRunner {
          */
         bool _save = false;
 
+        /**
+         * @brief Determine if we want to mock the job
+         * @details Just for mock (demo day)
+         */
+        bool _mock = false;
+
+        /**
+         * @brief Run the job mocked
+         * @return Job Information (just return value in mock)
+         * @details Just for mock (demo day)
+         */
+        JobInfo runJobMocked();
+
     public:
         /**
          * @brief Run the job
@@ -196,6 +222,13 @@ namespace jobRunner {
          * @param save Set true or false to save job info
          */
         void setJobToSave(bool save);
+
+        /**
+         * @brief Set to mock a job instead of doing it ourselves
+         * @param mock A bool determining to mock the job or not
+         * @details Just for mock (demo day)
+         */
+        void setJobToMock(bool mock);
     };
 
     /**

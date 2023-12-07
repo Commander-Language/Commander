@@ -5,6 +5,7 @@
 #include "job_runner.hpp"
 #include "builtins/builtins.hpp"
 #include "source/util/commander_exception.hpp"
+#include <cstdlib>
 #include <cstring>
 /* Unix/Mac specific includes */
 #include <fcntl.h>
@@ -27,6 +28,7 @@ namespace jobRunner {
         _cargs.emplace_back(nullptr);
         return _cargs.data();
     }
+
     std::vector<std::string> CommandArgs::getArgs() {
         std::vector<std::string> result;
         for (auto& arg : _args) { result.emplace_back(arg); }
@@ -58,6 +60,7 @@ namespace jobRunner {
             }
         }
     }
+
     void Command::_execBuiltin() {
         // for right now use if statements
         // find a better way
@@ -68,6 +71,7 @@ namespace jobRunner {
             builtins::print(_args.getArgs());
         }
     }
+
     void Command::_execCommand() {
         execvp(_name.c_str(), _args.getCArgs());
         throw util::CommanderException("Job Runner: error trying to exec command");
@@ -155,6 +159,8 @@ namespace jobRunner {
         return {stdoutString, stderrString, WEXITSTATUS(stat)};
     }
 
+    CommandArgs Command::getArgs() { return _args; }
+
     /*
      * PipeCommands Class
      */
@@ -228,14 +234,39 @@ namespace jobRunner {
         // pipeline is greater than one so run the helper
         return _runPipeHelper();
     }
+
+    JobInfo PipeCommands::runPipeLineMocked() {
+        std::string command;
+        for (int i = 0; i < _pipeline.size(); i++) {
+            for (auto& arg : _pipeline[i]->getArgs().getArgs()) {
+                command.append(arg);
+                command.append(" ");
+            }
+            if (i != (_pipeline.size() - 1)) { command.append("| "); }
+        }
+
+        int returnCode = system(command.data());
+
+        return {"", "", returnCode};
+    }
+
     /*
      * Job Class
      */
-    JobInfo Job::runJob() { return _pipeline.runPipeLine(_save); }
+    JobInfo Job::runJob() {
+        if (_mock) {
+            return runJobMocked();
+        } else
+            return _pipeline.runPipeLine(_save);
+    }
+
+    JobInfo Job::runJobMocked() { return _pipeline.runPipeLineMocked(); }
 
     void Job::addCommandToPipeline(Command* command) { _pipeline.addCommand(command); }
 
     void Job::setJobToSave(bool save) { _save = save; }
+
+    void Job::setJobToMock(bool mock) { _mock = mock; }
 
     /*
      * Helper Methods
@@ -249,7 +280,7 @@ namespace jobRunner {
     void resizeArrayHelper(char** arr, size_t currentSize) {
         char* newArr = new char[currentSize * 2];
         memcpy(newArr, *arr, currentSize * sizeof(char));
-        delete[] *arr;
+        delete[] * arr;
         *arr = newArr;
     }
 
