@@ -1,14 +1,23 @@
 /**
- * SymbolTableTests contains test cases for the SymbolTableOrganizer and Scope classes.
+ * @file symbol_table_tests
+ * @brief symbol_table_tests contains the unit tests for the Scope and SymbolTableOrganizer classes
+ * @details Tests are separated into three suites:
+ *          SCOPETEST - tests the functionality of the Scope class
+ *          SCOPESTRESSTEST - inserts a large number of items into a Scope object, perform an operation, and validates the result
+ *          SYMORGTEST - tests the functionality of the SymbolTableOrganizer class
  */
 
-#include "SymbolTableTests.hpp"
 #include <string>
-#include "source/symbol_table/Scope.hpp"
-#include "source/symbol_table/SymbolTableOrganizer.hpp"
+#include "source/symbol_table/scope.hpp"
+#include "source/symbol_table/symbol_table_organizer.hpp"
 #include "gtest/gtest.h"
 
 //SCOPE TESTS
+
+/**
+ * @brief addToScope tests the functionality of addOrUpdateVariable()
+ * @details An example variable is added to a Scope object. The test expects one value, but is not expecting a second value
+ */
 TEST(SCOPETEST, addToScope) {
     Scope testScope = Scope();
     int testValue = 3;
@@ -17,6 +26,14 @@ TEST(SCOPETEST, addToScope) {
     EXPECT_FALSE(testScope.hasLocalVariable("dog"));
 }
 
+/**
+ * @brief scopeParents tests the parents of Scope objects
+ * @details Two Scope objects are added:
+ *          The first uses nullptr for it's parent
+ *          The second's parent pointer redirects to the first Scope
+ *
+ *          The actual pointer of the first Scope is expected to equal the second Scope's parent
+ */
 TEST(SCOPETEST, scopeParents) {
     Scope parentScope = Scope();
     Scope* parentPointer = &parentScope;
@@ -26,6 +43,14 @@ TEST(SCOPETEST, scopeParents) {
     EXPECT_EQ(parentPointer, childScope.getParentScopePointer());
 }
 
+/**
+ * @brief globalTest creates two constructors and checks their global status
+ * @details Two Scope objects are created:
+ *          The first Scope object has a nullptr parent
+ *          The second Scope object redirects to the first Scope object
+ *
+ *          These objects run isGlobal with the expectation that a nullptr parent is the head of a symbol table
+ */
 TEST(SCOPETEST, globalTest) {
     Scope parentScope = Scope();
     Scope childScope = Scope(&parentScope);
@@ -40,6 +65,9 @@ TEST(SCOPETEST, globalTest) {
     EXPECT_FALSE(otherChildScope.isGlobal());
 }
 
+/**
+ * @brief getVariableTest adds a variable with an arbitrary value to a Scope object and verifies it with getVariable
+ */
 TEST(SCOPETEST, getVariableTest) {
     int catValue = 8;
     int updatedCatValue = 14;
@@ -53,6 +81,9 @@ TEST(SCOPETEST, getVariableTest) {
     EXPECT_NE(8, *testScope.getVariable("cat"));
 }
 
+/**
+ * @brief addStressTestSmall adds 100 variables to a Scope object and validates them
+ */
 TEST(SCOPESTRESSTEST, addStressTestSmall) {
     Scope testScope = Scope();
     for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
@@ -64,6 +95,9 @@ TEST(SCOPESTRESSTEST, addStressTestSmall) {
     }
 }
 
+/**
+ * @brief addStressTestLarge acts similar to it's smaller counterpart, but adds and validates 10000 items
+ */
 TEST(SCOPESTRESSTEST, addStressTestLarge) {
     Scope testScope = Scope();
     for(int currentVariable = 0; currentVariable < 10000; currentVariable++) {
@@ -75,8 +109,11 @@ TEST(SCOPESTRESSTEST, addStressTestLarge) {
     }
 }
 
-////SYMBOLTABLEORGANIZER TESTS
+//SYMBOLTABLEORGANIZER TESTS
 
+/**
+ * @brief pushTest adds a Scope to a SymbolTable object and validates the global status of the scope
+ */
 TEST(SYMORGTEST, pushTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
@@ -86,6 +123,9 @@ TEST(SYMORGTEST, pushTest) {
     EXPECT_FALSE(testOrg.isScopeGlobal());
 }
 
+/**
+ * @brief pushStressTest adds 100 Scope objects to a SymbolTableOrganizer and validates them
+ */
 TEST(SYMORGTEST, pushStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     for(int currentScope = 0; currentScope < 100; currentScope++) {
@@ -103,6 +143,14 @@ TEST(SYMORGTEST, pushStressTest) {
     }
 }
 
+/**
+ * @brief globalTests tests Four conditions where a global status may yield an incorrect result
+ * @details Four cases are considered for the global status:
+ *          No Scope objects are present (Expected TRUE)
+ *          A single Scope is present (Expected TRUE)
+ *          Two Scope objects are present (Expected FALSE)
+ *          The second Scope is removed (Expected TRUE)
+ */
 TEST(SYMORGTEST, globalTests) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     EXPECT_TRUE(testOrg.isScopeGlobal());
@@ -116,6 +164,9 @@ TEST(SYMORGTEST, globalTests) {
     EXPECT_TRUE(testOrg.isScopeGlobal());
 }
 
+/**
+ * @brief addItemsTest adds a variable to a SymbolTableOrganizer and validates it value
+ */
 TEST(SYMORGTEST, addItemsTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
@@ -127,6 +178,11 @@ TEST(SYMORGTEST, addItemsTest) {
     EXPECT_EQ(*testOrg.getScope()->getVariable("dog"), 6);
 }
 
+/**
+ * @brief addItemsStressTest adds 20 items to 5 Scope objects and validates their values
+ * @details For each scope, 20 variables are added with an arbitrary value assigned to them. Five scopes are pushed in total
+ *          For each scope, a set of 20 variables are validated before calling popSymbolTable()
+ */
 TEST(SYMORGTEST, addItemsStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     for(int currentScope = 0; currentScope < 5; currentScope++) {
@@ -145,6 +201,14 @@ TEST(SYMORGTEST, addItemsStressTest) {
     }
 }
 
+/**
+ * @brief recursionTest tests the recursive nature of hasGlobalVariable() and getVariable()
+ * @details 100 Scope objects are pushed to the SymbolTableOrganizer:
+ *          The first Scope contains a variable "cat" with any value
+ *          99 empty Scopes are added in turn with each Scope referencing the previous
+ *          When hasGlobalVariable() and getVariable() are called, the Scope is expected to return a value present in the
+ *          First Scope
+ */
 TEST(SYMORGTEST, recursionTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
@@ -156,4 +220,7 @@ TEST(SYMORGTEST, recursionTest) {
 
     EXPECT_TRUE(testOrg.getScope()->hasGlobalVariable("cat"));
     EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 8);
+
+    EXPECT_FALSE(testOrg.getScope()->hasGlobalVariable("dog"));
+    EXPECT_EQ(testOrg.getScope()->getVariable("dog"), nullptr);
 }

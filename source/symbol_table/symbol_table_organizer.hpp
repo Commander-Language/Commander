@@ -1,10 +1,12 @@
 /**
- * SymbolTableOrganizer.h holds the prototypes for the SymbolTableOrganizer class
+ * @file symbol_table_organizer.hpp
+ * @brief symbol_table_organizer.hpp contains the prototypes for the SymbolTableOrganizer class
+ * @details For an implementation, see symbol_table_organizer.cpp
  */
 
-#ifndef CPP_UTILITIES_SYMBOLTABLEORGANIZER_HPP
-#define CPP_UTILITIES_SYMBOLTABLEORGANIZER_HPP
-#include "source/symbol_table/Scope.hpp"
+#ifndef CPP_UTILITIES_SYMBOL_TABLE_ORGANIZER_HPP
+#define CPP_UTILITIES_SYMBOL_TABLE_ORGANIZER_HPP
+#include "source/symbol_table/scope.hpp"
 #include <string>
 #include <vector>
 
@@ -12,17 +14,29 @@
 
 class SymbolTableOrganizer {
 public:
+    /**
+     * SymbolTableOrganizer() serves as a default constructor for the class
+     */
     SymbolTableOrganizer(); //Constructor
+
+    /**
+     * ~SymbolTableOrganizer() destructs all Scope objects being held before the organizer is removed
+     */
     ~SymbolTableOrganizer(); //Destructor
+
+    /**
+     * SymbolTableOrganizer(otherTableOrganizer) serves as a copy constructor for the SymbolTableOrganizer class
+     * @param otherTableOrganizer - The SymbolTableOrganizer to copy
+     */
     SymbolTableOrganizer(SymbolTableOrganizer &otherTableOrganizer); //Copy-Constructor
 
     /**
-     * pushSymbolTable() adds a new Scope object to the SymbolTables vector and updates its parent scope pointer
+     * pushSymbolTable() adds a new scope object to the SymbolTables vector and updates its parent scope pointer
      */
     void pushSymbolTable(); //Add a new symbol table to the stack
 
     /**
-     * popSymbolTable() removes the Scope object at the back of the SymbolTables vector
+     * popSymbolTable() removes the scope object at the back of the SymbolTables vector
      */
     void popSymbolTable(); //remove a symbol table from the stack
 
@@ -35,7 +49,7 @@ public:
     void addOrUpdateVariable(std::string variableID, int data); //add a variable to the current scope
 
     /**
-     * getScope() returns a pointer to the last scope in the SymbolTableOrganizer
+     * getScope() returns a pointer to the last scope in the symbol_table_organizer
      * @return - A pointer to the last scope object present or nullptr
      */
     Scope* getScope();
@@ -69,8 +83,8 @@ public:
     int* getVariable(std::string variableID);
 
 private:
-    std::vector<Scope*> symbolTables{}; //A vector containing each symbol table; some methods will use this to find a value while others will rely on Scope's recursiveness
+    std::vector<Scope*> symbolTables{}; //A vector containing each symbol table; some methods will use this to find a value while others will rely on scope's recursiveness
 };
 
 
-#endif //CPP_UTILITIES_SYMBOLTABLEORGANIZER_HPP
+#endif //CPP_UTILITIES_SYMBOL_TABLE_ORGANIZER_HPP

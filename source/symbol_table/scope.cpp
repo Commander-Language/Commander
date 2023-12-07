@@ -1,9 +1,10 @@
 /**
- * Scope.cpp serves as the implementation for the Scope class.
- * Scope contains a symbol table - a map which uses a string ID to return an object
+ * @file scope.cpp
+ * @brief scope.cpp contains implementations for the scope.hpp class
+ * @details For method prototypes, see scope.hpp
  */
 
-#include "Scope.hpp"
+#include "scope.hpp"
 
 //Default Constructor
 Scope::Scope() {
@@ -16,9 +17,7 @@ Scope::Scope(Scope* parent) {
 }
 
 //Destructor
-Scope::~Scope() {
-
-}
+Scope::~Scope() = default;
 
 //Copy Constructor
 Scope::Scope(Scope &otherScope) {
@@ -32,10 +31,7 @@ void Scope::addOrUpdateVariable(std::string variableID, int data) {
 }
 
 bool Scope::hasLocalVariable(std::string variableID) {
-    if(hasKey(variableID)) {
-        return true;
-    }
-    return false;
+    return hasKey(variableID);
 }
 
 bool Scope::hasGlobalVariable(std::string variableID) {

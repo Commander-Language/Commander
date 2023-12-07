@@ -124,6 +124,6 @@ include(GoogleTest)
 #      (Can be empty if all source files are specified in the the line above.)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
 
-add_executable(SymbolTableTests tests/SymbolTableTests.cpp source/symbol_table/Scope.cpp source/symbol_table/SymbolTableOrganizer.cpp)
+add_executable(SymbolTableTests tests/symbol_table_tests.cpp source/symbol_table/scope.cpp source/symbol_table/symbol_table_organizer.cpp)
 target_link_libraries(SymbolTableTests GTest::gtest_main)
 gtest_discover_tests(SymbolTableTests)

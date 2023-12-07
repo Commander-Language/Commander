@@ -1,5 +1,7 @@
 /**
- * Scope.hpp contains the prototypes for the Scope class. These prototypes contain basic data and methods, but no implementations
+ * @file scope.hpp
+ * @brief scope.hpp contains prototype methods for the scope class
+ * @details For an implementation, see scope.cpp
  */
 
 #ifndef CPP_UTILITIES_SCOPE_HPP
@@ -12,23 +14,23 @@
 class Scope {
 public:
     /**
-     * Scope() serves as a default constructor for the scope object. Its parent will default to nullptr
+     * scope() serves as a default constructor for the scope object. Its parent will default to nullptr
      */
     Scope();
 
     /**
-     * Scope(Scope* parent) is a constructor which specifies the parent scope object.
+     * scope(scope* parent) is a constructor which specifies the parent scope object.
      * @param parent - A pointer to the parent of the scope
      */
     Scope(Scope* parent);
 
     /**
-     * ~Scope() serves as a destructor for the Scope object
+     * scope() serves as a destructor for the scope object
      */
     ~Scope();
 
     /**
-     * Not to be confused with Scope(Scope* parent), this method serves as a copy constructor
+     * Not to be confused with scope(scope* parent), this method serves as a copy constructor
      * @param otherScope - The scope one wishes to copy
      */
     Scope(Scope &otherScope);
@@ -70,7 +72,7 @@ public:
     Scope* getParentScopePointer();
 
     /**
-     * isGlobal() will return a value according to whether the Scope has a parent
+     * isGlobal() will return a value according to whether the scope has a parent
      * @return - FALSE if the scope has a parent, TRUE if the scope returns a nullptr
      */
     bool isGlobal();
@@ -89,4 +91,4 @@ private:
 };
 
 
-#endif //CPP_UTILITIES_SCOPE_HPP
+#endif // CPP_UTILITIES_SCOPE_HPP

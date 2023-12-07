@@ -1,9 +1,10 @@
 /**
- * SymbolTableOrganizer is a class which holds and maintains Scope objects
- * These scopes can be accessed through the class
+ * @file symbol_table_organizer.cpp
+ * @brief symbol_table_organizer.cpp contains the implementation for the prototype methods in symbol_table_organizer.hpp
+ * @details For method prototypes, see symbol_table_organizer.hpp
  */
 
-#include "SymbolTableOrganizer.hpp"
+#include "symbol_table_organizer.hpp"
 
 //Constructor
 SymbolTableOrganizer::SymbolTableOrganizer() {
