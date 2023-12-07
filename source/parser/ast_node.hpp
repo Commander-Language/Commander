@@ -36,7 +36,7 @@ namespace Parser {
     /**
      * @brief The types of binop expressions
      */
-    enum Binop {
+    enum BinOpType {
         LESSER,
         GREATER,
         LESSER_EQUAL,
@@ -64,7 +64,7 @@ namespace Parser {
      * @param binop The binop to get the string version of
      * @return The string of the binop
      */
-    std::string binOpToString(Binop binop);
+    std::string binOpToString(BinOpType binop);
 
     /**
      * @brief Represents a single Abstract Syntax Tree node.
@@ -134,6 +134,14 @@ namespace Parser {
     class BindingNode : public ASTNode {
     public:
         /**
+         * @brief Class constructor.
+         *
+         * @param variable The name of the bound variable.
+         * @param type The type of the bound variable. (Defaults to `nullptr`.)
+         */
+        BindingNode(std::string variable, TypeNodePtr type = nullptr);
+
+        /**
          * The variable name of the associated binding
          */
         std::string variable;
@@ -183,7 +191,7 @@ namespace Parser {
          * @param bindings The list of binding nodes at the beginning.
          * @param binding The binding node at the end.
          */
-        BindingsNode(const std::vector<BindingNodePtr>& bindings);
+        BindingsNode(const std::vector<BindingNodePtr>& bindings, BindingNodePtr binding);
 
         /**
          * @brief Reports the type of this binding-list node.
@@ -191,6 +199,13 @@ namespace Parser {
          * @return `BINDINGS` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression.
+         *
+         * @return The s-expression string of the node.
+         */
+        [[nodiscard]] std::string sExpression() const override;
 
         /**
          * @brief The list of binding nodes that makes up this AST node.
@@ -272,6 +287,13 @@ namespace Parser {
         [[nodiscard]] ASTNodeType nodeType() const override;
 
         /**
+         * @brief Gets the string representation of the node as an s-expression.
+         *
+         * @return The s-expression string of the node.
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
          * @brief The list of expression nodes that makes up this AST node.
          *
          */
@@ -330,6 +352,13 @@ namespace Parser {
          * @return `EXPRS` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression.
+         *
+         * @return The s-expression string of the node.
+         */
+        [[nodiscard]] std::string sExpression() const override;
 
         /**
          * @brief The list of statement nodes that makes up this AST node.
@@ -572,6 +601,29 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
     };
 
+    class StringExprNode : public ExprNode {
+    public:
+        /**
+         * @brief Class constructor.
+         *
+         * @param stringNode The string node that makes up this expression.
+         */
+        StringExprNode(StringNodePtr stringNode);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression.
+         *
+         * @return The s-expression string of the node.
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief The string node that makes up this expression.
+         *
+         */
+        StringNodePtr stringNode;
+    };
+
     /**
      * @brief A boolean literal expression AST node.
      *
@@ -784,20 +836,37 @@ namespace Parser {
     class UnOpExprNode : public ExprNode {
     public:
         /**
-         * The type of unary operation
+         * @brief The type of unary operation being done.
          */
         UnOpType opType;
 
         /**
-         * Expression being operated on
+         * @brief The expression being operated on.
+         * @details Set to `nullptr` if the left-hand side is a variable.
          */
         ExprNodePtr expr;
 
         /**
-         * @brief Class constructor.
+         * @brief The variable being operated on.
+         * @details Set to `nullptr` if the left-hand side is an expression.
+         */
+        VariableNodePtr var;
+
+        /**
+         * @brief Class constructor for a unary operation on an expression.
          *
+         * @param opType The unary operation type being performed.
+         * @param expr The expression on which the unary operation is being performed.
          */
         UnOpExprNode(UnOpType opType, ExprNodePtr expr);
+
+        /**
+         * @brief Class constructor for a unary operation on a variable.
+         *
+         * @param opType The unary operation type being performed.
+         * @param var The variable on which the unary operation is being performed.
+         */
+        UnOpExprNode(UnOpType opType, VariableNodePtr var);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -815,12 +884,19 @@ namespace Parser {
         /**
          * The type of binary operation
          */
-        Binop opType;
+        BinOpType opType;
 
         /**
-         * @brief The expression on the right-hand side of the operator.
+         * @brief The expression on the left-hand side of the operator,
+         *     for expressions that don't set a variable.
          */
         ExprNodePtr leftExpr;
+
+        /**
+         * @brief The variable on the left-hand side of the operator,
+         *     for expressions that do set a variable.
+         */
+        VariableNodePtr leftVariable;
 
         /**
          * @brief The expression on the right-hand side of the operator.
@@ -829,10 +905,23 @@ namespace Parser {
 
         /**
          * @brief Class constructor.
-         * @details TODO: This.
+         * @details For binary operations that don't set a variable.
          *
+         * @param leftExpr The expression on the left-hand side of the operator.
+         * @param opType The type of operation being done.
+         * @param rightExpr The expression on the right-hand side of the operator.
          */
-        BinOpExprNode(ExprNodePtr leftExpr, Binop opType, ExprNodePtr rightExpr);
+        BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr);
+
+        /**
+         * @brief Class constructor.
+         * @details For binary operations that do set a variable.
+         *
+         * @param leftVariable The variable on the left-hand side of the operator.
+         * @param opType The type of operation being done.
+         * @param rightExpr The expression on the right-hand side of the operator.
+         */
+        BinOpExprNode(VariableNodePtr leftVariable, BinOpType opType, ExprNodePtr rightExpr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression

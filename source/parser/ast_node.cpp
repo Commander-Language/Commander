@@ -29,7 +29,7 @@ namespace Parser {
         }
     }
 
-    std::string binOpToString(Binop binop) {
+    std::string binOpToString(BinOpType binop) {
         switch (binop) {
             case LESSER:
                 return "LESSER";
@@ -100,15 +100,29 @@ namespace Parser {
 
     ASTNodeType TypeNode::nodeType() const { return ASTNodeType::TYPE; }
 
+    BindingNode::BindingNode(std::string variable, Parser::TypeNodePtr type)
+        : variable(std::move(variable)), type(std::move(type)) {}
+
     ASTNodeType BindingNode::nodeType() const { return ASTNodeType::BINDING; }
 
-    std::string BindingNode::sExpression() const { return "(Binding " + variable + " " + type->sExpression() + ")"; }
+    std::string BindingNode::sExpression() const {
+        return "(BindingNode " + variable + " " + type->sExpression() + ")";
+    }
 
     ASTNodeType BindingsNode::nodeType() const { return ASTNodeType::BINDINGS; }
 
+    std::string BindingsNode::sExpression() const {
+        std::stringstream result;
+        result << "(BindingsNode";
+        for (const auto& binding : bindings) { result << " " << binding->sExpression(); }
+        result << ")";
+        return result.str();
+    }
+
     BindingsNode::BindingsNode(BindingNodePtr binding) : bindings({std::move(binding)}) {}
 
-    BindingsNode::BindingsNode(const std::vector<BindingNodePtr>& bindings) : bindings(bindings) {}
+    BindingsNode::BindingsNode(const std::vector<BindingNodePtr>& bindings, BindingNodePtr binding)
+        : bindings(concat(bindings, std::move(binding))) {}
 
     ASTNodeType CmdNode::nodeType() const { return ASTNodeType::CMD; }
 
@@ -121,6 +135,14 @@ namespace Parser {
 
     ASTNodeType ExprsNode::nodeType() const { return ASTNodeType::EXPRS; }
 
+    std::string ExprsNode::sExpression() const {
+        std::stringstream result;
+        result << "(ExprsNode";
+        for (const auto& expr : exprs) { result << " " << expr->sExpression(); }
+        result << ")";
+        return result.str();
+    }
+
     ASTNodeType StmtNode::nodeType() const { return ASTNodeType::STMT; }
 
     StmtsNode::StmtsNode(Parser::StmtNodePtr stmt) : stmts({std::move(stmt)}) {}
@@ -129,6 +151,14 @@ namespace Parser {
         : stmts(concat(stmts, std::move(stmt))) {}
 
     ASTNodeType StmtsNode::nodeType() const { return ASTNodeType::STMTS; }
+
+    std::string StmtsNode::sExpression() const {
+        std::stringstream result;
+        result << "(StmtsNode";
+        for (const auto& stmt : stmts) { result << " " << stmt->sExpression(); }
+        result << ")";
+        return result.str();
+    }
 
     ASTNodeType StringNode::nodeType() const { return ASTNodeType::STRING; }
 
@@ -186,6 +216,12 @@ namespace Parser {
     FloatExprNode::FloatExprNode(double value) : value(value) {}
 
     std::string FloatExprNode::sExpression() const { return "(FloatExprNode " + std::to_string(value) + ")"; }
+
+    StringExprNode::StringExprNode(Parser::StringNodePtr stringNode) : stringNode(std::move(stringNode)) {}
+
+    std::string StringExprNode::sExpression() const {
+        return "(StringExpressionNode " + stringNode->sExpression() + ")";
+    }
 
     BoolExprNode::BoolExprNode(bool value) : value(value) {}
 
@@ -246,16 +282,24 @@ namespace Parser {
     UnOpExprNode::UnOpExprNode(Parser::UnOpType opType, Parser::ExprNodePtr expr)
         : opType(opType), expr(std::move(expr)) {}
 
+    UnOpExprNode::UnOpExprNode(Parser::UnOpType opType, Parser::VariableNodePtr var)
+        : opType(opType), var(std::move(var)) {}
+
     std::string UnOpExprNode::sExpression() const {
         return "(UnOpExprNode " + unOpToString(opType) + " " + expr->sExpression() + ")";
     }
 
-    BinOpExprNode::BinOpExprNode(Parser::ExprNodePtr leftExpr, Parser::Binop opType, Parser::ExprNodePtr rightExpr)
+    BinOpExprNode::BinOpExprNode(Parser::ExprNodePtr leftExpr, Parser::BinOpType opType, Parser::ExprNodePtr rightExpr)
         : leftExpr(std::move(leftExpr)), opType(opType), rightExpr(std::move(rightExpr)) {}
 
+    BinOpExprNode::BinOpExprNode(Parser::VariableNodePtr leftVariable, Parser::BinOpType opType,
+                                 Parser::ExprNodePtr rightExpr)
+        : leftVariable(std::move(leftVariable)), opType(opType), rightExpr(std::move(rightExpr)) {}
+
     std::string BinOpExprNode::sExpression() const {
-        return "(BinOpExprNode " + binOpToString(opType) + " " + leftExpr->sExpression() + " "
-             + rightExpr->sExpression() + ")";
+        return "(BinOpExprNode "
+             + (leftExpr == nullptr ? (ASTNodePtr)leftVariable : (ASTNodePtr)leftExpr)->sExpression() + " "
+             + binOpToString(opType) + " " + rightExpr->sExpression() + ")";
     }
 
     CallExprNode::CallExprNode(Parser::ExprNodePtr func, const std::vector<ExprNodePtr>& args)
