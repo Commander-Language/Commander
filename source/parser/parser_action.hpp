@@ -61,34 +61,34 @@ namespace Parser {
          * @param ruleSize The number of production items to pop from the stack, and to provide to the node constructor.
          * @param nodeConstructor A function that constructs a new AST node smart pointer.
          */
-        ParserAction(size_t ruleSize, const NodeConstructor& nodeConstructor);
+        ParserAction(size_t ruleSize, NodeConstructor nodeConstructor);
 
         /**
          * @brief Whether the parser should perform a shift or a reduce action.
          *
          */
-        const ActionType actionType;
+        ActionType actionType;
 
         /**
          * @brief The next state, to which the parser needs to transition.
          * @details Only relevant for shift actions.
          *
          */
-        const StateNum nextState;
+        StateNum nextState{};
 
         /**
          * @brief The number of production items to pop from the stack, and to provide to the node constructor.
          * @details Only relevant for reduce actions.
          *
          */
-        const size_t ruleSize;
+        size_t ruleSize{};
 
         /**
          * @brief A function that constructs a new AST node smart pointer.
          * @details Only relevant for reduce actions.
          *
          */
-        const std::optional<NodeConstructor> nodeConstructor;
+        std::optional<NodeConstructor> nodeConstructor;
     };
 
 }  //  namespace Parser
