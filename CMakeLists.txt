@@ -146,6 +146,9 @@ add_executable(TypeCheckerTests tests/type_checker_tests.cpp source/type_checker
 target_link_libraries(TypeCheckerTests GTest::gtest_main)
 gtest_discover_tests(TypeCheckerTests)
 
+add_executable(SymbolTableTests tests/symbol_table_tests.cpp source/symbol_table/scope.cpp source/symbol_table/symbol_table_organizer.cpp)
+target_link_libraries(SymbolTableTests GTest::gtest_main)
+
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 add_executable(jobRunnerTests ${builtins} source/util/commander_exception.cpp source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
 target_link_libraries(jobRunnerTests GTest::gtest_main)
