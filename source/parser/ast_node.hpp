@@ -19,19 +19,19 @@ namespace Parser {
      * @brief The overarching type of an AST node.
      *
      */
-    enum ASTNodeType { BINDING, BINDINGS, CMD, CMD_STRING, EXPR, EXPRS, PRGM, STMT, STMTS, STRING, TYPE };
+    enum ASTNodeType { BINDING, BINDINGS, CMD, EXPR, EXPRS, PRGM, STMT, STMTS, STRING, TYPE, VARIABLE };
 
     /**
-     * @brief The types of unop expressions
+     * @brief The types of unary operation expressions
      */
-    enum Unop { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
+    enum UnOpType { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
 
     /**
      * @brief Helper method that gets the string representation of the Unop enum type
      * @param unop The unop to get the string version of
      * @return The string of the unop
      */
-    std::string unopToString(const Unop& unop);
+    std::string unOpToString(UnOpType unop);
 
     /**
      * @brief The types of binop expressions
@@ -64,7 +64,7 @@ namespace Parser {
      * @param binop The binop to get the string version of
      * @return The string of the binop
      */
-    std::string binopToString(const Binop& binop);
+    std::string binOpToString(Binop binop);
 
     /**
      * @brief Represents a single Abstract Syntax Tree node.
@@ -171,9 +171,17 @@ namespace Parser {
     class BindingsNode : public ASTNode {
     public:
         /**
-         * @brief Class constructor.
+         * @brief Class constructor from a single binding.
          *
          * @param bindings The list of binding nodes that makes up this AST node.
+         */
+        BindingsNode(BindingNodePtr binding);
+
+        /**
+         * @brief Class constructor from a list of bindings, plus one more binding at the end.
+         *
+         * @param bindings The list of binding nodes at the beginning.
+         * @param binding The binding node at the end.
          */
         BindingsNode(const std::vector<BindingNodePtr>& bindings);
 
@@ -202,11 +210,6 @@ namespace Parser {
      */
     class CmdNode : public ASTNode {
     public:
-        /**
-         * The list of arguments for the command, consisting of variable expression nodes and strings nodes
-         */
-        std::vector<ASTNode> arguments;
-
         /**
          * @brief Reports the type of this command node.
          *
@@ -249,18 +252,17 @@ namespace Parser {
         /**
          * @brief Class constructor from a single expression.
          *
-         * @param stmt The single expression node that makes up this AST node.
+         * @param expr The single expression node that makes up this AST node.
          */
-        ExprsNode(const ExprNodePtr& stmt);
+        ExprsNode(ExprNodePtr expr);
 
         /**
          * @brief Class constructor from a list of expressions, plus one more expression.
          *
          * @param exprs The list of expression nodes that makes up this AST node.
-         * @param expr The expression to add to the end of the list of statements.
+         * @param expr The expression to add to the end of the list of expressions.
          */
-        ExprsNode(const std::vector<ExprNodePtr>& exprs, const ExprNodePtr& expr);
-
+        ExprsNode(const std::vector<ExprNodePtr>& exprs, ExprNodePtr expr);
 
         /**
          * @brief Reports the type of this expression-list node.
@@ -312,7 +314,7 @@ namespace Parser {
          *
          * @param stmt The single statement node that makes up this AST node.
          */
-        StmtsNode(const StmtNodePtr& stmt);
+        StmtsNode(StmtNodePtr stmt);
 
         /**
          * @brief Class constructor from a list of statement, plus one more statement.
@@ -320,7 +322,7 @@ namespace Parser {
          * @param stmts The list of statement nodes that makes up this AST node.
          * @param stmt The statement to add to the end of the list of statements.
          */
-        StmtsNode(const std::vector<StmtNodePtr>& stmts, const StmtNodePtr& stmt);
+        StmtsNode(const std::vector<StmtNodePtr>& stmts, StmtNodePtr stmt);
 
         /**
          * @brief Reports the type of this expression-list node.
@@ -350,13 +352,15 @@ namespace Parser {
      */
     class StringNode : public ASTNode {
     public:
-        /*
-         * The list of string literals in the string
+        /**
+         * @brief The list of string literals in the string
+         *
          */
         std::vector<std::string> literals;
 
-        /*
-         * The list of expressions in the string (from string interpolation)
+        /**
+         * @brief The list of expressions in the string (from string interpolation)
+         *
          */
         std::vector<ExprNodePtr> expressions;
 
@@ -382,8 +386,8 @@ namespace Parser {
      */
     class PrgmNode : public ASTNode {
     public:
-        /*
-         * All the statements in the program
+        /**
+         * @brief All the statements in the program
          */
         std::vector<StmtNodePtr> stmts;
 
@@ -409,6 +413,20 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
     };
 
+    /**
+     * @brief A variable AST node.
+     */
+    class VariableNode : public ASTNode {
+    public:
+        /**
+         * @brief Reports the type of this program node.
+         *
+         * @return `VARIABLE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    using VariableNodePtr = std::shared_ptr<VariableNode>;
+
 
     //  =================
     //  ||  Commands:  ||
@@ -421,11 +439,16 @@ namespace Parser {
     class CmdCmdNode : public CmdNode {
     public:
         /**
+         * The list of arguments for the command, consisting of variable expression nodes and strings nodes
+         */
+        std::vector<ASTNode> arguments;
+
+        /**
          * @brief Class constructor.
          * @details TODO: This.
          *
          */
-        CmdCmdNode();
+        //  CmdCmdNode();
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -442,11 +465,16 @@ namespace Parser {
     class AsyncCmdNode : public CmdNode {
     public:
         /**
+         * @brief The command to run asynchronously.
+         */
+        CmdNodePtr cmd;
+
+        /**
          * @brief Class constructor.
          *
          * @param cmd The command to run asynchronously.
          */
-        AsyncCmdNode(const CmdNodePtr& cmd);
+        AsyncCmdNode(CmdNodePtr cmd);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -478,7 +506,7 @@ namespace Parser {
          * @param leftCmd The "source" command on the left. Its output goes into the pipe.
          * @param rightCmd The "destination" command on the right. The pipe goes into its input.
          */
-        PipeCmdNode(const CmdNodePtr& leftCmd, const CmdNodePtr& rightCmd);
+        PipeCmdNode(CmdNodePtr leftCmd, CmdNodePtr rightCmd);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -577,16 +605,16 @@ namespace Parser {
     class VarExprNode : public ExprNode {
     public:
         /**
-         * The variable name
+         * The referenced variable.
          */
-        std::string variable;
+        VariableNodePtr variable;
 
         /**
          * @brief Class constructor.
          *
          * @param variable The variable to reference.
          */
-        VarExprNode(const std::string& variable);
+        VarExprNode(VariableNodePtr variable);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -631,19 +659,20 @@ namespace Parser {
         /**
          * The expression being indexed
          */
-        ExprNodePtr expression;
+        ExprNodePtr array;
 
         /**
-         * The expressions that make up the array indeces
+         * The expressions that make up the array indices
          */
-        std::vector<ExprNodePtr> expressions;
+        std::vector<ExprNodePtr> indexExprs;
 
         /**
          * @brief Class constructor.
          *
-         * @param expressions The elements that go inside the array.
+         * @param array The array into which we're indexing.
+         * @param expressions The indices inside the square brackets.
          */
-        ArrayIndexExprNode(const ExprNodePtr& expression, const std::vector<ExprNodePtr>& expressions);
+        ArrayIndexExprNode(ExprNodePtr array, const std::vector<ExprNodePtr>& indexExprs);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -688,19 +717,20 @@ namespace Parser {
         /**
          * The expression being indexed
          */
-        ExprNodePtr expression;
+        ExprNodePtr tuple;
 
         /**
          * The expression for the tuple index
          */
-        ExprNodePtr indexExpression;
+        ExprNodePtr index;
 
         /**
          * @brief Class constructor.
          *
-         * @param expressions The elements that go inside the array.
+         * @param tuple The tuple being indexed.
+         * @param index The index into the tuple.
          */
-        TupleIndexExprNode(const ExprNodePtr& expression, const ExprNodePtr& indexExpression);
+        TupleIndexExprNode(ExprNodePtr tuple, ExprNodePtr index);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -735,10 +765,10 @@ namespace Parser {
          * @brief Class constructor.
          *
          * @param condition The condition to evaluate.
-         * @param positive The expression to evaluate if the condition was true.
-         * @param negative The expression to evaluate if the condition was false.
+         * @param trueExpr The expression to evaluate if the condition was true.
+         * @param falseExpr The expression to evaluate if the condition was false.
          */
-        TernaryExprNode(const ExprNodePtr& condition, const ExprNodePtr& positive, const ExprNodePtr& negative);
+        TernaryExprNode(ExprNodePtr condition, ExprNodePtr trueExpr, ExprNodePtr falseExpr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -749,27 +779,25 @@ namespace Parser {
     };
 
     /**
-     * @brief Unary operator expression node.
-     *
+     * @brief Unary operation expression node.
      */
     class UnOpExprNode : public ExprNode {
     public:
         /**
-         * The type of Unop
+         * The type of unary operation
          */
-        Unop op;
+        UnOpType opType;
 
         /**
          * Expression being operated on
          */
-        ExprNodePtr expression;
+        ExprNodePtr expr;
 
         /**
          * @brief Class constructor.
-         * @details TODO: This.
          *
          */
-        UnOpExprNode();
+        UnOpExprNode(UnOpType opType, ExprNodePtr expr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -780,27 +808,31 @@ namespace Parser {
     };
 
     /**
-     * @brief Binary operator expression node.
-     *
+     * @brief Binary operation expression node.
      */
     class BinOpExprNode : public ExprNode {
     public:
         /**
-         * The type of Binop
+         * The type of binary operation
          */
-        Binop op;
+        Binop opType;
 
         /**
-         * Expression being operated on
+         * @brief The expression on the right-hand side of the operator.
          */
-        ExprNodePtr expression;
+        ExprNodePtr leftExpr;
+
+        /**
+         * @brief The expression on the right-hand side of the operator.
+         */
+        ExprNodePtr rightExpr;
 
         /**
          * @brief Class constructor.
          * @details TODO: This.
          *
          */
-        BinOpExprNode();
+        BinOpExprNode(ExprNodePtr leftExpr, Binop opType, ExprNodePtr rightExpr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -817,14 +849,14 @@ namespace Parser {
     class CallExprNode : public ExprNode {
     public:
         /**
-         * The function to call (usually a variable, but might be a lambda expression)
+         * @brief The function to call (usually a variable, but might be a lambda expression)
          */
-        ExprNodePtr function;
+        ExprNodePtr func;
 
         /**
-         * The arguments to pass into the function
+         * @brief The arguments to pass into the function
          */
-        std::vector<ExprNodePtr> arguments;
+        std::vector<ExprNodePtr> args;
 
         /**
          * @brief Class constructor.
@@ -832,7 +864,7 @@ namespace Parser {
          * @param func The function to call (usually just a variable name).
          * @param args The arguments for the function call.
          */
-        CallExprNode(const ExprNodePtr& func, const std::vector<ExprNodePtr>& args);
+        CallExprNode(ExprNodePtr func, const std::vector<ExprNodePtr>& args);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -854,40 +886,23 @@ namespace Parser {
         std::vector<BindingNodePtr> bindings;
 
         /**
-         * The statement of the function
+         * The body of the function
          */
-        StmtNodePtr statement;
+        StmtNodePtr body;
 
         /**
          * The (optional) return type of the function
          */
-        TypeNodePtr& type;
+        TypeNodePtr type;
 
         /**
-         * @brief Untyped class constructor.
-         *
-         * @param bindings The bindings (arguments) of the function.
-         * @param body The body of the function.
-         */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, const StmtNodePtr& body);
-
-        /**
-         * @brief Untyped class constructor for lambdas with just an expression for the body.
-         *
-         * @param bindings The bindings (arguments) of the function.
-         * @param body The body of the function.
-         */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, const ExprNodePtr& body);
-
-        /**
-         * @brief Class constructor with a return type.
+         * @brief Class constructor with a statement body (the default).
          *
          * @param bindings The bindings (arguments) of the function.
          * @param body The body of the function.
          * @param type The return type of the function.
          */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, const std::vector<StmtNodePtr>& body,
-                       const TypeNodePtr& type);
+        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, StmtNodePtr body, TypeNodePtr type = nullptr);
 
         /**
          * @brief Class constructor with a return type for lambdas with just an expression for the body.
@@ -896,7 +911,7 @@ namespace Parser {
          * @param body The body of the function.
          * @param type The return type of the function.
          */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, const ExprNodePtr& body, const TypeNodePtr& type);
+        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, ExprNodePtr body, TypeNodePtr type = nullptr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -913,16 +928,11 @@ namespace Parser {
     class CmdExprNode : public ExprNode {
     public:
         /**
-         * The command for the expression
-         */
-        CmdNodePtr cmd;
-
-        /**
          * @brief Class constructor.
          *
          * @param cmd The command to run.
          */
-        CmdExprNode(const CmdNodePtr& cmd);
+        CmdExprNode(CmdNodePtr cmd);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -930,44 +940,17 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * The command for the expression
+         */
+        CmdNodePtr cmd;
     };
 
 
     //  ===================
     //  ||  Statements:  ||
     //  ===================
-
-    /**
-     * @brief A variable statement node.
-     *
-     */
-    class VarStmtNode : public StmtNode {
-    public:
-        /**
-         * The variable name
-         */
-        std::string variable;
-
-        /**
-         * The expression representing the value of the variable
-         */
-        ExprNodePtr value;
-
-        /**
-         * @brief Class constructor.
-         *
-         * @param variable The variable's name
-         * @param value The value of the variable as an expression
-         */
-        VarStmtNode(const std::string& variable, const ExprNodePtr& value);
-
-        /**
-         * @brief Gets the string representation of the node as an s-expression
-         *
-         * @return The s-expression string of the node
-         */
-        [[nodiscard]] std::string sExpression() const override;
-    };
 
     /**
      * @brief An `if` statement node.
@@ -978,27 +961,27 @@ namespace Parser {
         /**
          * The expressions representing the boolean conditions
          */
-        std::vector<ExprNodePtr> conditions;
+        std::vector<ExprNodePtr> conds;
 
         /**
-         * The statements that are evalauated when the conditions are true
+         * The statements that are evaluated when the conditions are true
          */
-        std::vector<StmtNodePtr> statements;
+        std::vector<StmtNodePtr> trueStmts;
 
         /**
-         * The statement that is evaluated when all the conditions are false
+         * The statements that are evaluated when all the conditions are false
          */
-        StmtNodePtr falseStatement;
+        StmtNodePtr falseStmt;
 
         /**
          * @brief Class constructor.
          *
-         * @param conditions The conditions to test.
-         * @param positive The statements to evaluate if true.
-         * @param negative The statement to evaluate if false. (Defaults to `nullptr`).
+         * @param conds The conditions to test.
+         * @param trueStmts The statements to evaluate if true.
+         * @param negStmts The statement to evaluate if false. (Defaults to `nullptr`).
          */
-        IfStmtNode(const std::vector<ExprNodePtr>& conditions, const std::vector<StmtNodePtr>& positive,
-                   const StmtNodePtr negative = nullptr);
+        IfStmtNode(const std::vector<ExprNodePtr>& conds, std::vector<StmtNodePtr> trueStmts,
+                   StmtNodePtr falseStmt = nullptr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1017,7 +1000,7 @@ namespace Parser {
         /**
          * The statement for the initialization step of the loop
          */
-        StmtNodePtr initialization;
+        StmtNodePtr initial;
 
         /**
          * The condition expression
@@ -1042,8 +1025,7 @@ namespace Parser {
          * @param update The variable-update expression in the parentheses.
          * @param body The body of the loop.
          */
-        ForStmtNode(const StmtNodePtr& initial, const ExprNodePtr& condition, const StmtNodePtr& update,
-                    const StmtNodePtr& body);
+        ForStmtNode(StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update, StmtNodePtr body);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1075,7 +1057,7 @@ namespace Parser {
          * @param condition The condition to test.
          * @param body The body of the loop.
          */
-        WhileStmtNode(const ExprNodePtr& condition, const StmtNodePtr& body);
+        WhileStmtNode(ExprNodePtr condition, StmtNodePtr body);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1105,9 +1087,9 @@ namespace Parser {
          * @brief Class constructor.
          *
          * @param condition The condition to test.
-         * @param stmts The body of the loop.
+         * @param body The body of the loop.
          */
-        DoWhileStmtNode(const ExprNodePtr& condition, const StmtNodePtr& stmts);
+        DoWhileStmtNode(ExprNodePtr condition, StmtNodePtr body);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1115,6 +1097,31 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+    };
+
+    /**
+     * @brief A return statement.
+     */
+    class ReturnStmtNode : public StmtNode {
+    public:
+        /**
+         * @brief Class constructor.
+         *
+         * @param retExpr The expression that's evaluated and returned.
+         */
+        ReturnStmtNode(ExprNodePtr retExpr);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief The expression that's evaluated and returned.
+         */
+        ExprNodePtr retExpr;
     };
 
     /**
@@ -1159,7 +1166,7 @@ namespace Parser {
          *
          * @param command The command to run.
          */
-        CmdStmtNode(const CmdNodePtr& command);
+        CmdStmtNode(CmdNodePtr command);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1188,10 +1195,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
-         * @param variable The variable name.
+         * @param variable The new alias name.
          * @param command The alias's command.
          */
-        AliasStmtNode(const std::string& variable, const CmdNodePtr& command);
+        AliasStmtNode(std::string alias, CmdNodePtr command);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1213,12 +1220,6 @@ namespace Parser {
     class IntTypeNode : public TypeNode {
     public:
         /**
-         * @brief Class constructor.
-         *
-         */
-        IntTypeNode();
-
-        /**
          * @brief Gets the string representation of the node as an s-expression
          *
          * @return The s-expression string of the node
@@ -1232,12 +1233,6 @@ namespace Parser {
      */
     class FloatTypeNode : public TypeNode {
     public:
-        /**
-         * @brief Class constructor.
-         *
-         */
-        FloatTypeNode();
-
         /**
          * @brief Gets the string representation of the node as an s-expression
          *
@@ -1253,11 +1248,16 @@ namespace Parser {
     class ArrayTypeNode : public TypeNode {
     public:
         /**
+         * @brief The type of the sub-items of this array type.
+         */
+        TypeNodePtr subtype;
+
+        /**
          * @brief Class constructor.
          *
          * @param subtype The type of the array's items.
          */
-        ArrayTypeNode(const TypeNodePtr& subtype);
+        ArrayTypeNode(TypeNodePtr subtype);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1274,11 +1274,47 @@ namespace Parser {
     class TupleTypeNode : public TypeNode {
     public:
         /**
+         * @brief subtypes The type of each of the tuple's items.
+         */
+        std::vector<TypeNodePtr> subtypes;
+
+        /**
          * @brief Class constructor.
          *
          * @param subtypes The type of each of the tuple's items.
          */
         TupleTypeNode(const std::vector<TypeNodePtr>& subtypes);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+    };
+
+
+    //  ==================
+    //  ||  Variables:  ||
+    //  ==================
+
+    /**
+     * @brief A variable made of just an identifier.
+     */
+    class IdentVariableNode : public VariableNode {
+    public:
+        /**
+         * @brief The name of the variable.
+         *
+         */
+        std::string varName;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param varName The name of the variable.
+         */
+        IdentVariableNode(std::string varName);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
