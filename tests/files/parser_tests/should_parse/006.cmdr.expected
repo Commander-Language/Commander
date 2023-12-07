@@ -1,0 +1,2 @@
+(PrgmNode
+	(VarStmtNode isTrue (BoolExprNode true)))

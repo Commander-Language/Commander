@@ -1,0 +1,2 @@
+(PrgmNode
+	(VarStmtNode isFloat (FloatExprNode 9.8)))

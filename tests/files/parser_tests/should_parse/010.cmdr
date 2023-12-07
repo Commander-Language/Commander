@@ -1,0 +1,2 @@
+// Test that arrays parse properly
+isArray = [1, 2, 3];

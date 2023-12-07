@@ -1,0 +1,2 @@
+// Test that float values parse properly
+isFloat = 9.8;

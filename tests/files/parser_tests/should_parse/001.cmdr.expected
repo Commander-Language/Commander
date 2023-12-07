@@ -1,0 +1,3 @@
+(PrgmNode
+	(VarStmtNode five (IntExprNode 5))
+	(CmdCmdNode echo (StringNode '2 + 3 = ') (VarExprNode five)))

@@ -1,0 +1,2 @@
+// Test that tuples parse properly
+isTuple = (1, true, "hello");

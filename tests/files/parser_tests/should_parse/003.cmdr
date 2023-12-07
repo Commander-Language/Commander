@@ -1,0 +1,2 @@
+// Test simple alias statement parses correctly
+alias x = ls;

@@ -76,16 +76,10 @@ namespace Parser {
 
     std::string BindingNode::sExpression() const { return "(Binding " + variable + " " + type->sExpression() + ")"; }
 
-    std::string CmdNode::sExpression() const {
-        std::ostringstream builder;
-        for (const ASTNode& arg : arguments) { builder << " " << arg.sExpression(); }
-        return "(CmdNode" + builder.str() + ")";
-    }
-
     std::string StringNode::sExpression() const {
         std::ostringstream builder;
         for (int i = 0; i < (int)literals.size(); i++) {
-            builder << " " << literals[i];
+            builder << " '" << literals[i] << "'";
             if (i < (int)expressions.size()) { builder << " " << expressions[i]->sExpression(); }
         }
         return "(StringNode" + builder.str() + ")";
@@ -93,8 +87,20 @@ namespace Parser {
 
     std::string PrgmNode::sExpression() const {
         std::ostringstream builder;
-        for (const StmtNodePtr& stmt : stmts) { builder << " " << stmt->sExpression(); }
+        for (const StmtNodePtr& stmt : stmts) { builder << "\n\t" << stmt->sExpression(); }
         return "(PrgmNode" + builder.str() + ")";
+    }
+
+    std::string CmdCmdNode::sExpression() const {
+        std::ostringstream builder;
+        for (const ASTNode& arg : arguments) { builder << " " << arg.sExpression(); }
+        return "(CmdCmdNode" + builder.str() + ")";
+    }
+
+    std::string AsyncCmdNode::sExpression() const {
+        std::ostringstream builder;
+        for (const ASTNode& arg : arguments) { builder << " " << arg.sExpression(); }
+        return "(AsyncCmdNode" + builder.str() + ")";
     }
 
     std::string PipeCmdNode::sExpression() const {
@@ -166,6 +172,10 @@ namespace Parser {
 
     std::string CmdExprNode::sExpression() const { return "(CmdExprNode " + cmd->sExpression() + ")"; }
 
+    std::string VarStmtNode::sExpression() const {
+        return "(VarStmtNode " + variable + " " + value->sExpression() + ")";
+    }
+
     std::string IfStmtNode::sExpression() const {
         std::ostringstream builder;
         for (int i = 0; i < (int)conditions.size(); i++) {
@@ -190,7 +200,7 @@ namespace Parser {
 
     std::string ScopeStmtNode::sExpression() const {
         std::ostringstream builder;
-        for (const StmtNodePtr& stmt : stmts) { builder << " " << stmt->sExpression(); }
+        for (const StmtNodePtr& stmt : stmts) { builder << "\n\t" << stmt->sExpression(); }
         return "(ScopeStmtNode " + builder.str() + ")";
     }
 
