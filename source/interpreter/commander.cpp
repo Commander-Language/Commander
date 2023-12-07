@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <variant>
+#include <map>
 #include "../lexer/lexer.hpp"
 #include "../parser/parser.hpp"
 #include "../util/commander_exception.hpp"
@@ -41,7 +43,29 @@ int main(int argc, char** argv) {
                 continue;
             }
             //TODO: Run script
-
+            std::map<std::string, std::variant<long, double, bool>> variables;
+            for (const Parser::ASTNodePtr& node : nodes) {
+                if (node->nodeType() == Parser::ASTNodeType::STMTS) {
+                    switch (node->nodeType()) {
+                        // Basic commands
+                        case Parser::ASTNodeType::CMD:
+                            // TODO
+                            break;
+                        // Variables
+                        case Parser::ASTNodeType::VARIABLE:
+                            // TODO
+                            break;
+                        // Expressions (math, boolean, variables, strings and string interpolation)
+                        case Parser::ASTNodeType::EXPRS:
+                            // TODO
+                            break;
+                        // User I/O (need to handle read, write, scan, print)
+                        case Parser::ASTNodeType::STMT:
+                            // TODO
+                            break;
+                    }
+                }
+            }
         }
         return 0;
     } catch (const util::CommanderException& e) {
