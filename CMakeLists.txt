@@ -127,3 +127,7 @@ add_executable(commander source/interpreter/commander.cpp source/lexer/lexer.cpp
 
 add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
 target_link_libraries(lexerTests GTest::gtest_main)
+
+add_executable(TypeCheckerTests tests/type_checker_tests.cpp source/type_checker/type_checker.cpp)
+target_link_libraries(TypeCheckerTests GTest::gtest_main)
+gtest_discover_tests(TypeCheckerTests)
