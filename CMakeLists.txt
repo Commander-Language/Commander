@@ -133,7 +133,17 @@ include(GoogleTest)
 #      (Can be empty if all source files are specified in the the line above.)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
 
+add_library(parser source/parser/parser.cpp
+        source/parser/ast_node.cpp
+        source/parser/grammar.cpp
+        source/parser/parse_table.cpp
+        source/parser/parser_action.cpp
+        source/util/combine_hashes.cpp
+)
+
+
 add_executable(commander source/interpreter/commander.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp)
+target_link_libraries(commander parser)
 
 add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
 target_link_libraries(lexerTests GTest::gtest_main)
