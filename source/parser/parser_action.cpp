@@ -8,10 +8,11 @@
 
 namespace Parser {
 
-    ParserAction::ParserAction() : actionType(SHIFT) {}
+    ParserAction::ParserAction() : actionType(ERROR) {}
 
     ParserAction::ParserAction(Parser::ParserAction::StateNum nextState) : actionType(SHIFT), nextState(nextState) {}
 
     ParserAction::ParserAction(size_t ruleSize, Parser::ParserAction::NodeConstructor nodeConstructor)
         : actionType(REDUCE), ruleSize(ruleSize), nodeConstructor(std::move(nodeConstructor)) {}
+
 }  //  namespace Parser

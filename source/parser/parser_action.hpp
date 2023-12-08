@@ -36,14 +36,13 @@ namespace Parser {
         using NodeConstructor = std::function<ASTNodePtr(const ProductionItemList&)>;
 
         /**
-         * @brief Whether the parser should perform a shift or a reduce action.
-         *
+         * @brief Whether the parser should perform a shift or a reduce action, or whether there's an error.
          */
-        enum ActionType { SHIFT, REDUCE };
+        enum ActionType { SHIFT, REDUCE, ERROR };
 
         /**
          * @brief Default constructor.
-         * @details Necessary for use in a `std::unordered_map`.
+         * @details Necessary for use in a `std::unordered_map`. The action type is `ERROR`.
          *
          */
         ParserAction();
