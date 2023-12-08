@@ -23,6 +23,20 @@ namespace Parser {
      */
     struct ProductionItem {
         /**
+         * @brief Class constructor from a token.
+         *
+         * @param token The token that makes up this `ProductionItem`.
+         */
+        ProductionItem(lexer::TokenPtr token);
+
+        /**
+         * @brief Class constructor from an AST node.
+         *
+         * @param node The AST node that makes up this `ProductionItem`.
+         */
+        ProductionItem(ASTNodePtr node);
+
+        /**
          * @brief The token, if this is a token.
          *
          */
