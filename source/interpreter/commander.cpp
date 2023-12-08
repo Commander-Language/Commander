@@ -10,9 +10,12 @@ int main(int argc, char** argv) {
     try {
         std::string arg = "";
         if (argc > 1) { arg = std::string(argv[1]); }
+        clock_t start = clock();
         Parser::Parser parser;
+        clock_t end = clock();
+        std::cout << "Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds" << std::endl;
         std::cout << "Commander Scripting Language version x.x\n";
-        std::cout << "Basic REPL for Commander scripting language. Currently just prints out token "
+        std::cout << "Basic REPL for Commander scripting language."
                      "representation of input.\n";
         while (true) {
             std::cout << ">> ";
