@@ -112,7 +112,8 @@ namespace Parser {
 
                 if (grammarEntry.tokenType.has_value()) {
                     //  Add a `SHIFT` action.
-                    _nextAction[stateNum][grammarEntry.tokenType.value()] = {nextState};
+                    _nextAction[stateNum][grammarEntry.tokenType.value()] = {ParserAction::ActionType::SHIFT,
+                                                                             nextState};
                 } else {
                     //  Set the next state.
                     _nextState[stateNum][grammarEntry.nodeType.value()] = {nextState};
@@ -121,8 +122,11 @@ namespace Parser {
 
             for (const auto& kernel : state.kernels) {
                 const auto& rule = kernel.rule.get();
-                if (rule == defaultRule) continue;
-                if (kernel.index == rule.components.size() && _nextAction[stateNum].count(kernel.lookahead) == 0) {
+                if (rule == defaultRule) {
+                    //  Add an `ACCEPT` action.
+                    _nextAction[stateNum][TokenType::END_OF_FILE] = {ParserAction::ActionType::ACCEPT};
+                } else if (kernel.index == rule.components.size()
+                           && _nextAction[stateNum].count(kernel.lookahead) == 0) {
                     //  Add a `REDUCE` action.
                     _nextAction[stateNum][kernel.lookahead] = {rule.components.size(), grammar.reductions.at(rule)};
                 }

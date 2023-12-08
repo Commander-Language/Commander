@@ -2,7 +2,6 @@
  * @file source/parser/parser_action.hpp
  * @brief Defines the `ParserAction` class.
  * @details Used to tell the parser which action to take at a given step.
- *
  */
 
 #ifndef PARSER_ACTION_HPP
@@ -36,9 +35,11 @@ namespace Parser {
         using NodeConstructor = std::function<ASTNodePtr(const ProductionItemList&)>;
 
         /**
-         * @brief Whether the parser should perform a shift or a reduce action, or whether there's an error.
+         * @brief The type of action to take.
+         * @details Whether to perform a shift or reduce action, or that we're done parsing,
+         *     or that there was a syntax error.
          */
-        enum ActionType { SHIFT, REDUCE, ERROR };
+        enum ActionType { SHIFT, REDUCE, ACCEPT, ERROR };
 
         /**
          * @brief Default constructor.
@@ -48,44 +49,43 @@ namespace Parser {
         ParserAction();
 
         /**
-         * @brief Class constructor for a shift action.
+         * @brief Class constructor for a `SHIFT` or `ACCEPT` action.
          *
+         * @param actionType The type of action to perform.
          * @param nextState The next state, to which the parser needs to transition.
+         *     Defaults to 0 for non-`SHIFT` actions.
          */
-        ParserAction(StateNum nextState);
+        ParserAction(ActionType actionType, StateNum nextState = 0);
 
         /**
-         * @brief Class constructor for a reduce action.
+         * @brief Class constructor for a `REDUCE` action.
          *
-         * @param ruleSize The number of production items to pop from the stack, and to provide to the node constructor.
+         * @param ruleSize The number of production items to pop from the parse stack and state stack,
+         *     and to provide to the node constructor.
          * @param nodeConstructor A function that constructs a new AST node smart pointer.
          */
         ParserAction(size_t ruleSize, NodeConstructor nodeConstructor);
 
         /**
-         * @brief Whether the parser should perform a shift or a reduce action.
-         *
+         * @brief The type of action that the parser should take.
          */
         ActionType actionType;
 
         /**
          * @brief The next state, to which the parser needs to transition.
-         * @details Only relevant for shift actions.
-         *
+         * @details Only relevant for `SHIFT` actions.
          */
         StateNum nextState{};
 
         /**
          * @brief The number of production items to pop from the stack, and to provide to the node constructor.
-         * @details Only relevant for reduce actions.
-         *
+         * @details Only relevant for `REDUCE` actions.
          */
         size_t ruleSize{};
 
         /**
          * @brief A function that constructs a new AST node smart pointer.
-         * @details Only relevant for reduce actions.
-         *
+         * @details Only relevant for `REDUCE` actions.
          */
         std::optional<NodeConstructor> nodeConstructor;
     };
