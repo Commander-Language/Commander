@@ -5,6 +5,7 @@
  */
 
 #include "parser.hpp"
+#include "source/util/commander_exception.hpp"
 
 namespace Parser {
 
@@ -21,8 +22,8 @@ namespace Parser {
                 productionStack.push({token, {}});
                 stateStack.push(action.nextState);
                 continue;
-                // Reduce action
-            } else {
+            // Reduce action
+            } else if (action.actionType == ParserAction::REDUCE) {
                 std::vector<ProductionItem> productionList;
                 for (size_t i = 0; i < action.ruleSize; i++) {
                     productionList.push_back(productionStack.top());
@@ -30,6 +31,21 @@ namespace Parser {
                 }
                 ASTNodePtr node = (*action.nodeConstructor)(productionList);
                 productionStack.push({{}, node});
+            // Error occurred
+            } else {
+                std::ostringstream productionBuilder;
+                while (!productionStack.empty()) {
+                    ProductionItem item = productionStack.top();
+                    productionBuilder << "\n" << (item.token ? item.token->toString() : item.node->sExpression());
+                    productionStack.pop();
+                }
+                std::ostringstream stateBuilder;
+                while (!stateStack.empty()) {
+                    ParserAction::StateNum item = stateStack.top();
+                    stateBuilder << "\n" << (item);
+                    stateStack.pop();
+                }
+                throw util::CommanderException("Parser error occurred.\nThe production stack:" + productionBuilder.str() + "\nState stack:" + stateBuilder.str());
             }
             while (!productionStack.top().node) {
                 productionStack.pop();

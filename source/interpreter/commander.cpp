@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
         clock_t start = clock();
         Parser::Parser parser;
         clock_t end = clock();
-        std::cout << "Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds" << std::endl;
+        std::cout << "Parse Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds" << std::endl;
         std::cout << "Commander Scripting Language version x.x\n";
         std::cout << "Basic REPL for Commander scripting language."
                      "representation of input.\n";
