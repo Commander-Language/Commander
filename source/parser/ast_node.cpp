@@ -392,6 +392,10 @@ namespace Parser {
 
     std::string CmdStmtNode::sExpression() const { return "(CmdStmtNode " + command->sExpression() + ")"; }
 
+    ExprStmtNode::ExprStmtNode(Parser::ExprNodePtr expression) : expression(std::move(expression)) {}
+
+    std::string ExprStmtNode::sExpression() const { return "(ExprStmtNode " + expression->sExpression() + ")"; }
+
     AliasStmtNode::AliasStmtNode(std::string alias, Parser::CmdNodePtr command)
         : alias(std::move(alias)), command(std::move(command)) {}
 

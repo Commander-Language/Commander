@@ -1266,6 +1266,31 @@ namespace Parser {
     };
 
     /**
+     * @brief An expression statement node.
+     */
+    class ExprStmtNode : public StmtNode {
+    public:
+        /**
+         * @brief The expression that this statement node will evaluate.
+         */
+        ExprNodePtr expression;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expression The expression that this statement node will evaluate.
+         */
+        ExprStmtNode(ExprNodePtr expression);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression.
+         *
+         * @return The s-expression string of the node.
+         */
+        [[nodiscard]] std::string sExpression() const override;
+    };
+
+    /**
      * @brief An `alias` statement node.
      *
      */
