@@ -85,12 +85,12 @@ include_directories(.)
 
 add_library(parser source/parser/parser.cpp
         source/parser/ast_node.cpp
+        source/parser/grammar.cpp
         source/parser/parse_table.cpp
         source/parser/parser_action.cpp
-)
 
-add_executable(scratch scratch.cpp)
-target_link_libraries(scratch parser)
+        source/util/combine_hashes.cpp
+)
 
 
 #  =========================
