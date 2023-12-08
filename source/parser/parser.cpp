@@ -6,38 +6,47 @@
 
 #include "parser.hpp"
 
+#include "source/util/commander_exception.hpp"
+
 namespace Parser {
 
     Parser::Parser() { _parseTable = ParseTable(); }
 
     ASTNodeList Parser::parse(const lexer::TokenList& tokens) {
-        std::stack<ProductionItem> productionStack;
-        std::stack<ParserAction::StateNum> stateStack;
-        stateStack.push(0);
-        for (const lexer::TokenPtr& token : tokens) {
-            ParserAction action = _parseTable.getNextAction(stateStack.top(), token->type);
-            // Shift action
-            if (action.actionType == ParserAction::SHIFT) {
-                productionStack.push({token, {}});
-                stateStack.push(action.nextState);
-                continue;
-                // Reduce action
-            } else {
-                std::vector<ProductionItem> productionList;
-                for (size_t i = 0; i < action.ruleSize; i++) {
-                    productionList.push_back(productionStack.top());
-                    productionStack.pop();
-                }
-                ASTNodePtr node = (*action.nodeConstructor)(productionList);
-                productionStack.push({{}, node});
+        std::vector<ProductionItem> productionStack;
+        std::vector<ParserAction::StateNum> stateStack {0};
+        size_t tokenIndex = 0;
+
+        while (true) {
+            const auto& token = tokens[tokenIndex];
+            const auto action = _parseTable.getNextAction(stateStack.back(), tokens[tokenIndex]->type);
+
+            switch (action.actionType) {
+                case ParserAction::SHIFT:
+                    productionStack.emplace_back(token);
+                    ++tokenIndex;
+                    stateStack.emplace_back(action.nextState);
+                    break;
+                case ParserAction::REDUCE: {
+                    const std::vector<ProductionItem> poppedItems {productionStack.end() - (long)action.ruleSize,
+                                                                   productionStack.end()};
+                    productionStack.erase(productionStack.end() - (long)action.ruleSize, productionStack.end());
+
+                    const auto newNode = action.nodeConstructor.value()(poppedItems);
+                    productionStack.emplace_back(newNode);
+                    stateStack.erase(stateStack.end() - (long)action.ruleSize, stateStack.end());
+                    stateStack.push_back(_parseTable.getNextState(stateStack.back(), newNode->nodeType()));
+                } break;
+                case ParserAction::ACCEPT:
+                    return [&]() {
+                        ASTNodeList result;
+                        for (const auto& node : productionStack) result.push_back(node.node);
+                        return result;
+                    }();
+                case ParserAction::ERROR:
+                    throw util::CommanderException("Unexpected token: `" + token->contents + "`", token->position);
             }
-            while (!productionStack.top().node) {
-                productionStack.pop();
-                stateStack.pop();
-            }
-            ParserAction::StateNum nextState = _parseTable.getNextState(stateStack.top(),
-                                                                        productionStack.top().node->nodeType());
-            stateStack.push(nextState);
         }
     }
-}  // namespace Parser
+
+}  //  namespace Parser
