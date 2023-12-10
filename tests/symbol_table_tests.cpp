@@ -82,6 +82,32 @@ TEST(SCOPETEST, getVariableTest) {
 }
 
 /**
+ * @brief copyScopeTest tests the copy constructor of the Scope object
+ * @details A Scope object is created with an initial value. The copy constructor will be called and verify changes
+ *          to one object does not impact the data of the other.
+ */
+TEST(SCOPETEST, copyScopeTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 3);
+    testScope.addOrUpdateVariable("dog", 2);
+
+    Scope copiedScope = Scope(testScope);
+    copiedScope.addOrUpdateVariable("bird", 8);
+
+    EXPECT_TRUE(testScope.hasLocalVariable("cat"));
+    EXPECT_TRUE(testScope.hasLocalVariable("dog"));
+    EXPECT_TRUE(copiedScope.hasLocalVariable("cat"));
+    EXPECT_TRUE(copiedScope.hasLocalVariable("dog"));
+    EXPECT_FALSE(testScope.hasLocalVariable("bird"));
+    EXPECT_TRUE(copiedScope.hasLocalVariable("bird"));
+
+    copiedScope.addOrUpdateVariable("dog", 21);
+
+    EXPECT_EQ(*testScope.getVariable("cat"), *copiedScope.getVariable("cat"));
+    EXPECT_NE(*testScope.getVariable("dog"), *copiedScope.getVariable("dog"));
+}
+
+/**
  * @brief addStressTestSmall adds 100 variables to a Scope object and validates them
  */
 TEST(SCOPESTRESSTEST, addStressTestSmall) {
@@ -223,4 +249,32 @@ TEST(SYMORGTEST, recursionTest) {
 
     EXPECT_FALSE(testOrg.getScope()->hasGlobalVariable("dog"));
     EXPECT_EQ(testOrg.getScope()->getVariable("dog"), nullptr);
+}
+
+/**
+ * @brief copyTest checks the validity of the copy constructor in SymbolTableOrganizer
+ * @details Two variables are initialized to testOrg, "dog" and "bird". The copy constructor is called for the copiedOrg
+ *          object. First, determine whether both variables exist in the objects. Next, add a new variable to copiedOrg
+ *          and update a pre-existing variable. Finally, determine whether the original contents of testOrg have changed
+ */
+TEST(SYMORGTEST, copyTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("bird", 64);
+    testOrg.addOrUpdateVariable("dog", 36);
+
+    SymbolTableOrganizer copiedOrg = SymbolTableOrganizer(testOrg);
+
+    EXPECT_TRUE(testOrg.varExistsInScope("bird"));
+    EXPECT_TRUE(copiedOrg.varExistsInScope("bird"));
+    EXPECT_TRUE(testOrg.varExistsInScope("dog"));
+    EXPECT_TRUE(copiedOrg.varExistsInScope("dog"));
+
+    copiedOrg.addOrUpdateVariable("dog", 4);
+    copiedOrg.addOrUpdateVariable("cat", 36);
+
+    EXPECT_EQ(*testOrg.getVariable("bird"), *copiedOrg.getVariable("bird"));
+    EXPECT_NE(*testOrg.getVariable("dog"), *copiedOrg.getVariable("dog"));
+    EXPECT_FALSE(testOrg.varExistsInScope("cat"));
+    EXPECT_TRUE(copiedOrg.varExistsInScope("cat"));
 }

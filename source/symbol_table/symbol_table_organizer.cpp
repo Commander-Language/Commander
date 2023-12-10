@@ -12,64 +12,63 @@ SymbolTableOrganizer::SymbolTableOrganizer() {
 
 //Destructor
 SymbolTableOrganizer::~SymbolTableOrganizer() {
-    for(int currentScopeObject = 0; currentScopeObject < symbolTables.size(); currentScopeObject++) {
-        delete symbolTables[currentScopeObject];
+    for(int currentScopeObject = 0; currentScopeObject < _symbolTables.size(); currentScopeObject++) {
+        delete _symbolTables.top();
+        _symbolTables.pop();
     }
 }
 
 //Copy-Constructor
 SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer &otherTableOrganizer) {
-    for(int currentIndex = 0; currentIndex < otherTableOrganizer.symbolTables.size(); currentIndex++) {
-        symbolTables[currentIndex] = (otherTableOrganizer.symbolTables[currentIndex]); //may not work as intended
-    }
+    _symbolTables = std::stack(otherTableOrganizer._symbolTables);
 }
 
 void SymbolTableOrganizer::pushSymbolTable() {
-    if(symbolTables.size() < 1) {
+    if(_symbolTables.size() < 1) {
         Scope* headScope = new Scope();
-        symbolTables.push_back(headScope);
+        _symbolTables.push(headScope);
     }
     else {
-        Scope* nextScope = new Scope(symbolTables.back());
-        symbolTables.push_back(nextScope);
+        Scope* nextScope = new Scope(_symbolTables.top());
+        _symbolTables.push(nextScope);
     }
 }
 
 void SymbolTableOrganizer::popSymbolTable() {
-    if(symbolTables.empty()) {
+    if(_symbolTables.empty()) {
         return; //return early if no scopes are present
     }
-    delete symbolTables.back();
-    symbolTables.pop_back(); //despite the name, pop_back does not return the last item while removing it
+    delete _symbolTables.top();
+    _symbolTables.pop();
 }
 
 void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data) {
-    symbolTables.back()->addOrUpdateVariable(variableID, data);
+    _symbolTables.top()->addOrUpdateVariable(variableID, data);
 }
 
 Scope* SymbolTableOrganizer::getScope() {
-    if(symbolTables.empty()) {
+    if(_symbolTables.empty()) {
         return nullptr;
     }
-    return symbolTables.back();
+    return _symbolTables.top();
 }
 
 bool SymbolTableOrganizer::varExistsInCurrentSymbolTable(std::string variableID) {
-    return symbolTables.back()->hasLocalVariable(variableID);
+    return _symbolTables.top()->hasLocalVariable(variableID);
 }
 
 bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
-    return symbolTables.back()->hasGlobalVariable(variableID);
+    return _symbolTables.top()->hasGlobalVariable(variableID);
 }
 
 int* SymbolTableOrganizer::getVariable(std::string variableID) {
-    return symbolTables.back()->getVariable(variableID);
+    return _symbolTables.top()->getVariable(variableID);
 }
 
 bool SymbolTableOrganizer::isScopeGlobal() {
-    if(symbolTables.size() == 0) {
+    if(_symbolTables.size() == 0) {
         return true; //Error case - Assume true if nothing exists
     }
-    bool global = symbolTables.size() <= 1;
+    bool global = _symbolTables.size() <= 1;
     return global;
 }

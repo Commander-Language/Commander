@@ -8,7 +8,7 @@
 #define CPP_UTILITIES_SYMBOL_TABLE_ORGANIZER_HPP
 #include "source/symbol_table/scope.hpp"
 #include <string>
-#include <vector>
+#include <stack>
 
 //TODO: replace int data with a generic object
 
@@ -83,7 +83,7 @@ public:
     int* getVariable(std::string variableID);
 
 private:
-    std::vector<Scope*> symbolTables{}; //A vector containing each symbol table; some methods will use this to find a value while others will rely on scope's recursiveness
+    std::stack<Scope*> _symbolTables{}; //A vector containing each symbol table; some methods will use this to find a value while others will rely on scope's recursiveness
 };
 
 

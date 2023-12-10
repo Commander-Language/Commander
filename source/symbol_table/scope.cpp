@@ -35,13 +35,7 @@ bool Scope::hasLocalVariable(std::string variableID) {
 }
 
 bool Scope::hasGlobalVariable(std::string variableID) {
-    if(!hasKey(variableID)) {
-        if(parentScope != nullptr) {
-            return parentScope->hasGlobalVariable(variableID);
-        }
-        return false;
-    }
-    return true;
+    return hasKey(variableID) || (parentScope != nullptr && parentScope->hasGlobalVariable(variableID));
 }
 
 int* Scope::getVariable(std::string variableID) {
@@ -60,12 +54,9 @@ Scope* Scope::getParentScopePointer() {
 }
 
 bool Scope::isGlobal() {
-    return parentScope == NULL || parentScope == nullptr;
+    return parentScope == nullptr;
 }
 
 bool Scope::hasKey(std::string key) {
-    if(variableData.find(key) == variableData.end()) { //.end() returns one index out-of-bounds from the data's contents (i.e. the equivalent of variableData.size())
-        return false;
-    }
-    return true;
+    return variableData.count(key) > 0;
 }
