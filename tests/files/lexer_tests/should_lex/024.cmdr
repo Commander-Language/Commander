@@ -1,0 +1,3 @@
+// Test that functions lex properly without specified return type
+foo(a,b,c){
+}

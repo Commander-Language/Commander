@@ -1,0 +1,2 @@
+// Test that scan expressions lex properly
+name = scan "Type in your name: ";

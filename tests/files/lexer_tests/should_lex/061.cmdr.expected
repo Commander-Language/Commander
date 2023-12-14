@@ -1,0 +1,7 @@
+IMPORT 'import' 2:1
+STRINGVAL 2:8
+[
+STRINGLITERAL 'lib.cmdr' 2:9
+]
+SEMICOLON ';' 2:18
+END_OF_FILE 3:1

@@ -1,0 +1,2 @@
+// Test that - (negate) operation lexes properly
+-x;

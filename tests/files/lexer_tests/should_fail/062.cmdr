@@ -1,0 +1,2 @@
+// Illegal character in variable name (ascii 29)
+myvar = 29;

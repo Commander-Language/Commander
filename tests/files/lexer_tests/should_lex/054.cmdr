@@ -1,0 +1,2 @@
+// Test that string concatenation lexes properly
+utah = "UT" + "AH";

@@ -1,0 +1,2 @@
+// Test that int values lex properly
+isInt = 24;

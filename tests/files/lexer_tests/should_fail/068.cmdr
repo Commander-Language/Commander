@@ -1,0 +1,2 @@
+// Fail with unterminated comment
+a = 3; /* This comment doesn't get terminated

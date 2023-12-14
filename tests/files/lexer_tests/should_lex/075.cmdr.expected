@@ -1,0 +1,12 @@
+WRITE 'write' 2:1
+STRINGVAL 2:7
+[
+STRINGLITERAL 'Hello World!' 2:8
+]
+TO 'to' 2:22
+STRINGVAL 2:25
+[
+STRINGLITERAL 'helloWorld.txt' 2:26
+]
+SEMICOLON ';' 2:41
+END_OF_FILE 2:42

@@ -1,0 +1,9 @@
+VARIABLE 'name' 2:1
+EQUALS '=' 2:6
+SCAN 'scan' 2:8
+STRINGVAL 2:13
+[
+STRINGLITERAL 'Type in your name: ' 2:14
+]
+SEMICOLON ';' 2:34
+END_OF_FILE 3:1
