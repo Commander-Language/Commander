@@ -1,0 +1,2 @@
+// Test that lambda expressions without curly braces lex correctly.
+addOne = (x,y) -> x+1;

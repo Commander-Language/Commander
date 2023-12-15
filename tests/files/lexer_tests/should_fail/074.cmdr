@@ -1,0 +1,2 @@
+// Lexer should fail with an unterminated string (using single quotation)
+a = 'unterminated string;

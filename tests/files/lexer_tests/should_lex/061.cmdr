@@ -1,0 +1,2 @@
+// Test that imports lex correctly
+import "lib.cmdr";

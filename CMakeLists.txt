@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(cpp_utilities)
+project(commander)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS_RELEASE -O3)
 
 include_directories(.)
-
 
 #  ===========================
 #  ||  Main Build Configs:  ||
@@ -124,6 +123,13 @@ include(GoogleTest)
 #      (Can be empty if all source files are specified in the the line above.)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
 
-add_executable(SymbolTableTests tests/symbol_table_tests.cpp source/symbol_table/scope.cpp source/symbol_table/symbol_table_organizer.cpp)
-target_link_libraries(SymbolTableTests GTest::gtest_main)
-gtest_discover_tests(SymbolTableTests)
+find_package(GTest REQUIRED)
+
+add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
+
+target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
+
+FILE(GLOB builtins source/job_runner/builtins/*.cpp)
+add_executable(jobRunnerTests ${builtins} source/util/commander_exception.cpp source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
+target_link_libraries(jobRunnerTests GTest::gtest_main)
+gtest_discover_tests(jobRunnerTests)

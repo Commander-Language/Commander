@@ -4,7 +4,7 @@
 
 Requirements:
 
-- CMake 3.10+
+- CMake 3.14+
 - A generator (GNU make, ninja, ...) (usually included with CMake installation)
 - A C++ compiler (GCC, Clang, MSVC, MinGW, ...)
 

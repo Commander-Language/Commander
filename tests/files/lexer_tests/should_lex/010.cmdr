@@ -1,0 +1,2 @@
+// Test that true lexes properly
+isTrue = true;

@@ -1,0 +1,14 @@
+total 16K
+-rw-r--r-- 1    0  000.txt
+-rw-r--r-- 1    0  001.txt
+-rw-r--r-- 1    0  002.txt
+-rw-r--r-- 1    0  003.txt
+-rw-r--r-- 1    0  004.txt
+-rw-r--r-- 1    0  005.txt
+-rw-r--r-- 1    0  006.txt
+-rw-r--r-- 1    0  007.txt
+-rw-r--r-- 1    0  008.txt
+-rw-r--r-- 1    0  009.txt
+-rw-r--r-- 1    0  010.txt
+-rw-r--r-- 1 4.1K  cat.txt
+-rw-r--r-- 1 4.2K  cat2.txt

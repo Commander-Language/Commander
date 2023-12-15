@@ -1,0 +1,5 @@
+VARIABLE 'isFalse' 2:1
+EQUALS '=' 2:9
+FALSE 'false' 2:11
+SEMICOLON ';' 2:16
+END_OF_FILE 3:1
