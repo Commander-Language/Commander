@@ -3,20 +3,21 @@
  * @brief symbol_table_tests contains the unit tests for the Scope and SymbolTableOrganizer classes
  * @details Tests are separated into three suites:
  *          SCOPETEST - tests the functionality of the Scope class
- *          SCOPESTRESSTEST - inserts a large number of items into a Scope object, perform an operation, and validates the result
- *          SYMORGTEST - tests the functionality of the SymbolTableOrganizer class
+ *          SCOPESTRESSTEST - inserts a large number of items into a Scope object, perform an operation, and validates
+ * the result SYMORGTEST - tests the functionality of the SymbolTableOrganizer class
  */
 
-#include <string>
 #include "source/symbol_table/scope.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "gtest/gtest.h"
+#include <string>
 
-//SCOPE TESTS
+// SCOPE TESTS
 
 /**
  * @brief addToScope tests the functionality of addOrUpdateVariable()
- * @details An example variable is added to a Scope object. The test expects one value, but is not expecting a second value
+ * @details An example variable is added to a Scope object. The test expects one value, but is not expecting a second
+ * value
  */
 TEST(SCOPETEST, addToScope) {
     Scope testScope = Scope();
@@ -112,11 +113,11 @@ TEST(SCOPETEST, copyScopeTest) {
  */
 TEST(SCOPESTRESSTEST, addStressTestSmall) {
     Scope testScope = Scope();
-    for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
+    for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
         testScope.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
     }
 
-    for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
+    for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
         EXPECT_EQ(currentVariable, *testScope.getVariable(std::to_string(currentVariable)));
     }
 }
@@ -126,16 +127,16 @@ TEST(SCOPESTRESSTEST, addStressTestSmall) {
  */
 TEST(SCOPESTRESSTEST, addStressTestLarge) {
     Scope testScope = Scope();
-    for(int currentVariable = 0; currentVariable < 10000; currentVariable++) {
+    for (int currentVariable = 0; currentVariable < 10000; currentVariable++) {
         testScope.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
     }
 
-    for(int currentVariable = 0; currentVariable < 10000; currentVariable++) {
+    for (int currentVariable = 0; currentVariable < 10000; currentVariable++) {
         EXPECT_EQ(currentVariable, *testScope.getVariable(std::to_string(currentVariable)));
     }
 }
 
-//SYMBOLTABLEORGANIZER TESTS
+// SYMBOLTABLEORGANIZER TESTS
 
 /**
  * @brief pushTest adds a Scope to a SymbolTable object and validates the global status of the scope
@@ -154,15 +155,12 @@ TEST(SYMORGTEST, pushTest) {
  */
 TEST(SYMORGTEST, pushStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
-    for(int currentScope = 0; currentScope < 100; currentScope++) {
-        testOrg.pushSymbolTable();
-    }
+    for (int currentScope = 0; currentScope < 100; currentScope++) { testOrg.pushSymbolTable(); }
 
-    for(int currentScope = 100; currentScope > 0; currentScope--) {
-        if(currentScope == 1) {
+    for (int currentScope = 100; currentScope > 0; currentScope--) {
+        if (currentScope == 1) {
             EXPECT_TRUE(testOrg.isScopeGlobal());
-        }
-        else {
+        } else {
             EXPECT_FALSE(testOrg.isScopeGlobal());
         }
         testOrg.popSymbolTable();
@@ -196,30 +194,30 @@ TEST(SYMORGTEST, globalTests) {
 TEST(SYMORGTEST, addItemsTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
-    testOrg.getScope()->addOrUpdateVariable("cat", 3); //first test: updating via the usage of getScope()
+    testOrg.getScope()->addOrUpdateVariable("cat", 3);  // first test: updating via the usage of getScope()
     EXPECT_TRUE(testOrg.getScope()->hasLocalVariable("cat"));
     EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 3);
-    testOrg.addOrUpdateVariable("dog", 6); //second test: updating via the usage of addVariable()
+    testOrg.addOrUpdateVariable("dog", 6);  // second test: updating via the usage of addVariable()
     EXPECT_TRUE(testOrg.getScope()->hasLocalVariable("dog"));
     EXPECT_EQ(*testOrg.getScope()->getVariable("dog"), 6);
 }
 
 /**
  * @brief addItemsStressTest adds 20 items to 5 Scope objects and validates their values
- * @details For each scope, 20 variables are added with an arbitrary value assigned to them. Five scopes are pushed in total
- *          For each scope, a set of 20 variables are validated before calling popSymbolTable()
+ * @details For each scope, 20 variables are added with an arbitrary value assigned to them. Five scopes are pushed in
+ * total For each scope, a set of 20 variables are validated before calling popSymbolTable()
  */
 TEST(SYMORGTEST, addItemsStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
-    for(int currentScope = 0; currentScope < 5; currentScope++) {
+    for (int currentScope = 0; currentScope < 5; currentScope++) {
         testOrg.pushSymbolTable();
-        for(int currentVariable = 0; currentVariable < 20; currentVariable++) {
+        for (int currentVariable = 0; currentVariable < 20; currentVariable++) {
             testOrg.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
         }
     }
 
-    for(int currentScope = 0; currentScope < 5; currentScope++) {
-        for(int currentVariable = 0; currentVariable < 20; currentVariable++) {
+    for (int currentScope = 0; currentScope < 5; currentScope++) {
+        for (int currentVariable = 0; currentVariable < 20; currentVariable++) {
             EXPECT_TRUE(testOrg.varExistsInCurrentSymbolTable(std::to_string(currentVariable)));
             EXPECT_EQ(*testOrg.getVariable(std::to_string(currentVariable)), currentVariable);
         }
@@ -232,17 +230,15 @@ TEST(SYMORGTEST, addItemsStressTest) {
  * @details 100 Scope objects are pushed to the SymbolTableOrganizer:
  *          The first Scope contains a variable "cat" with any value
  *          99 empty Scopes are added in turn with each Scope referencing the previous
- *          When hasGlobalVariable() and getVariable() are called, the Scope is expected to return a value present in the
- *          First Scope
+ *          When hasGlobalVariable() and getVariable() are called, the Scope is expected to return a value present in
+ * the First Scope
  */
 TEST(SYMORGTEST, recursionTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
     testOrg.addOrUpdateVariable("cat", 8);
 
-    for(int currentScope = 0; currentScope < 99; currentScope++) {
-        testOrg.pushSymbolTable();
-    }
+    for (int currentScope = 0; currentScope < 99; currentScope++) { testOrg.pushSymbolTable(); }
 
     EXPECT_TRUE(testOrg.getScope()->hasGlobalVariable("cat"));
     EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 8);

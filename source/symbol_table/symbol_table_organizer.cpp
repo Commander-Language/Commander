@@ -6,40 +6,39 @@
 
 #include "symbol_table_organizer.hpp"
 
-//Constructor
-SymbolTableOrganizer::SymbolTableOrganizer() {
-}
+// Constructor
+SymbolTableOrganizer::SymbolTableOrganizer() {}
 
-//Destructor
+// Destructor
 SymbolTableOrganizer::~SymbolTableOrganizer() {
-    for(int currentScopeObject = 0; currentScopeObject < _symbolTables.size(); currentScopeObject++) {
+    for (int currentScopeObject = 0; currentScopeObject < _symbolTables.size(); currentScopeObject++) {
         delete _symbolTables.back();
         _symbolTables.pop_back();
     }
 }
 
-//Copy-Constructor
-SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer &otherTableOrganizer) {
-    for(int currentScope = 0; currentScope < otherTableOrganizer._symbolTables.size(); currentScope++) {
-        //vector(otherVector) creates shallow copies of the Scope object, so we'll need to make our own deep copies here
+// Copy-Constructor
+SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer& otherTableOrganizer) {
+    for (int currentScope = 0; currentScope < otherTableOrganizer._symbolTables.size(); currentScope++) {
+        // vector(otherVector) creates shallow copies of the Scope object, so we'll need to make our own deep copies
+        // here
         _symbolTables.push_back(new Scope(otherTableOrganizer._symbolTables.back()));
     }
 }
 
 void SymbolTableOrganizer::pushSymbolTable() {
-    if(_symbolTables.size() < 1) {
+    if (_symbolTables.size() < 1) {
         Scope* headScope = new Scope();
         _symbolTables.push_back(headScope);
-    }
-    else {
+    } else {
         Scope* nextScope = new Scope(_symbolTables.back());
         _symbolTables.push_back(nextScope);
     }
 }
 
 void SymbolTableOrganizer::popSymbolTable() {
-    if(_symbolTables.empty()) {
-        return; //return early if no scopes are present
+    if (_symbolTables.empty()) {
+        return;  // return early if no scopes are present
     }
     delete _symbolTables.back();
     _symbolTables.pop_back();
@@ -50,9 +49,7 @@ void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data)
 }
 
 Scope* SymbolTableOrganizer::getScope() {
-    if(_symbolTables.empty()) {
-        return nullptr;
-    }
+    if (_symbolTables.empty()) { return nullptr; }
     return _symbolTables.back();
 }
 
@@ -64,13 +61,11 @@ bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
     return _symbolTables.back()->hasGlobalVariable(variableID);
 }
 
-int* SymbolTableOrganizer::getVariable(std::string variableID) {
-    return _symbolTables.back()->getVariable(variableID);
-}
+int* SymbolTableOrganizer::getVariable(std::string variableID) { return _symbolTables.back()->getVariable(variableID); }
 
 bool SymbolTableOrganizer::isScopeGlobal() {
-    if(_symbolTables.size() == 0) {
-        return true; //Error case - Assume true if nothing exists
+    if (_symbolTables.size() == 0) {
+        return true;  // Error case - Assume true if nothing exists
     }
     bool global = _symbolTables.size() <= 1;
     return global;

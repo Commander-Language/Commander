@@ -67,23 +67,23 @@ namespace Parser {
     }
 
 
-    Grammar::Grammar() : Grammar(_defineGrammar()) {}
+    Grammar::Grammar() : Grammar(_definePrototypeGrammar()) {}
 
     Grammar::Grammar(const std::vector<std::tuple<GrammarRule, NodeConstructor>>& grammarDefinitions)
         : rules([&]() {
               std::vector<GrammarRule> result;
-              for (const auto& item : grammarDefinitions) { result.emplace_back(std::get<0>(item)); }
+              for (const auto& item : grammarDefinitions) result.emplace_back(std::get<0>(item));
               return result;
           }()),
           reductions([&]() {
               std::unordered_map<GrammarRule, NodeConstructor, GrammarRule::Hash> result;
-              for (const auto& item : grammarDefinitions) { result[std::get<0>(item)] = std::get<1>(item); }
+              for (const auto& item : grammarDefinitions) result[std::get<0>(item)] = std::get<1>(item);
               return result;
           }()) {}
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cppcoreguidelines-avoid-magic-numbers"
-    std::vector<std::tuple<Grammar::GrammarRule, Grammar::NodeConstructor>> Grammar::_defineGrammar() {
+    std::vector<std::tuple<Grammar::GrammarRule, Grammar::NodeConstructor>> Grammar::_definePrototypeGrammar() {
         //  Some shorthands for `std::reinterpret_pointer_cast`.
         //  Saves space and adds some clarity.
         const auto castBinding = [](const std::shared_ptr<ASTNode>& node) {
@@ -94,6 +94,218 @@ namespace Parser {
         };
         const auto castCmd = [](const std::shared_ptr<ASTNode>& node) {
             return std::reinterpret_pointer_cast<CmdNode>(node);
+        };
+        const auto castExpr = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<ExprNode>(node);
+        };
+        const auto castExprs = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<ExprsNode>(node);
+        };
+        const auto castStmt = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<StmtNode>(node);
+        };
+        const auto castStmts = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<StmtsNode>(node);
+        };
+        const auto castString = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<StringNode>(node);
+        };
+        const auto castType = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<TypeNode>(node);
+        };
+        const auto castVariable = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<VariableNode>(node);
+        };
+
+        return {{//  PRGM -> STMT
+                 {{ASTNodeType::PRGM, {ASTNodeType::STMT}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<PrgmNode>(std::vector<StmtNodePtr> {castStmt(productionList[0].node)});
+                  }},
+
+                 //  STMT -> EXPR "[SEMICOLON]"
+                 {{ASTNodeType::STMT, {ASTNodeType::EXPR, TokenType::SEMICOLON}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<ExprStmtNode>(castExpr(productionList[0].node));
+                  }},
+
+                 //  EXPR -> "[INTVAL]"
+                 {{ASTNodeType::EXPR, {TokenType::INTVAL}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<IntExprNode>(std::stoll(productionList[0].token->contents));
+                  }},
+                 //  EXPR -> "[FLOATVAL]"
+                 {{ASTNodeType::EXPR, {TokenType::FLOATVAL}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<FloatExprNode>(std::stold(productionList[0].token->contents));
+                  }},
+                 //  EXPR -> "[TRUE]"
+                 {{ASTNodeType::EXPR, {TokenType::TRUE}},
+                  [&](const ProductionItemList&) { return std::make_shared<BoolExprNode>(true); }},
+                 //  EXPR -> "[FALSE]"
+                 {{ASTNodeType::EXPR, {TokenType::FALSE}},
+                  [&](const ProductionItemList&) { return std::make_shared<BoolExprNode>(false); }},
+                 //  EXPR -> EXPR "[QUESTION]" EXPR "[COLON]" EXPR
+                 {{ASTNodeType::EXPR,
+                   {ASTNodeType::EXPR, TokenType::QUESTION, ASTNodeType::EXPR, TokenType::COLON, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<TernaryExprNode>(castExpr(productionList[0].node),
+                                                               castExpr(productionList[2].node),
+                                                               castExpr(productionList[4].node));
+                  }},
+                 //  EXPR -> EXPR "[EXPONENTIATE]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::EXPONENTIATE,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[MULTIPLY]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::MULTIPLY,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[DIVIDE]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DIVIDE, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::DIVIDE,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[MODULO]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MODULO, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::MODULO,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[ADD]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::ADD, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::ADD,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[MINUS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MINUS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::SUBTRACT,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[LESSER]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::LESSER,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[LESSER_EQUAL]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER_EQUAL, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::LESSER_EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[GREATER]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::GREATER, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::GREATER,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[GREATER_EQUAL]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::GREATER_EQUAL, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::GREATER_EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[DOUBLE_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DOUBLE_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[NOT_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::NOT_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::NOT_EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[AND]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::AND, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::AND,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> EXPR "[OR]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::OR, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castExpr(productionList[0].node), BinOpType::OR,
+                                                             castExpr(productionList[2].node));
+                  }},
+
+                 //  EXPR -> VARIABLE "[EXPONENTIATE_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node),
+                                                             BinOpType::EXPONENTIATE_EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> VARIABLE "[MULTIPLY_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MULTIPLY_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node),
+                                                             BinOpType::MULTIPLY_EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> VARIABLE "[DIVIDE_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::DIVIDE_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node),
+                                                             BinOpType::DIVIDE_EQUAL, castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> VARIABLE "[MODULO_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MODULO_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node),
+                                                             BinOpType::MODULO_EQUAL, castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> VARIABLE "[ADD_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::ADD_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node), BinOpType::ADD_EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> VARIABLE "[MINUS_EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MINUS_EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node),
+                                                             BinOpType::SUBTRACT_EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> VARIABLE "[EQUALS]" EXPR
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EQUALS, ASTNodeType::EXPR}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node), BinOpType::EQUAL,
+                                                             castExpr(productionList[2].node));
+                  }},
+                 //  EXPR -> VARIABLE
+                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE}},
+                  [&](const ProductionItemList& productionList) {
+                      return std::make_shared<VarExprNode>(castVariable(productionList[0].node));
+                  }},
+                 //  EXPR -> "[(]" EXPR "[)]"
+                 {{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
+                  [&](const ProductionItemList& productionList) { return productionList[1].node; }},
+
+                 //  VARIABLE -> "[VARIABLE]"
+                 {{ASTNodeType::VARIABLE, {TokenType::VARIABLE}}, [&](const ProductionItemList& productionList) {
+                      return std::make_shared<IdentVariableNode>(productionList[0].token->contents);
+                  }}}};
+    }
+
+    std::vector<std::tuple<Grammar::GrammarRule, Grammar::NodeConstructor>> Grammar::_defineGrammar() {
+        //  Some shorthands for `std::reinterpret_pointer_cast`.
+        //  Saves space and adds some clarity.
+        const auto castBinding = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<BindingNode>(node);
+        };
+        const auto castBindings = [](const std::shared_ptr<ASTNode>& node) {
+            return std::reinterpret_pointer_cast<BindingsNode>(node);
         };
         const auto castExpr = [](const std::shared_ptr<ASTNode>& node) {
             return std::reinterpret_pointer_cast<ExprNode>(node);

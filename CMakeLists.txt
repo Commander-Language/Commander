@@ -1,17 +1,14 @@
-cmake_minimum_required(VERSION 3.14)
-project(commander)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_FLAGS_RELEASE -O3)
-
-include_directories(.)
-
-#  ===========================
-#  ||  Main Build Configs:  ||
-#  ===========================
-
+#  ======================
+#  ||  CMakeLists.txt  ||
+#  ======================
+#
+#  Here, you'll find detailed documentation on how to set up new build configurations.
+#
+#
+#  ==================================
+#  ||  Main Build Configurations:  ||
+#  ==================================
+#
 #  Each build configuration will be made up of one or two lines.
 #
 #  Executables:
@@ -33,11 +30,7 @@ include_directories(.)
 #      If the executable doesn't use any linked libraries,
 #      then the second line may be omitted.
 #
-#      Examples:
-#
-#      ```
-#      add_executable(commander source/commander/commander.cpp source/lexer/lexer.cpp source/parser/parser.cpp)
-#      ```
+#      Example:
 #
 #      ```
 #      add_executable(commander source/commander/commander.cpp)
@@ -47,8 +40,9 @@ include_directories(.)
 #  Libraries:
 #  ----------
 #
-#      Because the main executable will involve a lot of source files,
-#      it's useful to break up the different pieces of the application into
+#      Everything other than executables will be libraries.
+#      This is because the program will involve a lot of source files,
+#      so it's useful to break up the different pieces of the application into
 #      separately-linked libraries.
 #
 #      Form:
@@ -71,8 +65,8 @@ include_directories(.)
 #      ```
 #
 #      ```
-#      add_library(type-checker source/type-checker/type-checker.cpp)
-#      target_link_libraries(type-checker token ast-node)
+#      add_library(typeChecker source/type_checker/type-checker.cpp)
+#      target_link_libraries(typeChecker lexer parser)
 #      ```
 #
 #      Then, this library can be used by used in a `target_link_libraries` call
@@ -82,40 +76,12 @@ include_directories(.)
 #      add_executable(commander source/commander/commander.cpp)
 #      target_link_libraries(commander lexer parser type-checker)
 #      ```
-
-add_library(parser source/parser/parser.cpp
-        source/parser/ast_node.cpp
-        source/parser/grammar.cpp
-        source/parser/parse_table.cpp
-        source/parser/parser_action.cpp
-
-        source/util/combine_hashes.cpp
-)
-
-
-#  =========================
-#  ||  GoogleTest Setup:  ||
-#  =========================
-
-include(FetchContent)
-FetchContent_Declare(
-        googletest
-        DOWNLOAD_EXTRACT_TIMESTAMP true
-        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings.
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-enable_testing()
-
-include(GoogleTest)
-
-
+#
+#
 #  ============================
 #  ||  Test Configurations:  ||
 #  ============================
-
+#
 #  Each test configuration will be made up of three lines:
 #
 #      ```
@@ -133,12 +99,80 @@ include(GoogleTest)
 #      (Can be empty if all source files are specified in the the line above.)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
 
-add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
-target_link_libraries(lexerTests GTest::gtest_main)
+
+#  Project configuration:
+#  ----------------------
+
+cmake_minimum_required(VERSION 3.14)
+project(commander)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_FLAGS_RELEASE -O3)
+
+include_directories(.)
+
+
+#  GoogleTest setup:
+#  -----------------
+
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        DOWNLOAD_EXTRACT_TIMESTAMP true
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings.
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+include(GoogleTest)
+
+
+#  Main build configurations:
+#  --------------------------
+
+add_library(lexer source/lexer/lexer.cpp
+
+        source/util/commander_exception.cpp
+)
+
+add_library(parser source/parser/parser.cpp
+        source/parser/ast_node.cpp
+        source/parser/grammar.cpp
+        source/parser/parse_table.cpp
+        source/parser/parser_action.cpp
+        source/parser/production_item.cpp
+
+        source/util/combine_hashes.cpp
+        source/util/commander_exception.cpp
+)
+
+add_executable(commander source/interpreter/commander.cpp)
+target_link_libraries(commander lexer parser)
+
+
+#  Test configurations:
+#  --------------------
+
+add_executable(lexerTests tests/lexer_tests.cpp)
+target_link_libraries(lexerTests lexer GTest::gtest_main)
+gtest_discover_tests(lexerTests)
 
 add_executable(parserTests tests/parser_tests.cpp)
-target_link_libraries(parserTests parser GTest::gtest_main)
+target_link_libraries(parserTests lexer parser GTest::gtest_main)
 gtest_discover_tests(parserTests)
+
+add_executable(typeCheckerTests tests/type_checker_tests.cpp source/type_checker/type_checker.cpp)
+target_link_libraries(typeCheckerTests GTest::gtest_main)
+gtest_discover_tests(typeCheckerTests)
+
+add_executable(symbolTableTests tests/symbol_table_tests.cpp source/symbol_table/scope.cpp source/symbol_table/symbol_table_organizer.cpp)
+target_link_libraries(symbolTableTests GTest::gtest_main)
+gtest_discover_tests(symbolTableTests)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 add_executable(jobRunnerTests ${builtins} source/util/commander_exception.cpp source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
