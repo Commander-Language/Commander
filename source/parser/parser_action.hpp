@@ -75,13 +75,13 @@ namespace Parser {
          * @brief The next state, to which the parser needs to transition.
          * @details Only relevant for `SHIFT` actions.
          */
-        StateNum nextState{};
+        StateNum nextState {};
 
         /**
          * @brief The number of production items to pop from the stack, and to provide to the node constructor.
          * @details Only relevant for `REDUCE` actions.
          */
-        size_t ruleSize{};
+        size_t ruleSize {};
 
         /**
          * @brief A function that constructs a new AST node smart pointer.

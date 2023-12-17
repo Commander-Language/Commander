@@ -95,10 +95,10 @@ TEST(BASICTESTS, verifySimilarTypesTest) {
  */
 TEST(BASICTESTS, varsExist) {
     TypeChecker testChecker = TypeChecker();
-    for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
+    for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
         testChecker.setOrUpdateType(std::to_string(currentVariable), "INTEGER");
     }
-    for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
+    for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
         EXPECT_TRUE(testChecker.hasVariable(std::to_string(currentVariable)));
     }
 }
@@ -110,11 +110,11 @@ TEST(BASICTESTS, varsExist) {
  */
 TEST(STRESSTESTS, stressTest100) {
     TypeChecker testChecker = TypeChecker();
-    for(int currentString = 0; currentString < 100; currentString++) {
+    for (int currentString = 0; currentString < 100; currentString++) {
         testChecker.setOrUpdateType(std::to_string(currentString), std::to_string(currentString));
     }
 
-    for(int currentString = 0; currentString < 100; currentString++) {
+    for (int currentString = 0; currentString < 100; currentString++) {
         EXPECT_EQ(std::to_string(currentString), testChecker.getType(std::to_string(currentString)));
     }
 }
@@ -124,11 +124,11 @@ TEST(STRESSTESTS, stressTest100) {
  */
 TEST(STRESSTESTS, stressTest100000) {
     TypeChecker testChecker = TypeChecker();
-    for(int currentString = 0; currentString < 100000; currentString++) {
+    for (int currentString = 0; currentString < 100000; currentString++) {
         testChecker.setOrUpdateType(std::to_string(currentString), std::to_string(currentString));
     }
 
-    for(int currentString = 0; currentString < 100000; currentString++) {
+    for (int currentString = 0; currentString < 100000; currentString++) {
         EXPECT_EQ(std::to_string(currentString), testChecker.getType(std::to_string(currentString)));
     }
 }

@@ -13,17 +13,23 @@ int main(int argc, char** argv) {
         clock_t start = clock();
         Parser::Parser parser;
         clock_t end = clock();
-        std::cout << "Parse Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds"
+        std::cout << "Parse Table Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds"
                   << std::endl;
-        std::cout << "Commander Scripting Language version x.x\n";
-        std::cout << "Basic REPL for Commander scripting language."
-                     "representation of input.\n";
+        std::cout << "Commander Language Prototype" << std::endl;
+        std::cout << "Basic REPL for Commander scripting language." << std::endl;
         while (true) {
             try {
                 std::cout << ">> ";
 
                 std::string source;
                 std::getline(std::cin, source);
+
+                if (source == "clear") {
+                    std::cout << "\033[2J\033[H" << std::endl;
+                    continue;
+                }
+
+                if (source == "exit") { return 0; }
 
                 // Make a temporary file for the lexer
                 std::string tmpFileName = std::tmpnam(nullptr);  // Not thread safe!!

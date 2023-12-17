@@ -6,10 +6,10 @@
 
 #ifndef CPP_UTILITIES_SCOPE_HPP
 #define CPP_UTILITIES_SCOPE_HPP
-#include <string>
 #include <map>
+#include <string>
 
-//TODO: replace data with a generic object class (template class?)
+// TODO: replace data with a generic object class (template class?)
 
 class Scope {
 public:
@@ -33,7 +33,7 @@ public:
      * Not to be confused with scope(scope* parent), this method serves as a copy constructor
      * @param otherScope - The scope one wishes to copy
      */
-    Scope(Scope &otherScope);
+    Scope(Scope& otherScope);
 
     /**
      * addOrUpdateVariable will attempt to add the relevant data to the scope.
@@ -51,7 +51,8 @@ public:
     bool hasLocalVariable(std::string variableID);
 
     /**
-     * hasGlobalVariable returns a boolean value according to whether the entire scope collection contains the specified variable
+     * hasGlobalVariable returns a boolean value according to whether the entire scope collection contains the specified
+     * variable
      * @param variableID - A string ID which the variable will be referenced by
      * @return - TRUE if the variable exists in any scope, otherwise FALSE is returned
      */
@@ -78,8 +79,8 @@ public:
     bool isGlobal();
 
 private:
-    std::map<std::string, int> variableData{}; //uses a Key variableName to find it's associated object
-    Scope* parentScope = nullptr; //Pointer to the parent scope object (i.e. this scope exists within another scope)
+    std::map<std::string, int> variableData {};  // uses a Key variableName to find it's associated object
+    Scope* parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
 
 
     /**
@@ -91,4 +92,4 @@ private:
 };
 
 
-#endif // CPP_UTILITIES_SCOPE_HPP
+#endif  // CPP_UTILITIES_SCOPE_HPP
