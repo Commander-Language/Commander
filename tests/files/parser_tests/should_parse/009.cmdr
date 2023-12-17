@@ -1,0 +1,2 @@
+// Test that empty tuples parse properly
+isTuple = ();

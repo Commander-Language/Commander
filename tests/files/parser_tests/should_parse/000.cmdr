@@ -1,0 +1,2 @@
+// Test simple command parses correctly
+echo "Hello World!";

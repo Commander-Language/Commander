@@ -1,0 +1,2 @@
+// Test that empty function calls parse properly
+isFun();

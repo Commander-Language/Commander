@@ -1,0 +1,2 @@
+// Test that true values parse properly
+isTrue = true;

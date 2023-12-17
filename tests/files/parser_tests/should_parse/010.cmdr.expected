@@ -1,0 +1,2 @@
+(PrgmNode
+	(VarStmtNode isArray (ArrayExprNode (IntExprNode 1) (IntExprNode 2) (IntExprNode 3))))

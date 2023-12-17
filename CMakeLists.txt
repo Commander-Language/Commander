@@ -83,6 +83,16 @@ include_directories(.)
 #      target_link_libraries(commander lexer parser type-checker)
 #      ```
 
+add_library(parser source/parser/parser.cpp
+        source/parser/ast_node.cpp
+        source/parser/grammar.cpp
+        source/parser/parse_table.cpp
+        source/parser/parser_action.cpp
+
+        source/util/combine_hashes.cpp
+)
+
+
 #  =========================
 #  ||  GoogleTest Setup:  ||
 #  =========================
@@ -123,11 +133,12 @@ include(GoogleTest)
 #      (Can be empty if all source files are specified in the the line above.)
 #    * `[tests]` refers the file containing the unit tests (e.g., `tests/lexer_tests.cpp`).
 
-find_package(GTest REQUIRED)
-
 add_executable(lexerTests source/lexer/lexer.cpp source/util/commander_exception.cpp tests/lexer_tests.cpp)
+target_link_libraries(lexerTests GTest::gtest_main)
 
-target_link_libraries(lexerTests ${GTEST_BOTH_LIBRARIES})
+add_executable(parserTests tests/parser_tests.cpp)
+target_link_libraries(parserTests parser GTest::gtest_main)
+gtest_discover_tests(parserTests)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 add_executable(jobRunnerTests ${builtins} source/util/commander_exception.cpp source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
