@@ -97,9 +97,10 @@
     - [Grammar](#grammar-20)
     - [Examples](#examples-29)
   - [API Functions](#api-functions)
-    - [Grammar](#grammar-21)
-  - [Errors](#errors)
-
+    - [Grammar (Parsing)](#grammar-parsing)
+    - [Grammar (Math)](#grammar-math)
+    - [Grammar (Other)](#grammar-other)
+  - [Runtime Errors](#runtime-errors)
 
 ## General Info
 ### Legal Characters
@@ -232,6 +233,14 @@ Arrays contain multiple elements of a single type. To index an array, you use th
 - Default: ```[]```
 #### API
     1. toString() : <string>
+    2. sort(<function>) : <array>
+    3. filter(<function>) : <array>
+    4. map(<function>) : <array>
+    5. foreach(<function>) : void
+    6. includes(<type_expr>) : <array>
+    7. indexOf(<type_expr>) : <int>
+    8. length() : <int>
+    
 #### Examples
 ```
 myNumbers = [1, 2, 3]
@@ -254,6 +263,9 @@ Functions are types that represent a single function, and can be called. Functio
 - Default: ```() => void```
 #### API
     1. toString() : <string>
+    2. includes(<type_expr>) : <array>
+    3. indexOf(<type_expr>) : <int>
+    4. length() : <int>
 #### Examples
 ```
 add(a, b) {
@@ -765,48 +777,51 @@ type AddFunction (a: int, b: int) -> int;
 add: AddFunction = (a, b) -> a + b;
 ```
 
-<!-- TODO: Separate into groups based on function (e.g. one group for file I/O, one for user I/O, one for math, etc.). Add others as needed -->
 ## API Functions
-### Grammar
+### Grammar (Parsing)
     1. parseInt(<string> | <int> | <bool>) : <int>
     2. parseFloat(<string> | <int> | <bool>) : <float>
     3. parseBool(<string> | <int> | <float>) : <bool>
-    4. sqrt(<int> | <float>) : <float>
-    5. ln(<int> | <float>) : <float>
-    6.  log(<int> | <float>) : <float>
-    7.  abs(<int>) : <int>
-    8.  abs(<float>) : <float>
-    9.  floor(<int> | <float>) : <int>
-    10. ceil(<int> | <float>) : <int>
-    11. round(<int> | <float>) : <int>
-    12. random() : <float>
-    13. time() : <int>
-    14. date() : <tuple>
-    15. sleep(<int>) : void
-    16. sin(<int> | <float>) : <float>
-    17. cos(<int> | <float>) : <float>
-    18. tan(<int> | <float>) : <float>
-    19. csc(<int> | <float>) : <float>
-    20. sec(<int> | <float>) : <float>
-    21. cot(<int> | <float>) : <float>
-    22. sinh(<int> | <float>) : <float>
-    23. cosh(<int> | <float>) : <float>
-    24. tanh(<int> | <float>) : <float>
-    25. csch(<int> | <float>) : <float>
-    26. sech(<int> | <float>) : <float>
-    27. coth(<int> | <float>) : <float>
-    32. arcsin(<int> | <float>) : <float>
-    33. arccos(<int> | <float>) : <float>
-    34. arctan(<int> | <float>) : <float>
-    35. arccsc(<int> | <float>) : <float>
-    36. arcsec(<int> | <float>) : <float>
-    37. arccot(<int> | <float>) : <float>
-    38. arcsinh(<int> | <float>) : <float>
-    39. arccosh(<int> | <float>) : <float>
-    40. arctanh(<int> | <float>) : <float>
-    41. arccsch(<int> | <float>) : <float>
-    42. arcsech(<int> | <float>) : <float>
-    43. arccoth(<int> | <float>) : <float>
+
+### Grammar (Math)
+    1. sqrt(<int> | <float>) : <float>
+    2. ln(<int> | <float>) : <float>
+    3. log(<int> | <float>) : <float>
+    4. abs(<int>) : <int>
+    5. abs(<float>) : <float>
+    6. floor(<int> | <float>) : <int>
+    7. ceil(<int> | <float>) : <int>
+    8. round(<int> | <float>) : <int>
+    9. sin(<int> | <float>) : <float>
+    10. cos(<int> | <float>) : <float>
+    11. tan(<int> | <float>) : <float>
+    12. csc(<int> | <float>) : <float>
+    13. sec(<int> | <float>) : <float>
+    14. cot(<int> | <float>) : <float>
+    15. sinh(<int> | <float>) : <float>
+    16. cosh(<int> | <float>) : <float>
+    17. tanh(<int> | <float>) : <float>
+    18. csch(<int> | <float>) : <float>
+    19. sech(<int> | <float>) : <float>
+    20. coth(<int> | <float>) : <float>
+    21. arcsin(<int> | <float>) : <float>
+    22. arccos(<int> | <float>) : <float>
+    23. arctan(<int> | <float>) : <float>
+    24. arccsc(<int> | <float>) : <float>
+    25. arcsec(<int> | <float>) : <float>
+    26. arccot(<int> | <float>) : <float>
+    27. arcsinh(<int> | <float>) : <float>
+    28. arccosh(<int> | <float>) : <float>
+    29. arctanh(<int> | <float>) : <float>
+    30. arccsch(<int> | <float>) : <float>
+    31. arcsech(<int> | <float>) : <float>
+    32. arccoth(<int> | <float>) : <float>
+
+### Grammar (Other)
+    1. random() : <float>
+    2. time() : <int>
+    3. date() : <tuple>
+    4. sleep(<int>) : void
 
 ## Runtime Errors
 - Divide by zero is an error that will be thrown if an attempt is made to divide by zero.
