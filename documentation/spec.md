@@ -107,19 +107,21 @@ Commander scripts can only contain ascii characters 32 through 126, with a coupl
 
 ### Precedence
 Operator precedence is define as follows, from highest precedence to lowest precedence:
-- Postfix ```[]``` for indexing arrays or tuples, or ```++``` and ```--``` for incrementing and decrementing.
-- Prefix operations ```!```, ```-```, ```++```, or ```--```.
+- Postfix ```[]``` for indexing arrays or tuples
+- Postfix```++``` and ```--``` for incrementing and decrementing.
+- Prefix operators ```!```, ```-```, ```++```, or ```--```.
 - Exponential operator ```**```.
 - Multiplicative binary operators ```*```, ```/```, and ```%```
 - Additive binary operators ```+``` and ```-```
 - Binary comparisons ```<```, ```>```, ```<=```, ```>=```, ```==```, ```!=```
-- Boolean binary operators ```&&``` and ```||```
+- Boolean binary operator ```&&```
+- Boolean binary operator ```||```
 
 Note: you may override precedence anytime using parentheses ```()```.
 
 ## Grammar Explanation
 - Statements, expressed with ```<stmt>```, are either a line or multiple lines of code that ultimately end with a ```;```. They are simply executed at runtime, and don't return anything.
-- Expresions, expressed with ```<expr>```, is code that evaluates to a value of a certain type, and returns that value at runtime.
+- Expressions, expressed with ```<expr>```, is code that evaluates to a value of a certain type, and returns that value at runtime.
 - Variables, expressed with ```<variable>```, represent a variable name.
 - Bindings, expressed with ```<binding>```, are a variable name followed by an optional type. In other words, they have the following grammar:
     ```
@@ -127,7 +129,7 @@ Note: you may override precedence anytime using parentheses ```()```.
               | <variable>
     ```
 - Types are expressed as ```<int>``` for ints, ```<bool>``` for booleans, ```<string>``` for strings, etc. A general type (any type) would be expressed as ```<type>```. These are mostly used in API function definitions.
-- Expressions that are of a particular type will be expressed as ```<int_expr>``` for int expressions, ```bool_expr``` for boolean expressions, etc.
+- Expressions that are of a particular type will be expressed as ```<int_expr>``` for int expressions, ```<bool_expr>``` for boolean expressions, etc.
 - If, for some reason, multiple grammars apply, then they are separated using |. For example, commands are a sequence of strings, command strings, or variables, and so each command argument would be represented as ```<string | command_string | variable>```.
 ## Types
 ### int
@@ -174,7 +176,7 @@ true
 false
 ```
 ### string
-- Strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\``` character, in which case the new line that comes after it will not be included in the final string).
+- Strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\ ``` character, in which case the new line that comes after it will not be included in the final string).
 - Useful string operations such as [string concatenation](#string-concatenation) and [string interpolation](#string-interpolation) are supported.
 - Strings that start and end with ```'``` are very literal strings. Anything inside of them will be considered a string, including escape characters, with the exception of:
   - Curly braces, if the string is an interpolated string (i.e. has ```$``` right before the starting ```'```). Curly braces can be escaped with ```\{``` or ```\}```
@@ -247,8 +249,8 @@ myItems = ("hello", 2, 3.14, true)
 
 pi = myItems[2]
 ```
-Functions are types that represent a single function, and can be called. Functions can be initialized in two different ways (see [Functions](#functions) and [Lambda Expressions](#lambda-expressions)), but either way the function is stored into a variable.
 ### function
+Functions are types that represent a single function, and can be called. Functions can be initialized in two different ways (see [Functions](#functions) and [Lambda Expressions](#lambda-expressions)), but either way the function is stored into a variable.
 - Default: ```() => void```
 #### API
     1. toString() : <string>
@@ -266,7 +268,8 @@ Commands are simply a series of strings or variables followed one after another.
 - backticks ``` ` ```,
 - semicolons ```;```, 
 - pipes ```|```, 
-- or ampersands ```&```. 
+- ampersands ```&```,
+- or parentheses ```(``` or ```)```.
 
 For variables to be used as a command argument, they must be of type string, and must be preceded by a ```$```. 
 
@@ -311,15 +314,15 @@ The output from one command may be used as input to another through piping, usin
 ls -a | grep myDirectory;
 ```
 
-<!-- TODO -->
 ## Timeout Commands
+You can run commands with the option to time them out after a specified amount of time given in milliseconds.
 ### Grammar
 ```
-
+<stmt> : timeout <int_expr> <command>
 ```
 ### Examples
 ```
-
+timeout 5000 ping https://google.com;
 ```
 
 ## Command Aliasing
@@ -366,6 +369,10 @@ Execute lines of code multiple times, so long as the ```<bool_expr>``` is true b
 ```
 x = 10;
 while (x > 5) {
+    if (x == 6) {
+      break;
+    }
+    if (x == 7) continue;
     print(x--);
 };
 ```
@@ -383,6 +390,10 @@ Like a while loop, but will execute all statements first before considering the 
 ```
 x = 10;
 do {
+    if (x == 6) {
+      break;
+    }
+    if (x == 7) continue;
     print(x--);
 } while (x > 5);
 ```
@@ -399,6 +410,10 @@ Similar to a while loop in that it will only execute one iteration of the statem
 ### Examples
 ```
 for (i = 0; i < 10; i++) {
+    if (i == 8) {
+      break;
+    }
+    if (x == 7) continue;
     print(i);
 }
 ```
@@ -446,6 +461,12 @@ if (true) {
     echo "true";
 } else {
     echo "false";
+}
+
+if (x == 1) {
+    ...
+} else if (x == 2) {
+    ...
 }
 ```
 
@@ -686,7 +707,7 @@ write "My name is Bob" to "documents/name.txt";
 ```
 
 ## User Defined Scopes
-You may defined a custom scope in your commander script. Any variables or functions initialize within the scope will no longer exist once the scope is left.
+You may define a custom scope in your commander script. Any variables or functions initialize within the scope will no longer exist once the scope is left.
 ### Grammar
 ```
 <stmt> : {
@@ -787,6 +808,6 @@ add: AddFunction = (a, b) -> a + b;
     42. arcsech(<int> | <float>) : <float>
     43. arccoth(<int> | <float>) : <float>
 
-<!-- TODO -->
-## Errors
-- Divide by zero is an error that will be thrown at runtime if an attempt is made to divide by zero.
+## Runtime Errors
+- Divide by zero is an error that will be thrown if an attempt is made to divide by zero.
+- Index out of bounds is an error that will be thrown if there is an attempt to access an array out of its bounds.
