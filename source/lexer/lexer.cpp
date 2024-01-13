@@ -48,6 +48,8 @@ namespace lexer {
                 return "DIVIDE_EQUALS";
             case DO:
                 return "DO";
+            case DOT:
+                return "DOT";
             case DOUBLE_EQUALS:
                 return "DOUBLE_EQUALS";
             case ELSE:
