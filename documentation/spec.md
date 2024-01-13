@@ -330,7 +330,7 @@ ls -a | grep myDirectory;
 You can run commands with the option to time them out after a specified amount of time given in milliseconds.
 ### Grammar
 ```
-<stmt> : timeout <int_expr> <command>
+<stmt> : timeout <int> <command>
 ```
 ### Examples
 ```
