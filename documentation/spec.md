@@ -765,16 +765,15 @@ print(add(3, 4))
 ```
 
 ## Custom Types
-Use the ```type``` keyword followed by a type to defined a custom type.
+Use the ```type``` keyword followed by a type name and then a type to define a custom type.
 ### Grammar
 ```
-<stmt> : type <type>
+<stmt> : type <variable> <type>
 ```
 ### Examples
 ```
-type AddFunction (a: int, b: int) -> int;
-
-add: AddFunction = (a, b) -> a + b;
+type BinOpFunction (a: int, b: int) -> int;
+add: BinopFunction = (a, b) -> a + b;
 ```
 
 ## API Functions
