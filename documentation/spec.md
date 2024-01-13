@@ -252,6 +252,9 @@ Tuples contain multiple elements of different types. To index a tuple, you use t
 - Default: ```()```
 #### API
     1. toString() : <string>
+    2. includes(<type_expr>) : <array>
+    3. indexOf(<type_expr>) : <int>
+    4. length() : <int>
 #### Examples
 ```
 myItems = ("hello", 2, 3.14, true)
@@ -263,9 +266,6 @@ Functions are types that represent a single function, and can be called. Functio
 - Default: ```() => void```
 #### API
     1. toString() : <string>
-    2. includes(<type_expr>) : <array>
-    3. indexOf(<type_expr>) : <int>
-    4. length() : <int>
 #### Examples
 ```
 add(a, b) {
