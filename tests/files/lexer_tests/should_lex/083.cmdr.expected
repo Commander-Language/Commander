@@ -1,6 +1,6 @@
 VARIABLE 'a' 2:1
 EQUALS '=' 2:3
-LSQAURE '[' 2:5
+LSQUARE '[' 2:5
 INTVAL '1' 2:6
 COMMA ',' 2:7
 INTVAL '2' 2:9
