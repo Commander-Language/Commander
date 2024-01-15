@@ -151,8 +151,10 @@ add_library(parser source/parser/parser.cpp
         source/util/commander_exception.cpp
 )
 
+add_library(flow_controller source/flow_controller/flow_controller.cpp)
+
 add_executable(commander source/interpreter/commander.cpp)
-target_link_libraries(commander lexer parser)
+target_link_libraries(commander lexer parser flow_controller)
 
 
 #  Test configurations:
