@@ -10,6 +10,101 @@
 
 namespace Parser {
 
+    std::string nodeTypeToString(ASTNodeType nodeType) {
+        switch (nodeType) {
+            case BINDING:
+                return "BINDING";
+            case BINDINGS:
+                return "BINDINGS";
+            case CMD:
+                return "CMD";
+            case CMD_CMD:
+                return "CMD_CMD";
+            case PIPE_CMD:
+                return "PIPE_CMD";
+            case ASYNC_CMD:
+                return "ASYNC_CMD";
+            case INT_EXPR:
+                return "INT_EXPR";
+            case FLOAT_EXPR:
+                return "FLOAT_EXPR";
+            case STRING_EXPR:
+                return "STRING_EXPR";
+            case BOOL_EXPR:
+                return "BOOL_EXPR";
+            case VAR_EXPR:
+                return "VAR_EXPR";
+            case ARRAY_EXPR:
+                return "ARRAY_EXPR";
+            case ARRAY_INDEX_EXPR:
+                return "ARRAY_INDEX_EXPR";
+            case TUPLE_EXPR:
+                return "TUPLE_EXPR";
+            case TUPLE_INDEX_EXPR:
+                return "TUPLE_INDEX_EXPR";
+            case TERNARY_EXPR:
+                return "TERNARY_EXPR";
+            case UNOP_EXPR:
+                return "UNOP_EXPR";
+            case BINOP_EXPR:
+                return "BINOP_EXPR";
+            case CALL_EXPR:
+                return "CALL_EXPR";
+            case LAMBDA_EXPR:
+                return "LAMBDA_EXPR";
+            case CMD_EXPR:
+                return "CMD_EXPR";
+            case EXPR:
+                return "EXPR";
+            case EXPRS:
+                return "EXPRS";
+            case PRGM:
+                return "PRGM";
+            case IF_STMT:
+                return "IF_STMT";
+            case FOR_STMT:
+                return "FOR_STMT";
+            case WHILE_STMT:
+                return "WHILE_STMT";
+            case DO_WHILE_STMT:
+                return "DO_WHILE_STMT";
+            case RETURN_STMT:
+                return "RETURN_STMT";
+            case SCOPE_STMT:
+                return "SCOPE_STMT";
+            case CMD_STMT:
+                return "CMD_STMT";
+            case EXPR_STMT:
+                return "EXPR_STMT";
+            case ALIAS_STMT:
+                return "ALIAS_STMT";
+            case STMT:
+                return "STMT";
+            case STMTS:
+                return "STMTS";
+            case STRING:
+                return "STRING";
+            case INT_TYPE:
+                return "INT_TYPE";
+            case FLOAT_TYPE:
+                return "FLOAT_TYPE";
+            case BOOL_TYPE:
+                return "BOOL_TYPE";
+            case STRING_TYPE:
+                return "STRING_TYPE";
+            case ARRAY_TYPE:
+                return "ARRAY_TYPE";
+            case TUPLE_TYPE:
+                return "TUPLE_TYPE";
+            case FUNCTION_TYPE:
+                return "FUNCTION_TYPE";
+            case TYPE:
+                return "TYPE";
+            case VARIABLE:
+                return "VARIABLE";
+        }
+    }
+
     std::string unOpToString(UnOpType unop) {
         switch (unop) {
             case NEGATE:
