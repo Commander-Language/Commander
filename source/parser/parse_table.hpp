@@ -9,7 +9,6 @@
 #define PARSE_TABLE_HPP
 
 #include "ast_node.hpp"
-#include "grammar.hpp"
 #include "parser_action.hpp"
 
 #include "source/lexer/lexer.hpp"
@@ -34,19 +33,6 @@ namespace Parser {
          * @brief Each state has a unique integer ID.
          */
         using StateNum = unsigned int;
-
-        /**
-         * @brief Represents an entry in a grammar rule.
-         * @details Either a token type or an AST node type.
-         *     Every rule is made up of these.
-         */
-        using GrammarEntry = Grammar::GrammarEntry;
-
-        /**
-         * @brief Represents a single grammar rule.
-         * @details Made up of the resulting AST node type and a list of component `GrammarEntry`s.
-         */
-        using GrammarRule = Grammar::GrammarRule;
 
         /**
          * @brief Class constructor.

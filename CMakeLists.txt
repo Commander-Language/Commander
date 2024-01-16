@@ -157,7 +157,6 @@ add_custom_command(OUTPUT parse_table.cpp
 
 add_library(parser source/parser/parser.cpp
         source/parser/ast_node.cpp
-        source/parser/grammar.cpp
         source/parser/parser_action.cpp
         source/parser/production_item.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/parse_table.cpp
