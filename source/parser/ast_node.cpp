@@ -10,6 +10,35 @@
 
 namespace Parser {
 
+    std::string nodeTypeToString(ASTNodeType nodeType) {
+        switch (nodeType) {
+            case BINDING:
+                return "BINDING";
+            case BINDINGS:
+                return "BINDINGS";
+            case CMD:
+                return "CMD";
+            case EXPR:
+                return "EXPR";
+            case EXPRS:
+                return "EXPRS";
+            case PRGM:
+                return "PRGM";
+            case STMT:
+                return "STMT";
+            case STMTS:
+                return "STMTS";
+            case STRING:
+                return "STRING";
+            case TYPE:
+                return "TYPE";
+            case VARIABLE:
+                return "VARIABLE";
+            default:
+                return "";
+        }
+    }
+
     std::string unOpToString(UnOpType unop) {
         switch (unop) {
             case NEGATE:

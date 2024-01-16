@@ -27,6 +27,14 @@ namespace Parser {
     enum UnOpType { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
 
     /**
+     * @brief Helper method that gets the string representation of the given AST node type.
+     *
+     * @param nodeType The named AST node type.
+     * @return The string name of the given AST node type.
+     */
+    std::string nodeTypeToString(ASTNodeType nodeType);
+
+    /**
      * @brief Helper method that gets the string representation of the Unop enum type
      * @param unop The unop to get the string version of
      * @return The string of the unop
