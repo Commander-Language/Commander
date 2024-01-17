@@ -164,15 +164,6 @@ namespace Parser {
         Grammar(const std::vector<std::tuple<GrammarRule, NodeConstructor>>& grammarDefinitions);
 
         /**
-         * @brief Returns a reduced grammar definition as a vector of tuples.
-         * @details This function will eventually be deleted. For now, it's useful for testing and demonstration.
-         *     Each tuple is made up of a grammar rule and a callable node constructor function.
-         *
-         * @return The prototype grammar definition as a vector of tuples.
-         */
-        static std::vector<std::tuple<GrammarRule, NodeConstructor>> _definePrototypeGrammar();
-
-        /**
          * @brief Returns the grammar definition as a vector of tuples.
          * @details Each tuple is made up of a grammar rule and a callable node constructor function.
          *

@@ -120,7 +120,9 @@ namespace Parser {
                                                                                   nextState);
                 } else {
                     //  Set the next state.
-                    _nextState[stateNum][grammarEntry.nodeType.value()] = {nextState};
+                    if (grammarEntry.nodeType.has_value()) {
+                        _nextState[stateNum][grammarEntry.nodeType.value()] = {nextState};
+                    }
                 }
             }
 
@@ -132,8 +134,8 @@ namespace Parser {
                 } else if (kernel.index == rule.components.size()
                            && _nextAction[stateNum].count(kernel.lookahead) == 0) {
                     //  Add a `REDUCE` action.
-                    const std::string function = _join(" ", "[&](const ProductionItemList& productionList) {",
-                                                       grammar.reductions.at(rule), "}");
+                    const std::string function = _join("", {"[&](const ProductionItemList& productionList) { return ",
+                                                            grammar.reductions.at(rule), "; }"});
                     _nextAction[stateNum][kernel.lookahead] = _pair(rule.components.size(), function);
                 }
             }
@@ -337,7 +339,9 @@ namespace Parser {
                         }();
 
                         for (const auto& rule : _grammar) {
-                            if (!remaining[0].nodeType.has_value() || remaining[0].nodeType.value() != rule.result)
+                            if (!remaining[0].nodeType.has_value()
+                                || remaining[0].nodeType.value()  //  NOLINT(*-unchecked-optional-access)
+                                           != rule.result)
                                 continue;
 
                             for (const auto& lookahead : lookaheads) {
@@ -359,21 +363,6 @@ namespace Parser {
         return {result.begin(), result.end()};
     }
 
-    template<typename... StrType>
-    std::string Generator::_join(const std::string& delimiter, const StrType&... strings) {
-        std::vector<std::string> stringVec;
-
-        (
-                [&]() {
-                    std::stringstream stream;
-                    stream << strings;
-                    stringVec.emplace_back(stream.str());
-                }(),
-                ...);
-
-        return _join(delimiter, stringVec);
-    }
-
     std::string Generator::_join(const std::string& delimiter, const std::vector<std::string>& strings) {
         std::stringstream stream;
         for (const auto& string : strings) stream << string << delimiter;
@@ -386,7 +375,11 @@ namespace Parser {
 
     template<typename LeftType, typename RightType>
     std::string Generator::_pair(const LeftType& left, const RightType& right) {
-        return _wrap(_join(", ", left, right));
+        std::stringstream leftStream;
+        leftStream << left;
+        std::stringstream rightStream;
+        rightStream << right;
+        return _wrap(_join(", ", {leftStream.str(), rightStream.str()}));
     }
 
 }  //  namespace Parser
