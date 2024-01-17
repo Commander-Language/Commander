@@ -18,11 +18,14 @@ Scope::~Scope() = default;
 // Copy Constructor
 Scope::Scope(Scope& otherScope) {
     parentScope = otherScope.getParentScopePointer();
-    std::map<std::string, int> copyData(otherScope.variableData);
-    variableData = copyData;
+    std::map<std::string, int> copyData(otherScope._variableData);
+    _variableData = copyData;
 }
 
-void Scope::addOrUpdateVariable(std::string variableID, int data) { variableData.insert_or_assign(variableID, data); }
+//Deprecated
+void Scope::addOrUpdateVariable(std::string variableID, int data) {
+    _variableData.insert_or_assign(variableID, data);
+}
 
 bool Scope::hasLocalVariable(std::string variableID) { return hasKey(variableID); }
 
@@ -35,7 +38,7 @@ int* Scope::getVariable(std::string variableID) {
         if (parentScope != nullptr) { return parentScope->getVariable(variableID); }
         return nullptr;
     }
-    return &variableData[variableID];
+    return &_variableData[variableID];
 }
 
 
@@ -43,4 +46,25 @@ Scope* Scope::getParentScopePointer() { return parentScope; }
 
 bool Scope::isGlobal() { return parentScope == nullptr; }
 
-bool Scope::hasKey(std::string key) { return variableData.count(key) > 0; }
+bool Scope::hasKey(std::string key) { return _variableData.count(key) > 0; }
+
+//Garbage Collection methods
+
+void Scope::setVariableOccurences(std::string variableID, unsigned int occurences) {
+    _variableUses.insert_or_assign(variableID, occurences);
+}
+
+void Scope::freeVariableData(std::string variableID) {
+    int* dataPointer = &_variableData[variableID];
+    delete dataPointer;
+}
+
+void Scope::decrementUses(std::string variableID) {
+    if(_variableUses[variableID] != 0) {
+        _variableUses[variableID] = _variableUses[variableID] - 1;
+    }
+}
+
+bool Scope::hasExpired(std::string variableID) {
+    return (_variableUses.find(variableID) != _variableUses.end()) && (_variableUses[variableID] == 0);
+}

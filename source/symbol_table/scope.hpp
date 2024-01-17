@@ -39,6 +39,7 @@ public:
      * addOrUpdateVariable will attempt to add the relevant data to the scope.
      * @param variableID - A String ID which the variable will be referenced by (e.g. "cat")
      * @param data - An object which will be stored as data (e.g. 14, "dog", std::vector<int>, etc.)
+     * @param occurences - The number of times the variable is used in the script (used for garbage collection)
      */
     void addOrUpdateVariable(std::string variableID, int data);
 
@@ -78,8 +79,36 @@ public:
      */
     bool isGlobal();
 
+    //Garbage Collection methods
+
+    /**
+     * setVariableOccurences() adds a key, value pair for variable occurances in the Commander script
+     * @param occurences - An unsigned int value which determines how many times a variable is used in a script
+     */
+    void setVariableOccurences(std::string variableID, unsigned int occurences);
+
+    /**
+     * freeVariableData() destructs the data used by a variable
+     * @param variableID - A string variableID to free data from
+     */
+    void freeVariableData(std::string variableID);
+
+    /**
+     * TODO
+     * @param variableID
+     */
+    void decrementUses(std::string variableID);
+
+    /**
+     * TODO
+     * @param variableID
+     * @return
+     */
+    bool hasExpired(std::string variableID);
+
 private:
-    std::map<std::string, int> variableData {};  // uses a Key variableName to find it's associated object
+    std::map<std::string, int> _variableData {};  // uses a Key variableName to find it's associated object
+    std::map<std::string, unsigned int> _variableUses; //uses a Key variableName to find usages left (unsigned int)
     Scope* parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
 
 
@@ -89,6 +118,7 @@ private:
      * @return - TRUE if the variable exists in variableData, otherwise FALSE is returned
      */
     bool hasKey(std::string key);
+
 };
 
 

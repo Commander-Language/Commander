@@ -274,3 +274,22 @@ TEST(SYMORGTEST, copyTest) {
     EXPECT_FALSE(testOrg.varExistsInScope("cat"));
     EXPECT_TRUE(copiedOrg.varExistsInScope("cat"));
 }
+
+//Garbage Collection Tests
+//Scope
+TEST(GARBAGE_COLLECTION_SCOPE, hasExpiredTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 255);
+    testScope.setVariableOccurences("cat", 8);
+
+    EXPECT_FALSE(testScope.hasExpired("cat"));
+    for(int calls = 0; calls < 8; calls++) {
+        testScope.decrementUses("cat");
+    }
+    EXPECT_TRUE(testScope.hasExpired("cat"));
+    EXPECT_FALSE(testScope.hasExpired("dog"));
+}
+
+TEST(GARBAGE_COLLECTION_SCOPE, decrementTest) {
+    Scope testScope = Scope();
+}
