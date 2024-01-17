@@ -191,17 +191,6 @@ namespace Parser {
         /**
          * @brief Joins the given items into a string with the given delimiter.
          *
-         * @tparam StrType The types of the individual items.
-         * @param delimiter The delimiter of the string.
-         * @param strings The items that will be joined together.
-         * @return The joined string with the given delimiter.
-         */
-        template<typename... StrType>
-        static std::string _join(const std::string& delimiter, const StrType&... strings);
-
-        /**
-         * @brief Joins the given items into a string with the given delimiter.
-         *
          * @param delimiter The delimiter of the string.
          * @param strings The items that will be joined together.
          * @return The joined string with the given delimiter.
