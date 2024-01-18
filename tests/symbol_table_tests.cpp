@@ -280,7 +280,7 @@ TEST(SYMORGTEST, copyTest) {
 TEST(GARBAGE_COLLECTION_SCOPE, hasExpiredTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 255);
-    testScope.setVariableOccurences("cat", 8);
+    testScope.setVariableOccurrences("cat", 8);
 
     EXPECT_FALSE(testScope.hasExpired("cat"));
     for(int calls = 0; calls < 8; calls++) {
@@ -292,4 +292,32 @@ TEST(GARBAGE_COLLECTION_SCOPE, hasExpiredTest) {
 
 TEST(GARBAGE_COLLECTION_SCOPE, decrementTest) {
     Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 255);
+    testScope.setVariableOccurrences("cat", 1);
+
+    EXPECT_FALSE(testScope.hasExpired("cat"));
+    testScope.decrementUses("cat"); //Should change 1 to 0
+    EXPECT_TRUE(testScope.hasExpired("cat"));
+    testScope.decrementUses("cat"); //Should not update from 0
+    EXPECT_TRUE(testScope.hasExpired("cat"));
+}
+
+TEST(GARBAGE_COLLECTION_SCOPE, expiredTest) {
+    Scope testScope = Scope();
+    for(int currentVar = 0; currentVar < 10; currentVar++) {
+        testScope.addOrUpdateVariable(std::to_string(currentVar), 1);
+        testScope.setVariableOccurrences(std::to_string(currentVar), 3);
+    }
+
+    for(int currentVar = 0; currentVar < 1; currentVar++) {
+        for(int currentDec = 0; currentDec < 4; currentDec++) {
+            testScope.decrementUses(std::to_string(currentVar));
+            if(currentDec == 3) {
+                EXPECT_TRUE(testScope.hasExpired(std::to_string(currentVar))); //TODO: yielding true but being counted as false
+            }
+            else {
+                EXPECT_FALSE(testScope.hasExpired(std::to_string(currentVar)));
+            }
+        }
+    }
 }

@@ -50,8 +50,8 @@ bool Scope::hasKey(std::string key) { return _variableData.count(key) > 0; }
 
 //Garbage Collection methods
 
-void Scope::setVariableOccurences(std::string variableID, unsigned int occurences) {
-    _variableUses.insert_or_assign(variableID, occurences);
+void Scope::setVariableOccurrences(std::string variableID, unsigned int occurrences) {
+    _variableUses.insert_or_assign(variableID, occurrences);
 }
 
 void Scope::freeVariableData(std::string variableID) {
@@ -66,5 +66,6 @@ void Scope::decrementUses(std::string variableID) {
 }
 
 bool Scope::hasExpired(std::string variableID) {
-    return (_variableUses.find(variableID) != _variableUses.end()) && (_variableUses[variableID] == 0);
+    bool status = (_variableUses.find(variableID) != _variableUses.end()) && (_variableUses[variableID] == 0); //Oddly enough, not recording this variable cause false to yield in true conditions
+    return status;
 }

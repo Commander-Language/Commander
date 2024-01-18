@@ -82,10 +82,10 @@ public:
     //Garbage Collection methods
 
     /**
-     * setVariableOccurences() adds a key, value pair for variable occurances in the Commander script
-     * @param occurences - An unsigned int value which determines how many times a variable is used in a script
+     * setVariableOccurrences() adds a key, value pair for variable occurrences in the Commander script
+     * @param occurrences - An unsigned int value which determines how many times a variable is used in a script
      */
-    void setVariableOccurences(std::string variableID, unsigned int occurences);
+    void setVariableOccurrences(std::string variableID, unsigned int occurrences);
 
     /**
      * freeVariableData() destructs the data used by a variable
@@ -94,15 +94,15 @@ public:
     void freeVariableData(std::string variableID);
 
     /**
-     * TODO
-     * @param variableID
+     * decrementUses() subtracts the number of the variable's occurrences by 1. If the number of occurrences are 0, the value will not update further
+     * @param variableID - The variable one wishes to decrement
      */
     void decrementUses(std::string variableID);
 
     /**
-     * TODO
-     * @param variableID
-     * @return
+     * hasExpired() returns a boolean value according to whether the number of occurrences of a variable is equal to 0
+     * @param variableID - The variable to check the garbage collection status of
+     * @return - TRUE if the variable has no more occurrences, otherwise FALSE is returned
      */
     bool hasExpired(std::string variableID);
 
