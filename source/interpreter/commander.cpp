@@ -1,6 +1,7 @@
 #include "../lexer/lexer.hpp"
 #include "../parser/parser.hpp"
 #include "../util/commander_exception.hpp"
+#include "../flow_controller/flow_controller.hpp"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -53,6 +54,10 @@ int main(int argc, char** argv) {
                     // TODO: type checking
                     continue;
                 }
+
+                FlowController::FlowController flow(nodes);
+                flow.runtime();
+
                 // TODO: Run script
                 std::map<std::string, std::variant<long, double, bool>> variables;
                 for (const Parser::ASTNodePtr& node : nodes) {
