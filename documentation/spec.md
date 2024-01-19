@@ -97,9 +97,10 @@
     - [Grammar](#grammar-20)
     - [Examples](#examples-29)
   - [API Functions](#api-functions)
-    - [Grammar](#grammar-21)
-  - [Errors](#errors)
-
+    - [Grammar (Parsing)](#grammar-parsing)
+    - [Grammar (Math)](#grammar-math)
+    - [Grammar (Other)](#grammar-other)
+  - [Runtime Errors](#runtime-errors)
 
 ## General Info
 ### Legal Characters
@@ -107,19 +108,21 @@ Commander scripts can only contain ascii characters 32 through 126, with a coupl
 
 ### Precedence
 Operator precedence is define as follows, from highest precedence to lowest precedence:
-- Postfix ```[]``` for indexing arrays or tuples, or ```++``` and ```--``` for incrementing and decrementing.
-- Prefix operations ```!```, ```-```, ```++```, or ```--```.
+- Postfix ```[]``` for indexing arrays or tuples
+- Postfix```++``` and ```--``` for incrementing and decrementing.
+- Prefix operators ```!```, ```-```, ```++```, or ```--```.
 - Exponential operator ```**```.
 - Multiplicative binary operators ```*```, ```/```, and ```%```
 - Additive binary operators ```+``` and ```-```
 - Binary comparisons ```<```, ```>```, ```<=```, ```>=```, ```==```, ```!=```
-- Boolean binary operators ```&&``` and ```||```
+- Boolean binary operator ```&&```
+- Boolean binary operator ```||```
 
 Note: you may override precedence anytime using parentheses ```()```.
 
 ## Grammar Explanation
 - Statements, expressed with ```<stmt>```, are either a line or multiple lines of code that ultimately end with a ```;```. They are simply executed at runtime, and don't return anything.
-- Expresions, expressed with ```<expr>```, is code that evaluates to a value of a certain type, and returns that value at runtime.
+- Expressions, expressed with ```<expr>```, is code that evaluates to a value of a certain type, and returns that value at runtime.
 - Variables, expressed with ```<variable>```, represent a variable name.
 - Bindings, expressed with ```<binding>```, are a variable name followed by an optional type. In other words, they have the following grammar:
     ```
@@ -127,7 +130,7 @@ Note: you may override precedence anytime using parentheses ```()```.
               | <variable>
     ```
 - Types are expressed as ```<int>``` for ints, ```<bool>``` for booleans, ```<string>``` for strings, etc. A general type (any type) would be expressed as ```<type>```. These are mostly used in API function definitions.
-- Expressions that are of a particular type will be expressed as ```<int_expr>``` for int expressions, ```bool_expr``` for boolean expressions, etc.
+- Expressions that are of a particular type will be expressed as ```<int_expr>``` for int expressions, ```<bool_expr>``` for boolean expressions, etc.
 - If, for some reason, multiple grammars apply, then they are separated using |. For example, commands are a sequence of strings, command strings, or variables, and so each command argument would be represented as ```<string | command_string | variable>```.
 ## Types
 ### int
@@ -174,7 +177,7 @@ true
 false
 ```
 ### string
-- Strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\``` character, in which case the new line that comes after it will not be included in the final string).
+- Strings start and end with ```"``` or ```'```. The strings can be multiline as well, so any newlines present in them will be included in the final string (unless the line ends with a ```\ ``` character, in which case the new line that comes after it will not be included in the final string).
 - Useful string operations such as [string concatenation](#string-concatenation) and [string interpolation](#string-interpolation) are supported.
 - Strings that start and end with ```'``` are very literal strings. Anything inside of them will be considered a string, including escape characters, with the exception of:
   - Curly braces, if the string is an interpolated string (i.e. has ```$``` right before the starting ```'```). Curly braces can be escaped with ```\{``` or ```\}```
@@ -230,6 +233,14 @@ Arrays contain multiple elements of a single type. To index an array, you use th
 - Default: ```[]```
 #### API
     1. toString() : <string>
+    2. sort(<function>) : <array>
+    3. filter(<function>) : <array>
+    4. map(<function>) : <array>
+    5. foreach(<function>) : void
+    6. includes(<type_expr>) : <array>
+    7. indexOf(<type_expr>) : <int>
+    8. length() : <int>
+    
 #### Examples
 ```
 myNumbers = [1, 2, 3]
@@ -241,14 +252,17 @@ Tuples contain multiple elements of different types. To index a tuple, you use t
 - Default: ```()```
 #### API
     1. toString() : <string>
+    2. includes(<type_expr>) : <array>
+    3. indexOf(<type_expr>) : <int>
+    4. length() : <int>
 #### Examples
 ```
 myItems = ("hello", 2, 3.14, true)
 
 pi = myItems[2]
 ```
-Functions are types that represent a single function, and can be called. Functions can be initialized in two different ways (see [Functions](#functions) and [Lambda Expressions](#lambda-expressions)), but either way the function is stored into a variable.
 ### function
+Functions are types that represent a single function, and can be called. Functions can be initialized in two different ways (see [Functions](#functions) and [Lambda Expressions](#lambda-expressions)), but either way the function is stored into a variable.
 - Default: ```() => void```
 #### API
     1. toString() : <string>
@@ -266,7 +280,8 @@ Commands are simply a series of strings or variables followed one after another.
 - backticks ``` ` ```,
 - semicolons ```;```, 
 - pipes ```|```, 
-- or ampersands ```&```. 
+- ampersands ```&```,
+- or parentheses ```(``` or ```)```.
 
 For variables to be used as a command argument, they must be of type string, and must be preceded by a ```$```. 
 
@@ -311,15 +326,15 @@ The output from one command may be used as input to another through piping, usin
 ls -a | grep myDirectory;
 ```
 
-<!-- TODO -->
 ## Timeout Commands
+You can run commands with the option to time them out after a specified amount of time given in milliseconds.
 ### Grammar
 ```
-
+<stmt> : timeout <int> <command>
 ```
 ### Examples
 ```
-
+timeout 5000 ping https://google.com;
 ```
 
 ## Command Aliasing
@@ -366,6 +381,10 @@ Execute lines of code multiple times, so long as the ```<bool_expr>``` is true b
 ```
 x = 10;
 while (x > 5) {
+    if (x == 6) {
+      break;
+    }
+    if (x == 7) continue;
     print(x--);
 };
 ```
@@ -383,6 +402,10 @@ Like a while loop, but will execute all statements first before considering the 
 ```
 x = 10;
 do {
+    if (x == 6) {
+      break;
+    }
+    if (x == 7) continue;
     print(x--);
 } while (x > 5);
 ```
@@ -399,6 +422,10 @@ Similar to a while loop in that it will only execute one iteration of the statem
 ### Examples
 ```
 for (i = 0; i < 10; i++) {
+    if (i == 8) {
+      break;
+    }
+    if (x == 7) continue;
     print(i);
 }
 ```
@@ -446,6 +473,12 @@ if (true) {
     echo "true";
 } else {
     echo "false";
+}
+
+if (x == 1) {
+    ...
+} else if (x == 2) {
+    ...
 }
 ```
 
@@ -686,7 +719,7 @@ write "My name is Bob" to "documents/name.txt";
 ```
 
 ## User Defined Scopes
-You may defined a custom scope in your commander script. Any variables or functions initialize within the scope will no longer exist once the scope is left.
+You may define a custom scope in your commander script. Any variables or functions initialize within the scope will no longer exist once the scope is left.
 ### Grammar
 ```
 <stmt> : {
@@ -732,61 +765,63 @@ print(add(3, 4))
 ```
 
 ## Custom Types
-Use the ```type``` keyword followed by a type to defined a custom type.
+Use the ```type``` keyword followed by a type name and then a type to define a custom type.
 ### Grammar
 ```
-<stmt> : type <type>
+<stmt> : type <variable> <type>
 ```
 ### Examples
 ```
-type AddFunction (a: int, b: int) -> int;
-
-add: AddFunction = (a, b) -> a + b;
+type BinOpFunction (a: int, b: int) -> int;
+add: BinopFunction = (a, b) -> a + b;
 ```
 
-<!-- TODO: Separate into groups based on function (e.g. one group for file I/O, one for user I/O, one for math, etc.). Add others as needed -->
 ## API Functions
-### Grammar
+### Grammar (Parsing)
     1. parseInt(<string> | <int> | <bool>) : <int>
     2. parseFloat(<string> | <int> | <bool>) : <float>
     3. parseBool(<string> | <int> | <float>) : <bool>
-    4. sqrt(<int> | <float>) : <float>
-    5. ln(<int> | <float>) : <float>
-    6.  log(<int> | <float>) : <float>
-    7.  abs(<int>) : <int>
-    8.  abs(<float>) : <float>
-    9.  floor(<int> | <float>) : <int>
-    10. ceil(<int> | <float>) : <int>
-    11. round(<int> | <float>) : <int>
-    12. random() : <float>
-    13. time() : <int>
-    14. date() : <tuple>
-    15. sleep(<int>) : void
-    16. sin(<int> | <float>) : <float>
-    17. cos(<int> | <float>) : <float>
-    18. tan(<int> | <float>) : <float>
-    19. csc(<int> | <float>) : <float>
-    20. sec(<int> | <float>) : <float>
-    21. cot(<int> | <float>) : <float>
-    22. sinh(<int> | <float>) : <float>
-    23. cosh(<int> | <float>) : <float>
-    24. tanh(<int> | <float>) : <float>
-    25. csch(<int> | <float>) : <float>
-    26. sech(<int> | <float>) : <float>
-    27. coth(<int> | <float>) : <float>
-    32. arcsin(<int> | <float>) : <float>
-    33. arccos(<int> | <float>) : <float>
-    34. arctan(<int> | <float>) : <float>
-    35. arccsc(<int> | <float>) : <float>
-    36. arcsec(<int> | <float>) : <float>
-    37. arccot(<int> | <float>) : <float>
-    38. arcsinh(<int> | <float>) : <float>
-    39. arccosh(<int> | <float>) : <float>
-    40. arctanh(<int> | <float>) : <float>
-    41. arccsch(<int> | <float>) : <float>
-    42. arcsech(<int> | <float>) : <float>
-    43. arccoth(<int> | <float>) : <float>
 
-<!-- TODO -->
-## Errors
-- Divide by zero is an error that will be thrown at runtime if an attempt is made to divide by zero.
+### Grammar (Math)
+    1. sqrt(<int> | <float>) : <float>
+    2. ln(<int> | <float>) : <float>
+    3. log(<int> | <float>) : <float>
+    4. abs(<int>) : <int>
+    5. abs(<float>) : <float>
+    6. floor(<int> | <float>) : <int>
+    7. ceil(<int> | <float>) : <int>
+    8. round(<int> | <float>) : <int>
+    9. sin(<int> | <float>) : <float>
+    10. cos(<int> | <float>) : <float>
+    11. tan(<int> | <float>) : <float>
+    12. csc(<int> | <float>) : <float>
+    13. sec(<int> | <float>) : <float>
+    14. cot(<int> | <float>) : <float>
+    15. sinh(<int> | <float>) : <float>
+    16. cosh(<int> | <float>) : <float>
+    17. tanh(<int> | <float>) : <float>
+    18. csch(<int> | <float>) : <float>
+    19. sech(<int> | <float>) : <float>
+    20. coth(<int> | <float>) : <float>
+    21. arcsin(<int> | <float>) : <float>
+    22. arccos(<int> | <float>) : <float>
+    23. arctan(<int> | <float>) : <float>
+    24. arccsc(<int> | <float>) : <float>
+    25. arcsec(<int> | <float>) : <float>
+    26. arccot(<int> | <float>) : <float>
+    27. arcsinh(<int> | <float>) : <float>
+    28. arccosh(<int> | <float>) : <float>
+    29. arctanh(<int> | <float>) : <float>
+    30. arccsch(<int> | <float>) : <float>
+    31. arcsech(<int> | <float>) : <float>
+    32. arccoth(<int> | <float>) : <float>
+
+### Grammar (Other)
+    1. random() : <float>
+    2. time() : <int>
+    3. date() : <tuple>
+    4. sleep(<int>) : void
+
+## Runtime Errors
+- Divide by zero is an error that will be thrown if an attempt is made to divide by zero.
+- Index out of bounds is an error that will be thrown if there is an attempt to access an array out of its bounds.
