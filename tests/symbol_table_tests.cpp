@@ -136,7 +136,7 @@ TEST(SCOPESTRESSTEST, addStressTestLarge) {
     }
 }
 
-// SYMBOLTABLEORGANIZER TESTS
+//SYMBOLTABLEORGANIZER TESTS
 
 /**
  * @brief pushTest adds a Scope to a SymbolTable object and validates the global status of the scope
@@ -338,9 +338,9 @@ TEST(GARBAGE_COLLECTION_SCOPE, setOccurrencesTest) {
     EXPECT_FALSE(testScope.hasExpired("cat"));
 }
 
-//TODO: std::shared_ptr
-//TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
-//    Scope testScope = Scope();
-//    testScope.addOrUpdateVariable("cat", 48);
-//    testScope.freeVariableData("cat");
-//}
+
+TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 48);
+    ASSERT_NO_THROW(testScope.freeVariableData("cat")); //We shouldn't segfault here
+}

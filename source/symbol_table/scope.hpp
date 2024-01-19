@@ -108,7 +108,7 @@ public:
     bool hasExpired(std::string variableID);
 
 private:
-    std::map<std::string, int> _variableData {};  // uses a Key variableName to find it's associated object
+    std::map<std::string, std::shared_ptr<int>> _variableData {};  // uses a Key variableName to find it's associated object
     std::map<std::string, unsigned int> _variableUses; //uses a Key variableName to find usages left (unsigned int)
     Scope* parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
 

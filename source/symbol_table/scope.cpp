@@ -18,13 +18,13 @@ Scope::~Scope() = default;
 // Copy Constructor
 Scope::Scope(Scope& otherScope) {
     parentScope = otherScope.getParentScopePointer();
-    std::map<std::string, int> copyData(otherScope._variableData);
+    std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
     _variableData = copyData;
 }
 
 //Deprecated
 void Scope::addOrUpdateVariable(std::string variableID, int data) {
-    _variableData.insert_or_assign(variableID, data);
+    _variableData.insert_or_assign(variableID, std::make_shared<int>(data));
 }
 
 bool Scope::hasLocalVariable(std::string variableID) { return hasKey(variableID); }
@@ -38,7 +38,7 @@ int* Scope::getVariable(std::string variableID) {
         if (parentScope != nullptr) { return parentScope->getVariable(variableID); }
         return nullptr;
     }
-    return &_variableData[variableID];
+    return _variableData[variableID].get();
 }
 
 
@@ -55,8 +55,8 @@ void Scope::setVariableOccurrences(std::string variableID, unsigned int occurren
 }
 
 void Scope::freeVariableData(std::string variableID) {
-    int* dataPointer = &_variableData[variableID];
-    delete dataPointer;
+    //if a shared pointer is unique, resetting (allegedly) destructs the object
+    _variableData[variableID].reset();
 }
 
 void Scope::decrementUses(std::string variableID) {
