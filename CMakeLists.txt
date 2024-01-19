@@ -153,8 +153,10 @@ add_library(parser source/parser/parser.cpp
 
 add_library(flow_controller source/flow_controller/flow_controller.cpp)
 
+add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
+
 add_executable(commander source/interpreter/commander.cpp)
-target_link_libraries(commander lexer parser flow_controller)
+target_link_libraries(commander lexer parser flow_controller symbol_table)
 
 
 #  Test configurations:
