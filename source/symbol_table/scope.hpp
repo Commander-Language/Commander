@@ -8,6 +8,7 @@
 #define CPP_UTILITIES_SCOPE_HPP
 #include <map>
 #include <string>
+#include <memory>
 
 // TODO: replace data with a generic object class (template class?)
 

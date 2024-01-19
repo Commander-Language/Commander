@@ -66,6 +66,5 @@ void Scope::decrementUses(std::string variableID) {
 }
 
 bool Scope::hasExpired(std::string variableID) {
-    bool status = (_variableUses.find(variableID) != _variableUses.end()) && (_variableUses[variableID] == 0); //Oddly enough, not recording this variable cause false to yield in true conditions
-    return status;
+    return (_variableUses.find(variableID) != _variableUses.end()) && (_variableUses[variableID] == 0);
 }

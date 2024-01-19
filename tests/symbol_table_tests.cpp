@@ -311,13 +311,36 @@ TEST(GARBAGE_COLLECTION_SCOPE, expiredTest) {
 
     for(int currentVar = 0; currentVar < 1; currentVar++) {
         for(int currentDec = 0; currentDec < 4; currentDec++) {
-            testScope.decrementUses(std::to_string(currentVar));
             if(currentDec == 3) {
                 EXPECT_TRUE(testScope.hasExpired(std::to_string(currentVar))); //TODO: yielding true but being counted as false
             }
             else {
                 EXPECT_FALSE(testScope.hasExpired(std::to_string(currentVar)));
             }
+            testScope.decrementUses(std::to_string(currentVar));
         }
     }
 }
+
+TEST(GARBAGE_COLLECTION_SCOPE, setOccurrencesTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 128);
+    testScope.setVariableOccurrences("cat", 8);
+    EXPECT_FALSE(testScope.hasExpired("cat"));
+
+    testScope.setVariableOccurrences("cat", 16);
+    EXPECT_FALSE(testScope.hasExpired("cat"));
+
+    testScope.setVariableOccurrences("cat", 0);
+    EXPECT_TRUE(testScope.hasExpired("cat"));
+
+    testScope.setVariableOccurrences("cat", 2);
+    EXPECT_FALSE(testScope.hasExpired("cat"));
+}
+
+//TODO: std::shared_ptr
+//TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
+//    Scope testScope = Scope();
+//    testScope.addOrUpdateVariable("cat", 48);
+//    testScope.freeVariableData("cat");
+//}
