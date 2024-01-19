@@ -1,7 +1,6 @@
 /**
  * @file flow_controller.cpp
  * @brief Implements the Flow Controller and runtime
- *
  */
 
 #include "flow_controller.hpp"
