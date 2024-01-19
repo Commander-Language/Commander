@@ -27,6 +27,42 @@ namespace Parser {
     enum UnOpType { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
 
     /**
+     * @brief The types of Expressions
+     */
+    enum ExprType {
+        INT_EXPR,
+        FLOAT_EXPR,
+        STRING_EXPR,
+        BOOL_EXPR,
+        VARIABLE_EXPR,
+        ARRAY_EXPR,
+        ARRAY_INDEXED_EXPR,
+        TUPLE_EXPR,
+        TUPLE_INDEXED_EXPR,
+        TERNARY_EXPR,
+        UNARY_EXPR,
+        BINARY_EXPR,
+        FUNCTION_CALL_EXPR,
+        LAMBDA_EXPR,
+        COMMAND_EXPR
+    };
+
+    /**
+     * @brief The types of Statements
+     */
+    enum StmtType {
+        IF_STMT,
+        FOR_STMT,
+        WHILE_STMT,
+        DO_WHILE_STMT,
+        RETURN_STMT,
+        SCOPE_STMT,
+        COMMAND_STMT,
+        EXPRESSION_STMT,
+        ALIAS_STMT
+    };
+
+    /**
      * @brief Helper method that gets the string representation of the Unop enum type
      * @param unop The unop to get the string version of
      * @return The string of the unop
@@ -250,6 +286,12 @@ namespace Parser {
          * @return `EXPR` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Reports the type of expression
+         * @return ExprType
+         */
+         [[nodiscard]] virtual ExprType exprType() const = 0;
     };
     /**
      * @brief A pointer to an expression node.
@@ -317,6 +359,11 @@ namespace Parser {
          * @return `STMT` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Reports the type of statment
+         */
+         [[nodiscard]] virtual StmtType stmtType() const = 0;
     };
     /**
      * @brief A pointer to a statement node.
@@ -574,6 +621,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+         [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -599,6 +653,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     class StringExprNode : public ExprNode {
@@ -622,6 +683,13 @@ namespace Parser {
          *
          */
         StringNodePtr stringNode;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -648,6 +716,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -674,6 +749,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -700,6 +782,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -732,6 +821,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -758,6 +854,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -790,6 +893,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -828,6 +938,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -874,6 +991,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -929,6 +1053,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -961,6 +1092,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -1008,6 +1146,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
     /**
@@ -1034,6 +1179,13 @@ namespace Parser {
          * The command for the expression
          */
         CmdNodePtr cmd;
+
+        /**
+         * @brief Reports the type of expression
+         *
+         * @return ExprType
+         */
+        [[nodiscard]] ExprType exprType() const override;
     };
 
 
@@ -1078,6 +1230,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1122,6 +1281,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1154,6 +1320,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1186,6 +1359,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1211,6 +1391,13 @@ namespace Parser {
          * @brief The expression that's evaluated and returned.
          */
         ExprNodePtr retExpr;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1237,6 +1424,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1263,6 +1457,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1288,6 +1489,13 @@ namespace Parser {
          * @return The s-expression string of the node.
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
     /**
@@ -1320,6 +1528,13 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of statment
+         *
+         * @return StmtType
+         */
+        [[nodiscard]] StmtType stmtType() const override;
     };
 
 
