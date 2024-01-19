@@ -1,3 +1,9 @@
+/**
+* @file flow_controller.hpp
+* @brief Definition for flow controller components
+*
+*/
+
 #ifndef FLOW_CONTROLLER_HPP
 #define FLOW_CONTROLLER_HPP
 
@@ -21,7 +27,7 @@ namespace FlowController {
         void _binding(Parser::BindingNodePtr);
         void _bindings(Parser::BindingsNodePtr);
         void _cmd(Parser::CmdNodePtr);
-        void _expr(Parser::ExprNodePtr);
+        std::any _expr(Parser::ExprNodePtr);
         void _exprs(Parser::ExprsNodePtr);
         void _prgm(std::shared_ptr<Parser::PrgmNode>);
         void _stmt(Parser::StmtNodePtr);
