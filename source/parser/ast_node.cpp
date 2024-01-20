@@ -177,7 +177,7 @@ namespace Parser {
 
     std::string PrgmNode::sExpression() const {
         std::stringstream builder;
-        for (const StmtNodePtr& stmt : stmts) { builder << " " << stmt->sExpression(); }
+        for (const StmtNodePtr& stmt : stmts) { builder << "\n\t" << stmt->sExpression(); }
         return "(PrgmNode" + builder.str() + ")";
     }
 

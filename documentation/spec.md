@@ -249,7 +249,7 @@ pi = myItems[2]
 ```
 Functions are types that represent a single function, and can be called. Functions can be initialized in two different ways (see [Functions](#functions) and [Lambda Expressions](#lambda-expressions)), but either way the function is stored into a variable.
 ### function
-- Default: ```() => void```
+- Default: ```() -> void```
 #### API
     1. toString() : <string>
 #### Examples
@@ -258,7 +258,7 @@ add(a, b) {
     return a + b;
 };
 
-subtract = (a, b) => a - b;
+subtract = (a, b) -> a - b;
 ```
 
 ## Command Execution
