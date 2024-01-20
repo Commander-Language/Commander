@@ -1,0 +1,6 @@
+//Should parse multi-line string
+x = "This
+is
+a
+multi-line
+string";

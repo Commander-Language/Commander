@@ -1,0 +1,2 @@
+//Should not parse weird floats
+float = 3.3.45;

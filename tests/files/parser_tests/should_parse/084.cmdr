@@ -1,0 +1,4 @@
+//Test tuples don't get confused in do while loops
+do {
+    echo "Hi";
+} while (((i < 2)|| (true, false)[1]));

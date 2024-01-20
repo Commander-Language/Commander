@@ -1,0 +1,2 @@
+// Test that nested string interpolation parses
+a = "Hi${ $"There${`echo $'Sum${3 + 4}'`}" }";

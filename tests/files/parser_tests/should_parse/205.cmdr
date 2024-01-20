@@ -1,0 +1,2 @@
+//Test empty string concatenation
+x = '' + '' + '';

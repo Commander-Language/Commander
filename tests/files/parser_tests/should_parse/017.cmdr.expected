@@ -1,0 +1,2 @@
+(PrgmNode
+	(CmdNode (CmdCmdNode ls) (CmdCmdNode ws)))

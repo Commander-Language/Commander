@@ -1,0 +1,2 @@
+//Should parse complex expressions as function parameters
+add([1, 2, 3], `echo "Hello World!"`[0], "Hello ${name}!", 3 * 4 < 4 + 3 && 3 >= 2 || "hi" == "bye");

@@ -1,0 +1,2 @@
+// Test that + operation parses properly
+val = x+y;

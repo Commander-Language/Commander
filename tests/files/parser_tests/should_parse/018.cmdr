@@ -1,0 +1,3 @@
+// Test that alias parses properly
+alias ls = dir;
+ls;

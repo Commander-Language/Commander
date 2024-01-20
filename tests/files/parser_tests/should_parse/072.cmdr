@@ -1,0 +1,2 @@
+//Tests commands inside of strings parse correctly
+print $"Output: {`cat myfile.txt`[0]}!";

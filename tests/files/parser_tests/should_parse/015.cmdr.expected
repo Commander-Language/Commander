@@ -1,0 +1,2 @@
+(PrgmNode
+	(VarStmtNode isInt (IntExprNode 24)))

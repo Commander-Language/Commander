@@ -1,0 +1,2 @@
+// Test that print statements parse properly
+print "Hello";

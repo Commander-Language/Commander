@@ -1,0 +1,2 @@
+//Should not parse weird function names
+x = 4.3.4();

@@ -1,0 +1,4 @@
+// Test that do while loops parse properly
+do{
+    echo "Hello World!";
+} while(true);

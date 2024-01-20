@@ -1,0 +1,2 @@
+// Test that const variables parse properly
+const _abc123_ = "_abc123_";

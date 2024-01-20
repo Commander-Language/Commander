@@ -1,0 +1,2 @@
+// Test that read expressions parse properly
+fileContents = read "myfile.txt";
