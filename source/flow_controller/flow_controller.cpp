@@ -67,6 +67,9 @@ namespace FlowController {
                     _variable(std::dynamic_pointer_cast<Parser::VariableNode>(node));
                     break;
                 }
+                default: {
+                    // TODO: Throw unknown type error
+                }
             }
         }
     }
