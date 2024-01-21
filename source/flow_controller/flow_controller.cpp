@@ -13,6 +13,7 @@ namespace FlowController {
         // TODO: Implement
     }
     void FlowController::setVariable(std::string name, std::any value) {
+        // TODO: generic value for symbol table
         _symbolTable.addOrUpdateVariable(std::move(name), 0);
     }
     std::any FlowController::getVariable(std::string name) {
@@ -103,63 +104,70 @@ namespace FlowController {
                 return intExp->value;
             }
             case Parser::ExprType::FLOAT_EXPR: {
-                // TODO: Implement
-                break;
+                auto floatExp = std::dynamic_pointer_cast<Parser::FloatExprNode>(node);
+                return floatExp->value;
             }
             case Parser::ExprType::STRING_EXPR: {
                 // TODO: Implement
                 break;
             }
             case Parser::ExprType::BOOL_EXPR: {
-                // TODO: Implement
-                break;
+                auto boolExp = std::dynamic_pointer_cast<Parser::BoolExprNode>(node);
+                return boolExp->value;
             }
             case Parser::ExprType::VARIABLE_EXPR: {
-                // TODO: Implement
-                break;
+                auto varExp = std::dynamic_pointer_cast<Parser::VarExprNode>(node);
+                return getVariable(std::dynamic_pointer_cast<Parser::IdentVariableNode>(varExp->variable)->varName);
             }
             case Parser::ExprType::ARRAY_EXPR: {
+                auto arrExp = std::dynamic_pointer_cast<Parser::ArrayExprNode>(node);
                 // TODO: Implement
-                break;
+                return arrExp->expressions;  // What should this return?!
             }
             case Parser::ExprType::ARRAY_INDEXED_EXPR: {
+                auto arrExp = std::dynamic_pointer_cast<Parser::ArrayIndexExprNode>(node);
                 // TODO: Implement
                 break;
             }
             case Parser::ExprType::TUPLE_EXPR: {
-                // TODO: Implement
-                break;
+                auto tupleExp = std::dynamic_pointer_cast<Parser::TupleExprNode>(node);
+                CommanderTuple tuple;
+                for (auto& expr : tupleExp->expressions) { tuple.emplace_back(_expr(expr)); }
+                return tuple;
             }
             case Parser::ExprType::TUPLE_INDEXED_EXPR: {
-                // TODO: Implement
-                break;
+                auto tupleExp = std::dynamic_pointer_cast<Parser::TupleIndexExprNode>(node);
+                CommanderInt index = std::any_cast<CommanderInt>(_expr(tupleExp->index));
+                CommanderTuple tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
+
+                if (index >= tuple.size() || index < 0) {
+                    // TODO: Throw index out of bounds error
+                }
+                return tuple[index];
             }
             case Parser::ExprType::TERNARY_EXPR: {
-                // TODO: Implement
-                break;
+                auto ternaryExpr = std::dynamic_pointer_cast<Parser::TernaryExprNode>(node);
+                bool condition = std::any_cast<bool>(_expr(ternaryExpr->condition));
+                std::any ifTrue = _expr(ternaryExpr->trueExpr);
+                std::any ifFalse = _expr(ternaryExpr->falseExpr);
+                return condition ? ifTrue : ifFalse;
             }
             case Parser::ExprType::UNARY_EXPR: {
-                // TODO: Implement
-                break;
+                auto unOp = std::dynamic_pointer_cast<Parser::UnOpExprNode>(node);
+                return _unaryOp(unOp);
             }
             case Parser::ExprType::BINARY_EXPR: {
                 auto binOp = std::dynamic_pointer_cast<Parser::BinOpExprNode>(node);
-                switch (binOp->opType) {
-                    case Parser::BinOpType::EQUAL: {
-                        auto variable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
-                        std::any value = _expr(binOp->rightExpr);
-                        // any_cast<int64_t> might change later
-                        _symbolTable.addOrUpdateVariable(variable->varName, std::any_cast<int64_t>(value));
-                        return value;
-                    }
-                }
-                break;
+                return _binaryOp(binOp);
             }
             case Parser::ExprType::FUNCTION_CALL_EXPR: {
+                auto funcExpr = std::dynamic_pointer_cast<Parser::CallExprNode>(node);
+                std::any func = _expr(funcExpr->func);
+
                 // TODO: Implement
-                break;
             }
             case Parser::ExprType::LAMBDA_EXPR: {
+                auto lambdaExpr = std::dynamic_pointer_cast<Parser::LambdaExprNode>(node);
                 // TODO: Implement
                 break;
             }
@@ -228,5 +236,72 @@ namespace FlowController {
     }
     void FlowController::_variable(Parser::VariableNodePtr node) {
         // TODO: Implement
+    }
+
+    std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
+        switch (unOp->opType) {
+            case Parser::NEGATE:
+                break;
+            case Parser::NOT:
+                break;
+            case Parser::PRE_INCREMENT:
+                break;
+            case Parser::POST_INCREMENT:
+                break;
+            case Parser::PRE_DECREMENT:
+                break;
+            case Parser::POST_DECREMENT:
+                break;
+        }
+    }
+
+    std::any FlowController::_binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp) {
+        switch (binOp->opType) {
+            case Parser::LESSER:
+                break;
+            case Parser::GREATER:
+                break;
+            case Parser::LESSER_EQUAL:
+                break;
+            case Parser::GREATER_EQUAL:
+                break;
+            case Parser::MODULO:
+                break;
+            case Parser::DIVIDE:
+                break;
+            case Parser::MULTIPLY:
+                break;
+            case Parser::SUBTRACT:
+                break;
+            case Parser::ADD:
+                break;
+            case Parser::EXPONENTIATE:
+                break;
+            case Parser::AND:
+                break;
+            case Parser::OR:
+                break;
+            case Parser::EQUAL: {
+                auto variable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
+                std::any value = _expr(binOp->rightExpr);
+                // any_cast<int64_t> might change later
+                _symbolTable.addOrUpdateVariable(variable->varName, std::any_cast<CommanderInt>(value));
+                return value;
+            }
+            case Parser::NOT_EQUAL:
+                break;
+            case Parser::ADD_EQUAL:
+                break;
+            case Parser::SUBTRACT_EQUAL:
+                break;
+            case Parser::MULTIPLY_EQUAL:
+                break;
+            case Parser::DIVIDE_EQUAL:
+                break;
+            case Parser::MODULO_EQUAL:
+                break;
+            case Parser::EXPONENTIATE_EQUAL:
+                break;
+        }
     }
 }  // namespace FlowController

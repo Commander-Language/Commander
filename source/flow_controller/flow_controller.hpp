@@ -128,6 +128,16 @@ namespace FlowController {
          * @brief Helper to interpret variable nodes
          */
         void _variable(Parser::VariableNodePtr);
+
+        /**
+         * @brief
+         */
+        std::any _unaryOp(std::shared_ptr<Parser::UnOpExprNode> &);
+
+        /**
+         * @brief
+         */
+        std::any _binaryOp(std::shared_ptr<Parser::BinOpExprNode> &binOp);
     };
 }  // namespace FlowController
 #endif
