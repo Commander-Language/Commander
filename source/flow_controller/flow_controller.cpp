@@ -15,6 +15,11 @@ namespace FlowController {
     void FlowController::setVariable(std::string name, std::any value) {
         _symbolTable.addOrUpdateVariable(std::move(name), 0);
     }
+    std::any FlowController::getVariable(std::string name) {
+        std::any value = _symbolTable.getVariable(name);
+        if (value.has_value()) { return value; }
+        // TODO: Throw symbol not found error
+    }
     void FlowController::runtime() {
         for (auto& node : _nodes) {
             switch (node->nodeType()) {

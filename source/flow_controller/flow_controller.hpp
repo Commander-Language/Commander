@@ -57,6 +57,14 @@ namespace FlowController {
         void setVariable(std::string name, std::any value);
 
         /**
+         * @brief Set a variable in the symbol table.
+         * @details Sets a variable in the symbol table
+         * @param name The name of the symbol
+         * @param value The value of the symbol
+         */
+        std::any getVariable(std::string name);
+
+        /**
          * @brief Run a command
          */
         void runCommand();
