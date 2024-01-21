@@ -13,6 +13,14 @@
 
 namespace FlowController {
     /**
+     * @brief A Commander tuple representation
+     */
+    using CommanderTuple = std::vector<std::any>;
+    /**
+     * @brief A Commander int representation
+     */
+    using CommanderInt = int64_t;
+    /**
      * @brief Interpret the AST Nodes given from the Parser
      * @details
      *    The responsibilities of the Flow Controller will include interpreting the AST nodes,
