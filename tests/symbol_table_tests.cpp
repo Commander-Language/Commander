@@ -356,7 +356,7 @@ TEST(GARBAGE_COLLECTION_SCOPE, setOccurrencesTest) {
 
 /**
  * @brief freeDataTest() checks the functionality of freeVariableData()
- * @details A variable "cat" is assigned a value. The test is expected to not throw an exception when freeVariableData() is called
+ * @details A variable "cat" is assigned a value. The test is expected to not throw an exception when freeVariableData() is called.
  */
 TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
     Scope testScope = Scope();

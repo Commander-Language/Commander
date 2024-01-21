@@ -60,7 +60,7 @@ public:
      * freeVariableData() will attempt to remove the data associated with a string variableID.
      * If the variable does not exist, nothing will be removed
      * @param variableID - The variable to remove
-     * @return - TRUE if the variable was removed, otherwise FALSE is returned
+     * @return - TRUE if the variable was removed, otherwise FALSE is returne
      */
     bool tryFreeVariableData(std::string variableID);
 
