@@ -42,11 +42,41 @@ public:
 
     /**
      * addOrUpdateVariable() will add a provided variable to the top of the stack (i.e. current scope)
-     * For updating a previously-established variable, use updateVariable().
      * @param variableID - A string representing the variable's ID (e.g. cat)
      * @param data - An object which the variable should be associated with
      */
-    void addOrUpdateVariable(std::string variableID, int data);  // add a variable to the current scope
+    void addOrUpdateVariable(std::string variableID, int data);
+
+    /**
+     * addOrUpdateVariable() will add the provided variable to the top of the stack (i.e. current scope)
+     * This is an overloaded version of a two-parameter addOrUpdate variable. This method is reccommended for initializing variables for garbage collection
+     * @param variableID - A string representing the variable's ID
+     * @param data - An object which the variable should associate with
+     * @param occurrences - The number of times the variable is found in the Commander script - will not update if the parameter passed in is null
+     */
+    void addOrUpdateVariable(std::string variableID, int data, unsigned int occurrences);
+
+    /**
+     * freeVariableData() will attempt to remove the data associated with a string variableID.
+     * If the variable does not exist, nothing will be removed
+     * @param variableID - The variable to remove
+     * @return - TRUE if the variable was removed, otherwise FALSE is returned
+     */
+    bool tryFreeVariableData(std::string variableID);
+
+    /**
+     * forceFreeVariableData() will garbage collect the variable, regardless of whether it has expired.
+     * If the variable does not exist, nothing will be removed
+     * @param variableID - The variable to remove
+     */
+    void forceFreeVariableData(std::string variableID);
+
+    /**
+     * variableHasExpired() will check if the variable's occurrences are equal to zero
+     * @param variableID - The variable to check
+     * @return - TRUE if the variable has no more occurrences, otherwise FALSE is returned
+     */
+    bool variableHasExpired(std::string variableID);
 
     /**
      * getScope() returns a pointer to the last scope in the symbol_table_organizer
@@ -89,6 +119,12 @@ public:
 private:
     std::vector<Scope*> _symbolTables {};  // A vector containing each symbol table; some methods will use this to find
                                            // a value while others will rely on scope's recursiveness
+
+    /**
+     * decrementVariableUses() is a helper method which decrements the occurences of a variable
+     * @param variableID - The variable to modify
+     */
+    void decrementVariableUses(std::string variableID);
 };
 
 

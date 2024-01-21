@@ -275,8 +275,13 @@ TEST(SYMORGTEST, copyTest) {
     EXPECT_TRUE(copiedOrg.varExistsInScope("cat"));
 }
 
-//Garbage Collection Tests
-//Scope
+//GARBAGE COLLECTION TESTS
+
+/**
+ * @brief hasExpiredTest checks the functionality of the hasExpired() method
+ * @details A variable "cat" is initialized. It's value is set to 0 and other non-zero values. hasExpired is expected to
+ * be true when the value equals zero.
+ */
 TEST(GARBAGE_COLLECTION_SCOPE, hasExpiredTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 255);
@@ -290,6 +295,9 @@ TEST(GARBAGE_COLLECTION_SCOPE, hasExpiredTest) {
     EXPECT_FALSE(testScope.hasExpired("dog"));
 }
 
+/**
+ * @details decrementTest checks the functionality of the decrementUses() method
+ */
 TEST(GARBAGE_COLLECTION_SCOPE, decrementTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 255);
@@ -302,6 +310,10 @@ TEST(GARBAGE_COLLECTION_SCOPE, decrementTest) {
     EXPECT_TRUE(testScope.hasExpired("cat"));
 }
 
+/**
+ * @brief expiredTest is a small stress test for the hasExpired() method
+ * @details 10 variables are given 3 occurrences in the Scope object. These are decremented and expected to expire after the third call of decrementUses()
+ */
 TEST(GARBAGE_COLLECTION_SCOPE, expiredTest) {
     Scope testScope = Scope();
     for(int currentVar = 0; currentVar < 10; currentVar++) {
@@ -309,10 +321,10 @@ TEST(GARBAGE_COLLECTION_SCOPE, expiredTest) {
         testScope.setVariableOccurrences(std::to_string(currentVar), 3);
     }
 
-    for(int currentVar = 0; currentVar < 1; currentVar++) {
+    for(int currentVar = 0; currentVar < 10; currentVar++) {
         for(int currentDec = 0; currentDec < 4; currentDec++) {
             if(currentDec == 3) {
-                EXPECT_TRUE(testScope.hasExpired(std::to_string(currentVar))); //TODO: yielding true but being counted as false
+                EXPECT_TRUE(testScope.hasExpired(std::to_string(currentVar)));
             }
             else {
                 EXPECT_FALSE(testScope.hasExpired(std::to_string(currentVar)));
@@ -322,6 +334,10 @@ TEST(GARBAGE_COLLECTION_SCOPE, expiredTest) {
     }
 }
 
+/**
+ * @brief setOccurrences() is not reccommended outside of variable initialization, but will be tested regardless
+ * @details The variable "cat" has its number of occurrences modified. The variable is expected to expire when the number of occurrences is zero
+ */
 TEST(GARBAGE_COLLECTION_SCOPE, setOccurrencesTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 128);
@@ -338,7 +354,10 @@ TEST(GARBAGE_COLLECTION_SCOPE, setOccurrencesTest) {
     EXPECT_FALSE(testScope.hasExpired("cat"));
 }
 
-
+/**
+ * @brief freeDataTest() checks the functionality of freeVariableData()
+ * @details A variable "cat" is assigned a value. The test is expected to not throw an exception when freeVariableData() is called
+ */
 TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 48);
