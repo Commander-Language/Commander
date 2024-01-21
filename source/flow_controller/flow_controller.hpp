@@ -21,6 +21,16 @@ namespace FlowController {
      */
     using CommanderInt = int64_t;
     /**
+     * @brief A commander lambda representation
+     */
+    struct CommanderLambda {
+    public:
+        CommanderLambda();
+    private:
+
+    };
+
+    /**
      * @brief Interpret the AST Nodes given from the Parser
      * @details
      *    The responsibilities of the Flow Controller will include interpreting the AST nodes,
@@ -38,6 +48,11 @@ namespace FlowController {
         void runtime();
 
     private:
+       /**
+        * @brief
+        */
+        CommanderLambda findFunctionOrLambda(const Parser::ExprNodePtr&);
+
         /**
          * @brief The AST nodes in a list
          */

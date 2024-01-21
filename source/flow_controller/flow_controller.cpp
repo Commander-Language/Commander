@@ -20,6 +20,19 @@ namespace FlowController {
         if (value.has_value()) { return value; }
         // TODO: Throw symbol not found error
     }
+    CommanderLambda FlowController::findFunctionOrLambda(const Parser::ExprNodePtr& expr) {
+        if (expr->exprType() == Parser::ExprType::VARIABLE_EXPR) {
+            auto varExpr = std::dynamic_pointer_cast<Parser::IdentVariableNode>(expr);
+            // TODO: Check if return type is a lambda
+            std::any func = getVariable(varExpr->varName);
+            return std::any_cast<CommanderLambda>(func);
+        } else if (expr->exprType() == Parser::ExprType::LAMBDA_EXPR) {
+
+        } else {
+            // TODO: Throw error
+        }
+    }
+
     void FlowController::runtime() {
         for (auto& node : _nodes) {
             switch (node->nodeType()) {
