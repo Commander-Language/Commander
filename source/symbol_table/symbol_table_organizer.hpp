@@ -49,7 +49,9 @@ public:
 
     /**
      * addOrUpdateVariable() will add the provided variable to the top of the stack (i.e. current scope)
-     * This is an overloaded version of a two-parameter addOrUpdate variable. This method is reccommended for initializing variables for garbage collection
+     * This is an overloaded version of a two-parameter addOrUpdate variable. This method is reccommended for
+     * initializing variables for garbage collection.
+     * If the user is unsure of the number of occurrences, they should use NULL
      * @param variableID - A string representing the variable's ID
      * @param data - An object which the variable should associate with
      * @param occurrences - The number of times the variable is found in the Commander script - will not update if the parameter passed in is null
@@ -60,7 +62,7 @@ public:
      * freeVariableData() will attempt to remove the data associated with a string variableID.
      * If the variable does not exist, nothing will be removed
      * @param variableID - The variable to remove
-     * @return - TRUE if the variable was removed, otherwise FALSE is returne
+     * @return - TRUE if the variable was removed, otherwise FALSE is returned
      */
     bool tryFreeVariableData(std::string variableID);
 
@@ -90,8 +92,7 @@ public:
      * @param variableID - A string representing the ID of a variable (e.g. "cat")
      * @return - TRUE if the variable exists in the top of the stack, otherwise FALSE is returned
      */
-    bool varExistsInCurrentSymbolTable(
-            std::string variableID);  // return TRUE if the variable exists at the top of the stack
+    bool varExistsInCurrentSymbolTable(std::string variableID);
 
     /**
      * varExistsInScope() returns a boolean according to whether a variable of the specified string ID exists anywhere
@@ -99,8 +100,7 @@ public:
      * @param variableID - A string representing the ID of a variable
      * @return - TRUE if the variable exists anywhere in the vector, otherwise FALSE is returned
      */
-    bool varExistsInScope(
-            std::string variableID);  // return TRUE if the variable can be found anywhere in the stack (recursive)
+    bool varExistsInScope(std::string variableID);
 
     /**
      * isScopeGlobal() returns a boolean according to whether a scope is the head.
@@ -119,12 +119,6 @@ public:
 private:
     std::vector<Scope*> _symbolTables {};  // A vector containing each symbol table; some methods will use this to find
                                            // a value while others will rely on scope's recursiveness
-
-    /**
-     * decrementVariableUses() is a helper method which decrements the occurences of a variable
-     * @param variableID - The variable to modify
-     */
-    void decrementVariableUses(std::string variableID);
 };
 
 

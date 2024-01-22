@@ -91,11 +91,13 @@ public:
     /**
      * freeVariableData() destructs the data used by a variable
      * @param variableID - A string variableID to free data from
+     * @return - TRUE if the data was destructed (or already destructed), otherwise FALSE is returned
      */
-    void freeVariableData(std::string variableID);
+    bool freeVariableData(std::string variableID);
 
     /**
-     * decrementUses() subtracts the number of the variable's occurrences by 1. If the number of occurrences are 0, the value will not update further
+     * decrementUses() subtracts the number of the variable's occurrences by 1. If the number of occurrences are 0, the
+     * value will not update further
      * @param variableID - The variable one wishes to decrement
      */
     void decrementUses(std::string variableID);
@@ -110,15 +112,30 @@ public:
 private:
     std::map<std::string, std::shared_ptr<int>> _variableData {};  // uses a Key variableName to find it's associated object
     std::map<std::string, unsigned int> _variableUses; //uses a Key variableName to find usages left (unsigned int)
-    Scope* parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
+    Scope* _parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
 
 
     /**
-     * hasKey() returns a boolean value according to whether variableData has an entry of the specified name
+     * hasDataKey() returns a boolean value according to whether _variableData has an entry of the specified name
      * @param key - A string value representing a variable ID
-     * @return - TRUE if the variable exists in variableData, otherwise FALSE is returned
+     * @return - TRUE if the variable exists in _variableData, otherwise FALSE is returned
      */
-    bool hasKey(std::string key);
+    bool hasDataKey(std::string key);
+
+    /**
+     * hasUsesKey() returns a boolean value according to whether _variableUses has an entry of the specified name
+     * @param key - A string value representing a variable ID
+     * @return - TRUE if the variable exists in _variableUses, otherwise FALSE is returned
+     */
+    bool hasUsesKey(std::string key);
+
+    /**
+     * tryGetUses() is a helper method for getting the number of variable uses. If a value does not exist, a new one
+     * will be created with a value of 0
+     * @param variableID - The variable one wishes to find or initialize
+     * @return - TRUE if the method created a new entry in _variableUses, otherwise FALSE is returned
+     */
+    bool tryGetUses(std::string variableID);
 
 };
 

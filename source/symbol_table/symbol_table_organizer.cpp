@@ -48,6 +48,13 @@ void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data)
     _symbolTables.back()->addOrUpdateVariable(variableID, data);
 }
 
+void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data, unsigned int occurrences) {
+    if(occurrences != NULL) {
+        _symbolTables.back()->setVariableOccurrences(variableID, occurrences);
+    }
+    _symbolTables.back()->addOrUpdateVariable(variableID, data);
+}
+
 Scope* SymbolTableOrganizer::getScope() {
     if (_symbolTables.empty()) { return nullptr; }
     return _symbolTables.back();
@@ -61,7 +68,10 @@ bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
     return _symbolTables.back()->hasGlobalVariable(variableID);
 }
 
-int* SymbolTableOrganizer::getVariable(std::string variableID) { return _symbolTables.back()->getVariable(variableID); }
+int* SymbolTableOrganizer::getVariable(std::string variableID) {
+    _symbolTables.back()->decrementUses(variableID);
+    return _symbolTables.back()->getVariable(variableID);
+}
 
 bool SymbolTableOrganizer::isScopeGlobal() {
     if (_symbolTables.size() == 0) {
@@ -69,4 +79,20 @@ bool SymbolTableOrganizer::isScopeGlobal() {
     }
     bool global = _symbolTables.size() <= 1;
     return global;
+}
+
+bool SymbolTableOrganizer::tryFreeVariableData(std::string variableID) {
+    if(_symbolTables.back()->hasExpired(variableID)) {
+        _symbolTables.back()->freeVariableData(variableID);
+        return true;
+    }
+    return false;
+}
+
+void SymbolTableOrganizer::forceFreeVariableData(std::string variableID) {
+    _symbolTables.back()->freeVariableData(variableID);
+}
+
+bool SymbolTableOrganizer::variableHasExpired(std::string variableID) {
+    return _symbolTables.back()->hasExpired(variableID);
 }

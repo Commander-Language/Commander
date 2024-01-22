@@ -362,4 +362,87 @@ TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 48);
     ASSERT_NO_THROW(testScope.freeVariableData("cat")); //We shouldn't segfault here
+    ASSERT_NO_THROW(testScope.freeVariableData("cat")); //We shouldn't throw here either after removing the data
+}
+
+/**
+ * @brief freeDataSuccessfulTest() checks the functionality of boolean values returned from freeVariableData()
+ * @details TRUE is expected from any reset of data, FALSE is expected when a variable does not exist
+ */
+TEST(GARBAGE_COLLECTION_SCOPE, freeDataSuccessfulTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 48);
+    ASSERT_TRUE(testScope.freeVariableData("cat")); //TRUE indicates we trashed the data
+    ASSERT_TRUE(testScope.freeVariableData("cat")); //TRUE can also indicate we have already trashed data
+
+    ASSERT_FALSE(testScope.freeVariableData("dog")); //We'll expect FALSE when data doesn't exist
+}
+
+/**
+ * @brief tryFreeDataSuccessfullTest() tests the functionality of boolean values returned from SymbolTableOrganizer's tryFreevariableData() method
+ * @details TRUE is expected for any variable which exists and has expired, FALSE is expected for variables which don't exist or have not expired
+ */
+TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, tryFreeDataSuccessfulTest) {
+    SymbolTableOrganizer organizer = SymbolTableOrganizer();
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("cat", 8, 0);
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("dog", 16, 5);
+
+    ASSERT_TRUE(organizer.tryFreeVariableData("cat"));
+    ASSERT_FALSE(organizer.tryFreeVariableData("dog"));
+}
+
+/**
+ * @brief tryFreeDataTest() checks if no errors are thrown upon calling SymbolTableOrganizer's tryFreeData() method
+ */
+TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, tryFreeDataTest) {
+    SymbolTableOrganizer organizer = SymbolTableOrganizer();
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("cat", 8, 0);
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("dog", 16, 5);
+
+    ASSERT_NO_THROW(organizer.tryFreeVariableData("cat"));
+    ASSERT_NO_THROW(organizer.tryFreeVariableData("dog"));
+}
+
+/**
+ * @brief forceFreeDataTest() checks if no errors are thrown upon calling SymbolTableOrganizer's forceFreeData() method
+ */
+TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, forceFreeDataTest) {
+    SymbolTableOrganizer organizer = SymbolTableOrganizer();
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("cat", 8, 0);
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("dog", 16, 5);
+
+    ASSERT_NO_THROW(organizer.forceFreeVariableData("cat"));
+    ASSERT_NO_THROW(organizer.forceFreeVariableData("dog"));
+}
+
+/**
+ * @brief expirationTest() checks SymbolTableOrganizer's variableHasExpired() method
+ * @details "cat" is expected to expire after calling getVariable(). "dog" and "birb" are expected to not expire. All variables are present in different Scope levels
+ */
+TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
+    SymbolTableOrganizer organizer = SymbolTableOrganizer();
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("cat", 8, 1);
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("dog", 16, 2);
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("birb", 32, 3);
+
+    ASSERT_FALSE(organizer.variableHasExpired("cat"));
+    ASSERT_FALSE(organizer.variableHasExpired("dog"));
+    ASSERT_FALSE(organizer.variableHasExpired("birb"));
+
+    organizer.getVariable("cat"); //We won't do anything with this data, we just need to decrement uses
+    organizer.getVariable("dog");
+    organizer.getVariable("birb");
+
+    ASSERT_TRUE(organizer.variableHasExpired("cat"));
+    ASSERT_FALSE(organizer.variableHasExpired("dog"));
+    ASSERT_FALSE(organizer.variableHasExpired("birb"));
 }
