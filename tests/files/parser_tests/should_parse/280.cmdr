@@ -1,0 +1,2 @@
+//Should parse nested lambdas
+x = (a, b) -> (c, d) -> (e, f) -> a + b + c + d + e + f;

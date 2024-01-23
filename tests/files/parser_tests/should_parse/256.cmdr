@@ -1,0 +1,6 @@
+//Should parse while loop
+while (parseBool(`get bool`[0])) {
+    while ((true, false)[1]) {
+        echo "hi";
+    }
+}

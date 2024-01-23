@@ -1,0 +1,2 @@
+//Should parse api toString() on bool
+x = true.toString();

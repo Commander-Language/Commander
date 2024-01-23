@@ -1,0 +1,4 @@
+//Should parse for loop
+for ((a, b, c)[1] = 3; false; (a, b, c)[1] += 2) {
+    echo "hi";
+}

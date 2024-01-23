@@ -1,0 +1,2 @@
+//Should fail due to incorrect timeout command
+timeout echo "hello" 4000;

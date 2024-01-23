@@ -1,0 +1,2 @@
+//Should not parse incorrect variable initialization
+x: = 3;

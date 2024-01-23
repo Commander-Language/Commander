@@ -1,0 +1,4 @@
+//Should parse for loop
+for (;;) {
+    echo Hi;
+}

@@ -1,0 +1,2 @@
+//Should not parse due to incorrect string concatenation
+x = "hi" "there";

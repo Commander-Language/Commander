@@ -1,0 +1,2 @@
+//Should parse api charAt() on string
+x = "My string".charAt(1);

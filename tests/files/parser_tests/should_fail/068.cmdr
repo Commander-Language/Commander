@@ -1,0 +1,10 @@
+//Should not parse if-chain
+if (true) {
+    echo hi;
+} else if ((true, false)[1]) {
+    echo there;
+} else if (false) {
+    echo bye;
+} else
+    echo adios;
+}
