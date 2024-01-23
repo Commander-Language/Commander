@@ -17,21 +17,45 @@ Scope::~Scope() = default;
 
 // Copy Constructor
 Scope::Scope(Scope& otherScope) {
+//    _parentScope = otherScope.getParentScopePointer();
+//    std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
+//    _variableData = copyData;
     _parentScope = otherScope.getParentScopePointer();
-    std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
+    std::map<std::string, std::shared_ptr<int>> copyData;
+    auto iter = otherScope._variableData.begin();
+    while (iter != otherScope._variableData.end()) {
+        std::string key = iter->first;
+        int data = *iter->second;
+        copyData.insert_or_assign(key, std::make_shared<int>(data));
+        ++iter;
+    }
     _variableData = copyData;
 }
 
 void Scope::addOrUpdateVariable(std::string variableID, int data) {
-    //TODO: potential bug: a new variable will be added rather than updating a previously-created variable
-    bool dataKeyExists = hasDataKey(variableID);
-    _variableData.insert_or_assign(variableID, std::make_shared<int>(data));
-    if(!tryGetUses(variableID)) {
-        _variableUses.insert_or_assign(variableID, 0); //set the number of occurrences to zero if the variable doesn't exist
+    if(!updateVariable(variableID, data)) {
+        _variableData.insert_or_assign(variableID, std::make_shared<int>(data));
+        _variableUses.insert_or_assign(variableID, 0); //TODO: may not work as intended
     }
-    else if (dataKeyExists){
-        decrementUses(variableID); //otherwise, count the use of the variable if it already existed in the scope
+}
+
+bool Scope::updateVariable(std::string variableID, int newData) {
+    if(!hasDataKey(variableID)) {
+        if(_parentScope != nullptr) {
+            return _parentScope->updateVariable(variableID, newData);
+        }
+        else {
+            return false;
+        }
     }
+    _variableData.insert_or_assign(variableID, std::make_shared<int>(newData));
+    if(!hasUsesKey(variableID)) {
+        _variableUses.insert_or_assign(variableID, 0); //If the variable somehow doesn't have uses assigned, default to 0
+    }
+    else {
+        decrementUses(variableID);
+    }
+    return true;
 }
 
 bool Scope::hasLocalVariable(std::string variableID) { return hasDataKey(variableID); }

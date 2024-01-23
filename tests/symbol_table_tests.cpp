@@ -200,6 +200,12 @@ TEST(SYMORGTEST, addItemsTest) {
     testOrg.addOrUpdateVariable("dog", 6);  // second test: updating via the usage of addVariable()
     EXPECT_TRUE(testOrg.getScope()->hasLocalVariable("dog"));
     EXPECT_EQ(*testOrg.getScope()->getVariable("dog"), 6);
+
+    testOrg.pushSymbolTable(); //third test: we'll add a new Scope to ensure cat is being properly updated instead of re-initializing
+    testOrg.addOrUpdateVariable("cat", 8);
+    EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 8);
+    testOrg.popSymbolTable();
+    EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 8);
 }
 
 /**
@@ -209,19 +215,20 @@ TEST(SYMORGTEST, addItemsTest) {
  */
 TEST(SYMORGTEST, addItemsStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
-    for (int currentScope = 0; currentScope < 5; currentScope++) {
-        testOrg.pushSymbolTable();
-        for (int currentVariable = 0; currentVariable < 20; currentVariable++) {
-            testOrg.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
+    testOrg.pushSymbolTable();
+    for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
+        if((currentVariable != 0) && (currentVariable % 20 == 0)) {
+            testOrg.pushSymbolTable(); //every 20 items, add a new Scope
         }
+        testOrg.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
     }
 
-    for (int currentScope = 0; currentScope < 5; currentScope++) {
-        for (int currentVariable = 0; currentVariable < 20; currentVariable++) {
-            EXPECT_TRUE(testOrg.varExistsInCurrentSymbolTable(std::to_string(currentVariable)));
-            EXPECT_EQ(*testOrg.getVariable(std::to_string(currentVariable)), currentVariable);
+    for(int currentVariable = 99; currentVariable > -1; currentVariable--) {
+        EXPECT_TRUE(testOrg.varExistsInCurrentSymbolTable(std::to_string(currentVariable)));
+        EXPECT_EQ(*testOrg.getVariable(std::to_string(currentVariable)), currentVariable);
+        if((currentVariable != 0) && (currentVariable % 20 == 0)) {
+            testOrg.popSymbolTable(); //every 20 items, remove a Scope
         }
-        testOrg.popSymbolTable();
     }
 }
 
@@ -260,7 +267,9 @@ TEST(SYMORGTEST, copyTest) {
     testOrg.addOrUpdateVariable("dog", 36);
 
     SymbolTableOrganizer copiedOrg = SymbolTableOrganizer(testOrg);
-
+    printf("copied bird value: %u\n", *copiedOrg.getVariable("bird"));
+    printf("bird address (orig): %x\n", testOrg.getVariable("bird"));
+    printf("bird address (new): %x\n", copiedOrg.getVariable("bird"));
     EXPECT_TRUE(testOrg.varExistsInScope("bird"));
     EXPECT_TRUE(copiedOrg.varExistsInScope("bird"));
     EXPECT_TRUE(testOrg.varExistsInScope("dog"));

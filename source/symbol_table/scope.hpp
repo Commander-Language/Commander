@@ -45,6 +45,14 @@ public:
     void addOrUpdateVariable(std::string variableID, int data);
 
     /**
+     * updateVariable() is similar to addOrUpdateVariable. This method will only update variables if they exist anywhere in the scope.
+     * @param variableID - The variable one wishes to change
+     * @param newData - The new data to associate with the variable
+     * @return - TRUE if the variable was successfully updated, otherwise FALSE is returned
+     */
+    bool updateVariable(std::string variableID, int newData);
+
+    /**
      * hasLocalVariable returns a boolean value according to whether the specified variable exists in this scope.
      * For scanning all scopes for a variable, use getVariable()
      * @param variableID - A string ID which the variable will be referenced by
