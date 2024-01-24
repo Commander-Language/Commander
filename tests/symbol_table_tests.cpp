@@ -2,9 +2,11 @@
  * @file symbol_table_tests
  * @brief symbol_table_tests contains the unit tests for the Scope and SymbolTableOrganizer classes
  * @details Tests are separated into three suites:
- *          SCOPETEST - tests the functionality of the Scope class
- *          SCOPESTRESSTEST - inserts a large number of items into a Scope object, perform an operation, and validates
- * the result SYMORGTEST - tests the functionality of the SymbolTableOrganizer class
+ *          SCOPE_TEST - tests the functionality of the Scope class
+ *          SCOPE_STRESS_TEST - inserts a large number of items into a Scope object, perform an operation, and validates the result
+ *          SYMORG_TEST - tests the functionality of the SymbolTableOrganizer class
+ *          GARBAGE_COLLECTION_SCOPE - tests the functionality of garbage collection logic in the Scope class
+ *          GARBAGE_COLLECTION_SYMBOL_TABLE - tests the functionality of garbage collection logic in the SymbolTableOrganizer class
  */
 
 #include "source/symbol_table/scope.hpp"
@@ -19,12 +21,58 @@
  * @details An example variable is added to a Scope object. The test expects one value, but is not expecting a second
  * value
  */
-TEST(SCOPETEST, addToScope) {
+TEST(SCOPE_TEST, addToScope) {
     Scope testScope = Scope();
     int testValue = 3;
     testScope.addOrUpdateVariable("cat", testValue);
     EXPECT_TRUE(testScope.hasLocalVariable("cat"));
     EXPECT_FALSE(testScope.hasLocalVariable("dog"));
+}
+
+/**
+ * @brief addPointerTest() checks if identical data between two different variables is shared
+ * @details "bird" and "dog" are both initialized with a value of 8. These variables are expected to yield the same value, but not the same pointer
+ */
+TEST(SCOPE_TEST, addPointerTests) {
+    Scope testScope = Scope();
+
+    testScope.addOrUpdateVariable("bird", 8);
+    testScope.addOrUpdateVariable("dog", 8);
+    EXPECT_EQ(*testScope.getVariable("bird"), *testScope.getVariable("dog"));
+    EXPECT_NE(testScope.getVariable("bird"), testScope.getVariable("dog"));
+
+    testScope.addOrUpdateVariable("dog", 16);
+    EXPECT_NE(*testScope.getVariable("bird"), *testScope.getVariable("dog"));
+}
+
+/**
+ * @brief updateVariableTest() tests if the value of a provided variable updates without issue
+ * @details First, we attempt to update a variable which does not exist. Next, we update a variable which exists and verifies it retains the new value
+ */
+TEST(SCOPE_TEST, updateVariableTest) {
+    Scope testScope = Scope();
+    EXPECT_NO_THROW(testScope.updateVariable("cat", 8));
+
+    testScope.addOrUpdateVariable("cat", 255);
+    testScope.updateVariable("cat", 16);
+
+    EXPECT_EQ(*testScope.getVariable("cat"), 16);
+    EXPECT_NE(*testScope.getVariable("cat"), 255);
+}
+
+/**
+ * @brief updateVariableBooleanTest acts similarly to updateVariableTest. This test ensures the boolean values returned are accurate
+ * @details FALSE is expected when a variable does not exist, TRUE is expected if the variable has been updated
+ */
+TEST(SCOPE_TEST, updateVariableBooleanTest) {
+    Scope testScope = Scope();
+    EXPECT_FALSE(testScope.updateVariable("birb", 16));
+
+    testScope.addOrUpdateVariable("birb", 8);
+    testScope.addOrUpdateVariable("dog", 16);
+
+    EXPECT_TRUE(testScope.updateVariable("birb", 64));
+    EXPECT_TRUE(testScope.updateVariable("dog", 8));
 }
 
 /**
@@ -35,7 +83,7 @@ TEST(SCOPETEST, addToScope) {
  *
  *          The actual pointer of the first Scope is expected to equal the second Scope's parent
  */
-TEST(SCOPETEST, scopeParents) {
+TEST(SCOPE_TEST, scopeParents) {
     Scope parentScope = Scope();
     Scope* parentPointer = &parentScope;
     Scope childScope = Scope(parentPointer);
@@ -52,7 +100,7 @@ TEST(SCOPETEST, scopeParents) {
  *
  *          These objects run isGlobal with the expectation that a nullptr parent is the head of a symbol table
  */
-TEST(SCOPETEST, globalTest) {
+TEST(SCOPE_TEST, globalTest) {
     Scope parentScope = Scope();
     Scope childScope = Scope(&parentScope);
 
@@ -69,7 +117,7 @@ TEST(SCOPETEST, globalTest) {
 /**
  * @brief getVariableTest adds a variable with an arbitrary value to a Scope object and verifies it with getVariable
  */
-TEST(SCOPETEST, getVariableTest) {
+TEST(SCOPE_TEST, getVariableTest) {
     int catValue = 8;
     int updatedCatValue = 14;
     Scope testScope = Scope();
@@ -87,7 +135,7 @@ TEST(SCOPETEST, getVariableTest) {
  * @details A Scope object is created with an initial value. The copy constructor will be called and verify changes
  *          to one object does not impact the data of the other.
  */
-TEST(SCOPETEST, copyScopeTest) {
+TEST(SCOPE_TEST, copyScopeTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 3);
     testScope.addOrUpdateVariable("dog", 2);
@@ -111,7 +159,7 @@ TEST(SCOPETEST, copyScopeTest) {
 /**
  * @brief addStressTestSmall adds 100 variables to a Scope object and validates them
  */
-TEST(SCOPESTRESSTEST, addStressTestSmall) {
+TEST(SCOPE_STRESS_TEST, addStressTestSmall) {
     Scope testScope = Scope();
     for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
         testScope.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
@@ -125,7 +173,7 @@ TEST(SCOPESTRESSTEST, addStressTestSmall) {
 /**
  * @brief addStressTestLarge acts similar to it's smaller counterpart, but adds and validates 10000 items
  */
-TEST(SCOPESTRESSTEST, addStressTestLarge) {
+TEST(SCOPE_STRESS_TEST, addStressTestLarge) {
     Scope testScope = Scope();
     for (int currentVariable = 0; currentVariable < 10000; currentVariable++) {
         testScope.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
@@ -141,7 +189,7 @@ TEST(SCOPESTRESSTEST, addStressTestLarge) {
 /**
  * @brief pushTest adds a Scope to a SymbolTable object and validates the global status of the scope
  */
-TEST(SYMORGTEST, pushTest) {
+TEST(SYMORG_TEST, pushTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
 
@@ -153,7 +201,7 @@ TEST(SYMORGTEST, pushTest) {
 /**
  * @brief pushStressTest adds 100 Scope objects to a SymbolTableOrganizer and validates them
  */
-TEST(SYMORGTEST, pushStressTest) {
+TEST(SYMORG_TEST, pushStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     for (int currentScope = 0; currentScope < 100; currentScope++) { testOrg.pushSymbolTable(); }
 
@@ -175,7 +223,7 @@ TEST(SYMORGTEST, pushStressTest) {
  *          Two Scope objects are present (Expected FALSE)
  *          The second Scope is removed (Expected TRUE)
  */
-TEST(SYMORGTEST, globalTests) {
+TEST(SYMORG_TEST, globalTests) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     EXPECT_TRUE(testOrg.isScopeGlobal());
 
@@ -191,7 +239,7 @@ TEST(SYMORGTEST, globalTests) {
 /**
  * @brief addItemsTest adds a variable to a SymbolTableOrganizer and validates it value
  */
-TEST(SYMORGTEST, addItemsTest) {
+TEST(SYMORG_TEST, addItemsTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
     testOrg.getScope()->addOrUpdateVariable("cat", 3);  // first test: updating via the usage of getScope()
@@ -213,7 +261,7 @@ TEST(SYMORGTEST, addItemsTest) {
  * @details For each scope, 20 variables are added with an arbitrary value assigned to them. Five scopes are pushed in
  * total For each scope, a set of 20 variables are validated before calling popSymbolTable()
  */
-TEST(SYMORGTEST, addItemsStressTest) {
+TEST(SYMORG_TEST, addItemsStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
     for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
@@ -240,7 +288,7 @@ TEST(SYMORGTEST, addItemsStressTest) {
  *          When hasGlobalVariable() and getVariable() are called, the Scope is expected to return a value present in
  * the First Scope
  */
-TEST(SYMORGTEST, recursionTest) {
+TEST(SYMORG_TEST, recursionTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
     testOrg.addOrUpdateVariable("cat", 8);
@@ -260,7 +308,7 @@ TEST(SYMORGTEST, recursionTest) {
  *          object. First, determine whether both variables exist in the objects. Next, add a new variable to copiedOrg
  *          and update a pre-existing variable. Finally, determine whether the original contents of testOrg have changed
  */
-TEST(SYMORGTEST, copyTest) {
+TEST(SYMORG_TEST, copyTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
     testOrg.addOrUpdateVariable("bird", 64);
@@ -392,6 +440,19 @@ TEST(GARBAGE_COLLECTION_SCOPE, freeDataSuccessfulTest) {
  * @details TRUE is expected for any variable which exists and has expired, FALSE is expected for variables which don't exist or have not expired
  */
 TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, tryFreeDataSuccessfulTest) {
+    SymbolTableOrganizer organizer = SymbolTableOrganizer();
+    organizer.pushSymbolTable();
+    organizer.addOrUpdateVariable("cat", 8, 0);
+    organizer.addOrUpdateVariable("dog", 16, 5);
+
+    ASSERT_TRUE(organizer.tryFreeVariableData("cat"));
+    ASSERT_FALSE(organizer.tryFreeVariableData("dog"));
+}
+
+/**
+ * @brief tryFreeNestedDataSuccessfulTest() places two variables in different Scopes. They are expected to free without issues
+ */
+TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, tryFreeNestedDataSuccessfulTest) {
     SymbolTableOrganizer organizer = SymbolTableOrganizer();
     organizer.pushSymbolTable();
     organizer.addOrUpdateVariable("cat", 8, 0);

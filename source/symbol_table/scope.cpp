@@ -35,7 +35,6 @@ Scope::Scope(Scope& otherScope) {
 void Scope::addOrUpdateVariable(std::string variableID, int data) {
     if(!updateVariable(variableID, data)) {
         _variableData.insert_or_assign(variableID, std::make_shared<int>(data));
-        _variableUses.insert_or_assign(variableID, 0); //TODO: may not work as intended
     }
 }
 
@@ -80,7 +79,7 @@ bool Scope::isGlobal() { return _parentScope == nullptr; }
 
 bool Scope::hasDataKey(std::string key) { return _variableData.count(key) > 0; }
 
-bool Scope::hasUsesKey(std::string key) { return _variableUses.count(key) > 0;}
+bool Scope::hasUsesKey(std::string key) { return _variableUses.count(key) > 0; }
 
 //Garbage Collection methods
 
@@ -128,17 +127,13 @@ bool Scope::hasExpired(std::string variableID) {
         }
     }
     else {
-        return (_variableUses.find(variableID) != _variableUses.end()) && (_variableUses[variableID] == 0);
+        return (_variableUses[variableID] == 0);
     }
 }
 
 bool Scope::tryGetUses(std::string variableID) {
-    bool hasKey = hasUsesKey(variableID);
-    if(!hasKey && _parentScope == nullptr) {
+    if(!hasUsesKey(variableID) && _parentScope == nullptr) {
         return false;
-    }
-    else if(!hasKey) {
-        return _parentScope->tryGetUses(variableID);
     }
     return true;
 }

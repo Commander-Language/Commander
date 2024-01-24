@@ -49,9 +49,7 @@ void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data)
 }
 
 void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data, unsigned int occurrences) {
-    if(occurrences != NULL) {
-        _symbolTables.back()->setVariableOccurrences(variableID, occurrences);
-    }
+    _symbolTables.back()->setVariableOccurrences(variableID, occurrences);
     _symbolTables.back()->addOrUpdateVariable(variableID, data);
 }
 
@@ -69,7 +67,6 @@ bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
 }
 
 int* SymbolTableOrganizer::getVariable(std::string variableID) {
-    _symbolTables.back()->decrementUses(variableID);
     return _symbolTables.back()->getVariable(variableID);
 }
 
