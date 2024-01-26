@@ -9,50 +9,61 @@
 #include <vector>
 #include <memory>
 
-enum Type {INT, FLOAT, BOOLEAN, TUPLE, ARRAY, FUNCTION, STRING};
+namespace TypeChecker {
 
-class Ty {
-    //TODO: documentation
-    virtual Type getType() const = 0;
-};
+    enum Type : std::uint8_t { INT, FLOAT, BOOLEAN, TUPLE, ARRAY, FUNCTION, STRING };
 
-class IntTy : Ty {
-    Type getType() const override;
-};
+    class Ty {
+        // TODO: documentatiojn
+    public:
+        virtual ~Ty() = default;
+        [[nodiscard]] virtual Type getType() const = 0;
+    };
 
-class FloatTy : Ty {
-    Type getType() const override;
-};
+    /**
+ * @brief Pointer to a type
+     */
+    using TyPtr = std::shared_ptr<Ty>;
 
-class BooleanTy : Ty {
-    Type getType() const override;
-};
+    class IntTy : Ty {
+        [[nodiscard]] Type getType() const override;
+    };
 
-class TupleTy : Ty {
-    TupleTy(std::vector<std::unique_ptr<Ty>> types);
-    ~TupleTy();
-    //TupleTy(TupleTy &otherTuple);
+    class FloatTy : Ty {
+        [[nodiscard]] Type getType() const override;
+    };
 
-    Type getType() const override;
-    std::vector<std::unique_ptr<Ty>> _contentTypes;
-};
+    class BooleanTy : Ty {
+        [[nodiscard]] Type getType() const override;
+    };
 
-class ArrayTy : Ty {
-    ArrayTy(std::unique_ptr<Ty> type, unsigned int rank);
-    Type getType() const override;
+    class TupleTy : Ty {
+        TupleTy(std::vector<std::unique_ptr<Ty>> types);
+        [[nodiscard]] Type getType() const override;
 
-    std::unique_ptr<Ty> _baseType;
-    unsigned int _rank;
-};
+        std::vector<std::unique_ptr<Ty>> _contentTypes;
+    };
 
-class FunctionTy : Ty {
-    FunctionTy(std::vector<std::unique_ptr<Ty>> params);
-    Type getType() const override;
-    std::vector<std::unique_ptr<Ty>> _parameters;
-};
+    class ArrayTy : Ty {
+        ArrayTy(std::unique_ptr<Ty> type, unsigned int rank);
+        [[nodiscard]] Type getType() const override;
 
-class StringTy : Ty {
-    Type getType() const override;
-};
+        std::unique_ptr<Ty> _baseType;
+        unsigned int _rank;
+    };
+
+    class FunctionTy : Ty {
+        FunctionTy(std::vector<std::unique_ptr<Ty>> params, std::unique_ptr<Ty> returnType);
+        [[nodiscard]] Type getType() const override;
+
+        std::vector<std::unique_ptr<Ty>> _parameters;
+        std::unique_ptr<Ty> _returnType;
+    };
+
+    class StringTy : Ty {
+        [[nodiscard]] Type getType() const override;
+    };
+
+} //  namespace TypeChecker
 
 #endif  // COMMANDER_TYPE_H

@@ -6,43 +6,32 @@
 
 #include "type.hpp"
 
-Type IntTy::getType() const {
-    return Type::INT;
-}
+namespace TypeChecker {
 
-Type FloatTy::getType() const {
-    return Type::FLOAT;
-}
+    Type IntTy::getType() const { return Type::INT; }
 
-Type BooleanTy::getType() const {
-    return Type::BOOLEAN;
-}
+    Type FloatTy::getType() const { return Type::FLOAT; }
 
-TupleTy::TupleTy(std::vector<std::unique_ptr<Ty>> types) {
-    _contentTypes = std::move(types);
-}
+    Type BooleanTy::getType() const { return Type::BOOLEAN; }
 
-Type TupleTy::getType() const {
-    return Type::TUPLE;
-}
+    TupleTy::TupleTy(std::vector<std::unique_ptr<Ty>> types) { _contentTypes = std::move(types); }
 
-ArrayTy::ArrayTy(std::unique_ptr<Ty> type, unsigned int rank) {
-    _baseType = std::move(type);
-    _rank = rank;
-}
+    Type TupleTy::getType() const { return Type::TUPLE; }
 
-Type ArrayTy::getType() const {
-    return Type::ARRAY;
-}
+    ArrayTy::ArrayTy(std::unique_ptr<Ty> type, unsigned int rank) {
+        _baseType = std::move(type);
+        _rank = rank;
+    }
 
-FunctionTy::FunctionTy(std::vector<std::unique_ptr<Ty>> params) {
-    _parameters = std::move(params);
-}
+    Type ArrayTy::getType() const { return Type::ARRAY; }
 
-Type FunctionTy::getType() const {
-    return Type::FUNCTION;
-}
+    FunctionTy::FunctionTy(std::vector<std::unique_ptr<Ty>> params, std::unique_ptr<Ty> returnType) {
+        _parameters = std::move(params);
+        _returnType = std::move(returnType);
+    }
 
-Type StringTy::getType() const {
-    return Type::STRING;
-}
+    Type FunctionTy::getType() const { return Type::FUNCTION; }
+
+    Type StringTy::getType() const { return Type::STRING; }
+
+} //  namespace TypeChecker
