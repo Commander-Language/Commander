@@ -19,7 +19,7 @@ namespace Parser {
      * @brief The overarching type of an AST node.
      *
      */
-    enum ASTNodeType { BINDING, BINDINGS, CMD, EXPR, EXPRS, PRGM, STMT, STMTS, STRING, TYPE, VARIABLE };
+    enum ASTNodeType { BINDING, BINDINGS, CMD, PIPE_CMD, ASYNC_CMD, EXPR, EXPRS, PRGM, STMT, STMTS, STRING, TYPE, VARIABLE };
 
     /**
      * @brief The types of unary operation expressions
@@ -261,12 +261,7 @@ namespace Parser {
      */
     class CmdNode : public ASTNode {
     public:
-        /**
-         * @brief Reports the type of this command node.
-         *
-         * @return `CMD` always.
-         */
-        [[nodiscard]] ASTNodeType nodeType() const override;
+
     };
     /**
      * @brief A smart pointer to a command node.
@@ -489,6 +484,8 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
     };
 
+    using PrgmNodePtr = std::shared_ptr<PrgmNode>;
+
     /**
      * @brief A variable AST node.
      */
@@ -532,7 +529,16 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `CMD` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+
+    using CmdCmdNodePtr = std::shared_ptr<CmdCmdNode>;
 
     /**
      * @brief An asynchronous command AST node.
@@ -558,7 +564,16 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `CMD` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+
+    using AsyncCmdNodePtr = std::shared_ptr<AsyncCmdNode>;
 
     /**
      * @brief A pipe between two command nodes.
@@ -590,7 +605,16 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `CMD` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+
+    using PipeCmdNodePtr = std::shared_ptr<PipeCmdNode>;
 
 
     //  ====================
