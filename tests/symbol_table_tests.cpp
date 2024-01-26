@@ -315,9 +315,6 @@ TEST(SYMORG_TEST, copyTest) {
     testOrg.addOrUpdateVariable("dog", 36);
 
     SymbolTableOrganizer copiedOrg = SymbolTableOrganizer(testOrg);
-    printf("copied bird value: %u\n", *copiedOrg.getVariable("bird"));
-    printf("bird address (orig): %x\n", testOrg.getVariable("bird"));
-    printf("bird address (new): %x\n", copiedOrg.getVariable("bird"));
     EXPECT_TRUE(testOrg.varExistsInScope("bird"));
     EXPECT_TRUE(copiedOrg.varExistsInScope("bird"));
     EXPECT_TRUE(testOrg.varExistsInScope("dog"));
@@ -330,6 +327,46 @@ TEST(SYMORG_TEST, copyTest) {
     EXPECT_NE(*testOrg.getVariable("dog"), *copiedOrg.getVariable("dog"));
     EXPECT_FALSE(testOrg.varExistsInScope("cat"));
     EXPECT_TRUE(copiedOrg.varExistsInScope("cat"));
+}
+
+/**
+ * @brief multiScopeCopyTest() tests the status of SymbolTableOrganizer's copy constructor on objects with multiple Scopes
+ * @details One variable exists on each Scope in the organizer. A copy of the Symbol Table Organizer is created and its contents are modified. The contents of the copied organizer are not expected to impact the original symbol table organizer
+ */
+TEST(SYMORG_TEST, multiScopeCopyTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("cat", 8);
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("dog", 16);
+
+    SymbolTableOrganizer copiedOrg = SymbolTableOrganizer(testOrg);
+    copiedOrg.addOrUpdateVariable("cat", 16);
+    copiedOrg.addOrUpdateVariable("dog", 32);
+
+    EXPECT_NE(*testOrg.getVariable("cat"), *copiedOrg.getVariable("cat")); //data
+    EXPECT_NE(*testOrg.getVariable("dog"), *copiedOrg.getVariable("dog"));
+    EXPECT_NE(testOrg.getVariable("cat"), copiedOrg.getVariable("cat")); //pointer
+    EXPECT_NE(testOrg.getVariable("dog"), copiedOrg.getVariable("dog"));
+}
+
+/**
+ * @brief deepCopyTest() is functionally similar to multiScopeCopyTest(). This test includes 100 Scope objects
+ * @details A single variable is created on each scope. The contents of the copied Symbol Table Organizer are modified and validated. The contents of one organizer should not affect the other
+ */
+TEST(SYMORG_TEST, deepCopyTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    for(int currentScope = 0; currentScope < 100; currentScope++) {
+        testOrg.pushSymbolTable();
+        testOrg.addOrUpdateVariable(std::to_string(currentScope), currentScope);
+    }
+
+    SymbolTableOrganizer copiedOrg = SymbolTableOrganizer(testOrg);
+    for(int currentScope = 0; currentScope < 100; currentScope++) {
+        copiedOrg.addOrUpdateVariable(std::to_string(currentScope), currentScope + 1);
+        //EXPECT_NE(testOrg.getVariable(std::to_string(currentScope)), copiedOrg.getVariable(std::to_string(currentScope)));
+        EXPECT_NE(*testOrg.getVariable(std::to_string(currentScope)), *copiedOrg.getVariable(std::to_string(currentScope)));
+    }
 }
 
 //GARBAGE COLLECTION TESTS

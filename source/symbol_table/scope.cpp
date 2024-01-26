@@ -19,7 +19,9 @@ Scope::~Scope() = default;
 Scope::Scope(Scope& otherScope) {
     _parentScope = otherScope.getParentScopePointer();
     std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
+    std::map<std::string, unsigned int> copyUses(otherScope._variableUses);
     _variableData = copyData;
+    _variableUses = copyUses;
 }
 
 void Scope::addOrUpdateVariable(std::string variableID, int data) {
