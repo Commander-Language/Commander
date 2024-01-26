@@ -5,6 +5,7 @@
  */
 
 #include "type_checker.hpp"
+#include "source/symbol_table/symbol_table_organizer.hpp"
 
 // Constructor
 TypeChecker::TypeChecker() = default;
@@ -16,6 +17,47 @@ TypeChecker::~TypeChecker() = default;
 TypeChecker::TypeChecker(TypeChecker* otherTypeChecker) {
     std::unordered_map<std::string, std::string> data(otherTypeChecker->assignedTypes);
     assignedTypes = data;
+}
+
+Parser::ASTNodeList TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
+    SymbolTableOrganizer symbolTable;
+    for (const std::shared_ptr<Parser::ASTNode>& node : astNodeList) {
+        switch (node->nodeType()) {
+            case Parser::BINDING:
+
+                break;
+            case Parser::BINDINGS:
+
+                break;
+            case Parser::CMD:
+
+                break;
+            case Parser::EXPR:
+
+                break;
+            case Parser::EXPRS:
+
+                break;
+            case Parser::PRGM:
+
+                break;
+            case Parser::STMT:
+
+                break;
+            case Parser::STMTS:
+
+                break;
+            case Parser::STRING:
+
+                break;
+            case Parser::TYPE:
+
+                break;
+            case Parser::VARIABLE:
+
+                break;
+        }
+    }
 }
 
 std::string TypeChecker::getType(std::string variableID) { return assignedTypes[variableID]; }
