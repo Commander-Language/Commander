@@ -124,7 +124,11 @@ namespace Parser {
     BindingsNode::BindingsNode(const std::vector<BindingNodePtr>& bindings, BindingNodePtr binding)
         : bindings(concat(bindings, std::move(binding))) {}
 
-    ASTNodeType CmdNode::nodeType() const { return ASTNodeType::CMD; }
+    ASTNodeType CmdCmdNode::nodeType() const { return ASTNodeType::CMD; }
+
+    ASTNodeType PipeCmdNode::nodeType() const { return ASTNodeType::PIPE_CMD; }
+
+    ASTNodeType AsyncCmdNode::nodeType() const { return ASTNodeType::ASYNC_CMD; }
 
     ASTNodeType ExprNode::nodeType() const { return ASTNodeType::EXPR; }
 

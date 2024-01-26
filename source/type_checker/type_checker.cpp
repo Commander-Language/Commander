@@ -14,7 +14,7 @@ namespace TypeChecker {
 
     // Copy-Constructor
     TypeChecker::TypeChecker(TypeChecker* otherTypeChecker) {
-        std::unordered_map<std::string, std::string> data(otherTypeChecker->_assignedTypes);
+        std::unordered_map<std::string, TyPtr> data(otherTypeChecker->_assignedTypes);
         _assignedTypes = data;
     }
 
@@ -32,15 +32,29 @@ namespace TypeChecker {
         switch (astNode->nodeType()) {
             case Parser::BINDING:
                 Parser::BindingNodePtr binding = std::static_pointer_cast<Parser::BindingNode>(astNode);
+                TyPtr type = nullptr;
                 if (binding->type) {
-                    setOrUpdateType(binding->variable, typeCheck(binding->type));
+                    type = typeCheck(binding->type);
+                    setOrUpdateType(binding->variable, type);
                 }
+                return type;
                 break;
             case Parser::BINDINGS:
-                // TODO: Add to symbol table
+                Parser::BindingsNodePtr bindings = std::static_pointer_cast<Parser::BindingsNode>(astNode);
+                //std::vector<TyPtr> bindingTypes;
+                for(const Parser::BindingNodePtr &currentBinding : bindings->bindings) {
+                    typeCheck(currentBinding);
+                }
+                return nullptr; //TODO: modify?
                 break;
             case Parser::CMD:
-                // TODO: Type check
+                Parser::CmdCmdNodePtr command = std::static_pointer_cast<Parser::CmdCmdNode>(astNode);
+                break;
+            case Parser::PIPE_CMD:
+                Parser::PipeCmdNodePtr pipeCommand = std::static_pointer_cast<Parser::PipeCmdNode>(astNode);
+                break;
+            case Parser::ASYNC_CMD:
+                Parser::AsyncCmdNodePtr asyncCommand = std::static_pointer_cast<Parser::AsyncCmdNode>(astNode);
                 break;
             case Parser::EXPR:
                 // TODO: Type check
@@ -49,10 +63,15 @@ namespace TypeChecker {
                 // TODO: Type check
                 break;
             case Parser::PRGM:
-                // TODO: Type check
+                Parser::PrgmNodePtr program = std::static_pointer_cast<Parser::PrgmNode>(astNode);
+                for(const Parser::StmtNodePtr &currentStatement : program->stmts) {
+                    typeCheck(currentStatement);
+                }
+                return nullptr;
                 break;
             case Parser::STMT:
-                // TODO: determine what kind of statement
+                //TODO: need to switch for each derivative of switch statements
+                    //ForStmtNode, IfStmtNode, etc.
                 break;
             case Parser::STMTS:
                 // TODO: Type check
