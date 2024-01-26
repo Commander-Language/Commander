@@ -63,7 +63,7 @@ public:
 
 private:
     std::unordered_map<std::string, std::string>
-            assignedTypes {};  // A dictionary which stores a string id and returns a string type
+            _assignedTypes {};  // A dictionary which stores a string id and returns a string type
 
     /**
      * isVariantOfExpected is a helper method which determines if the provided type is compatible with the expected type
