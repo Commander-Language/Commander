@@ -17,18 +17,8 @@ Scope::~Scope() = default;
 
 // Copy Constructor
 Scope::Scope(Scope& otherScope) {
-//    _parentScope = otherScope.getParentScopePointer();
-//    std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
-//    _variableData = copyData;
     _parentScope = otherScope.getParentScopePointer();
-    std::map<std::string, std::shared_ptr<int>> copyData;
-    auto iter = otherScope._variableData.begin();
-    while (iter != otherScope._variableData.end()) {
-        std::string key = iter->first;
-        int data = *iter->second;
-        copyData.insert_or_assign(key, std::make_shared<int>(data));
-        ++iter;
-    }
+    std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
     _variableData = copyData;
 }
 
