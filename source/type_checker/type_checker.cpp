@@ -5,84 +5,95 @@
  */
 
 #include "type_checker.hpp"
-#include "source/symbol_table/symbol_table_organizer.hpp"
+namespace TypeChecker {
+    // Constructor
+    TypeChecker::TypeChecker() = default;
 
-// Constructor
-TypeChecker::TypeChecker() = default;
+    // Destructor
+    TypeChecker::~TypeChecker() = default;
 
-// Destructor
-TypeChecker::~TypeChecker() = default;
+    // Copy-Constructor
+    TypeChecker::TypeChecker(TypeChecker* otherTypeChecker) {
+        std::unordered_map<std::string, std::string> data(otherTypeChecker->_assignedTypes);
+        _assignedTypes = data;
+    }
 
-// Copy-Constructor
-TypeChecker::TypeChecker(TypeChecker* otherTypeChecker) {
-    std::unordered_map<std::string, std::string> data(otherTypeChecker->assignedTypes);
-    _assignedTypes = data;
-}
+    void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
+        // Symbol table:
+        // 4 different types of stuff stored in it
+        // Variables: name --> Ty
+        // Functions: name --> FunctionTy (Ty)
+        // Aliases: ?
+        // Custom Types: name --> Ty
+        for (const Parser::ASTNodePtr& node : astNodeList) { typeCheck(node); }
+    }
 
-Parser::ASTNodeList TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
-    SymbolTableOrganizer symbolTable;
-    symbolTable.pushSymbolTable();
-    for (const std::shared_ptr<Parser::ASTNode>& node : astNodeList) {
-        switch (node->nodeType()) {
+    TyPtr TypeChecker::typeCheck(const Parser::ASTNodePtr& astNode) {
+        switch (astNode->nodeType()) {
             case Parser::BINDING:
-
+                Parser::BindingNodePtr binding = std::static_pointer_cast<Parser::BindingNode>(astNode);
+                if (binding->type) {
+                    setOrUpdateType(binding->variable, typeCheck(binding->type));
+                }
                 break;
             case Parser::BINDINGS:
-
+                // TODO: Add to symbol table
                 break;
             case Parser::CMD:
-
+                // TODO: Type check
                 break;
             case Parser::EXPR:
-
+                // TODO: Type check
                 break;
             case Parser::EXPRS:
-
+                // TODO: Type check
                 break;
             case Parser::PRGM:
-
+                // TODO: Type check
                 break;
             case Parser::STMT:
-                //TODO: determine what kind of statement
-                symbolTable.pushSymbolTable();
+                // TODO: determine what kind of statement
                 break;
             case Parser::STMTS:
-
+                // TODO: Type check
                 break;
             case Parser::STRING:
-
+                // TODO: Type check
                 break;
             case Parser::TYPE:
-
+                // TODO: Add to symbol table
                 break;
             case Parser::VARIABLE:
-
+                // TODO: Add to symbol table (after type checking)
                 break;
         }
     }
-}
 
-std::string TypeChecker::getType(std::string variableID) { return _assignedTypes[variableID]; }
+    TyPtr& TypeChecker::getType(const std::string& variableID) { return _assignedTypes[variableID]; }
 
-void TypeChecker::setOrUpdateType(std::string variableID, std::string type) { _assignedTypes[variableID] = type; }
+    void TypeChecker::setOrUpdateType(const std::string& variableID, const TyPtr& type) {
+        _assignedTypes[variableID] = type;
+    }
 
-bool TypeChecker::verifyType(std::string variableID, std::string expected) {
-    if (!hasVariable(variableID)) return false;  // return false if the variable doesnt exist
+    bool TypeChecker::verifyType(const std::string& variableID, const TyPtr& expected) {
+        if (!hasVariable(variableID)) return false;  // return false if the variable doesnt exist
+        if (_assignedTypes[variableID] == expected)
+            return true;  // return true if the variable is equal to the expected value
 
-    if (_assignedTypes[variableID] == expected)
-        return true;  // return true if the variable is equal to the expected value
-
-    // if neither check was successful, check if expected is compatible with the variableID's type
-    return isVariantOfExpected(_assignedTypes[variableID], expected);
-}
+        // if neither check was successful, check if expected is compatible with the variableID's type
+        return _isVariantOfExpected(_assignedTypes[variableID], expected);
+    }
 
 
-bool TypeChecker::hasVariable(std::string variableID) { return _assignedTypes.find(variableID) != _assignedTypes.end(); }
+    bool TypeChecker::hasVariable(const std::string& variableID) {
+        return _assignedTypes.find(variableID) != _assignedTypes.end();
+    }
 
-bool TypeChecker::isVariantOfExpected(std::string variableType, std::string expectedType) {
-    // TODO: refactor and account for additional types (i.e. STRING and CHAR, etc.)
-    bool variableStatus = (variableType == "INTEGER" || variableType == "FLOAT" || variableType == "DOUBLE");
-    bool expectedStatus = (expectedType == "INTEGER" || expectedType == "FLOAT" || expectedType == "DOUBLE");
+    bool TypeChecker::_isVariantOfExpected(const TyPtr& variableType, const TyPtr& expectedType) {
+        // TODO: refactor and account for additional types (i.e. STRING and CHAR, etc.)
+        bool variableStatus = (variableType->getType() == Type::INT || variableType->getType() == Type::FLOAT);
+        bool expectedStatus = (expectedType->getType() == Type::INT || expectedType->getType() == Type::FLOAT);
 
-    return variableStatus == expectedStatus;
-}
+        return variableStatus == expectedStatus;
+    }
+} //  namespace TypeChecker
