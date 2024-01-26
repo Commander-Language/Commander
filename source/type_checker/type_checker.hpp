@@ -8,6 +8,7 @@
 #define CPP_UTILITIES_TYPE_CHECKER_HPP
 #include <string>
 #include <unordered_map>
+#include "../parser/parser.hpp"
 
 
 class TypeChecker {
@@ -20,6 +21,11 @@ public:
      * @param otherTypeChecker - The TypeChecker object to copy from
      */
     TypeChecker(TypeChecker* otherTypeChecker);
+
+
+    Parser::ASTNodeList TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
+
+    }
 
     /**
      * getType() will attempt to return the variable type if present
