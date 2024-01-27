@@ -6,12 +6,13 @@
 
 #ifndef COMMANDER_TYPE_H
 #define COMMANDER_TYPE_H
-#include <vector>
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace TypeChecker {
 
-    enum Type : std::uint8_t { INT, FLOAT, BOOLEAN, TUPLE, ARRAY, FUNCTION, STRING };
+    enum Type : std::uint8_t { INT, FLOAT, BOOL, TUPLE, ARRAY, FUNCTION, STRING };
 
     class Ty {
         // TODO: documentatiojn
@@ -20,48 +21,49 @@ namespace TypeChecker {
         [[nodiscard]] virtual Type getType() const = 0;
     };
 
+    std::string typeToString(Type type);
+
     /**
  * @brief Pointer to a type
      */
     using TyPtr = std::shared_ptr<Ty>;
 
-    class IntTy : Ty {
+    class IntTy : public Ty {
         [[nodiscard]] Type getType() const override;
     };
 
-    class FloatTy : Ty {
+    class FloatTy : public Ty {
         [[nodiscard]] Type getType() const override;
     };
 
-    class BooleanTy : Ty {
+    class BoolTy : public Ty {
         [[nodiscard]] Type getType() const override;
     };
 
-    class TupleTy : Ty {
-        TupleTy(std::vector<std::unique_ptr<Ty>> types);
+    class StringTy : public Ty {
         [[nodiscard]] Type getType() const override;
-
-        std::vector<std::unique_ptr<Ty>> _contentTypes;
     };
 
-    class ArrayTy : Ty {
-        ArrayTy(std::unique_ptr<Ty> type, unsigned int rank);
+    class TupleTy : public Ty {
+    public:
+        TupleTy(std::vector<std::shared_ptr<Ty>> types);
         [[nodiscard]] Type getType() const override;
-
-        std::unique_ptr<Ty> _baseType;
-        unsigned int _rank;
+        std::vector<std::shared_ptr<Ty>> contentTypes;
     };
 
-    class FunctionTy : Ty {
-        FunctionTy(std::vector<std::unique_ptr<Ty>> params, std::unique_ptr<Ty> returnType);
+    class ArrayTy : public Ty {
+    public:
+        ArrayTy(std::shared_ptr<Ty> type);
         [[nodiscard]] Type getType() const override;
-
-        std::vector<std::unique_ptr<Ty>> _parameters;
-        std::unique_ptr<Ty> _returnType;
+        std::shared_ptr<Ty> baseType;
     };
 
-    class StringTy : Ty {
+    class FunctionTy : public Ty {
+    public:
+        FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> returnType);
         [[nodiscard]] Type getType() const override;
+        std::vector<std::shared_ptr<Ty>> parameters;
+        std::shared_ptr<Ty> returnType;
     };
 
 } //  namespace TypeChecker

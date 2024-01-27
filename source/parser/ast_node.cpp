@@ -98,7 +98,19 @@ namespace Parser {
     //  ||  Overarching types:  ||
     //  ==========================
 
-    ASTNodeType TypeNode::nodeType() const { return ASTNodeType::TYPE; }
+    ASTNodeType IntTypeNode::nodeType() const { return ASTNodeType::INT_TYPE; }
+
+    ASTNodeType FloatTypeNode::nodeType() const { return ASTNodeType::FLOAT_TYPE; }
+
+    ASTNodeType BoolTypeNode::nodeType() const { return ASTNodeType::BOOL_TYPE; }
+
+    ASTNodeType StringTypeNode::nodeType() const { return ASTNodeType::STRING_TYPE; }
+
+    ASTNodeType ArrayTypeNode::nodeType() const { return ASTNodeType::ARRAY_TYPE; }
+
+    ASTNodeType TupleTypeNode::nodeType() const { return ASTNodeType::TUPLE_TYPE; }
+
+    ASTNodeType FunctionTypeNode::nodeType() const { return ASTNodeType::FUNCTION_TYPE; }
 
     BindingNode::BindingNode(std::string variable, Parser::TypeNodePtr type)
         : variable(std::move(variable)), type(std::move(type)) {}
@@ -129,8 +141,6 @@ namespace Parser {
     ASTNodeType PipeCmdNode::nodeType() const { return ASTNodeType::PIPE_CMD; }
 
     ASTNodeType AsyncCmdNode::nodeType() const { return ASTNodeType::ASYNC_CMD; }
-
-    ASTNodeType ExprNode::nodeType() const { return ASTNodeType::EXPR; }
 
     ExprsNode::ExprsNode(ExprNodePtr expr) : exprs({std::move(expr)}) {}
 
@@ -185,7 +195,7 @@ namespace Parser {
         return "(PrgmNode" + builder.str() + ")";
     }
 
-    ASTNodeType VariableNode::nodeType() const { return ASTNodeType::VARIABLE; }
+    ASTNodeType IdentVariableNode::nodeType() const { return ASTNodeType::VARIABLE; }
 
     //  =================
     //  ||  Commands:  ||
@@ -193,9 +203,11 @@ namespace Parser {
 
     std::string CmdCmdNode::sExpression() const {
         std::stringstream builder;
-        for (const ASTNode& arg : arguments) { builder << " " << arg.sExpression(); }
+        for (const ASTNodePtr& arg : arguments) { builder << " " << arg->sExpression(); }
         return "(CmdCmdNode" + builder.str() + ")";
     }
+
+    CmdCmdNode::CmdCmdNode(std::vector<ASTNodePtr> arguments) : arguments(std::move(arguments)) {}
 
     AsyncCmdNode::AsyncCmdNode(Parser::CmdNodePtr cmd) : cmd(std::move(cmd)) {}
 
@@ -312,7 +324,7 @@ namespace Parser {
     std::string CallExprNode::sExpression() const {
         std::stringstream builder;
         for (const ExprNodePtr& arg : args) { builder << " " << arg->sExpression(); }
-        return "(CallExprNode " + func->sExpression() + builder.str() + ")";
+        return "(CallExprNode  " + func->sExpression() + builder.str() + ")";
     }
 
     LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, Parser::ExprNodePtr body,
@@ -407,17 +419,33 @@ namespace Parser {
         return "(AliasStmtNode " + alias + " " + command->sExpression() + ")";
     }
 
-    std::string IntTypeNode::sExpression() const { return "(IntTypeNode)"; }
+    std::string IntTypeNode::sExpression() const { return "(IntTypeNode" + (type ? " " + TypeChecker::typeToString(type->getType()) : "") + ")"; }
 
-    std::string FloatTypeNode::sExpression() const { return "(FloatTypeNode)"; }
+    std::string FloatTypeNode::sExpression() const { return "(FloatTypeNode" + (type ? " " + TypeChecker::typeToString(type->getType()) : "") + ")"; }
+
+    std::string BoolTypeNode::sExpression() const { return "(BoolTypeNode" + (type ? " " + TypeChecker::typeToString(type->getType()) : "") + ")"; }
+
+    std::string StringTypeNode::sExpression() const { return "(StringTypeNode" + (type ? " " + TypeChecker::typeToString(type->getType()) : "") + ")"; }
 
     ArrayTypeNode::ArrayTypeNode(Parser::TypeNodePtr subtype) : subtype(std::move(subtype)) {}
 
-    std::string ArrayTypeNode::sExpression() const { return "(ArrayTypeNode " + subtype->sExpression() + ")"; }
+    std::string ArrayTypeNode::sExpression() const { return "(ArrayTypeNode " + subtype->sExpression() + (type ? " " + TypeChecker::typeToString(type->getType()) : "") + ")"; }
 
     TupleTypeNode::TupleTypeNode(const std::vector<TypeNodePtr>& subtypes) : subtypes(subtypes) {}
 
-    std::string TupleTypeNode::sExpression() const { return "(TupleTypeNode)"; }
+    std::string TupleTypeNode::sExpression() const {
+        std::stringstream builder;
+        for (const TypeNodePtr& subType : subtypes) { builder << " " << subType->sExpression(); }
+        return "(TupleTypeNode" + builder.str() + (type ? " " + TypeChecker::typeToString(type->getType()) : "") + ")";
+    }
+
+    FunctionTypeNode::FunctionTypeNode(const std::vector<TypeNodePtr>& params) : params(params) {}
+
+    std::string FunctionTypeNode::sExpression() const {
+        std::stringstream builder;
+        for (const TypeNodePtr& param : params) { builder << " " << param->sExpression(); }
+        return "(FunctionTypeNode" + builder.str() + (type ? " " + TypeChecker::typeToString(type->getType()) : "") + ")";
+    }
 
     IdentVariableNode::IdentVariableNode(std::string varName) : varName(std::move(varName)) {}
 
