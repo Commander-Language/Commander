@@ -1,8 +1,8 @@
 /**
- * @file
- * @bried
- * @details
- */
+* @file type.cpp
+* @brief type.cpp contains the implementation for the prototype methods in type.hpp
+* @details For method prototypes, see type.hpp
+*/
 
 #include "type.hpp"
 
@@ -29,25 +29,29 @@ namespace TypeChecker {
         }
     }
 
+    std::string getTypeString(const TypeChecker::TyPtr& tyPtr) {
+        return (tyPtr ? " " + TypeChecker::typeToString(tyPtr->getType()) : "");
+    }
+
     Type IntTy::getType() const { return Type::INT; }
 
     Type FloatTy::getType() const { return Type::FLOAT; }
 
     Type BoolTy::getType() const { return Type::BOOL; }
 
-    TupleTy::TupleTy(std::vector<std::shared_ptr<Ty>> types) { _contentTypes = std::move(types); }
+    TupleTy::TupleTy(std::vector<std::shared_ptr<Ty>> types) { contentTypes = std::move(types); }
 
     Type TupleTy::getType() const { return Type::TUPLE; }
 
     ArrayTy::ArrayTy(std::shared_ptr<Ty> type) {
-        _baseType = std::move(type);
+        baseType = std::move(type);
     }
 
     Type ArrayTy::getType() const { return Type::ARRAY; }
 
-    FunctionTy::FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> returnType) {
-        _parameters = std::move(params);
-        _returnType = std::move(returnType);
+    FunctionTy::FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> retType) {
+        parameters = std::move(params);
+        returnType = std::move(retType);
     }
 
     Type FunctionTy::getType() const { return Type::FUNCTION; }

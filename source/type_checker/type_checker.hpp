@@ -15,6 +15,10 @@
 #include <unordered_map>
 
 namespace TypeChecker {
+    /**
+     * @brief Class for type checking
+     *
+     */
     class TypeChecker {
     public:
         TypeChecker();   // Default Constructor
@@ -26,8 +30,17 @@ namespace TypeChecker {
          */
         TypeChecker(TypeChecker* otherTypeChecker);
 
-
+        /**
+         * @brief Type checks (recursively) a list of AST nodes
+         * @param astNodeList The list of AST nodes
+         */
         void typeCheck(const Parser::ASTNodeList& astNodeList);
+
+        /**
+         * @brief Type checks (recursively) a single AST node
+         * @param astNode The ast node pointer
+         * @return The type of the ast node if it evaluates to a type, otherwise returns nullptr
+         */
         TyPtr typeCheck(const Parser::ASTNodePtr& astNode);
 
         /**
