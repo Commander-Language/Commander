@@ -9,6 +9,7 @@
 #include "../parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/type_checker/type.hpp"
+#include "source/util/commander_exception.hpp"
 #include "type.hpp"
 #include <string>
 #include <unordered_map>
