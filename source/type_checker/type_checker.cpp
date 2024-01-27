@@ -65,9 +65,79 @@ namespace TypeChecker {
                 typeCheck(asyncCommand);
                 return nullptr;
             }
-            case Parser::EXPR: {
-                // MULTIPLE!!!
-                //  TODO: Type check
+            case Parser::INT_EXPR: {
+                Parser::IntExprNodePtr exprNode = std::static_pointer_cast<Parser::IntExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::FLOAT_EXPR: {
+                Parser::FloatExprNodePtr exprNode = std::static_pointer_cast<Parser::FloatExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::STRING_EXPR: {
+                Parser::StringExprNodePtr exprNode = std::static_pointer_cast<Parser::StringExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::BOOL_EXPR: {
+                Parser::BoolExprNodePtr exprNode = std::static_pointer_cast<Parser::BoolExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::VAR_EXPR: {
+                Parser::VarExprNodePtr exprNode = std::static_pointer_cast<Parser::VarExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::ARRAY_EXPR: {
+                Parser::ArrayExprNodePtr exprNode = std::static_pointer_cast<Parser::ArrayExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::ARRAY_INDEX_EXPR: {
+                Parser::ArrayIndexExprNodePtr exprNode = std::static_pointer_cast<Parser::ArrayIndexExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::TUPLE_EXPR: {
+                Parser::TupleExprNodePtr exprNode = std::static_pointer_cast<Parser::TupleExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::TUPLE_INDEX_EXPR: {
+                Parser::TupleIndexExprNodePtr exprNode = std::static_pointer_cast<Parser::TupleIndexExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::TERNARY_EXPR: {
+                Parser::TernaryExprNodePtr exprNode = std::static_pointer_cast<Parser::TernaryExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::UNOP_EXPR: {
+                Parser::UnOpExprNodePtr exprNode = std::static_pointer_cast<Parser::UnOpExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::BINOP_EXPR: {
+                Parser::BinOpExprNodePtr exprNode = std::static_pointer_cast<Parser::BinOpExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::CALL_EXPR: {
+                Parser::CallExprNodePtr exprNode = std::static_pointer_cast<Parser::CallExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::LAMBDA_EXPR: {
+                Parser::LambdaExprNodePtr exprNode = std::static_pointer_cast<Parser::LambdaExprNode>(astNode);
+                // TODO: implement
+                break;
+            }
+            case Parser::CMD_EXPR: {
+                Parser::CmdExprNodePtr exprNode = std::static_pointer_cast<Parser::CmdExprNode>(astNode);
+                // TODO: implement
                 break;
             }
             case Parser::EXPRS: {
@@ -80,10 +150,49 @@ namespace TypeChecker {
                 for (const Parser::StmtNodePtr& currentStatement : program->stmts) { typeCheck(currentStatement); }
                 return nullptr;
             }
-            case Parser::STMT: {
-                // MUTLIPLE!!!
-                // TODO: need to switch for each derivative of switch statements
-                // ForStmtNode, IfStmtNode, etc.
+            case Parser::IF_STMT: {
+                Parser::IfStmtNodePtr stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::FOR_STMT: {
+                Parser::ForStmtNodePtr stmtNode = std::static_pointer_cast<Parser::ForStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::WHILE_STMT: {
+                Parser::WhileStmtNodePtr stmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::DO_WHILE_STMT: {
+                Parser::DoWhileStmtNodePtr stmtNode = std::static_pointer_cast<Parser::DoWhileStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::RETURN_STMT: {
+                Parser::ReturnStmtNodePtr stmtNode = std::static_pointer_cast<Parser::ReturnStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::SCOPE_STMT: {
+                Parser::ScopeStmtNodePtr stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::CMD_STMT: {
+                Parser::CmdStmtNodePtr stmtNode = std::static_pointer_cast<Parser::CmdStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::EXPR_STMT: {
+                Parser::ExprStmtNodePtr stmtNode = std::static_pointer_cast<Parser::ExprStmtNode>(astNode);
+                // TODO: Implement
+                break;
+            }
+            case Parser::ALIAS_STMT: {
+                Parser::AliasStmtNodePtr stmtNode = std::static_pointer_cast<Parser::AliasStmtNode>(astNode);
+                // TODO: Implement
                 break;
             }
             case Parser::STMTS: {
