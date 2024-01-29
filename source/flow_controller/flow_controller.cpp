@@ -28,7 +28,6 @@ namespace FlowController {
             std::any func = getVariable(varExpr->varName);
             return std::any_cast<CommanderLambda>(func);
         } else if (expr->exprType() == Parser::ExprType::LAMBDA_EXPR) {
-
         } else {
             // TODO: Throw error
         }
@@ -88,8 +87,10 @@ namespace FlowController {
         }
     }
 
-    void FlowController::_binding(Parser::BindingNodePtr node) {
-        // TODO: Implement
+    CommanderBinding FlowController::_binding(Parser::BindingNodePtr node) {
+        CommanderBinding bind = std::make_tuple(node->variable,
+                                                0);  // TODO: fix, need tuple of string and a commander type
+        return bind;
     }
     void FlowController::_bindings(Parser::BindingsNodePtr node) {
         // TODO: Implement
@@ -162,9 +163,19 @@ namespace FlowController {
             }
             case Parser::ExprType::FUNCTION_CALL_EXPR: {
                 auto funcExpr = std::dynamic_pointer_cast<Parser::CallExprNode>(node);
-                std::any func = _expr(funcExpr->func);
+                auto function = std::any_cast<CommanderLambda>(_expr(funcExpr->func));
 
-                // TODO: Implement
+                _symbolTable.pushSymbolTable();  // new scope for function
+                int bindingIndex = 0;
+                for (auto& arg : funcExpr->args) {
+                    // args and bindings should be lined up 1 to 1
+                    auto argValue = _expr(arg);
+                    auto name = function._bindings[bindingIndex]->variable;
+
+                    _symbolTable.addOrUpdateVariable(name, 0);
+                    // _symbolTable.addOrUpdateVariable(name, argValue); // TODO: update when symbol table is generic
+                    bindingIndex++;
+                }
             }
             case Parser::ExprType::LAMBDA_EXPR: {
                 auto lambdaExpr = std::dynamic_pointer_cast<Parser::LambdaExprNode>(node);
@@ -304,4 +315,7 @@ namespace FlowController {
                 break;
         }
     }
+    CommanderLambda::CommanderLambda(std::vector<Parser::BindingNodePtr> bindings, Parser::StmtNodePtr body)
+        : _bindings(std::move(bindings)), _body(std::move(body)) {}
+
 }  // namespace FlowController

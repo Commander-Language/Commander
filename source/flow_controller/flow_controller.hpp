@@ -9,9 +9,14 @@
 #include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 
+#include <tuple>
 #include <any>
 
 namespace FlowController {
+    /**
+     * @brief A Commander binding representation
+     */
+    using CommanderBinding = std::tuple<std::string, int>; //TODO: fix, need tuple of string and a commander type
     /**
      * @brief A Commander tuple representation
      */
@@ -25,9 +30,11 @@ namespace FlowController {
      */
     struct CommanderLambda {
     public:
-        CommanderLambda();
+        CommanderLambda(std::vector<Parser::BindingNodePtr>, Parser::StmtNodePtr);
+        std::vector<Parser::BindingNodePtr> _bindings;
+        Parser::StmtNodePtr _body;
     private:
-
+        // TODO: Add return type
     };
 
     /**
@@ -87,7 +94,7 @@ namespace FlowController {
         /**
          * @brief Helper to interpret binding nodes
          */
-        void _binding(Parser::BindingNodePtr);
+        CommanderBinding _binding(Parser::BindingNodePtr);
         /**
          * @brief Helper to interpret bindings nodes
          */
