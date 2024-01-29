@@ -1,15 +1,16 @@
 /**
-* @file type.hpp
-* @brief Represent a type
-* @details For expressions and types in Commander, each has a type. This class represents all seven types that each expression or type can evaluate to.
-*/
+ * @file type.hpp
+ * @brief Represent a type
+ * @details For expressions and types in Commander, each has a type. This class represents all seven types that each
+ * expression or type can evaluate to.
+ */
 
 #ifndef COMMANDER_TYPE_H
 #define COMMANDER_TYPE_H
 #include <cstdint>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace TypeChecker {
 
@@ -55,7 +56,7 @@ namespace TypeChecker {
      * @param type2 Second type
      * @return True if the types are the same, false otherwise
      */
-    bool areTypesEqual(const TyPtr &type1, const TyPtr &type2);
+    bool areTypesEqual(const TyPtr& type1, const TyPtr& type2);
 
     /**
      * @brief Gets the string representation of the given type for S-Expressions
@@ -187,6 +188,6 @@ namespace TypeChecker {
         std::shared_ptr<Ty> returnType;
     };
 
-} //  namespace TypeChecker
+}  //  namespace TypeChecker
 
 #endif  // COMMANDER_TYPE_H

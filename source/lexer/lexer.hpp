@@ -201,7 +201,7 @@ namespace lexer {
              {"do", DO},       {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
              {"if", IF},       {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
              {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"timeout", TIMEOUT},
-             {"to", TO}, {"true", TRUE},   {"type", TYPE},     {"while", WHILE}, {"write", WRITE}});
+             {"to", TO},       {"true", TRUE},     {"type", TYPE},   {"while", WHILE},   {"write", WRITE}});
 
     /**
      * Vector of string token literal pairs that are not keywords (order matters here; longest to shortest)
