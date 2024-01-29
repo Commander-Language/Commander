@@ -184,8 +184,8 @@ namespace TypeChecker {
                     // TODO: Improve error
                     throw util::CommanderException("Ternary condition does not evaluate to a boolean");
                 }
-                TyPtr trueType = typeCheck(exprNode->condition);
-                TyPtr falseType = typeCheck(exprNode->condition);
+                TyPtr trueType = typeCheck(exprNode->trueExpr);
+                TyPtr falseType = typeCheck(exprNode->falseExpr);
                 if (!trueType || !falseType || !areTypesEqual(trueType, falseType)) {
                     // TODO: Improve error
                     throw util::CommanderException("True and false expressions in ternary do not match the same type.");
@@ -228,8 +228,8 @@ namespace TypeChecker {
                 bool isBool = rightType == Type::BOOL;
                 bool isString = rightType == Type::STRING;
                 bool areEqual = areTypesEqual(leftTy, rightTy);
-                bool areIntFloat = leftTy && (leftTy->getType() == Type::INT && isFloat)
-                                || (leftTy->getType() == Type::FLOAT && isInt);
+                bool areIntFloat = leftTy && ((leftTy->getType() == Type::INT && isFloat)
+                                || (leftTy->getType() == Type::FLOAT && isInt));
                 switch (exprNode->opType) {
                     case Parser::SET: {
                         if (!isVariable) {
@@ -261,7 +261,7 @@ namespace TypeChecker {
                         throw util::CommanderException("Boolean operation has incompatible types.");
                     case Parser::EQUAL:
                     case Parser::NOT_EQUAL:
-                        // int/float | any/any --> bool
+                        // any/any --> bool
                         if (areIntFloat || areEqual) { return (exprNode->type = std::make_shared<BoolTy>()); }
                         // TODO: Improve error
                         throw util::CommanderException("Equality operation has incompatible types.");
