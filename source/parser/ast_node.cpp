@@ -57,6 +57,8 @@ namespace Parser {
                 return "OR";
             case EQUAL:
                 return "EQUAL";
+            case SET:
+                return "SET";
             case NOT_EQUAL:
                 return "NOT_EQUAL";
             case ADD_EQUAL:
@@ -352,9 +354,6 @@ namespace Parser {
     UnOpExprNode::UnOpExprNode(Parser::UnOpType opType, Parser::ExprNodePtr expr)
         : opType(opType), expr(std::move(expr)) {}
 
-    UnOpExprNode::UnOpExprNode(Parser::UnOpType opType, Parser::VariableNodePtr var)
-        : opType(opType), var(std::move(var)) {}
-
     std::string UnOpExprNode::sExpression() const {
         return "(UnOpExprNode " + unOpToString(opType) + " " + expr->sExpression() + getTypeString() + ")";
     }
@@ -409,14 +408,14 @@ namespace Parser {
     //  ||  Statements:  ||
     //  ===================
 
-    IfStmtNode::IfStmtNode(const std::vector<ExprNodePtr>& conds, std::vector<StmtNodePtr> trueStmts,
+    IfStmtNode::IfStmtNode(const std::vector<ExprNodePtr>& conditions, std::vector<StmtNodePtr> trueStmts,
                            Parser::StmtNodePtr falseStmt)
-        : conds(conds), trueStmts(std::move(trueStmts)), falseStmt(std::move(falseStmt)) {}
+        : conditions(conditions), trueStmts(std::move(trueStmts)), falseStmt(std::move(falseStmt)) {}
 
     std::string IfStmtNode::sExpression() const {
         std::stringstream builder;
-        for (int i = 0; i < (int)conds.size(); i++) {
-            builder << " " << conds[i]->sExpression();
+        for (int i = 0; i < (int)conditions.size(); i++) {
+            builder << " " << conditions[i]->sExpression();
             builder << " " << trueStmts[i]->sExpression();
         }
         return "(IfStmtNode" + builder.str() + " " + falseStmt->sExpression() + ")";
