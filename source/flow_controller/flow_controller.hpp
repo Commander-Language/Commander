@@ -117,12 +117,18 @@ namespace FlowController {
         void _prgm(std::shared_ptr<Parser::PrgmNode>);
         /**
          * @brief Helper to interpret stmt nodes
+         * @details Some statements need to return some generic value;
+         * for example the body of a function call, so return value or nullptr if unnecessary.
+         * @returns Generic value or nullptr if not needed.
          */
-        void _stmt(Parser::StmtNodePtr);
+        std::any _stmt(Parser::StmtNodePtr);
         /**
          * @brief Helper to interpret stmts nodes
+         * @details Some statements need to return some generic value;
+         * for example the body of a function call, so return value or nullptr if unnecessary.
+         * @returns Generic value or nullptr if not needed.
          */
-        void _stmts(Parser::StmtsNodePtr);
+        std::any _stmts(Parser::StmtsNodePtr);
         /**
          * @brief Helper to interpret string nodes
          */

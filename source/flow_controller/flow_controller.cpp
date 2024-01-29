@@ -93,7 +93,9 @@ namespace FlowController {
         return bind;
     }
     void FlowController::_bindings(Parser::BindingsNodePtr node) {
-        // TODO: Implement
+        for(auto & binding : node->bindings){
+            _binding(binding);
+        }
     }
     void FlowController::_cmd(Parser::CmdNodePtr node) {
         // TODO: Implement
@@ -166,6 +168,7 @@ namespace FlowController {
                 auto function = std::any_cast<CommanderLambda>(_expr(funcExpr->func));
 
                 _symbolTable.pushSymbolTable();  // new scope for function
+
                 int bindingIndex = 0;
                 for (auto& arg : funcExpr->args) {
                     // args and bindings should be lined up 1 to 1
@@ -176,6 +179,10 @@ namespace FlowController {
                     // _symbolTable.addOrUpdateVariable(name, argValue); // TODO: update when symbol table is generic
                     bindingIndex++;
                 }
+
+                auto returnValue = _stmt(function._body);
+                _symbolTable.popSymbolTable(); // remove funciton scope!
+                return returnValue;
             }
             case Parser::ExprType::LAMBDA_EXPR: {
                 auto lambdaExpr = std::dynamic_pointer_cast<Parser::LambdaExprNode>(node);
@@ -195,7 +202,7 @@ namespace FlowController {
     void FlowController::_prgm(std::shared_ptr<Parser::PrgmNode> node) {
         for (auto& stmt : node->stmts) { _stmt(stmt); }
     }
-    void FlowController::_stmt(Parser::StmtNodePtr node) {
+    std::any FlowController::_stmt(Parser::StmtNodePtr node) {
         switch (node->stmtType()) {
             case Parser::StmtType::IF_STMT: {
                 // TODO: Implement
@@ -235,9 +242,11 @@ namespace FlowController {
                 break;
             }
         }
+        return nullptr;
     }
-    void FlowController::_stmts(Parser::StmtsNodePtr node) {
+    std::any FlowController::_stmts(Parser::StmtsNodePtr node) {
         // TODO: Implement
+        return nullptr;
     }
     void FlowController::_string(Parser::StringNodePtr node) {
         // TODO: Implement
