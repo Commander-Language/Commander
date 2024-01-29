@@ -1,8 +1,8 @@
 /**
-* @file type.cpp
-* @brief type.cpp contains the implementation for the prototype methods in type.hpp
-* @details For method prototypes, see type.hpp
-*/
+ * @file type.cpp
+ * @brief type.cpp contains the implementation for the prototype methods in type.hpp
+ * @details For method prototypes, see type.hpp
+ */
 
 #include "type.hpp"
 
@@ -33,14 +33,10 @@ namespace TypeChecker {
         return (tyPtr ? " " + TypeChecker::typeToString(tyPtr->getType()) : "");
     }
 
-    bool areTypesEqual(const TyPtr &type1, const TyPtr &type2) {
-        if (!type1 || !type2) {
-            return false;
-        }
+    bool areTypesEqual(const TyPtr& type1, const TyPtr& type2) {
+        if (!type1 || !type2) { return false; }
         Type t = type1->getType();
-        if (t != type2->getType()) {
-            return false;
-        }
+        if (t != type2->getType()) { return false; }
         switch (t) {
             case ARRAY: {
                 std::shared_ptr<ArrayTy> ty1 = std::static_pointer_cast<ArrayTy>(type1);
@@ -51,13 +47,9 @@ namespace TypeChecker {
                 std::shared_ptr<TupleTy> ty1 = std::static_pointer_cast<TupleTy>(type1);
                 std::shared_ptr<TupleTy> ty2 = std::static_pointer_cast<TupleTy>(type2);
                 int size = ty1->contentTypes.size();
-                if (size != ty2->contentTypes.size()) {
-                    return false;
-                }
+                if (size != ty2->contentTypes.size()) { return false; }
                 for (int i = 0; i < size; i++) {
-                    if (!areTypesEqual(ty1->contentTypes[i], ty2->contentTypes[i])) {
-                        return false;
-                    }
+                    if (!areTypesEqual(ty1->contentTypes[i], ty2->contentTypes[i])) { return false; }
                 }
                 return true;
             }
@@ -69,9 +61,7 @@ namespace TypeChecker {
                     return false;
                 }
                 for (int i = 0; i < size; i++) {
-                    if (!areTypesEqual(ty1->parameters[i], ty2->parameters[i])) {
-                        return false;
-                    }
+                    if (!areTypesEqual(ty1->parameters[i], ty2->parameters[i])) { return false; }
                 }
                 return true;
             }
@@ -90,9 +80,7 @@ namespace TypeChecker {
 
     Type TupleTy::getType() const { return Type::TUPLE; }
 
-    ArrayTy::ArrayTy(std::shared_ptr<Ty> type) {
-        baseType = std::move(type);
-    }
+    ArrayTy::ArrayTy(std::shared_ptr<Ty> type) { baseType = std::move(type); }
 
     Type ArrayTy::getType() const { return Type::ARRAY; }
 
@@ -105,4 +93,4 @@ namespace TypeChecker {
 
     Type StringTy::getType() const { return Type::STRING; }
 
-} //  namespace TypeChecker
+}  //  namespace TypeChecker

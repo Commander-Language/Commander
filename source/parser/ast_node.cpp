@@ -114,9 +114,7 @@ namespace Parser {
 
     ASTNodeType FunctionTypeNode::nodeType() const { return ASTNodeType::FUNCTION_TYPE; }
 
-    std::string TypeNode::getTypeString() const {
-        return TypeChecker::getTypeString(type);
-    }
+    std::string TypeNode::getTypeString() const { return TypeChecker::getTypeString(type); }
 
     BindingNode::BindingNode(std::string variable, Parser::TypeNodePtr type)
         : variable(std::move(variable)), type(std::move(type)) {}
@@ -142,9 +140,7 @@ namespace Parser {
     BindingsNode::BindingsNode(const std::vector<BindingNodePtr>& bindings, BindingNodePtr binding)
         : bindings(concat(bindings, std::move(binding))) {}
 
-    std::string ExprNode::getTypeString() const {
-        return TypeChecker::getTypeString(type);
-    }
+    std::string ExprNode::getTypeString() const { return TypeChecker::getTypeString(type); }
 
     ASTNodeType CmdCmdNode::nodeType() const { return ASTNodeType::CMD; }
 
@@ -283,11 +279,15 @@ namespace Parser {
 
     IntExprNode::IntExprNode(int64_t value) : value(value) {}
 
-    std::string IntExprNode::sExpression() const { return "(IntExprNode " + std::to_string(value) + getTypeString() + ")"; }
+    std::string IntExprNode::sExpression() const {
+        return "(IntExprNode " + std::to_string(value) + getTypeString() + ")";
+    }
 
     FloatExprNode::FloatExprNode(double value) : value(value) {}
 
-    std::string FloatExprNode::sExpression() const { return "(FloatExprNode " + std::to_string(value) + getTypeString() + ")"; }
+    std::string FloatExprNode::sExpression() const {
+        return "(FloatExprNode " + std::to_string(value) + getTypeString() + ")";
+    }
 
     StringExprNode::StringExprNode(Parser::StringNodePtr stringNode) : stringNode(std::move(stringNode)) {}
 
@@ -304,7 +304,9 @@ namespace Parser {
 
     VarExprNode::VarExprNode(Parser::VariableNodePtr variable) : variable(std::move(variable)) {}
 
-    std::string VarExprNode::sExpression() const { return "(VarExprNode " + variable->sExpression() + getTypeString() + ")"; }
+    std::string VarExprNode::sExpression() const {
+        return "(VarExprNode " + variable->sExpression() + getTypeString() + ")";
+    }
 
     ArrayExprNode::ArrayExprNode(const std::vector<ExprNodePtr>& expressions) : expressions(expressions) {}
 
@@ -382,7 +384,8 @@ namespace Parser {
 
     LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, Parser::ExprNodePtr body,
                                    Parser::TypeNodePtr returnType)
-        : bindings(bindings), body(std::make_shared<ReturnStmtNode>(std::move(body))), returnType(std::move(returnType)) {}
+        : bindings(bindings), body(std::make_shared<ReturnStmtNode>(std::move(body))),
+          returnType(std::move(returnType)) {}
 
     LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, Parser::StmtNodePtr body,
                                    Parser::TypeNodePtr returnType)
@@ -395,13 +398,15 @@ namespace Parser {
             bindingsBuilder << (first ? "" : " ") << binding->sExpression();
             first = false;
         }
-        return "(LambdaExprNode (" + bindingsBuilder.str() + ") " + returnType->sExpression() + " " + body->sExpression() + getTypeString()
-             + ")";
+        return "(LambdaExprNode (" + bindingsBuilder.str() + ") " + returnType->sExpression() + " "
+             + body->sExpression() + getTypeString() + ")";
     }
 
     CmdExprNode::CmdExprNode(Parser::CmdNodePtr cmd) : cmd(std::move(cmd)) {}
 
-    std::string CmdExprNode::sExpression() const { return "(CmdExprNode " + cmd->sExpression() + getTypeString() + ")"; }
+    std::string CmdExprNode::sExpression() const {
+        return "(CmdExprNode " + cmd->sExpression() + getTypeString() + ")";
+    }
 
 
     //  ===================
@@ -482,7 +487,9 @@ namespace Parser {
 
     ArrayTypeNode::ArrayTypeNode(Parser::TypeNodePtr subtype) : subtype(std::move(subtype)) {}
 
-    std::string ArrayTypeNode::sExpression() const { return "(ArrayTypeNode " + subtype->sExpression() + getTypeString() + ")"; }
+    std::string ArrayTypeNode::sExpression() const {
+        return "(ArrayTypeNode " + subtype->sExpression() + getTypeString() + ")";
+    }
 
     TupleTypeNode::TupleTypeNode(const std::vector<TypeNodePtr>& subtypes) : subtypes(subtypes) {}
 

@@ -1,7 +1,7 @@
 #include "../lexer/lexer.hpp"
 #include "../parser/parser.hpp"
-#include "../util/commander_exception.hpp"
 #include "../type_checker/type_checker.hpp"
+#include "../util/commander_exception.hpp"
 #include "../flow_controller/flow_controller.hpp"
 #include <fstream>
 #include <iostream>
