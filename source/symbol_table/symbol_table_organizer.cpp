@@ -20,8 +20,7 @@ SymbolTableOrganizer::~SymbolTableOrganizer() {
 // Copy-Constructor
 SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer& otherTableOrganizer) {
     for (int currentScope = 0; currentScope < otherTableOrganizer._symbolTables.size(); currentScope++) {
-        // vector(otherVector) creates shallow copies of the Scope object, so we'll need to make our own deep copies
-        // here
+        // vector(otherVector) creates shallow copies of the Scope object, so we'll need to make our own deep copies here
         _symbolTables.push_back(new Scope(*otherTableOrganizer._symbolTables[currentScope]));
     }
 }

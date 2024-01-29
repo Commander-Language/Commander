@@ -39,14 +39,16 @@ bool Scope::updateVariable(std::string variableID, int newData) {
             return false;
         }
     }
-    _variableData.insert_or_assign(variableID, std::make_shared<int>(newData));
-    if(!hasUsesKey(variableID)) {
-        _variableUses.insert_or_assign(variableID, 0); //If the variable somehow doesn't have uses assigned, default to 0
-    }
     else {
-        decrementUses(variableID);
+        _variableData.insert_or_assign(variableID, std::make_shared<int>(newData));
+        if(!hasUsesKey(variableID)) {
+            _variableUses.insert_or_assign(variableID, 0); //If the variable somehow doesn't have uses assigned, default to 0
+        }
+        else {
+            decrementUses(variableID);
+        }
+        return true;
     }
-    return true;
 }
 
 bool Scope::hasLocalVariable(std::string variableID) { return hasDataKey(variableID); }
@@ -124,7 +126,7 @@ bool Scope::hasExpired(std::string variableID) {
 }
 
 bool Scope::tryGetUses(std::string variableID) {
-    if(!hasUsesKey(variableID) && _parentScope == nullptr) {
+    if(!hasUsesKey(variableID)) {
         return false;
     }
     return true;
