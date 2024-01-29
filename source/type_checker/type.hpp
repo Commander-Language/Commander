@@ -38,15 +38,24 @@ namespace TypeChecker {
     };
 
     /**
+     * @brief Pointer to a type
+     */
+    using TyPtr = std::shared_ptr<Ty>;
+
+    /**
      * @brief Gets the string version of the given type
      *
      */
     std::string typeToString(Type type);
 
     /**
-     * @brief Pointer to a type
+     * @brief Checks if two types are equal
+     *
+     * @param type1 First type
+     * @param type2 Second type
+     * @return True if the types are the same, false otherwise
      */
-    using TyPtr = std::shared_ptr<Ty>;
+    bool areTypesEqual(const TyPtr &type1, const TyPtr &type2);
 
     /**
      * @brief Gets the string representation of the given type for S-Expressions

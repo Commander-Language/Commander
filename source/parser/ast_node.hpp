@@ -51,6 +51,7 @@ namespace Parser {
         AND,
         OR,
         EQUAL,
+        SET,
         NOT_EQUAL,
         ADD_EQUAL,
         SUBTRACT_EQUAL,
@@ -1003,15 +1004,8 @@ namespace Parser {
 
         /**
          * @brief The expression being operated on.
-         * @details Set to `nullptr` if the left-hand side is a variable.
          */
         ExprNodePtr expr;
-
-        /**
-         * @brief The variable being operated on.
-         * @details Set to `nullptr` if the left-hand side is an expression.
-         */
-        VariableNodePtr var;
 
         /**
          * @brief Class constructor for a unary operation on an expression.
@@ -1020,14 +1014,6 @@ namespace Parser {
          * @param expr The expression on which the unary operation is being performed.
          */
         UnOpExprNode(UnOpType opType, ExprNodePtr expr);
-
-        /**
-         * @brief Class constructor for a unary operation on a variable.
-         *
-         * @param opType The unary operation type being performed.
-         * @param var The variable on which the unary operation is being performed.
-         */
-        UnOpExprNode(UnOpType opType, VariableNodePtr var);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1271,7 +1257,7 @@ namespace Parser {
         /**
          * The expressions representing the boolean conditions
          */
-        std::vector<ExprNodePtr> conds;
+        std::vector<ExprNodePtr> conditions;
 
         /**
          * The statements that are evaluated when the conditions are true
@@ -1286,11 +1272,11 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
-         * @param conds The conditions to test.
+         * @param conditions The conditions to test.
          * @param trueStmts The statements to evaluate if true.
-         * @param negStmts The statement to evaluate if false. (Defaults to `nullptr`).
+         * @param falseStmt The statement to evaluate if false. (Defaults to `nullptr`).
          */
-        IfStmtNode(const std::vector<ExprNodePtr>& conds, std::vector<StmtNodePtr> trueStmts,
+        IfStmtNode(const std::vector<ExprNodePtr>& conditions, std::vector<StmtNodePtr> trueStmts,
                    StmtNodePtr falseStmt = nullptr);
 
         /**
