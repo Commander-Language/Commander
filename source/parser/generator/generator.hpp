@@ -13,6 +13,8 @@
 
 #include <ostream>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace Parser {
 
@@ -89,10 +91,11 @@ namespace Parser {
              * @brief Class constructor.
              *
              * @param rule The `GrammarRule` to which this kernel refers.
+             * @param priority The priority of the `GrammarRule`.
              * @param index How far we are into the `GrammarRule`.
              * @param lookahead The next lookahead token type.
              */
-            Kernel(const GrammarRule& rule, size_t index, TokenType lookahead);
+            Kernel(const GrammarRule& rule, size_t priority, size_t index, TokenType lookahead);
 
             /**
              * @brief Equality operator.
@@ -116,6 +119,11 @@ namespace Parser {
             std::reference_wrapper<const GrammarRule> rule;
 
             /**
+             * @brief The priority of the grammar rule.
+             */
+            size_t priority;
+
+            /**
              * @brief The index into the grammar rule.
              */
             size_t index;
@@ -125,6 +133,11 @@ namespace Parser {
              */
             TokenType lookahead;
         };
+
+        /**
+         * @brief A set of `Kernel`s.
+         */
+        using KernelSet = std::unordered_set<Kernel, Kernel::Hash>;
 
         /**
          * @brief Represents a state in the parsing automaton.
@@ -141,13 +154,13 @@ namespace Parser {
              * @param kernels All relevant kernels corresponding to this state.
              * @param transitions All transitions from this state.
              */
-            State(const std::vector<Kernel>& kernels,
+            State(KernelSet kernels,
                   const std::unordered_map<GrammarEntry, StateNum, Grammar::GrammarEntry::Hash>& transitions = {});
 
             /**
              * @brief All relevant kernels corresponding to this state.
              */
-            std::vector<Kernel> kernels;
+            KernelSet kernels;
 
             /**
              * @brief All transitions from this state.
@@ -172,15 +185,15 @@ namespace Parser {
              * @details Performs a calculation on the first query; saves results for subsequent queries.
              *
              * @param kernels The kernels for which to report the reachable kernels.
-             * @return The vector of all possible reachable kernels from the given kernels.
+             * @return The set of all possible reachable kernels from the given kernels.
              */
-            std::vector<Kernel> operator[](const std::vector<Kernel>& kernels);
+            KernelSet operator[](const KernelSet& kernels);
 
         private:
             /**
              * @brief A mapping from one kernel to the set of all reachable kernels from it.
              */
-            std::unordered_map<Kernel, std::vector<Kernel>, Kernel::Hash> _closure;
+            std::unordered_map<Kernel, KernelSet, Kernel::Hash> _closure;
 
             /**
              * @brief A reference to the grammar definition.
@@ -214,7 +227,7 @@ namespace Parser {
          * @param right The right item.
          * @return A braced pair of the two given items.
          */
-        template <typename LeftType, typename RightType>
+        template<typename LeftType, typename RightType>
         static std::string _pair(const LeftType& left, const RightType& right);
 
         /**
