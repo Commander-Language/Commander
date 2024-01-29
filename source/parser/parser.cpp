@@ -28,8 +28,7 @@ namespace Parser {
                     stateStack.emplace_back(action.nextState);
                     break;
                 case ParserAction::REDUCE: {
-                    const std::vector<ProductionItem> poppedItems {productionStack.end() - (long)action.ruleSize,
-                                                                   productionStack.end()};
+                    const std::vector<ProductionItem> poppedItems {productionStack.end() - (long)action.ruleSize,productionStack.end()};
                     productionStack.erase(productionStack.end() - (long)action.ruleSize, productionStack.end());
 
                     const auto newNode = action.nodeConstructor.value()(poppedItems);
