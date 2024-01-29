@@ -142,7 +142,7 @@ namespace Parser {
 
     std::string ExprNode::getTypeString() const { return TypeChecker::getTypeString(type); }
 
-    ASTNodeType CmdCmdNode::nodeType() const { return ASTNodeType::CMD; }
+    ASTNodeType CmdCmdNode::nodeType() const { return ASTNodeType::CMD_CMD; }
 
     ASTNodeType PipeCmdNode::nodeType() const { return ASTNodeType::PIPE_CMD; }
 

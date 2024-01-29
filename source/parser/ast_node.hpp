@@ -24,6 +24,7 @@ namespace Parser {
         BINDING,
         BINDINGS,
         CMD,
+        CMD_CMD,
         PIPE_CMD,
         ASYNC_CMD,
         INT_EXPR,

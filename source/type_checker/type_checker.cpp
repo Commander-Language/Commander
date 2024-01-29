@@ -45,7 +45,7 @@ namespace TypeChecker {
                 for (const Parser::BindingNodePtr& currentBinding : bindings->bindings) { typeCheck(currentBinding); }
                 return nullptr;
             }
-            case Parser::CMD: {
+            case Parser::CMD_CMD: {
                 Parser::CmdCmdNodePtr command = std::static_pointer_cast<Parser::CmdCmdNode>(astNode);
                 for (const Parser::ASTNodePtr& node : command->arguments) {
                     TyPtr nodeType = typeCheck(node);

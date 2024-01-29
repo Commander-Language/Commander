@@ -110,6 +110,8 @@ namespace Parser {
         ParseTable _parseTable;
     };
 
+    ASTNodeType getAbstractNodeType(const ASTNodeType& type);
+
 }  //  namespace Parser
 
 #endif  //  PARSER_HPP
