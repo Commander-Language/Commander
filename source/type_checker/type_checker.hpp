@@ -21,8 +21,8 @@ namespace TypeChecker {
      */
     class TypeChecker {
     public:
-        TypeChecker();   // Default Constructor
-        ~TypeChecker();  // Default Destructor
+        TypeChecker() = default;   // Default Constructor
+        ~TypeChecker() = default;  // Default Destructor
 
         /**
         * TypeChecker(otherTypeChecker) is a copy-constructor for the TypeChecker class.

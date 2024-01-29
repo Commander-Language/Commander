@@ -1,11 +1,12 @@
 #include "../lexer/lexer.hpp"
 #include "../parser/parser.hpp"
 #include "../util/commander_exception.hpp"
+#include "../type_checker/type_checker.hpp"
 #include "../flow_controller/flow_controller.hpp"
 #include <fstream>
 #include <iostream>
 
-void interpretFile(std::string& fileName, std::string& option, Parser::Parser& parser) {
+void interpretFile(std::string& fileName, std::string& option, Parser::Parser& parser, TypeChecker::TypeChecker& typeChecker) {
     lexer::TokenList tokens;
     lexer::tokenize(tokens, fileName);
     if (option == "-l") {
@@ -18,7 +19,8 @@ void interpretFile(std::string& fileName, std::string& option, Parser::Parser& p
         return;
     }
     if (option == "-t") {
-        // TODO: type checking
+        typeChecker.typeCheck(nodes);
+        for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
         return;
     }
     FlowController::FlowController flow(nodes);
@@ -29,6 +31,7 @@ int main(int argc, char** argv) {
     try {
         clock_t start = clock();
         Parser::Parser parser;
+        TypeChecker::TypeChecker typeChecker;
         clock_t end = clock();
         std::cout << "Parse Table Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds"
                   << '\n';
@@ -42,7 +45,7 @@ int main(int argc, char** argv) {
             }
             std::string file = std::string(argv[2]);
             std::string option = "-l";
-            interpretFile(file, option, parser);
+            interpretFile(file, option, parser, typeChecker);
             return 0;
         }
         while (true) {
@@ -65,7 +68,7 @@ int main(int argc, char** argv) {
                 tmp << source;
                 tmp.close();  // close file here to save changes
 
-                interpretFile(tmpFileName, arg, parser);
+                interpretFile(tmpFileName, arg, parser, typeChecker);
 
                 std::remove(tmpFileName.c_str());
             } catch (const util::CommanderException& err) { std::cout << err.what() << '\n'; }

@@ -5,7 +5,7 @@
  */
 
 #include "ast_node.hpp"
-
+#include "source/type_checker/type.hpp"
 #include <utility>
 
 namespace Parser {
@@ -114,7 +114,7 @@ namespace Parser {
 
     ASTNodeType FunctionTypeNode::nodeType() const { return ASTNodeType::FUNCTION_TYPE; }
 
-    [[nodiscard]] std::string TypeNode::getTypeString() const {
+    std::string TypeNode::getTypeString() const {
         return TypeChecker::getTypeString(type);
     }
 
