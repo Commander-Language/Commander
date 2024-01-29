@@ -105,13 +105,24 @@ namespace Parser {
         const auto tokenContents = [](size_t index) -> std::string {
             return "productionList[" + std::to_string(index) + "].token->contents";
         };
-        return {//  PRGM -> STMT
+        return {
+                //  PRGM -> STMT
                 {{ASTNodeType::PRGM, {ASTNodeType::STMT}},
                  makeNode("Prgm", {"std::vector<StmtNodePtr> {" + castNode("Stmt", 0) + "}"})},
+
+
+                //  ============
+                //  ||  STMT  ||
+                //  ============
 
                 //  STMT -> EXPR "[SEMICOLON]"
                 {{ASTNodeType::STMT, {ASTNodeType::EXPR, TokenType::SEMICOLON}},
                  makeNode("ExprStmt", {castNode("Expr", 0)})},
+
+
+                //  ============
+                //  ||  EXPR  ||
+                //  ============
 
                 //  EXPR -> "[INTVAL]"
                 {{ASTNodeType::EXPR, {TokenType::INTVAL}},
@@ -123,10 +134,7 @@ namespace Parser {
                 {{ASTNodeType::EXPR, {TokenType::TRUE}}, makeNode("BoolExpr", {"true"})},
                 //  EXPR -> "[FALSE]"
                 {{ASTNodeType::EXPR, {TokenType::FALSE}}, makeNode("BoolExpr", {"false"})},
-                //  EXPR -> EXPR "[QUESTION]" EXPR "[COLON]" EXPR
-                {{ASTNodeType::EXPR,
-                  {ASTNodeType::EXPR, TokenType::QUESTION, ASTNodeType::EXPR, TokenType::COLON, ASTNodeType::EXPR}},
-                 makeNode("TernaryExpr", {castNode("Expr", 0), castNode("Expr", 2), castNode("Expr", 4)})},
+
                 //  EXPR -> EXPR "[EXPONENTIATE]" EXPR
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EXPONENTIATE", castNode("Expr", 2)})},
@@ -145,6 +153,7 @@ namespace Parser {
                 //  EXPR -> EXPR "[MINUS]" EXPR
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MINUS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::SUBTRACT", castNode("Expr", 2)})},
+
                 //  EXPR -> EXPR "[LESSER]" EXPR
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::LESSER", castNode("Expr", 2)})},
@@ -170,6 +179,11 @@ namespace Parser {
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::OR, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::OR", castNode("Expr", 2)})},
 
+                //  EXPR -> EXPR "[QUESTION]" EXPR "[COLON]" EXPR
+                {{ASTNodeType::EXPR,
+                  {ASTNodeType::EXPR, TokenType::QUESTION, ASTNodeType::EXPR, TokenType::COLON, ASTNodeType::EXPR}},
+                 makeNode("TernaryExpr", {castNode("Expr", 0), castNode("Expr", 2), castNode("Expr", 4)})},
+
                 //  EXPR -> VARIABLE "[EXPONENTIATE_EQUALS]" EXPR
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr",
@@ -192,14 +206,17 @@ namespace Parser {
                 //  EXPR -> VARIABLE "[EQUALS]" EXPR
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> VARIABLE
-                {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE}}, makeNode("VarExpr", {castNode("Variable", 0)})},
-                //  EXPR -> "[(]" EXPR "[)]"
+
+                //  EXPR -> "[LPAREN]" EXPR "[RPAREN]"
                 {{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
                  "productionList[1].node"},
 
+                //  EXPR -> VARIABLE
+                {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE}}, makeNode("VarExpr", {castNode("Variable", 0)})},
+
                 //  VARIABLE -> "[VARIABLE]"
-                {{ASTNodeType::VARIABLE, {TokenType::VARIABLE}}, makeNode("IdentVariable", {tokenContents(0)})}};
+                {{ASTNodeType::VARIABLE, {TokenType::VARIABLE}}, makeNode("IdentVariable", {tokenContents(0)})},
+        };
     }
 #pragma clang diagnostic pop
 
