@@ -8,7 +8,7 @@
 
 namespace TypeChecker {
 
-    std::string typeToString(Type type) {
+    std::string typeToString(const Type& type) {
         switch (type) {
             case INT:
                 return "INT";

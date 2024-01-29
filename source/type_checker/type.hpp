@@ -46,7 +46,7 @@ namespace TypeChecker {
      * @brief Gets the string version of the given type
      *
      */
-    std::string typeToString(Type type);
+    std::string typeToString(const Type& type);
 
     /**
      * @brief Checks if two types are equal

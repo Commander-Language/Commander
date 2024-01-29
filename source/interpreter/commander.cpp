@@ -1,6 +1,7 @@
 #include "../lexer/lexer.hpp"
 #include "../parser/parser.hpp"
 #include "../util/commander_exception.hpp"
+#include "../type_checker/type_checker.hpp"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -12,6 +13,7 @@ int main(int argc, char** argv) {
         if (argc > 1) { arg = std::string(argv[1]); }
         clock_t start = clock();
         Parser::Parser parser;
+        TypeChecker::TypeChecker typeChecker;
         clock_t end = clock();
         std::cout << "Parse Table Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds"
                   << std::endl;
@@ -50,33 +52,11 @@ int main(int argc, char** argv) {
                     continue;
                 }
                 if (arg == "-t") {
-                    // TODO: type checking
+                    typeChecker.typeCheck(nodes);
+                    for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << std::endl;
                     continue;
                 }
-                // TODO: Run script
-                std::map<std::string, std::variant<long, double, bool>> variables;
-                for (const Parser::ASTNodePtr& node : nodes) {
-                    if (node->nodeType() == Parser::ASTNodeType::STMTS) {
-                        switch (node->nodeType()) {
-                            // Basic commands
-                            case Parser::ASTNodeType::CMD:
-                                // TODO
-                                break;
-                            // Variables
-                            case Parser::ASTNodeType::VARIABLE:
-                                // TODO
-                                break;
-                            // Expressions (math, boolean, variables, strings and string interpolation)
-                            case Parser::ASTNodeType::EXPRS:
-                                // TODO
-                                break;
-                            // User I/O (need to handle read, write, scan, print)
-                            case Parser::ASTNodeType::STMT:
-                                // TODO
-                                break;
-                        }
-                    }
-                }
+                // TODO: Run flow controller
             } catch (const util::CommanderException& err) { std::cout << err.what() << std::endl; }
         }
         return 0;

@@ -478,7 +478,7 @@ namespace Parser {
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::INCREMENT}},
                   [&](const ProductionItemList& productionList) {
                       return std::make_shared<UnOpExprNode>(UnOpType::POST_INCREMENT,
-                                                            castVariable(productionList[0].node));
+                                                            castExpr(productionList[0].node));
                   }},
                  //  EXPR -> EXPR "[DECREMENT]"
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DECREMENT}},

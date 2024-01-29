@@ -7,11 +7,6 @@
 #include "type_checker.hpp"
 
 namespace TypeChecker {
-    // Constructor
-    TypeChecker::TypeChecker() = default;
-
-    // Destructor
-    TypeChecker::~TypeChecker() = default;
 
     // Copy-Constructor
     TypeChecker::TypeChecker(TypeChecker* otherTypeChecker) {
@@ -419,7 +414,7 @@ namespace TypeChecker {
             case Parser::ALIAS_STMT: {
                 Parser::AliasStmtNodePtr stmtNode = std::static_pointer_cast<Parser::AliasStmtNode>(astNode);
                 // TODO: Implement
-                break;
+                return nullptr;
             }
             case Parser::STMTS: {
                 Parser::StmtsNodePtr stmtsPtr = std::static_pointer_cast<Parser::StmtsNode>(astNode);
@@ -484,6 +479,8 @@ namespace TypeChecker {
                 Parser::IdentVariableNodePtr variablePtr = std::static_pointer_cast<Parser::IdentVariableNode>(astNode);
                 return getType(variablePtr->varName);
             }
+            default:
+                throw util::CommanderException("This should not have happened. Abstract ExprNode, TypeNode, or StmtNode was created...");
         }
     }
 
