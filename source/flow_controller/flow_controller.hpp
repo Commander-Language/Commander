@@ -14,6 +14,10 @@
 
 namespace FlowController {
     /**
+     * @brief A Commander bool representation
+     */
+     using CommanderBool = bool;
+    /**
      * @brief A Commander binding representation
      */
     using CommanderBinding = std::tuple<std::string, int>; //TODO: fix, need tuple of string and a commander type

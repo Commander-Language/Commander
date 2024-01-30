@@ -4,6 +4,7 @@
  */
 
 #include "flow_controller.hpp"
+#include <cmath>
 
 namespace FlowController {
     FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
@@ -286,31 +287,58 @@ namespace FlowController {
     }
 
     std::any FlowController::_binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp) {
+        //TODO: Make general, for now assume just using int
+        CommanderInt left, right;
+        std::string variableSet;
+        if(binOp->leftExpr){
+            left = std::any_cast<CommanderInt>(_expr(binOp->leftExpr));
+        }
+        if(binOp->leftVariable){
+            auto var = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
+            variableSet = var->varName;
+        }
+        right = std::any_cast<CommanderInt>(_expr(binOp->rightExpr));
+
         switch (binOp->opType) {
-            case Parser::LESSER:
-                break;
-            case Parser::GREATER:
-                break;
-            case Parser::LESSER_EQUAL:
-                break;
-            case Parser::GREATER_EQUAL:
-                break;
-            case Parser::MODULO:
-                break;
-            case Parser::DIVIDE:
-                break;
-            case Parser::MULTIPLY:
-                break;
-            case Parser::SUBTRACT:
-                break;
-            case Parser::ADD:
-                break;
-            case Parser::EXPONENTIATE:
-                break;
-            case Parser::AND:
-                break;
-            case Parser::OR:
-                break;
+            case Parser::LESSER:{
+                return left < right;
+            }
+            case Parser::GREATER:{
+                return left > right;
+            }
+            case Parser::LESSER_EQUAL:{
+                return left <= right;
+            }
+            case Parser::GREATER_EQUAL:{
+                return left >= right;
+            }
+            case Parser::MODULO:{
+                return left % right;
+            }
+            case Parser::DIVIDE:{
+                if(right == 0){
+                    //TODO: throw divide by zero error
+                }
+                return left / right;
+            }
+            case Parser::MULTIPLY:{
+                return left * right;
+            }
+            case Parser::SUBTRACT:{
+                return left - right;
+            }
+            case Parser::ADD:{
+                return left + right;
+            }
+            case Parser::EXPONENTIATE:{
+                return std::pow(left, right);
+            }
+            case Parser::AND:{
+                return left && right;
+            }
+            case Parser::OR:{
+                return left || right;
+            }
             case Parser::EQUAL: {
                 auto variable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
                 std::any value = _expr(binOp->rightExpr);
@@ -318,20 +346,48 @@ namespace FlowController {
                 _symbolTable.addOrUpdateVariable(variable->varName, std::any_cast<CommanderInt>(value));
                 return value;
             }
-            case Parser::NOT_EQUAL:
-                break;
-            case Parser::ADD_EQUAL:
-                break;
-            case Parser::SUBTRACT_EQUAL:
-                break;
-            case Parser::MULTIPLY_EQUAL:
-                break;
-            case Parser::DIVIDE_EQUAL:
-                break;
-            case Parser::MODULO_EQUAL:
-                break;
-            case Parser::EXPONENTIATE_EQUAL:
-                break;
+            case Parser::NOT_EQUAL:{
+                return left != right;
+            }
+            case Parser::ADD_EQUAL:{
+                // TODO: update to CommanderInt
+                int* val = _symbolTable.getVariable(variableSet);
+                _symbolTable.addOrUpdateVariable(variableSet, *val + right);
+                //return left += right; // what return?!
+            }
+            case Parser::SUBTRACT_EQUAL:{
+                // TODO: update to CommanderInt
+                int* val = _symbolTable.getVariable(variableSet);
+                _symbolTable.addOrUpdateVariable(variableSet, *val - right);
+                return left -= right; // what return?!
+            }
+            case Parser::MULTIPLY_EQUAL:{
+                // TODO: update to CommanderInt
+                int* val = _symbolTable.getVariable(variableSet);
+                _symbolTable.addOrUpdateVariable(variableSet, *val * right);
+                // what return?!
+            }
+            case Parser::DIVIDE_EQUAL:{
+                // TODO: update to CommanderInt
+                if(right == 0){
+                    //TODO: throw divide by zero error
+                }
+                int* val = _symbolTable.getVariable(variableSet);
+                _symbolTable.addOrUpdateVariable(variableSet, *val / right);
+                // what return?!
+            }
+            case Parser::MODULO_EQUAL:{
+                // TODO: update to CommanderInt
+                int* val = _symbolTable.getVariable(variableSet);
+                _symbolTable.addOrUpdateVariable(variableSet, *val % right);
+                // what return?!
+            }
+            case Parser::EXPONENTIATE_EQUAL:{
+                // TODO: update to CommanderInt
+                int* val = _symbolTable.getVariable(variableSet);
+                _symbolTable.addOrUpdateVariable(variableSet, std::pow(*val, right));
+                // what return?!
+            }
         }
     }
     CommanderLambda::CommanderLambda(std::vector<Parser::BindingNodePtr> bindings, Parser::StmtNodePtr body)
