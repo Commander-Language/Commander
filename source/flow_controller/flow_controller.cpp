@@ -93,9 +93,7 @@ namespace FlowController {
         return bind;
     }
     void FlowController::_bindings(Parser::BindingsNodePtr node) {
-        for(auto & binding : node->bindings){
-            _binding(binding);
-        }
+        for (auto& binding : node->bindings) { _binding(binding); }
     }
     void FlowController::_cmd(Parser::CmdNodePtr node) {
         // TODO: Implement
@@ -111,7 +109,20 @@ namespace FlowController {
                 return floatExp->value;
             }
             case Parser::ExprType::STRING_EXPR: {
-                // TODO: Implement
+                auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
+                auto stringNode = stringExp->stringNode;
+
+                int indexL = 0;
+                int indexE = 0;
+                std::string stringResult;
+                while (indexL < stringNode->literals.size() && indexE < stringNode->expressions.size()) {
+                    std::any exprValue = _expr(stringNode->expressions[indexE]);
+                    stringResult.append(stringNode->literals[indexL]);
+                    //stringResult.append(exprValue);
+                    indexL++;
+                    indexE++;
+                }
+                //TODO: Implement rest when types
                 break;
             }
             case Parser::ExprType::BOOL_EXPR: {
@@ -179,9 +190,8 @@ namespace FlowController {
                     // _symbolTable.addOrUpdateVariable(name, argValue); // TODO: update when symbol table is generic
                     bindingIndex++;
                 }
-
                 auto returnValue = _stmt(function._body);
-                _symbolTable.popSymbolTable(); // remove funciton scope!
+                _symbolTable.popSymbolTable();  // remove funciton scope!
                 return returnValue;
             }
             case Parser::ExprType::LAMBDA_EXPR: {
