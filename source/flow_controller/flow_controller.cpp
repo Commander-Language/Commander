@@ -20,7 +20,7 @@ namespace FlowController {
     std::any FlowController::getVariable(std::string name) {
         std::any value = _symbolTable.getVariable(name);
         if (value.has_value()) { return value; }
-        // TODO: Throw symbol not found error
+        // TODO: Throw symbol not found error or not set
     }
     CommanderLambda FlowController::findFunctionOrLambda(const Parser::ExprNodePtr& expr) {
         if (expr->exprType() == Parser::ExprType::VARIABLE_EXPR) {
@@ -271,18 +271,34 @@ namespace FlowController {
 
     std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
-            case Parser::NEGATE:
-                break;
-            case Parser::NOT:
-                break;
-            case Parser::PRE_INCREMENT:
-                break;
-            case Parser::POST_INCREMENT:
-                break;
-            case Parser::PRE_DECREMENT:
-                break;
-            case Parser::POST_DECREMENT:
-                break;
+            case Parser::NEGATE:{
+                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                return -1 * expr;
+            }
+            case Parser::NOT: {
+                auto expr = std::any_cast<CommanderBool>(_expr(unOp->expr));
+                return !expr;
+            }
+            case Parser::PRE_INCREMENT:{
+                // might have to update symbol table if variable
+                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                return ++expr;
+            }
+            case Parser::POST_INCREMENT: {
+                // might have to update symbol table if variable
+                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                return expr++;
+            }
+            case Parser::PRE_DECREMENT: {
+                // might have to update symbol table if variable
+                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                return --expr;
+            }
+            case Parser::POST_DECREMENT: {
+                // might have to update symbol table if variable
+                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                return expr--;
+            }
         }
     }
 
