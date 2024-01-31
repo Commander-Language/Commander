@@ -1,0 +1,2 @@
+// test dot inside string interpolation
+vec = $"x, y, z is {vec.x()}, {vec.y()}, {vec.z()}";
