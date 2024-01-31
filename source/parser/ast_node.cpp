@@ -68,40 +68,40 @@ namespace Parser {
                 return "LESSER_EQUAL";
             case GREATER_EQUAL:
                 return "GREATER_EQUAL";
-            case MODULO:
-                return "MODULO";
-            case DIVIDE:
-                return "DIVIDE";
-            case MULTIPLY:
-                return "MULTIPLY";
-            case SUBTRACT:
-                return "SUBTRACT";
-            case ADD:
-                return "ADD";
-            case EXPONENTIATE:
-                return "EXPONENTIATE";
-            case AND:
-                return "AND";
-            case OR:
-                return "OR";
             case EQUAL:
                 return "EQUAL";
             case NOT_EQUAL:
                 return "NOT_EQUAL";
-            case ADD_EQUAL:
-                return "ADD_EQUAL";
-            case SUBTRACT_EQUAL:
-                return "SUBTRACT_EQUAL";
-            case MULTIPLY_EQUAL:
-                return "MULTIPLY_EQUAL";
-            case DIVIDE_EQUAL:
-                return "DIVIDE_EQUAL";
-            case MODULO_EQUAL:
-                return "MODULO_EQUAL";
-            case EXPONENTIATE_EQUAL:
-                return "EXPONENTIATE_EQUAL";
-            default:
-                return "UNKNOWN";
+            case AND:
+                return "AND";
+            case OR:
+                return "OR";
+            case EXPONENTIATE:
+                return "EXPONENTIATE";
+            case MULTIPLY:
+                return "MULTIPLY";
+            case DIVIDE:
+                return "DIVIDE";
+            case MODULO:
+                return "MODULO";
+            case ADD:
+                return "ADD";
+            case SUBTRACT:
+                return "SUBTRACT";
+            case EXPONENTIATE_SET:
+                return "EXPONENTIATE_SET";
+            case MULTIPLY_SET:
+                return "MULTIPLY_SET";
+            case DIVIDE_SET:
+                return "DIVIDE_SET";
+            case MODULO_SET:
+                return "MODULO_SET";
+            case ADD_SET:
+                return "ADD_SET";
+            case SUBTRACT_SET:
+                return "SUBTRACT_SET";
+            case SET:
+                return "SET";
         }
     }
 
@@ -189,6 +189,8 @@ namespace Parser {
         return result.str();
     }
 
+    StringNode::StringNode(std::string literal) : literals({std::move(literal)}) {}
+
     ASTNodeType StringNode::nodeType() const { return ASTNodeType::STRING; }
 
     std::string StringNode::sExpression() const {
@@ -216,9 +218,19 @@ namespace Parser {
     //  ||  Commands:  ||
     //  =================
 
+    CmdCmdNode::CmdCmdNode(Parser::ASTNodePtr argument) : arguments({std::move(argument)}) {}
+
+    CmdCmdNode::CmdCmdNode(Parser::CmdNodePtr command, Parser::ASTNodePtr argument)
+        : arguments([&]() {
+              //  FIXME: assumes the command is a `CmdCmd`.
+              std::vector<ASTNodePtr> result = std::reinterpret_pointer_cast<CmdCmdNode>(command)->arguments;
+              result.push_back(std::move(argument));
+              return result;
+          }()) {}
+
     std::string CmdCmdNode::sExpression() const {
         std::stringstream builder;
-        for (const ASTNode& arg : arguments) { builder << " " << arg.sExpression(); }
+        for (const ASTNodePtr& arg : arguments) { builder << " " << arg->sExpression(); }
         return "(CmdCmdNode" + builder.str() + ")";
     }
 

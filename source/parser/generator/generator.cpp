@@ -14,6 +14,7 @@
 namespace Parser {
 
     Generator::Generator() {
+        //  Kernel test1 {};
         constexpr ASTNodeType goalNode = ASTNodeType::PRGM;
         const Grammar::GrammarRule defaultRule {goalNode, {goalNode}};
 
@@ -46,8 +47,10 @@ namespace Parser {
             std::unordered_map<GrammarEntry, KernelSet, Grammar::GrammarEntry::Hash> transitions;
 
             //  For all kernels in the enclosure:
+            size_t index = 0;
             for (const auto& enclosed : clos) {
                 //  If the kernel is incomplete (i.e., the index is less than the number of components):
+                ++index;
                 const auto& components = enclosed.rule.get().components;
                 if (enclosed.index < components.size()) {
                     //  Get the next symbol in the kernel's components and add it to the transition map.
@@ -137,6 +140,11 @@ namespace Parser {
                     _nextAction[stateNum][kernel.lookahead] = _pair(rule.components.size(), function);
                     transitionPriorities[stateNum][kernel.lookahead] = kernel.priority;
                 }
+            }
+
+            if (_nextAction[stateNum].empty()) {
+                std::cout << "State " << stateNum << ": {" << _nextAction[stateNum].size() << ", "
+                          << _nextState[stateNum].size() << "}\n";
             }
         }
     }
@@ -330,7 +338,7 @@ namespace Parser {
                 while (!finished) {
                     finished = true;
                     for (size_t ind = 0; ind < closureVec.size(); ++ind) {
-                        const Kernel& curKernel = closureVec[ind];
+                        const Kernel curKernel = closureVec[ind];
 
                         const auto& curRule = curKernel.rule.get();
                         if (curKernel.index == curRule.components.size()) continue;
