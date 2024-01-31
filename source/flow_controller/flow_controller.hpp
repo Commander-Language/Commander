@@ -23,10 +23,6 @@ namespace FlowController {
      */
     using CommanderBool = bool;
     /**
-     * @brief A Commander binding representation
-     */
-    using CommanderBinding = std::tuple<std::string, int>;  // TODO: fix, need tuple of string and a commander type
-    /**
      * @brief A Commander tuple representation
      */
     using CommanderTuple = std::vector<std::any>;
@@ -38,13 +34,10 @@ namespace FlowController {
      * @brief A commander lambda representation
      */
     struct CommanderLambda {
-    public:
         CommanderLambda(std::vector<Parser::BindingNodePtr>, Parser::StmtNodePtr);
         std::vector<Parser::BindingNodePtr> _bindings;
         Parser::StmtNodePtr _body;
-
-    private:
-        // TODO: Add return type
+        // TODO: save return type
     };
 
     /**
@@ -66,11 +59,6 @@ namespace FlowController {
 
     private:
         /**
-         * @brief
-         */
-        CommanderLambda findFunctionOrLambda(const Parser::ExprNodePtr&);
-
-        /**
          * @brief The AST nodes in a list
          */
         Parser::ASTNodeList _nodes;
@@ -82,17 +70,15 @@ namespace FlowController {
 
         /**
          * @brief Set a variable in the symbol table.
-         * @details Sets a variable in the symbol table
          * @param name The name of the symbol
          * @param value The value of the symbol
          */
         void setVariable(std::string name, std::any value);
 
         /**
-         * @brief Set a variable in the symbol table.
-         * @details Sets a variable in the symbol table
+         * @brief Get a variable from the symbol table.
          * @param name The name of the symbol
-         * @param value The value of the symbol
+         * @returns The value of the symbol
          */
         std::any getVariable(std::string name);
 
@@ -104,7 +90,7 @@ namespace FlowController {
         /**
          * @brief Helper to interpret binding nodes
          */
-        CommanderBinding _binding(Parser::BindingNodePtr);
+        void _binding(Parser::BindingNodePtr);
         /**
          * @brief Helper to interpret bindings nodes
          */

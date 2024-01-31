@@ -1,6 +1,14 @@
 /**
  * @file flow_controller.cpp
  * @brief Implements the Flow Controller and runtime
+ *
+ *
+ * Node Helper Functions:
+ *      TODO: Finish the following: _cmd, _type, _string
+ * Statements:
+ *      TODO: Finish the following: If, For, While, Do While, Return, Scope, Command, Alias
+ * Expressions:
+ *      TODO: Finish the following: String, Command
  */
 
 #include "flow_controller.hpp"
@@ -12,26 +20,17 @@ namespace FlowController {
     FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
         _symbolTable.pushSymbolTable();  // push in the global scope
     }
-    void FlowController::runCommand() {}
+    void FlowController::runCommand() {
+        // TODO: Implement
+    }
     void FlowController::setVariable(std::string name, std::any value) {
-        // TODO: generic value for symbol table
-        _symbolTable.addOrUpdateVariable(std::move(name), 0);
+        // TODO: update when symbol table is generic
+        _symbolTable.addOrUpdateVariable(std::move(name), std::any_cast<CommanderInt>(value));
     }
     std::any FlowController::getVariable(std::string name) {
         std::any value = _symbolTable.getVariable(name);
         if (value.has_value()) { return value; }
-        // TODO: Throw symbol not found error or not set
-    }
-    CommanderLambda FlowController::findFunctionOrLambda(const Parser::ExprNodePtr& expr) {
-        if (expr->exprType() == Parser::ExprType::VARIABLE_EXPR) {
-            auto varExpr = std::dynamic_pointer_cast<Parser::IdentVariableNode>(expr);
-            // TODO: Check if return type is a lambda
-            std::any func = getVariable(varExpr->varName);
-            return std::any_cast<CommanderLambda>(func);
-        } else if (expr->exprType() == Parser::ExprType::LAMBDA_EXPR) {
-        } else {
-            // TODO: Throw error
-        }
+        throw util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
     void FlowController::runtime() {
@@ -88,11 +87,7 @@ namespace FlowController {
         }
     }
 
-    CommanderBinding FlowController::_binding(Parser::BindingNodePtr node) {
-        CommanderBinding bind = std::make_tuple(node->variable,
-                                                0);  // TODO: fix, need tuple of string and a commander type
-        return bind;
-    }
+    void FlowController::_binding(Parser::BindingNodePtr node) { setVariable(node->variable, nullptr); }
     void FlowController::_bindings(Parser::BindingsNodePtr node) {
         for (auto& binding : node->bindings) { _binding(binding); }
     }
@@ -137,18 +132,20 @@ namespace FlowController {
             case Parser::ExprType::ARRAY_EXPR: {
                 auto arrExp = std::dynamic_pointer_cast<Parser::ArrayExprNode>(node);
                 CommanderArray<std::any> array;
-                for(auto & expr : arrExp->expressions)  {
+                for (auto& expr : arrExp->expressions) {
                     std::any value = _expr(expr);
                     array.push_back(value);
                 }
                 return array;
             }
             case Parser::ExprType::ARRAY_INDEXED_EXPR: {
-                auto arrExp = std::dynamic_pointer_cast<Parser::ArrayIndexExprNode>(node);
-                auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrExp->array);
-                //_symbolTable.getVariable();
-                //TODO: Implement when symbol table is generic
-                break;
+                auto arrayIndexExpression = std::dynamic_pointer_cast<Parser::ArrayIndexExprNode>(node);
+                auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrayIndexExpression->array);
+                auto array = std::any_cast<CommanderArray<std::any>>(getVariable(arrayVariable->varName));
+
+                // TODO: might be understanding this wrong? why list of indices?
+                auto index = std::any_cast<CommanderInt>(_expr(arrayIndexExpression->indexExprs[0]));
+                return array[index];
             }
             case Parser::ExprType::TUPLE_EXPR: {
                 auto tupleExp = std::dynamic_pointer_cast<Parser::TupleExprNode>(node);
@@ -158,8 +155,8 @@ namespace FlowController {
             }
             case Parser::ExprType::TUPLE_INDEXED_EXPR: {
                 auto tupleExp = std::dynamic_pointer_cast<Parser::TupleIndexExprNode>(node);
-                CommanderInt index = std::any_cast<CommanderInt>(_expr(tupleExp->index));
-                CommanderTuple tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
+                auto index = std::any_cast<CommanderInt>(_expr(tupleExp->index));
+                auto tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
 
                 if (index >= tuple.size() || index < 0) {
                     throw util::CommanderException("Index out of bounds: Index " + std::to_string(index)
@@ -168,33 +165,34 @@ namespace FlowController {
                 return tuple[index];
             }
             case Parser::ExprType::TERNARY_EXPR: {
-                auto ternaryExpr = std::dynamic_pointer_cast<Parser::TernaryExprNode>(node);
-                bool condition = std::any_cast<bool>(_expr(ternaryExpr->condition));
-                std::any ifTrue = _expr(ternaryExpr->trueExpr);
-                std::any ifFalse = _expr(ternaryExpr->falseExpr);
+                auto ternaryExpression = std::dynamic_pointer_cast<Parser::TernaryExprNode>(node);
+                bool condition = std::any_cast<bool>(_expr(ternaryExpression->condition));
+
+                std::any ifTrue = _expr(ternaryExpression->trueExpr);
+                std::any ifFalse = _expr(ternaryExpression->falseExpr);
                 return condition ? ifTrue : ifFalse;
             }
             case Parser::ExprType::UNARY_EXPR: {
-                auto unOp = std::dynamic_pointer_cast<Parser::UnOpExprNode>(node);
-                return _unaryOp(unOp);
+                auto unaryOperation = std::dynamic_pointer_cast<Parser::UnOpExprNode>(node);
+                return _unaryOp(unaryOperation);
             }
             case Parser::ExprType::BINARY_EXPR: {
-                auto binOp = std::dynamic_pointer_cast<Parser::BinOpExprNode>(node);
-                return _binaryOp(binOp);
+                auto binaryOperation = std::dynamic_pointer_cast<Parser::BinOpExprNode>(node);
+                return _binaryOp(binaryOperation);
             }
             case Parser::ExprType::FUNCTION_CALL_EXPR: {
-                auto funcExpr = std::dynamic_pointer_cast<Parser::CallExprNode>(node);
-                auto function = std::any_cast<CommanderLambda>(_expr(funcExpr->func));
+                auto functionExpression = std::dynamic_pointer_cast<Parser::CallExprNode>(node);
+                auto function = std::any_cast<CommanderLambda>(_expr(functionExpression->func));
 
                 _symbolTable.pushSymbolTable();  // new scope for function
 
                 int bindingIndex = 0;
-                for (auto& arg : funcExpr->args) {
+                for (auto& arg : functionExpression->args) {
                     // args and bindings should be lined up 1 to 1
                     auto argValue = _expr(arg);
                     auto name = function._bindings[bindingIndex]->variable;
 
-                     _symbolTable.addOrUpdateVariable(name, std::any_cast<int>(argValue)); // TODO: update when symbol table is generic
+                    setVariable(name, argValue);
                     bindingIndex++;
                 }
                 auto returnValue = _stmt(function._body);
@@ -203,9 +201,9 @@ namespace FlowController {
                 return returnValue;
             }
             case Parser::ExprType::LAMBDA_EXPR: {
-                auto lambdaExpr = std::dynamic_pointer_cast<Parser::LambdaExprNode>(node);
-                // TODO: Implement
-                break;
+                auto lambdaExpression = std::dynamic_pointer_cast<Parser::LambdaExprNode>(node);
+                CommanderLambda lambda(lambdaExpression->bindings, lambdaExpression->body);
+                return lambda;
             }
             case Parser::ExprType::COMMAND_EXPR: {
                 // TODO: Implement
@@ -255,8 +253,7 @@ namespace FlowController {
             }
             case Parser::StmtType::EXPRESSION_STMT: {
                 auto expr = std::dynamic_pointer_cast<Parser::ExprStmtNode>(node);
-                _expr(expr->expression);
-                break;
+                return _expr(expr->expression);
             }
             case Parser::StmtType::ALIAS_STMT: {
                 // TODO: Implement
@@ -274,7 +271,6 @@ namespace FlowController {
     void FlowController::_type(Parser::TypeNodePtr node) {
         // TODO: Implement
     }
-    void FlowController::_variable(Parser::VariableNodePtr node) {}
 
     std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
@@ -314,11 +310,11 @@ namespace FlowController {
         CommanderInt left;
         CommanderInt right;
 
-        std::string variableSet;
+        std::string variableName;
         if (binOp->leftExpr) { left = std::any_cast<CommanderInt>(_expr(binOp->leftExpr)); }
         if (binOp->leftVariable) {
             auto var = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
-            variableSet = var->varName;
+            variableName = var->varName;
         }
         right = std::any_cast<CommanderInt>(_expr(binOp->rightExpr));
 
@@ -363,43 +359,42 @@ namespace FlowController {
             case Parser::EQUAL: {
                 auto variable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
                 std::any value = _expr(binOp->rightExpr);
-                _symbolTable.addOrUpdateVariable(variable->varName, std::any_cast<int>(value));
+
+                setVariable(variable->varName, value);
                 return value;
             }
             case Parser::NOT_EQUAL: {
                 return left != right;
             }
             case Parser::ADD_EQUAL: {
-                int newValue = *_symbolTable.getVariable(variableSet) + right;
-                _symbolTable.addOrUpdateVariable(variableSet, newValue);
-                 return newValue;
+                int newValue = *_symbolTable.getVariable(variableName) + right;
+                setVariable(variableName, newValue);
+                return newValue;
             }
             case Parser::SUBTRACT_EQUAL: {
-                int newValue = *_symbolTable.getVariable(variableSet) - right;
-                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                int newValue = *_symbolTable.getVariable(variableName) - right;
+                setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MULTIPLY_EQUAL: {
-                int newValue = *_symbolTable.getVariable(variableSet) * right;
-                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                int newValue = *_symbolTable.getVariable(variableName) * right;
+                setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::DIVIDE_EQUAL: {
-                if (right == 0) {
-                    throw util::CommanderException("Divide by zero error encountered");
-                }
-                int newValue = *_symbolTable.getVariable(variableSet) / right;
-                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                if (right == 0) { throw util::CommanderException("Divide by zero error encountered"); }
+                int newValue = *_symbolTable.getVariable(variableName) / right;
+                setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MODULO_EQUAL: {
-                int newValue = *_symbolTable.getVariable(variableSet) % right;
-                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                int newValue = *_symbolTable.getVariable(variableName) % right;
+                setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::EXPONENTIATE_EQUAL: {
-                int newValue = std::pow(*_symbolTable.getVariable(variableSet), right);
-                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                int newValue = std::pow(*_symbolTable.getVariable(variableName), right);
+                setVariable(variableName, newValue);
                 return newValue;
             }
             default: {
