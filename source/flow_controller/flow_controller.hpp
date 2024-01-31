@@ -13,6 +13,11 @@
 #include <any>
 
 namespace FlowController {
+    template <typename TType>
+    /**
+     * @brief A Commander array representation
+     */
+    using CommanderArray = std::vector<TType>;
     /**
      * @brief A Commander bool representation
      */
@@ -128,11 +133,8 @@ namespace FlowController {
         std::any _stmt(Parser::StmtNodePtr);
         /**
          * @brief Helper to interpret stmts nodes
-         * @details Some statements need to return some generic value;
-         * for example the body of a function call, so return value or nullptr if unnecessary.
-         * @returns Generic value or nullptr if not needed.
          */
-        std::any _stmts(Parser::StmtsNodePtr);
+        void _stmts(Parser::StmtsNodePtr);
         /**
          * @brief Helper to interpret string nodes
          */

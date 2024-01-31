@@ -4,15 +4,15 @@
  */
 
 #include "flow_controller.hpp"
+#include "source/job_runner/job_runner.hpp"
+#include "source/util/commander_exception.hpp"
 #include <cmath>
 
 namespace FlowController {
     FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
         _symbolTable.pushSymbolTable();  // push in the global scope
     }
-    void FlowController::runCommand() {
-        // TODO: Implement
-    }
+    void FlowController::runCommand() {}
     void FlowController::setVariable(std::string name, std::any value) {
         // TODO: generic value for symbol table
         _symbolTable.addOrUpdateVariable(std::move(name), 0);
@@ -82,7 +82,7 @@ namespace FlowController {
                     break;
                 }
                 default: {
-                    // TODO: Throw unknown type error
+                    throw util::CommanderException("Flow Controller: Encountered unknown node type");
                 }
             }
         }
@@ -119,11 +119,11 @@ namespace FlowController {
                 while (indexL < stringNode->literals.size() && indexE < stringNode->expressions.size()) {
                     std::any exprValue = _expr(stringNode->expressions[indexE]);
                     stringResult.append(stringNode->literals[indexL]);
-                    //stringResult.append(exprValue);
+                    // stringResult.append(exprValue);
                     indexL++;
                     indexE++;
                 }
-                //TODO: Implement rest when types
+                // TODO: Implement rest when types
                 break;
             }
             case Parser::ExprType::BOOL_EXPR: {
@@ -136,12 +136,18 @@ namespace FlowController {
             }
             case Parser::ExprType::ARRAY_EXPR: {
                 auto arrExp = std::dynamic_pointer_cast<Parser::ArrayExprNode>(node);
-                // TODO: Implement
-                return arrExp->expressions;  // What should this return?!
+                CommanderArray<std::any> array;
+                for(auto & expr : arrExp->expressions)  {
+                    std::any value = _expr(expr);
+                    array.push_back(value);
+                }
+                return array;
             }
             case Parser::ExprType::ARRAY_INDEXED_EXPR: {
                 auto arrExp = std::dynamic_pointer_cast<Parser::ArrayIndexExprNode>(node);
-                // TODO: Implement
+                auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrExp->array);
+                //_symbolTable.getVariable();
+                //TODO: Implement when symbol table is generic
                 break;
             }
             case Parser::ExprType::TUPLE_EXPR: {
@@ -156,7 +162,8 @@ namespace FlowController {
                 CommanderTuple tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
 
                 if (index >= tuple.size() || index < 0) {
-                    // TODO: Throw index out of bounds error
+                    throw util::CommanderException("Index out of bounds: Index " + std::to_string(index)
+                                                   + "out of bounds for tuple of size " + std::to_string(tuple.size()));
                 }
                 return tuple[index];
             }
@@ -187,11 +194,11 @@ namespace FlowController {
                     auto argValue = _expr(arg);
                     auto name = function._bindings[bindingIndex]->variable;
 
-                    _symbolTable.addOrUpdateVariable(name, 0);
-                    // _symbolTable.addOrUpdateVariable(name, argValue); // TODO: update when symbol table is generic
+                     _symbolTable.addOrUpdateVariable(name, std::any_cast<int>(argValue)); // TODO: update when symbol table is generic
                     bindingIndex++;
                 }
                 auto returnValue = _stmt(function._body);
+
                 _symbolTable.popSymbolTable();  // remove funciton scope!
                 return returnValue;
             }
@@ -203,6 +210,9 @@ namespace FlowController {
             case Parser::ExprType::COMMAND_EXPR: {
                 // TODO: Implement
                 break;
+            }
+            default: {
+                throw util::CommanderException("Flow Controller: Unknown expression encountered");
             }
         }
         return -1;  // TODO: Find better default return
@@ -255,9 +265,8 @@ namespace FlowController {
         }
         return nullptr;
     }
-    std::any FlowController::_stmts(Parser::StmtsNodePtr node) {
-        // TODO: Implement
-        return nullptr;
+    void FlowController::_stmts(Parser::StmtsNodePtr node) {
+        for (auto& stmt : node->stmts) { _stmt(stmt); }
     }
     void FlowController::_string(Parser::StringNodePtr node) {
         // TODO: Implement
@@ -265,13 +274,11 @@ namespace FlowController {
     void FlowController::_type(Parser::TypeNodePtr node) {
         // TODO: Implement
     }
-    void FlowController::_variable(Parser::VariableNodePtr node) {
-        // TODO: Implement
-    }
+    void FlowController::_variable(Parser::VariableNodePtr node) {}
 
     std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
-            case Parser::NEGATE:{
+            case Parser::NEGATE: {
                 auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
                 return -1 * expr;
             }
@@ -279,7 +286,7 @@ namespace FlowController {
                 auto expr = std::any_cast<CommanderBool>(_expr(unOp->expr));
                 return !expr;
             }
-            case Parser::PRE_INCREMENT:{
+            case Parser::PRE_INCREMENT: {
                 // might have to update symbol table if variable
                 auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
                 return ++expr;
@@ -303,106 +310,100 @@ namespace FlowController {
     }
 
     std::any FlowController::_binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp) {
-        //TODO: Make general, for now assume just using int
-        CommanderInt left, right;
+        // TODO: Make general to any type, for now assume just using int or bool
+        CommanderInt left;
+        CommanderInt right;
+
         std::string variableSet;
-        if(binOp->leftExpr){
-            left = std::any_cast<CommanderInt>(_expr(binOp->leftExpr));
-        }
-        if(binOp->leftVariable){
+        if (binOp->leftExpr) { left = std::any_cast<CommanderInt>(_expr(binOp->leftExpr)); }
+        if (binOp->leftVariable) {
             auto var = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
             variableSet = var->varName;
         }
         right = std::any_cast<CommanderInt>(_expr(binOp->rightExpr));
 
         switch (binOp->opType) {
-            case Parser::LESSER:{
+            case Parser::LESSER: {
                 return left < right;
             }
-            case Parser::GREATER:{
+            case Parser::GREATER: {
                 return left > right;
             }
-            case Parser::LESSER_EQUAL:{
+            case Parser::LESSER_EQUAL: {
                 return left <= right;
             }
-            case Parser::GREATER_EQUAL:{
+            case Parser::GREATER_EQUAL: {
                 return left >= right;
             }
-            case Parser::MODULO:{
+            case Parser::MODULO: {
                 return left % right;
             }
-            case Parser::DIVIDE:{
-                if(right == 0){
-                    //TODO: throw divide by zero error
-                }
+            case Parser::DIVIDE: {
+                if (right == 0) { throw util::CommanderException("Divide by zero error encountered"); }
                 return left / right;
             }
-            case Parser::MULTIPLY:{
+            case Parser::MULTIPLY: {
                 return left * right;
             }
-            case Parser::SUBTRACT:{
+            case Parser::SUBTRACT: {
                 return left - right;
             }
-            case Parser::ADD:{
+            case Parser::ADD: {
                 return left + right;
             }
-            case Parser::EXPONENTIATE:{
+            case Parser::EXPONENTIATE: {
                 return std::pow(left, right);
             }
-            case Parser::AND:{
-                return left && right;
+            case Parser::AND: {
+                return std::any_cast<CommanderBool>(left) && std::any_cast<CommanderBool>(right);
             }
-            case Parser::OR:{
-                return left || right;
+            case Parser::OR: {
+                return std::any_cast<CommanderBool>(left) || std::any_cast<CommanderBool>(right);
             }
             case Parser::EQUAL: {
                 auto variable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
                 std::any value = _expr(binOp->rightExpr);
-                // any_cast<int64_t> might change later
-                _symbolTable.addOrUpdateVariable(variable->varName, std::any_cast<CommanderInt>(value));
+                _symbolTable.addOrUpdateVariable(variable->varName, std::any_cast<int>(value));
                 return value;
             }
-            case Parser::NOT_EQUAL:{
+            case Parser::NOT_EQUAL: {
                 return left != right;
             }
-            case Parser::ADD_EQUAL:{
-                // TODO: update to CommanderInt
-                int* val = _symbolTable.getVariable(variableSet);
-                _symbolTable.addOrUpdateVariable(variableSet, *val + right);
-                //return left += right; // what return?!
+            case Parser::ADD_EQUAL: {
+                int newValue = *_symbolTable.getVariable(variableSet) + right;
+                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                 return newValue;
             }
-            case Parser::SUBTRACT_EQUAL:{
-                // TODO: update to CommanderInt
-                int* val = _symbolTable.getVariable(variableSet);
-                _symbolTable.addOrUpdateVariable(variableSet, *val - right);
-                return left -= right; // what return?!
+            case Parser::SUBTRACT_EQUAL: {
+                int newValue = *_symbolTable.getVariable(variableSet) - right;
+                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                return newValue;
             }
-            case Parser::MULTIPLY_EQUAL:{
-                // TODO: update to CommanderInt
-                int* val = _symbolTable.getVariable(variableSet);
-                _symbolTable.addOrUpdateVariable(variableSet, *val * right);
-                // what return?!
+            case Parser::MULTIPLY_EQUAL: {
+                int newValue = *_symbolTable.getVariable(variableSet) * right;
+                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                return newValue;
             }
-            case Parser::DIVIDE_EQUAL:{
-                // TODO: update to CommanderInt
-                if(right == 0){
-                    //TODO: throw divide by zero error
+            case Parser::DIVIDE_EQUAL: {
+                if (right == 0) {
+                    throw util::CommanderException("Divide by zero error encountered");
                 }
-                int* val = _symbolTable.getVariable(variableSet);
-                _symbolTable.addOrUpdateVariable(variableSet, *val / right);
-                // what return?!
+                int newValue = *_symbolTable.getVariable(variableSet) / right;
+                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                return newValue;
             }
-            case Parser::MODULO_EQUAL:{
-                // TODO: update to CommanderInt
-                int* val = _symbolTable.getVariable(variableSet);
-                _symbolTable.addOrUpdateVariable(variableSet, *val % right);
-                // what return?!
+            case Parser::MODULO_EQUAL: {
+                int newValue = *_symbolTable.getVariable(variableSet) % right;
+                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                return newValue;
             }
-            case Parser::EXPONENTIATE_EQUAL:{
-                // TODO: update to CommanderInt
-                int* val = _symbolTable.getVariable(variableSet);
-                _symbolTable.addOrUpdateVariable(variableSet, std::pow(*val, right));
-                // what return?!
+            case Parser::EXPONENTIATE_EQUAL: {
+                int newValue = std::pow(*_symbolTable.getVariable(variableSet), right);
+                _symbolTable.addOrUpdateVariable(variableSet, newValue);
+                return newValue;
+            }
+            default: {
+                throw util::CommanderException("Flow Controller: Unknown binary expression encountered");
             }
         }
     }
