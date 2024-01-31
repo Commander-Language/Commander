@@ -107,7 +107,7 @@ TEST(SCOPE_TEST, globalTest) {
     EXPECT_TRUE(parentScope.isGlobal());
     EXPECT_FALSE(childScope.isGlobal());
 
-    Scope otherChildScope = Scope(childScope);
+    Scope otherChildScope = Scope(&childScope);
 
     EXPECT_TRUE(parentScope.isGlobal());
     EXPECT_FALSE(childScope.isGlobal());
@@ -344,9 +344,13 @@ TEST(SYMORG_TEST, multiScopeCopyTest) {
     copiedOrg.addOrUpdateVariable("cat", 16);
     copiedOrg.addOrUpdateVariable("dog", 32);
 
-    EXPECT_NE(*testOrg.getVariable("cat"), *copiedOrg.getVariable("cat")); //data
+    EXPECT_NE(*testOrg.getVariable("cat"), *copiedOrg.getVariable("cat")); //data checks
+    EXPECT_EQ(*copiedOrg.getVariable("cat"), 16);
+    EXPECT_EQ(*testOrg.getVariable("cat"), 8);
     EXPECT_NE(*testOrg.getVariable("dog"), *copiedOrg.getVariable("dog"));
-    EXPECT_NE(testOrg.getVariable("cat"), copiedOrg.getVariable("cat")); //pointer
+    EXPECT_EQ(*copiedOrg.getVariable("dog"), 32);
+    EXPECT_EQ(*testOrg.getVariable("dog"), 16);
+    EXPECT_NE(testOrg.getVariable("cat"), copiedOrg.getVariable("cat")); //pointer checks
     EXPECT_NE(testOrg.getVariable("dog"), copiedOrg.getVariable("dog"));
 }
 
@@ -364,7 +368,7 @@ TEST(SYMORG_TEST, deepCopyTest) {
     SymbolTableOrganizer copiedOrg = SymbolTableOrganizer(testOrg);
     for(int currentScope = 0; currentScope < 100; currentScope++) {
         copiedOrg.addOrUpdateVariable(std::to_string(currentScope), currentScope + 1);
-        //EXPECT_NE(testOrg.getVariable(std::to_string(currentScope)), copiedOrg.getVariable(std::to_string(currentScope)));
+        EXPECT_NE(testOrg.getVariable(std::to_string(currentScope)), copiedOrg.getVariable(std::to_string(currentScope)));
         EXPECT_NE(*testOrg.getVariable(std::to_string(currentScope)), *copiedOrg.getVariable(std::to_string(currentScope)));
     }
 }

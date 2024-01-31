@@ -17,7 +17,15 @@ Scope::~Scope() = default;
 
 // Copy Constructor
 Scope::Scope(Scope& otherScope) {
-    _parentScope = otherScope.getParentScopePointer();
+    if(_parentScope != nullptr) {
+        //If a Scope has a parent, recursively use the copy constructor, then set its address as this object's parent Scope
+        Scope newParent = Scope(*_parentScope);
+        _parentScope = &newParent;
+    }
+    else {
+        //If we've reached the end of the line, set the parentScope to nullptr
+        _parentScope = nullptr;
+    }
     std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
     std::map<std::string, unsigned int> copyUses(otherScope._variableUses);
     _variableData = copyData;
