@@ -1,7 +1,7 @@
 /**
-* @file flow_controller.hpp
-* @brief Definition for flow controller components
-*/
+ * @file flow_controller.hpp
+ * @brief Definition for flow controller components
+ */
 
 #ifndef FLOW_CONTROLLER_HPP
 #define FLOW_CONTROLLER_HPP
@@ -9,11 +9,11 @@
 #include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 
-#include <tuple>
 #include <any>
+#include <tuple>
 
 namespace FlowController {
-    template <typename TType>
+    template<typename TType>
     /**
      * @brief A Commander array representation
      */
@@ -21,11 +21,11 @@ namespace FlowController {
     /**
      * @brief A Commander bool representation
      */
-     using CommanderBool = bool;
+    using CommanderBool = bool;
     /**
      * @brief A Commander binding representation
      */
-    using CommanderBinding = std::tuple<std::string, int>; //TODO: fix, need tuple of string and a commander type
+    using CommanderBinding = std::tuple<std::string, int>;  // TODO: fix, need tuple of string and a commander type
     /**
      * @brief A Commander tuple representation
      */
@@ -42,6 +42,7 @@ namespace FlowController {
         CommanderLambda(std::vector<Parser::BindingNodePtr>, Parser::StmtNodePtr);
         std::vector<Parser::BindingNodePtr> _bindings;
         Parser::StmtNodePtr _body;
+
     private:
         // TODO: Add return type
     };
@@ -64,9 +65,9 @@ namespace FlowController {
         void runtime();
 
     private:
-       /**
-        * @brief
-        */
+        /**
+         * @brief
+         */
         CommanderLambda findFunctionOrLambda(const Parser::ExprNodePtr&);
 
         /**
@@ -151,12 +152,12 @@ namespace FlowController {
         /**
          * @brief
          */
-        std::any _unaryOp(std::shared_ptr<Parser::UnOpExprNode> &);
+        std::any _unaryOp(std::shared_ptr<Parser::UnOpExprNode>&);
 
         /**
          * @brief
          */
-        std::any _binaryOp(std::shared_ptr<Parser::BinOpExprNode> &binOp);
+        std::any _binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp);
     };
 }  // namespace FlowController
 #endif
