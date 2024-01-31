@@ -571,3 +571,14 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
     ASSERT_FALSE(organizer.variableHasExpired("dog"));
     ASSERT_FALSE(organizer.variableHasExpired("birb"));
 }
+
+// GENERIC DATA TYPE TESTS
+
+//TEST(ANY_DATA, alternateIntTest) {
+//    Scope testScope = Scope();
+//    testScope.addOrUpdateVariable("cat", 8);
+//
+//    EXPECT_NO_THROW(testScope.getVariableAsType<int>("cat")); //Shouldn't throw an error here
+//    EXPECT_EQ(*testScope.getVariable("cat"), 8);
+//    EXPECT_EQ(testScope.getVariableAsType<int>("cat"), 8);
+//}

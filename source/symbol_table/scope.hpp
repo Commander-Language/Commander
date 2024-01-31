@@ -8,8 +8,7 @@
 #define CPP_UTILITIES_SCOPE_HPP
 #include <map>
 #include <memory>
-#include <string>
-
+#include <any>
 // TODO: replace data with a generic object class (template class?)
 
 class Scope {
@@ -76,6 +75,17 @@ public:
      * @return - A pointer to the specified data if it exists, otherwise a nullptr will return
      */
     int* getVariable(const std::string& variableID);
+
+    int* getVariableAsInt(std::string variableID);
+
+    //float
+    //double
+    //string
+    //char
+    //
+
+//    template<typename _Type>
+//        inline _Type getVariableAsType(std::string variableID);
 
     /**
      * getParenScopePointer() returns a pointer to the parent of this scope
