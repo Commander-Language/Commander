@@ -2,6 +2,9 @@
  * @file flow_controller.cpp
  * @brief Implements the Flow Controller and runtime
  *
+ *  Important: Assuming the types used with binary/unary expressions to be int. The only exceptions being logical
+ *             operators like && and ||. Update to be more generic when we know the types of expressions, possibly
+ *             through type checking or saving types in the symbol table.
  *
  * Node Helper Functions:
  *      TODO: Finish the following: _cmd, _type, _string
@@ -17,20 +20,18 @@
 #include <cmath>
 
 namespace FlowController {
+
+    //  ==========================
+    //  ||   Commander types    ||
+    //  ==========================
+    CommanderLambda::CommanderLambda(std::vector<Parser::BindingNodePtr> bindings, Parser::StmtNodePtr body)
+        : bindings(std::move(bindings)), body(std::move(body)) {}
+
+    //  ==========================
+    //  ||    Flow Controller   ||
+    //  ==========================
     FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
         _symbolTable.pushSymbolTable();  // push in the global scope
-    }
-    void FlowController::runCommand() {
-        // TODO: Implement
-    }
-    void FlowController::setVariable(std::string name, std::any value) {
-        // TODO: update when symbol table is generic
-        _symbolTable.addOrUpdateVariable(std::move(name), std::any_cast<CommanderInt>(value));
-    }
-    std::any FlowController::getVariable(std::string name) {
-        std::any value = _symbolTable.getVariable(name);
-        if (value.has_value()) { return value; }
-        throw util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
     void FlowController::runtime() {
@@ -87,13 +88,19 @@ namespace FlowController {
         }
     }
 
+    //  ==========================
+    //  ||    Node Evaluation   ||
+    //  ==========================
     void FlowController::_binding(Parser::BindingNodePtr node) { setVariable(node->variable, nullptr); }
+
     void FlowController::_bindings(Parser::BindingsNodePtr node) {
         for (auto& binding : node->bindings) { _binding(binding); }
     }
+
     void FlowController::_cmd(Parser::CmdNodePtr node) {
         // TODO: Implement
     }
+
     std::any FlowController::_expr(Parser::ExprNodePtr node) {
         switch (node->exprType()) {
             case Parser::ExprType::INT_EXPR: {
@@ -190,12 +197,12 @@ namespace FlowController {
                 for (auto& arg : functionExpression->args) {
                     // args and bindings should be lined up 1 to 1
                     auto argValue = _expr(arg);
-                    auto name = function._bindings[bindingIndex]->variable;
+                    auto name = function.bindings[bindingIndex]->variable;
 
                     setVariable(name, argValue);
                     bindingIndex++;
                 }
-                auto returnValue = _stmt(function._body);
+                auto returnValue = _stmt(function.body);
 
                 _symbolTable.popSymbolTable();  // remove funciton scope!
                 return returnValue;
@@ -215,12 +222,15 @@ namespace FlowController {
         }
         return -1;  // TODO: Find better default return
     }
+
     void FlowController::_exprs(Parser::ExprsNodePtr node) {
         for (auto& expr : node->exprs) { _expr(expr); }
     }
+
     void FlowController::_prgm(std::shared_ptr<Parser::PrgmNode> node) {
         for (auto& stmt : node->stmts) { _stmt(stmt); }
     }
+
     std::any FlowController::_stmt(Parser::StmtNodePtr node) {
         switch (node->stmtType()) {
             case Parser::StmtType::IF_STMT: {
@@ -262,12 +272,15 @@ namespace FlowController {
         }
         return nullptr;
     }
+
     void FlowController::_stmts(Parser::StmtsNodePtr node) {
         for (auto& stmt : node->stmts) { _stmt(stmt); }
     }
+
     void FlowController::_string(Parser::StringNodePtr node) {
         // TODO: Implement
     }
+
     void FlowController::_type(Parser::TypeNodePtr node) {
         // TODO: Implement
     }
@@ -402,7 +415,22 @@ namespace FlowController {
             }
         }
     }
-    CommanderLambda::CommanderLambda(std::vector<Parser::BindingNodePtr> bindings, Parser::StmtNodePtr body)
-        : _bindings(std::move(bindings)), _body(std::move(body)) {}
 
+    //  ==========================
+    //  ||   Helper Methods     ||
+    //  ==========================
+    void FlowController::runCommand() {
+        // TODO: Implement
+    }
+
+    void FlowController::setVariable(std::string name, std::any value) {
+        // TODO: update when symbol table is generic
+        _symbolTable.addOrUpdateVariable(std::move(name), std::any_cast<CommanderInt>(value));
+    }
+
+    std::any FlowController::getVariable(std::string name) {
+        std::any value = _symbolTable.getVariable(name);
+        if (value.has_value()) { return value; }
+        throw util::CommanderException("Symbol Error: Not found \"" + name + "\"");
+    }
 }  // namespace FlowController

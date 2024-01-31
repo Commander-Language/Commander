@@ -13,6 +13,7 @@
 #include <tuple>
 
 namespace FlowController {
+
     template<typename TType>
     /**
      * @brief A Commander array representation
@@ -35,8 +36,8 @@ namespace FlowController {
      */
     struct CommanderLambda {
         CommanderLambda(std::vector<Parser::BindingNodePtr>, Parser::StmtNodePtr);
-        std::vector<Parser::BindingNodePtr> _bindings;
-        Parser::StmtNodePtr _body;
+        std::vector<Parser::BindingNodePtr> bindings;
+        Parser::StmtNodePtr body;
         // TODO: save return type
     };
 
