@@ -105,116 +105,240 @@ namespace Parser {
         const auto tokenContents = [](size_t index) -> std::string {
             return "productionList[" + std::to_string(index) + "].token->contents";
         };
+        const auto stringTokenContents = [&](size_t index) -> std::string {
+            //  FIXME: Doesn't support string interpolation.
+            return callFunc("std::reinterpret_pointer_cast<lexer::StringToken>",
+                            {"productionList[" + std::to_string(index) + "].token"})
+                 + "->subTokens[0]->contents";
+        };
         return {
-                //  PRGM -> STMT
-                {{ASTNodeType::PRGM, {ASTNodeType::STMT}},
-                 makeNode("Prgm", {"std::vector<StmtNodePtr> {" + castNode("Stmt", 0) + "}"})},
+                //  ================
+                //  ||  Program:  ||
+                //  ================
+
+                //  (PRGM) -> (STMTS)
+                {{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0) + "->stmts"})},
 
 
-                //  ============
-                //  ||  STMT  ||
-                //  ============
+                //  =================
+                //  ||  Bindings:  ||
+                //  =================
 
-                //  STMT -> EXPR "[SEMICOLON]"
-                {{ASTNodeType::STMT, {ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                 makeNode("ExprStmt", {castNode("Expr", 0)})},
+                //  (BINDINGS) -> (BINDING)
+                //  TODO
+                //  (BINDINGS) -> (BINDINGS) [COMMA] (BINDING)
+                //  TODO
+
+                //  (BINDING) -> [VARIABLE]
+                //  TODO
+                //  (BINDING) -> [VARIABLE] [COLON] (TYPE)
+                //  TODO
 
 
-                //  ============
-                //  ||  EXPR  ||
-                //  ============
+                //  =================
+                //  ||  Commands:  ||
+                //  =================
 
-                //  EXPR -> "[INTVAL]"
+                //  (CMD) -> (CMD) [AMPERSAND]
+                {{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::AMPERSAND}},
+                 makeNode("AsyncCmd", {castNode("Cmd", 0)})},
+                //  (CMD) -> (CMD) [PIPE] (CMD)
+                {{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::PIPE, ASTNodeType::CMD}},
+                 makeNode("PipeCmd", {castNode("Cmd", 0), castNode("Cmd", 2)})},
+
+                //  (CMD) -> [CMDSTRINGVAL]
+                {{ASTNodeType::CMD, {TokenType::CMDSTRINGVAL}},
+                 makeNode("CmdCmd", {makeNode("String", {tokenContents(0)})})},
+                //  (CMD) -> (STRING)
+                {{ASTNodeType::CMD, {ASTNodeType::STRING}}, makeNode("CmdCmd", {castNode("String", 0)})},
+                //  (CMD) -> (CMD) [CMDSTRINGVAL]
+                {{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::CMDSTRINGVAL}},
+                 makeNode("CmdCmd", {castNode("Cmd", 0), makeNode("String", {tokenContents(1)})})},
+                //  (CMD) -> (CMD) (STRING)
+                {{ASTNodeType::CMD, {ASTNodeType::CMD, ASTNodeType::STRING}},
+                 makeNode("CmdCmd", {castNode("Cmd", 0), castNode("String", 1)})},
+
+
+                //  ====================
+                //  ||  Expressions:  ||
+                //  ====================
+
+                //  (EXPRS) -> (EXPR)
+                //  TODO
+                //  (EXPRS) -> (EXPRS) [COMMA] (EXPR)
+                //  TODO
+
+                //  Literals:
+                //  ---------
+                //  (EXPR) -> [INTVAL]
                 {{ASTNodeType::EXPR, {TokenType::INTVAL}},
                  makeNode("IntExpr", {callFunc("std::stoll", {tokenContents(0)})})},
-                //  EXPR -> "[FLOATVAL]"
+                //  (EXPR) -> [FLOATVAL]
                 {{ASTNodeType::EXPR, {TokenType::FLOATVAL}},
                  makeNode("FloatExpr", {callFunc("std::stold", {tokenContents(0)})})},
-                //  EXPR -> "[TRUE]"
+                //  (EXPR) -> [TRUE]
                 {{ASTNodeType::EXPR, {TokenType::TRUE}}, makeNode("BoolExpr", {"true"})},
-                //  EXPR -> "[FALSE]"
+                //  (EXPR) -> [FALSE]
                 {{ASTNodeType::EXPR, {TokenType::FALSE}}, makeNode("BoolExpr", {"false"})},
 
-                //  EXPR -> EXPR "[EXPONENTIATE]" EXPR
+                //  Number operations:
+                //  ------------------
+                //  (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EXPONENTIATE", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[MULTIPLY]" EXPR
+                //  (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MULTIPLY", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[DIVIDE]" EXPR
+                //  (EXPR) -> (EXPR) [DIVIDE] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DIVIDE, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::DIVIDE", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[MODULO]" EXPR
+                //  (EXPR) -> (EXPR) [MODULO] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MODULO, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MODULO", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[ADD]" EXPR
+                //  (EXPR) -> (EXPR) [ADD] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::ADD, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::ADD", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[MINUS]" EXPR
+                //  (EXPR) -> (EXPR) [MINUS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MINUS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::SUBTRACT", castNode("Expr", 2)})},
 
-                //  EXPR -> EXPR "[LESSER]" EXPR
+                //  Comparison operations:
+                //  ----------------------
+                //  (EXPR) -> (EXPR) [LESSER] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::LESSER", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[LESSER_EQUAL]" EXPR
+                //  (EXPR) -> (EXPR) [LESSER_EQUAL] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER_EQUAL, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::LESSER_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[GREATER]" EXPR
+                //  (EXPR) -> (EXPR) [GREATER] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::GREATER, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::GREATER", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[GREATER_EQUAL]" EXPR
+                //  (EXPR) -> (EXPR) [GREATER_EQUAL] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::GREATER_EQUAL, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::GREATER_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[DOUBLE_EQUALS]" EXPR
+                //  (EXPR) -> (EXPR) [DOUBLE_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DOUBLE_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[NOT_EQUALS]" EXPR
+                //  (EXPR) -> (EXPR) [NOT_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::NOT_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::NOT_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[AND]" EXPR
+
+                //  Boolean operations:
+                //  -------------------
+                //  (EXPR) -> (EXPR) [AND] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::AND, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::AND", castNode("Expr", 2)})},
-                //  EXPR -> EXPR "[OR]" EXPR
+                //  (EXPR) -> (EXPR) [OR] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::OR, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::OR", castNode("Expr", 2)})},
 
-                //  EXPR -> EXPR "[QUESTION]" EXPR "[COLON]" EXPR
+                //  Ternary:
+                //  --------
+                //  (EXPR) -> (EXPR) [QUESTION] (EXPR) [COLON] (EXPR)
                 {{ASTNodeType::EXPR,
                   {ASTNodeType::EXPR, TokenType::QUESTION, ASTNodeType::EXPR, TokenType::COLON, ASTNodeType::EXPR}},
                  makeNode("TernaryExpr", {castNode("Expr", 0), castNode("Expr", 2), castNode("Expr", 4)})},
 
-                //  EXPR -> VARIABLE "[EXPONENTIATE_EQUALS]" EXPR
+                //  Variable set:
+                //  -------------
+                //  (EXPR) -> (VARIABLE) [EXPONENTIATE_SET] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
-                 makeNode("BinOpExpr",
-                          {castNode("Variable", 0), "BinOpType::EXPONENTIATE_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> VARIABLE "[MULTIPLY_EQUALS]" EXPR
+                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::EXPONENTIATE_SET", castNode("Expr", 2)})},
+                //  (EXPR) -> (VARIABLE) [MULTIPLY_SET] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MULTIPLY_EQUALS, ASTNodeType::EXPR}},
-                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MULTIPLY_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> VARIABLE "[DIVIDE_EQUALS]" EXPR
+                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MULTIPLY_SET", castNode("Expr", 2)})},
+                //  (EXPR) -> (VARIABLE) [DIVIDE_SET] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::DIVIDE_EQUALS, ASTNodeType::EXPR}},
-                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::DIVIDE_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> VARIABLE "[MODULO_EQUALS]" EXPR
+                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::DIVIDE_SET", castNode("Expr", 2)})},
+                //  (EXPR) -> (VARIABLE) [MODULO_SET] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MODULO_EQUALS, ASTNodeType::EXPR}},
-                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MODULO_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> VARIABLE "[ADD_EQUALS]" EXPR
+                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MODULO_SET", castNode("Expr", 2)})},
+                //  (EXPR) -> (VARIABLE) [ADD_SET] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::ADD_EQUALS, ASTNodeType::EXPR}},
-                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::ADD_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> VARIABLE "[MINUS_EQUALS]" EXPR
+                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::ADD_SET", castNode("Expr", 2)})},
+                //  (EXPR) -> (VARIABLE) [MINUS_SET] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MINUS_EQUALS, ASTNodeType::EXPR}},
-                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::SUBTRACT_EQUAL", castNode("Expr", 2)})},
-                //  EXPR -> VARIABLE "[EQUALS]" EXPR
+                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::SUBTRACT_SET", castNode("Expr", 2)})},
+                //  (EXPR) -> (VARIABLE) [EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EQUALS, ASTNodeType::EXPR}},
-                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::EQUAL", castNode("Expr", 2)})},
+                 makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::SET", castNode("Expr", 2)})},
 
-                //  EXPR -> "[LPAREN]" EXPR "[RPAREN]"
+                //  Parentheses:
+                //  ------------
+                //  (EXPR) -> [LPAREN] (EXPR) [RPAREN]
                 {{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
                  "productionList[1].node"},
 
-                //  EXPR -> VARIABLE
+                //  Other:
+                //  ----------
+                //  (EXPR) -> (VARIABLE)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE}}, makeNode("VarExpr", {castNode("Variable", 0)})},
+                //  (EXPR) -> (STRING)
+                //  {{ASTNodeType::EXPR, {ASTNodeType::STRING}}, makeNode("StringExpr", {castNode("String", 0)})},
 
-                //  VARIABLE -> "[VARIABLE]"
+
+                //  ===================
+                //  ||  Statements:  ||
+                //  ===================
+
+                //  (STMTS) -> (STMT)
+                {{ASTNodeType::STMTS, {ASTNodeType::STMT}}, makeNode("Stmts", {castNode("Stmt", 0)})},
+                //  (STMTS) -> (STMTS) (STMT)
+                {{ASTNodeType::STMTS, {ASTNodeType::STMTS, ASTNodeType::STMT}},
+                 makeNode("Stmts", {castNode("Stmts", 0) + "->stmts", castNode("Stmt", 1)})},
+
+                //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
+                {{ASTNodeType::STMT,
+                  {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::CMD, TokenType::SEMICOLON}},
+                 makeNode("AliasStmt", {tokenContents(1), castNode("Cmd", 3)})},
+
+                //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
+                //  TODO
+                //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
+                //  TODO
+
+                //  (STMT) -> [FOR] [LPAREN] (STMT) [SEMICOLON] (EXPR) [SEMICOLON] (STMT) [RPAREN] (STMT)
+                //  TODO
+
+                //  (STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
+                //  TODO
+                //  (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN]
+                //  TODO
+
+                //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
+                //  TODO
+
+                //  (STMT) -> (CMD) [SEMICOLON]
+                {{ASTNodeType::STMT, {ASTNodeType::CMD, TokenType::SEMICOLON}},
+                 makeNode("CmdStmt", {castNode("Cmd", 0)})},
+                //  (STMT) -> (EXPR) [SEMICOLON]
+                {{ASTNodeType::STMT, {ASTNodeType::EXPR, TokenType::SEMICOLON}},
+                 makeNode("ExprStmt", {castNode("Expr", 0)})},
+
+
+                //  ================
+                //  ||  Strings:  ||
+                //  ================
+
+                //  (STRING) -> [STRINGVAL]
+                {{ASTNodeType::STRING, {TokenType::STRINGVAL}}, makeNode("String", {stringTokenContents(0)})},
+
+
+                //  ==============
+                //  ||  Types:  ||
+                //  ==============
+
+                //  (TYPE) -> [INT]
+                //  TODO
+                //  (TYPE) -> [FLOAT]
+                //  TODO
+
+
+                //  ==================
+                //  ||  Variables:  ||
+                //  ==================
+
+                //  (VARIABLE) -> [VARIABLE]
                 {{ASTNodeType::VARIABLE, {TokenType::VARIABLE}}, makeNode("IdentVariable", {tokenContents(0)})},
         };
     }

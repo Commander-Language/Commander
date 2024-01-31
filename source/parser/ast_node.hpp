@@ -69,17 +69,17 @@ namespace Parser {
     };
 
     /**
-     * @brief The types of unary operation expressions
-     */
-    enum UnOpType : uint8_t { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
-
-    /**
      * @brief Helper method that gets the string representation of the given AST node type.
      *
      * @param nodeType The named AST node type.
      * @return The string name of the given AST node type.
      */
     std::string nodeTypeToString(ASTNodeType nodeType);
+
+    /**
+     * @brief The types of unary operation expressions
+     */
+    enum UnOpType : std::uint8_t { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
 
     /**
      * @brief Helper method that gets the string representation of the Unop enum type
@@ -91,28 +91,28 @@ namespace Parser {
     /**
      * @brief The types of binop expressions
      */
-    enum BinOpType : uint8_t {
+    enum BinOpType : std::uint8_t {
         LESSER,
         GREATER,
         LESSER_EQUAL,
         GREATER_EQUAL,
-        MODULO,
-        DIVIDE,
-        MULTIPLY,
-        SUBTRACT,
-        ADD,
-        EXPONENTIATE,
+        EQUAL,
+        NOT_EQUAL,
         AND,
         OR,
-        EQUAL,
-        SET,
-        NOT_EQUAL,
-        ADD_EQUAL,
-        SUBTRACT_EQUAL,
-        MULTIPLY_EQUAL,
-        DIVIDE_EQUAL,
-        MODULO_EQUAL,
-        EXPONENTIATE_EQUAL
+        EXPONENTIATE,
+        MULTIPLY,
+        DIVIDE,
+        MODULO,
+        ADD,
+        SUBTRACT,
+        EXPONENTIATE_SET,
+        MULTIPLY_SET,
+        DIVIDE_SET,
+        MODULO_SET,
+        ADD_SET,
+        SUBTRACT_SET,
+        SET
     };
 
     /**
@@ -436,13 +436,20 @@ namespace Parser {
     class StringNode : public ASTNode {
     public:
         /**
-         * @brief The list of string literals in the string
+         * @brief Class constructor from a string literal.
+         *
+         * @param literal The string literal.
+         */
+        StringNode(std::string literal);
+
+        /**
+         * @brief The list of string literals in the string.
          *
          */
         std::vector<std::string> literals;
 
         /**
-         * @brief The list of expressions in the string (from string interpolation)
+         * @brief The list of expressions in the string (from string interpolation).
          *
          */
         std::vector<ExprNodePtr> expressions;
@@ -527,17 +534,24 @@ namespace Parser {
     class CmdCmdNode : public CmdNode {
     public:
         /**
-         * The list of arguments for the command, consisting of variable expression nodes and strings nodes
+         * @brief The list of arguments for the command, consisting of variable expression nodes and string nodes.
          */
         std::vector<ASTNodePtr> arguments;
 
         /**
-         * @brief Class constructor.
+         * @brief Class constructor from a single argument.
          *
-         * @param arguments The arguments for the command
+         * @param argument The first argument of the command.
          */
-        //  CmdCmdNode();
-        CmdCmdNode(std::vector<ASTNodePtr> arguments);
+        CmdCmdNode(ASTNodePtr argument);
+
+        /**
+         * @brief Class constructor from a command, plus one more argument.
+         *
+         * @param command The first command.
+         * @param argument The next argument of the command.
+         */
+        CmdCmdNode(CmdNodePtr command, ASTNodePtr argument);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
