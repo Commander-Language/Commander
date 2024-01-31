@@ -40,6 +40,7 @@ namespace lexer {
         DIVIDE,
         DIVIDE_EQUALS,
         DO,
+        DOT,
         DOUBLE_EQUALS,
         ELSE,
         END_OF_FILE,
@@ -237,7 +238,8 @@ namespace lexer {
                                                                         {"[", LSQUARE},
                                                                         {"?", QUESTION},
                                                                         {"}", RCURLY},
-                                                                        {"]", RSQUARE}});
+                                                                        {"]", RSQUARE},
+                                                                        {".", DOT}});
 
     /**
      * Vector of string token literal pairs that can be parsed in commands as well as normally

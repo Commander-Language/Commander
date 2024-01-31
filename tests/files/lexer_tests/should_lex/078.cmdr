@@ -1,0 +1,4 @@
+//Tests tuples
+tup = (1, "2", 3.0);
+length = tup.length();
+second = tup[1];

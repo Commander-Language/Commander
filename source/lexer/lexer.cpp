@@ -48,6 +48,8 @@ namespace lexer {
                 return "DIVIDE_EQUALS";
             case DO:
                 return "DO";
+            case DOT:
+                return "DOT";
             case DOUBLE_EQUALS:
                 return "DOUBLE_EQUALS";
             case ELSE:
@@ -670,7 +672,7 @@ namespace lexer {
                     || nextToken->type == NOT_EQUALS || nextToken->type == LESSER_EQUAL
                     || nextToken->type == GREATER_EQUAL || nextToken->type == MODULO_EQUALS
                     || nextToken->type == DIVIDE_EQUALS || nextToken->type == MULTIPLY_EQUALS
-                    || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS
+                    || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS || nextToken->type == LSQUARE
                     || (noSpace && (nextToken->type == DECREMENT || nextToken->type == INCREMENT))) {
                     tokens.push_back(nextToken);
                 } else {
