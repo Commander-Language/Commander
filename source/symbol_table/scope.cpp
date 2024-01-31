@@ -74,6 +74,21 @@ int* Scope::getVariable(std::string variableID) {
     return _variableData[variableID].get();
 }
 
+//template<typename _Type>
+//_Type Scope::getVariableAsType(std::string variableID) {
+//    try{
+//        if (!hasDataKey(variableID)) {
+//            if (_parentScope != nullptr) { return _parentScope->getVariableAsType<_Type>(variableID); }
+//            return nullptr;
+//        }
+//        decrementUses(variableID);
+//        return std::any_cast<_Type>(_variableData[variableID].get());
+//    }
+//    catch(std::exception ex) {
+//        throw(std::bad_any_cast());
+//    }
+//}
+
 
 Scope* Scope::getParentScopePointer() { return _parentScope; }
 

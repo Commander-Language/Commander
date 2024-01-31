@@ -9,8 +9,7 @@
 #include <map>
 #include <string>
 #include <memory>
-
-// TODO: replace data with a generic object class (template class?)
+#include <any>
 
 class Scope {
 public:
@@ -75,6 +74,17 @@ public:
      * @return - A pointer to the specified data if it exists, otherwise a nullptr will return
      */
     int* getVariable(std::string variableID);
+
+    int* getVariableAsInt(std::string variableID);
+
+    //float
+    //double
+    //string
+    //char
+    //
+
+//    template<typename _Type>
+//        inline _Type getVariableAsType(std::string variableID);
 
     /**
      * getParenScopePointer() returns a pointer to the parent of this scope
