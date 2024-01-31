@@ -7,11 +7,11 @@
  *             through type checking or saving types in the symbol table.
  *
  * Node Helper Functions:
- *      TODO: Finish the following: _cmd, _type, _string
+ *      TODO: Finish the following: _cmd, _type,
  * Statements:
  *      TODO: Finish the following: If, For, While, Do While, Return, Scope, Command, Alias
  * Expressions:
- *      TODO: Finish the following: String, Command
+ *      TODO: Finish the following: Command
  */
 
 #include "flow_controller.hpp"
@@ -91,7 +91,10 @@ namespace FlowController {
     //  ==========================
     //  ||    Node Evaluation   ||
     //  ==========================
-    void FlowController::_binding(Parser::BindingNodePtr node) { setVariable(node->variable, nullptr); }
+    void FlowController::_binding(Parser::BindingNodePtr node) {
+        // TODO: Find better default value for each type
+        setVariable(node->variable, 0);
+    }
 
     void FlowController::_bindings(Parser::BindingsNodePtr node) {
         for (auto& binding : node->bindings) { _binding(binding); }
@@ -113,20 +116,7 @@ namespace FlowController {
             }
             case Parser::ExprType::STRING_EXPR: {
                 auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
-                auto stringNode = stringExp->stringNode;
-
-                int indexL = 0;
-                int indexE = 0;
-                std::string stringResult;
-                while (indexL < stringNode->literals.size() && indexE < stringNode->expressions.size()) {
-                    std::any exprValue = _expr(stringNode->expressions[indexE]);
-                    stringResult.append(stringNode->literals[indexL]);
-                    // stringResult.append(exprValue);
-                    indexL++;
-                    indexE++;
-                }
-                // TODO: Implement rest when types
-                break;
+                return _string(stringExp->stringNode);
             }
             case Parser::ExprType::BOOL_EXPR: {
                 auto boolExp = std::dynamic_pointer_cast<Parser::BoolExprNode>(node);
@@ -148,7 +138,8 @@ namespace FlowController {
             case Parser::ExprType::ARRAY_INDEXED_EXPR: {
                 auto arrayIndexExpression = std::dynamic_pointer_cast<Parser::ArrayIndexExprNode>(node);
                 auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrayIndexExpression->array);
-                auto array = std::any_cast<CommanderArray<std::any>>(getVariable(arrayVariable->varName));
+                // TODO: Update to generic array
+                auto array = std::any_cast<CommanderArray<CommanderInt>>(getVariable(arrayVariable->varName));
 
                 // TODO: might be understanding this wrong? why list of indices?
                 auto index = std::any_cast<CommanderInt>(_expr(arrayIndexExpression->indexExprs[0]));
@@ -196,13 +187,13 @@ namespace FlowController {
                 int bindingIndex = 0;
                 for (auto& arg : functionExpression->args) {
                     // args and bindings should be lined up 1 to 1
-                    auto argValue = _expr(arg);
-                    auto name = function.bindings[bindingIndex]->variable;
+                    std::any argValue = _expr(arg);
+                    std::string name = function.bindings[bindingIndex]->variable;
 
                     setVariable(name, argValue);
                     bindingIndex++;
                 }
-                auto returnValue = _stmt(function.body);
+                std::any returnValue = _stmt(function.body);
 
                 _symbolTable.popSymbolTable();  // remove funciton scope!
                 return returnValue;
@@ -277,8 +268,23 @@ namespace FlowController {
         for (auto& stmt : node->stmts) { _stmt(stmt); }
     }
 
-    void FlowController::_string(Parser::StringNodePtr node) {
-        // TODO: Implement
+    std::string FlowController::_string(Parser::StringNodePtr node) {
+        auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
+        auto stringNode = stringExp->stringNode;
+
+        int indexLiteral = 0;
+        int indexExpression = 0;
+        std::string stringResult;
+        while (indexLiteral < stringNode->literals.size() && indexExpression < stringNode->expressions.size()) {
+            std::any exprValue = _expr(stringNode->expressions[indexExpression]);
+
+            stringResult.append(stringNode->literals[indexLiteral]);
+            stringResult.append(commanderTypeToString(exprValue));
+
+            indexLiteral++;
+            indexExpression++;
+        }
+        return stringResult;
     }
 
     void FlowController::_type(Parser::TypeNodePtr node) {
@@ -314,6 +320,9 @@ namespace FlowController {
                 // might have to update symbol table if variable
                 auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
                 return expr--;
+            }
+            default: {
+                throw util::CommanderException("Flow Controller: Unknown unary expression encountered");
             }
         }
     }
@@ -429,8 +438,14 @@ namespace FlowController {
     }
 
     std::any FlowController::getVariable(std::string name) {
-        std::any value = _symbolTable.getVariable(name);
-        if (value.has_value()) { return value; }
+        int* value = _symbolTable.getVariable(name);
+        if (value != nullptr) { return value; }
         throw util::CommanderException("Symbol Error: Not found \"" + name + "\"");
+    }
+
+    std::string FlowController::commanderTypeToString(std::any value) {
+        // TODO: Fix this.
+        // This is not the right approach, send type of value as a parameter instead.
+        return std::any_cast<std::string>(value);
     }
 }  // namespace FlowController

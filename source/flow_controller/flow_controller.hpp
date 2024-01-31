@@ -89,6 +89,11 @@ namespace FlowController {
         void runCommand();
 
         /**
+         * @brief Get a String representation of a Commander type value
+         */
+        std::string commanderTypeToString(std::any);
+
+        /**
          * @brief Helper to interpret binding nodes
          */
         void _binding(Parser::BindingNodePtr);
@@ -126,7 +131,7 @@ namespace FlowController {
         /**
          * @brief Helper to interpret string nodes
          */
-        void _string(Parser::StringNodePtr);
+        std::string _string(Parser::StringNodePtr);
         /**
          * @brief Helper to interpret type nodes
          */
