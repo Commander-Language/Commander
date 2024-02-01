@@ -105,28 +105,28 @@ namespace FlowController {
     }
 
     std::any FlowController::_expr(const Parser::ExprNodePtr& node) {
-        switch (node->exprType()) {
-            case Parser::ExprType::INT_EXPR: {
+        switch (node->nodeType()) {
+            case Parser::INT_EXPR: {
                 auto intExp = std::static_pointer_cast<Parser::IntExprNode>(node);
                 return intExp->value;
             }
-            case Parser::ExprType::FLOAT_EXPR: {
+            case Parser::FLOAT_EXPR: {
                 auto floatExp = std::static_pointer_cast<Parser::FloatExprNode>(node);
                 return floatExp->value;
             }
-            case Parser::ExprType::STRING_EXPR: {
+            case Parser::STRING_EXPR: {
                 auto stringExp = std::static_pointer_cast<Parser::StringExprNode>(node);
                 return _string(stringExp->stringNode);
             }
-            case Parser::ExprType::BOOL_EXPR: {
+            case Parser::BOOL_EXPR: {
                 auto boolExp = std::static_pointer_cast<Parser::BoolExprNode>(node);
                 return boolExp->value;
             }
-            case Parser::ExprType::VARIABLE_EXPR: {
+            case Parser::VAR_EXPR: {
                 auto varExp = std::static_pointer_cast<Parser::VarExprNode>(node);
                 return _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(varExp->variable)->varName);
             }
-            case Parser::ExprType::ARRAY_EXPR: {
+            case Parser::ARRAY_EXPR: {
                 auto arrExp = std::static_pointer_cast<Parser::ArrayExprNode>(node);
                 CommanderArray<std::any> array;
                 for (auto& expr : arrExp->expressions) {
@@ -135,7 +135,7 @@ namespace FlowController {
                 }
                 return array;
             }
-            case Parser::ExprType::ARRAY_INDEXED_EXPR: {
+            case Parser::ARRAY_INDEX_EXPR: {
                 auto arrayIndexExpression = std::static_pointer_cast<Parser::ArrayIndexExprNode>(node);
                 auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrayIndexExpression->array);
                 // TODO: Update to generic array
@@ -145,13 +145,13 @@ namespace FlowController {
                 auto index = std::any_cast<CommanderInt>(_expr(arrayIndexExpression->indexExprs[0]));
                 return array[index];
             }
-            case Parser::ExprType::TUPLE_EXPR: {
+            case Parser::TUPLE_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleExprNode>(node);
                 CommanderTuple tuple;
                 for (auto& expr : tupleExp->expressions) { tuple.emplace_back(_expr(expr)); }
                 return tuple;
             }
-            case Parser::ExprType::TUPLE_INDEXED_EXPR: {
+            case Parser::TUPLE_INDEX_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleIndexExprNode>(node);
                 auto index = std::any_cast<CommanderInt>(_expr(tupleExp->index));
                 auto tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
@@ -162,7 +162,7 @@ namespace FlowController {
                 }
                 return tuple[index];
             }
-            case Parser::ExprType::TERNARY_EXPR: {
+            case Parser::TERNARY_EXPR: {
                 auto ternaryExpression = std::static_pointer_cast<Parser::TernaryExprNode>(node);
                 bool const condition = std::any_cast<bool>(_expr(ternaryExpression->condition));
 
@@ -170,15 +170,15 @@ namespace FlowController {
                 std::any const ifFalse = _expr(ternaryExpression->falseExpr);
                 return condition ? ifTrue : ifFalse;
             }
-            case Parser::ExprType::UNARY_EXPR: {
+            case Parser::UNOP_EXPR: {
                 auto unaryOperation = std::static_pointer_cast<Parser::UnOpExprNode>(node);
                 return _unaryOp(unaryOperation);
             }
-            case Parser::ExprType::BINARY_EXPR: {
+            case Parser::BINOP_EXPR: {
                 auto binaryOperation = std::static_pointer_cast<Parser::BinOpExprNode>(node);
                 return _binaryOp(binaryOperation);
             }
-            case Parser::ExprType::FUNCTION_CALL_EXPR: {
+            case Parser::CALL_EXPR: {
                 auto functionExpression = std::static_pointer_cast<Parser::CallExprNode>(node);
                 auto function = std::any_cast<CommanderLambda>(_expr(functionExpression->func));
 
@@ -198,12 +198,12 @@ namespace FlowController {
                 _symbolTable.popSymbolTable();  // remove funciton scope!
                 return returnValue;
             }
-            case Parser::ExprType::LAMBDA_EXPR: {
+            case Parser::LAMBDA_EXPR: {
                 auto lambdaExpression = std::static_pointer_cast<Parser::LambdaExprNode>(node);
                 CommanderLambda lambda(lambdaExpression->bindings, lambdaExpression->body);
                 return lambda;
             }
-            case Parser::ExprType::COMMAND_EXPR: {
+            case Parser::CMD_EXPR: {
                 // TODO: Implement
                 break;
             }
@@ -223,40 +223,40 @@ namespace FlowController {
     }
 
     std::any FlowController::_stmt(const Parser::StmtNodePtr& node) {
-        switch (node->stmtType()) {
-            case Parser::StmtType::IF_STMT: {
+        switch (node->nodeType()) {
+            case Parser::IF_STMT: {
                 // TODO: Implement
                 break;
             }
-            case Parser::StmtType::FOR_STMT: {
+            case Parser::FOR_STMT: {
                 // TODO: Implement
                 break;
             }
-            case Parser::StmtType::WHILE_STMT: {
+            case Parser::WHILE_STMT: {
                 // TODO: Implement
                 break;
             }
-            case Parser::StmtType::DO_WHILE_STMT: {
+            case Parser::DO_WHILE_STMT: {
                 // TODO: Implement
                 break;
             }
-            case Parser::StmtType::RETURN_STMT: {
+            case Parser::RETURN_STMT: {
                 // TODO: Implement
                 break;
             }
-            case Parser::StmtType::SCOPE_STMT: {
+            case Parser::SCOPE_STMT: {
                 // TODO: Implement
                 break;
             }
-            case Parser::StmtType::COMMAND_STMT: {
+            case Parser::CMD_STMT: {
                 // TODO: Implement
                 break;
             }
-            case Parser::StmtType::EXPRESSION_STMT: {
+            case Parser::EXPR_STMT: {
                 auto expr = std::static_pointer_cast<Parser::ExprStmtNode>(node);
                 return _expr(expr->expression);
             }
-            case Parser::StmtType::ALIAS_STMT: {
+            case Parser::ALIAS_STMT: {
                 // TODO: Implement
                 break;
             }
