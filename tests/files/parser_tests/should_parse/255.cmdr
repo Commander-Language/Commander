@@ -1,0 +1,8 @@
+//Should parse variables
+const x = 3;
+const y = x ** x * x;
+const z: int = x * y;
+const a: float = x ** z * z;
+b = "hello";
+c = "there";
+d = b + c;

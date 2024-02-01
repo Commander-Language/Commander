@@ -1,0 +1,2 @@
+//Should parse function call with lambda in it
+add(a, b, (e : (bool, bool), f : bool[]) => e - f);

@@ -1,0 +1,2 @@
+//Should parse import
+import (1, "hi", 2)[1];

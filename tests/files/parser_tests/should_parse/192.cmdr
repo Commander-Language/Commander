@@ -1,0 +1,2 @@
+//Test precedence
+x = b[1] == a;

@@ -1,0 +1,2 @@
+//Should not parse due to unterminated index
+x = (1, 2, 3)1];

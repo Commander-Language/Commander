@@ -1,0 +1,2 @@
+//Should parse string interpolation
+"echo" "2 + 3 = ${2 + 3}" + $"5 + 5 = {add(3, 5)}";

@@ -1,0 +1,2 @@
+// Test that ternary operators parse properly
+num = true ? 1 : 2;

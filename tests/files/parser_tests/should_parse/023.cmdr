@@ -1,0 +1,8 @@
+// Test that if, else if, and else statements parse properly
+if(true){
+    echo "if";
+} else if(true){
+    echo "else if";
+} else {
+    echo "else";
+}

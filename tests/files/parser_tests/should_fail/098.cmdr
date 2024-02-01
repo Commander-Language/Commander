@@ -1,0 +1,3 @@
+//Should fail to parse incomplete scope
+x = 5;
+}

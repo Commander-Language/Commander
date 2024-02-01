@@ -1,0 +1,4 @@
+//Should parse if-chain
+if ((true)) {
+    echo hi;
+}

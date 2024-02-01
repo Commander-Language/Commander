@@ -1,2 +1,2 @@
 (PrgmNode
-	(VarStmtNode isFalse (BoolExprNode false)))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode isFalse) EQUAL (BoolExprNode false))))

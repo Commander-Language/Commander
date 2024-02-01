@@ -1,0 +1,4 @@
+//Should parse for loop
+for (echo $hi; parseBoolean(`echo hi`[0]); git clone "myurl") {
+    echo "hi";
+}

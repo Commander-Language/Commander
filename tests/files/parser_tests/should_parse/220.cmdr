@@ -1,0 +1,2 @@
+//Test that command parses
+x = `cd $filepath -p $random $var$two --hello`;

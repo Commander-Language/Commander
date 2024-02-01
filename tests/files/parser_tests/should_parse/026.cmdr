@@ -1,0 +1,4 @@
+// Test that functions lex properly with specified return type
+foo(a,b,c) : int{
+    return a + b + c;
+}

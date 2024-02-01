@@ -1,0 +1,2 @@
+//Test precedence
+x = (!false, 3 ** 2, 3.1 - 0.1)[x + 2];

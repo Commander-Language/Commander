@@ -1,0 +1,13 @@
+//Should parse nested scopes
+{
+    x = 5;
+    {
+        y = x;
+        {
+            z = "${x + y}";
+            {
+                print(x + y + z);
+            }
+        }
+    }
+}

@@ -1,0 +1,2 @@
+// Test that scan expressions parse properly
+name = scan "Type in your name: ";
