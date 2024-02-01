@@ -1,8 +1,8 @@
-#include "../flow_controller/flow_controller.hpp"
-#include "../lexer/lexer.hpp"
-#include "../parser/parser.hpp"
-#include "../type_checker/type_checker.hpp"
-#include "../util/commander_exception.hpp"
+#include "source/flow_controller/flow_controller.hpp"
+#include "source/lexer/lexer.hpp"
+#include "source/parser/parser.hpp"
+#include "source/type_checker/type_checker.hpp"
+#include "source/util/commander_exception.hpp"
 #include <fstream>
 #include <iostream>
 

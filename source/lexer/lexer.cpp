@@ -7,8 +7,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "../util/commander_exception.hpp"
 #include "lexer.hpp"
+#include "source/util/commander_exception.hpp"
 
 namespace Lexer {
 

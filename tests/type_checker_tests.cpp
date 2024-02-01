@@ -5,7 +5,7 @@
  *          number of items before validating
  */
 
-#include "../source/type_checker/type_checker.hpp"
+#include "source/type_checker/type_checker.hpp"
 #include "gtest/gtest.h"
 
 template<typename TType>

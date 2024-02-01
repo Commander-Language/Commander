@@ -7,7 +7,7 @@
 #ifndef COMMANDER_COMMANDER_EXCEPTION_HPP
 #define COMMANDER_COMMANDER_EXCEPTION_HPP
 
-#include "../lexer/lexer.hpp"
+#include "source/lexer/lexer.hpp"
 #include <string>
 #include <utility>
 
@@ -22,7 +22,7 @@ namespace Util {
          * @brief Constructor for the exception that stores a single message directly
          * @param message The message of the exception
          */
-        CommanderException(std::string message);
+        CommanderException(const std::string& message);
 
         /**
          * @brief Constructor for the exception that creates the message with the include position in the file
