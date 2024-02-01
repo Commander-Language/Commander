@@ -1,0 +1,6 @@
+CMDSTRINGVAL 'git' 2:1
+CMDSTRINGVAL 'clone' 2:5
+CMDSTRINGVAL 'https://github.com/repo.git' 2:11
+AMPERSAND '&' 2:39
+SEMICOLON ';' 2:40
+END_OF_FILE 2:41

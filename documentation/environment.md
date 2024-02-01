@@ -1,5 +1,6 @@
 # Coding Environment
 
+This page documents the details about the coding environment, including how to build the project, the recommended IDE (i.e. CLion), and code style. For more information on how to setup the environment based on this information, see the [setup documentation](setup.md).
 ## Building
 
 Requirements:

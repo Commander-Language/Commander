@@ -1,0 +1,3 @@
+// test dot operator inside array
+arr = [1, 2, 3];
+last = arr[arr.length() - 1];
