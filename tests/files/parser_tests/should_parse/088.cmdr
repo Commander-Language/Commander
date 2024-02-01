@@ -1,0 +1,2 @@
+//Test precedence
+x = x[1][2];

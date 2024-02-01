@@ -1,2 +1,2 @@
 (PrgmNode
-	(VarStmtNode isFloat (FloatExprNode 9.8)))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode isFloat) EQUAL (FloatExprNode 9.800000))))

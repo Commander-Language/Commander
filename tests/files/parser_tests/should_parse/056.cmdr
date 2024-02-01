@@ -1,0 +1,2 @@
+// Test that string interpolation with a function call parses properly
+statement = "UTAH IS ${getCoolWord()}!";

@@ -1,0 +1,2 @@
+(PrgmNode
+	(CmdExprNode (CmdCmdNode echo (StringNode 'Hello World!'))))

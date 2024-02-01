@@ -1,0 +1,2 @@
+//Should parse api toString() on tuple
+x = (1, true, "hi").toString();

@@ -1,0 +1,2 @@
+//Should not parse incorrect type format
+type one = 1;

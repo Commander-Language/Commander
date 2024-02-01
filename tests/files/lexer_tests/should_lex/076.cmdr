@@ -1,0 +1,2 @@
+// Tests that timeouts get lexed correctly
+timeout 40000 ping http://google.com;

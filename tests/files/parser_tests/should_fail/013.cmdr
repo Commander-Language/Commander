@@ -1,0 +1,2 @@
+//Should not parse due to unterminated array
+x = 1];

@@ -1,0 +1,2 @@
+// Test that write statements parse properly
+write "Hello World!" to "helloWorld.txt";

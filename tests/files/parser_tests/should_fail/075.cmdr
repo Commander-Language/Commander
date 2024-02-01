@@ -1,0 +1,2 @@
+//Should not parse ternary expression
+x = true ? : y;

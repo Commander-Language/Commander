@@ -1,0 +1,4 @@
+//Should parse for loop
+for (add(a, b); isTrue(a, b); subtract(b, a)) {
+    echo "hi";
+}

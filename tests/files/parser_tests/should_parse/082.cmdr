@@ -1,0 +1,5 @@
+//Test tuples don't get confused in functions
+add(a : ((int, int), (float)), b : float) : (float, float) {
+    return ((a[0][0] + b), b);
+}
+result = add(((1, 2), (3.0)), 3.1415926);

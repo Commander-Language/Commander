@@ -1,0 +1,8 @@
+//Should parse types
+type a = int;
+type b = float;
+type c = bool;
+type d = string;
+type e = (a, b, c, (string, float));
+type f = e[][];
+type g = (int, float, e, f) -> b;

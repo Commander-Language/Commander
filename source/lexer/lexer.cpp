@@ -48,6 +48,8 @@ namespace lexer {
                 return "DIVIDE_EQUALS";
             case DO:
                 return "DO";
+            case DOT:
+                return "DOT";
             case DOUBLE_EQUALS:
                 return "DOUBLE_EQUALS";
             case ELSE:
@@ -140,6 +142,8 @@ namespace lexer {
                 return "STRINGLITERAL";
             case STRINGVAL:
                 return "STRINGVAL";
+            case TIMEOUT:
+                return "TIMEOUT";
             case TO:
                 return "TO";
             case TRUE:
@@ -668,7 +672,7 @@ namespace lexer {
                     || nextToken->type == NOT_EQUALS || nextToken->type == LESSER_EQUAL
                     || nextToken->type == GREATER_EQUAL || nextToken->type == MODULO_EQUALS
                     || nextToken->type == DIVIDE_EQUALS || nextToken->type == MULTIPLY_EQUALS
-                    || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS
+                    || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS || nextToken->type == LSQUARE
                     || (noSpace && (nextToken->type == DECREMENT || nextToken->type == INCREMENT))) {
                     tokens.push_back(nextToken);
                 } else {
@@ -687,6 +691,11 @@ namespace lexer {
                 tokens.push_back(expectToken(EQUALS, file, position, isCommand));
                 isCommand = true;
             }
+            // Look ahead for timeout
+            if (token->type == TIMEOUT && isFirst) {
+                tokens.push_back(expectToken(INTVAL, file, position, isCommand));
+                isCommand = true;
+            }
             // Look ahead for for-loop
             if (token->type == FOR && isFirst && !isCommand) {
                 tokens.push_back(expectToken(LPAREN, file, position, isCommand));
@@ -695,7 +704,7 @@ namespace lexer {
                 lexStatement(tokens, file, position, RPAREN);
             }
             skipWhitespace(file, position);
-            if (token->type == ALIAS && isFirst) { commandPosition = position; }
+            if ((token->type == ALIAS || token->type == TIMEOUT) && isFirst) { commandPosition = position; }
             if (isFirst) { isFirst = false; }
         }
         if (isCommand && isBacktickCommand) {

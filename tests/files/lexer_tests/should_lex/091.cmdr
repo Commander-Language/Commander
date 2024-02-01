@@ -1,0 +1,2 @@
+//Should lex floats correctly
+x = [3., .5, 0.5, 1.2.3, 1234.24.35.4.55];

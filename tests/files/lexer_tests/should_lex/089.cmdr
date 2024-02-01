@@ -1,0 +1,2 @@
+//Test that command lexes correctly
+x = `$var -l`;

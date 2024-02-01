@@ -1,0 +1,4 @@
+//Should not parse due to unterminated curly braces
+add = (a, b)
+    return a + b;
+}

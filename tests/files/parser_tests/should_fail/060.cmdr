@@ -1,0 +1,4 @@
+//Should not parse for loop due to missing parentheses brace
+for (i = 0; i == 0; i++ {
+    echo hi;
+}

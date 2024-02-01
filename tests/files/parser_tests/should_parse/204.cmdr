@@ -1,0 +1,2 @@
+//Should parse multiple statements on the same line
+echo "hi"; echo "world"; x = 2;

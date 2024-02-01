@@ -8,6 +8,7 @@
 #define CPP_UTILITIES_SCOPE_HPP
 #include <map>
 #include <string>
+#include <memory>
 
 // TODO: replace data with a generic object class (template class?)
 
@@ -39,8 +40,17 @@ public:
      * addOrUpdateVariable will attempt to add the relevant data to the scope.
      * @param variableID - A String ID which the variable will be referenced by (e.g. "cat")
      * @param data - An object which will be stored as data (e.g. 14, "dog", std::vector<int>, etc.)
+     * @param occurences - The number of times the variable is used in the script (used for garbage collection)
      */
     void addOrUpdateVariable(std::string variableID, int data);
+
+    /**
+     * updateVariable() is similar to addOrUpdateVariable. This method will only update variables if they exist anywhere in the scope.
+     * @param variableID - The variable one wishes to change
+     * @param newData - The new data to associate with the variable
+     * @return - TRUE if the variable was successfully updated, otherwise FALSE is returned
+     */
+    bool updateVariable(std::string variableID, int newData);
 
     /**
      * hasLocalVariable returns a boolean value according to whether the specified variable exists in this scope.
@@ -78,17 +88,63 @@ public:
      */
     bool isGlobal();
 
+    //Garbage Collection methods
+
+    /**
+     * setVariableOccurrences() adds a key, value pair for variable occurrences in the Commander script
+     * @param occurrences - An unsigned int value which determines how many times a variable is used in a script
+     */
+    void setVariableOccurrences(std::string variableID, unsigned int occurrences);
+
+    /**
+     * freeVariableData() destructs the data used by a variable
+     * @param variableID - A string variableID to free data from
+     * @return - TRUE if the data was destructed (or already destructed), otherwise FALSE is returned
+     */
+    bool freeVariableData(std::string variableID);
+
+    /**
+     * decrementUses() subtracts the number of the variable's occurrences by 1. If the number of occurrences are 0, the
+     * value will not update further
+     * @param variableID - The variable one wishes to decrement
+     */
+    void decrementUses(std::string variableID);
+
+    /**
+     * hasExpired() returns a boolean value according to whether the number of occurrences of a variable is equal to 0
+     * @param variableID - The variable to check the garbage collection status of
+     * @return - TRUE if the variable has no more occurrences, otherwise FALSE is returned
+     */
+    bool hasExpired(std::string variableID);
+
 private:
-    std::map<std::string, int> variableData {};  // uses a Key variableName to find it's associated object
-    Scope* parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
+    std::map<std::string, std::shared_ptr<int>> _variableData {};  // uses a Key variableName to find it's associated object
+    std::map<std::string, unsigned int> _variableUses; //uses a Key variableName to find usages left (unsigned int)
+    Scope* _parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
 
 
     /**
-     * hasKey() returns a boolean value according to whether variableData has an entry of the specified name
+     * hasDataKey() returns a boolean value according to whether _variableData has an entry of the specified name
      * @param key - A string value representing a variable ID
-     * @return - TRUE if the variable exists in variableData, otherwise FALSE is returned
+     * @return - TRUE if the variable exists in _variableData, otherwise FALSE is returned
      */
-    bool hasKey(std::string key);
+    bool hasDataKey(std::string key);
+
+    /**
+     * hasUsesKey() returns a boolean value according to whether _variableUses has an entry of the specified name
+     * @param key - A string value representing a variable ID
+     * @return - TRUE if the variable exists in _variableUses, otherwise FALSE is returned
+     */
+    bool hasUsesKey(std::string key);
+
+    /**
+     * tryGetUses() is a helper method for getting the number of variable uses. If a value does not exist, a new one
+     * will be created with a value of 0
+     * @param variableID - The variable one wishes to find or initialize
+     * @return - TRUE if the method created a new entry in _variableUses, otherwise FALSE is returned
+     */
+    bool tryGetUses(std::string variableID);
+
 };
 
 

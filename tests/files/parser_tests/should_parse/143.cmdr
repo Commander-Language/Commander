@@ -1,0 +1,2 @@
+//Test precedence
+x = a[1] * b;

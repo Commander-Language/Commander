@@ -1,0 +1,4 @@
+//Tests arrays
+arr = [1, 2, 3];
+length = arr.length();
+second = arr[1];

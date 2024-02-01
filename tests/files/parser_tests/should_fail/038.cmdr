@@ -1,0 +1,4 @@
+//Should not parse weird function names
+3588() {
+    return 3588;
+}

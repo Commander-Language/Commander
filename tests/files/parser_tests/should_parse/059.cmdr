@@ -1,0 +1,4 @@
+// Test that lambdas parse with return type included
+nada = (x,y) : int -> {
+    return x + y;
+}

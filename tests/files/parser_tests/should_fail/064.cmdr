@@ -1,0 +1,4 @@
+//Should not parse for loop due to incomplete loop
+for (i = 0; i < 10) {
+    echo hi;
+}

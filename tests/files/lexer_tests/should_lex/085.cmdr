@@ -1,0 +1,46 @@
+//Test types
+func(
+    a:  int,
+    b:  float,
+    c : bool,
+    d : string,
+    e : int[],
+    f : float[],
+    g : bool[],
+    h : string[],
+    i : int[][],
+    j : float[][],
+    k : bool[][],
+    l : string[][],
+    m : (int, float, bool, string),
+    n : (int[], float[], bool[], string[])[],
+    o : ((int, float, bool, string), (int[], float[], bool[], string[]), (int[][], float[][], bool[][], string[][]))[][],
+    p : () -> int,
+    q : (int, float, bool, string) -> (int, float, bool, string),
+    r : (int[], float[], bool[], string[]) -> (int, float, bool, string)[]
+) : (
+    int,
+    float,
+    bool,
+    string,
+    int[],
+    float[],
+    bool[],
+    string[],
+    int[][],
+    float[][],
+    bool[][],
+    string[][],
+    (int, float, bool, string),
+    (int[], float[], bool[], string[])[],
+    ((int, float, bool, string), (int[], float[], bool[], string[]), (int[][], float[][], bool[][], string[][]))[][],
+    int,
+    (int, float, bool, string) -> (int, float, bool, string),
+    (int[], float[], bool[], string[]) -> (int, float, bool, string)[]
+) {
+    z: int =  a;
+    y : float = b;
+    x : bool = c;
+    w : string = d;
+    return (z, y, x, w, e, f, g, h, i, j, k, l, m, n, o, p(), q, r);
+}
