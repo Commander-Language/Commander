@@ -23,6 +23,8 @@
 
 namespace jobRunner {
 
+    const int bufferSize = 4096;
+
     using JobInfo = std::tuple<std::string, std::string, int>;
 
     /**

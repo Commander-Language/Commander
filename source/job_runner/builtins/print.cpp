@@ -3,10 +3,10 @@
  * @brief scan builtin header file
  */
 #include "builtins.hpp"
+#include <cstdlib>
 #include <iostream>
-#include <stdlib.h>
 
-namespace builtins {
+namespace Builtins {
     void print(std::vector<std::string> args) {
         if (args.size() <= 1) {
             std::cout << args[0] << ": no argument given\n";
@@ -22,4 +22,4 @@ namespace builtins {
         // only works with non-thread safe exit
         exit(0);
     }
-}  // namespace builtins
+}  // namespace Builtins

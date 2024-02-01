@@ -11,9 +11,9 @@
  * @param tokens The list of tokens
  * @param expectedOutput The expected token output
  */
-void expectOutputEqualsTokens(const lexer::TokenList& tokens, const std::string& expectedOutput) {
+void expectOutputEqualsTokens(const Lexer::TokenList& tokens, const std::string& expectedOutput) {
     std::ostringstream builder;
-    for (const lexer::TokenPtr& token : tokens) builder << token->toString() << "\n";
+    for (const Lexer::TokenPtr& token : tokens) builder << token->toString() << "\n";
     EXPECT_EQ(expectedOutput, builder.str());
 }
 
@@ -27,9 +27,9 @@ TEST_P(LexerLexTests, ShouldLexFileAndMatchExpectedExamples) {
     const std::string expectedFilePath = "../tests/files/lexer_tests/should_lex/" + std::get<1>(params);
 
     try {
-        lexer::TokenList tokens;
-        lexer::tokenize(tokens, filePath);
-        const std::string expectedOutput = lexer::readFile(expectedFilePath);
+        Lexer::TokenList tokens;
+        Lexer::tokenize(tokens, filePath);
+        const std::string expectedOutput = Lexer::readFile(expectedFilePath);
 
         expectOutputEqualsTokens(tokens, expectedOutput);
     } catch (const util::CommanderException& e) {
@@ -44,16 +44,16 @@ TEST_P(LexerLexTests, ShouldLexFileAndMatchExpectedExamples) {
 TEST_P(LexerFailTests, ShouldNotLexFile) {
     auto param = GetParam();
     const std::string filePath = "../tests/files/lexer_tests/should_fail/" + param;
-    lexer::TokenList tokens;
-    ASSERT_THROW(lexer::tokenize(tokens, filePath), util::CommanderException);
+    Lexer::TokenList tokens;
+    ASSERT_THROW(Lexer::tokenize(tokens, filePath), util::CommanderException);
 }
 
 /**
  * Tests that passing in a non-existent file path results in an exception being thrown
  */
 TEST(LexerFailTests, ShouldFailIfFileNotFound) {
-    lexer::TokenList tokens;
-    ASSERT_THROW(lexer::tokenize(tokens, "non-existent-file-name.txt"), util::CommanderException);
+    Lexer::TokenList tokens;
+    ASSERT_THROW(Lexer::tokenize(tokens, "non-existent-file-name.txt"), util::CommanderException);
 }
 
 /**

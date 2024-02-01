@@ -85,72 +85,72 @@ namespace FlowController {
          * @param name The name of the symbol
          * @param value The value of the symbol
          */
-        void setVariable(std::string name, std::any value);
+        void _setVariable(std::string name, std::any value);
 
         /**
          * @brief Get a variable from the symbol table.
          * @param name The name of the symbol
          * @returns The value of the symbol
          */
-        std::any getVariable(std::string name);
+        std::any _getVariable(const std::string& name);
 
         /**
          * @brief Run a command
          */
-        void runCommand();
+        void _runCommand();
 
         /**
          * @brief Get a String representation of a Commander type value
          */
-        std::string commanderTypeToString(std::any);
+        static std::string _commanderTypeToString(std::any);
 
         /**
          * @brief Helper to interpret binding nodes
          */
-        void _binding(Parser::BindingNodePtr);
+        void _binding(const Parser::BindingNodePtr&);
         /**
          * @brief Helper to interpret bindings nodes
          */
-        void _bindings(Parser::BindingsNodePtr);
+        void _bindings(const Parser::BindingsNodePtr&);
         /**
          * @brief Helper to interpret cmd nodes
          */
-        void _cmd(Parser::CmdNodePtr);
+        void _cmd(const Parser::CmdNodePtr&);
         /**
          * @brief Helper to interpret expr nodes
          */
-        std::any _expr(Parser::ExprNodePtr);
+        std::any _expr(const Parser::ExprNodePtr&);
         /**
          * @brief Helper to interpret exprs nodes
          */
-        void _exprs(Parser::ExprsNodePtr);
+        void _exprs(const Parser::ExprsNodePtr&);
         /**
          * @brief Helper to interpret prgm nodes
          */
-        void _prgm(std::shared_ptr<Parser::PrgmNode>);
+        void _prgm(const std::shared_ptr<Parser::PrgmNode>&);
         /**
          * @brief Helper to interpret stmt nodes
          * @details Some statements need to return some generic value;
          * for example the body of a function call, so return value or nullptr if unnecessary.
          * @returns Generic value or nullptr if not needed.
          */
-        std::any _stmt(Parser::StmtNodePtr);
+        std::any _stmt(const Parser::StmtNodePtr&);
         /**
          * @brief Helper to interpret stmts nodes
          */
-        void _stmts(Parser::StmtsNodePtr);
+        void _stmts(const Parser::StmtsNodePtr&);
         /**
          * @brief Helper to interpret string nodes
          */
-        std::string _string(Parser::StringNodePtr);
+        std::string _string(const Parser::StringNodePtr&);
         /**
          * @brief Helper to interpret type nodes
          */
-        void _type(Parser::TypeNodePtr);
+        void _type(const Parser::TypeNodePtr&);
         /**
          * @brief Helper to interpret variable nodes
          */
-        void _variable(Parser::VariableNodePtr);
+        void _variable(const Parser::VariableNodePtr&);
 
         /**
          * @brief

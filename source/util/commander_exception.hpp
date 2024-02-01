@@ -29,7 +29,7 @@ namespace util {
          * @param message The message of the exception
          * @param position The position in the file that the exception occurs
          */
-        CommanderException(const std::string& message, const lexer::FilePosition& position)
+        CommanderException(const std::string& message, const Lexer::FilePosition& position)
             : _errorMessage(message + "\n" + position.toString()) {}
 
         /**

@@ -10,7 +10,7 @@
 #include "../util/commander_exception.hpp"
 #include "lexer.hpp"
 
-namespace lexer {
+namespace Lexer {
 
     std::string tokenTypeToString(const tokenType& type) {
         switch (type) {
@@ -185,7 +185,7 @@ namespace lexer {
     std::string readFile(const std::string& filePath) {
         std::ifstream input(filePath);
         if (!input.is_open()) { throw util::CommanderException("File not found at " + filePath); }
-        return std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+        return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
     }
 
     void tokenize(TokenList& tokens, const std::string& filePath) {
@@ -747,4 +747,4 @@ namespace lexer {
                                        startPosition);
     }
 
-}  // namespace lexer
+}  // namespace Lexer

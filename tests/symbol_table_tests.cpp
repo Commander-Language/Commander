@@ -3,10 +3,10 @@
  * @brief symbol_table_tests contains the unit tests for the Scope and SymbolTableOrganizer classes
  * @details Tests are separated into three suites:
  *          SCOPE_TEST - tests the functionality of the Scope class
- *          SCOPE_STRESS_TEST - inserts a large number of items into a Scope object, perform an operation, and validates the result
- *          SYMORG_TEST - tests the functionality of the SymbolTableOrganizer class
- *          GARBAGE_COLLECTION_SCOPE - tests the functionality of garbage collection logic in the Scope class
- *          GARBAGE_COLLECTION_SYMBOL_TABLE - tests the functionality of garbage collection logic in the SymbolTableOrganizer class
+ *          SCOPE_STRESS_TEST - inserts a large number of items into a Scope object, perform an operation, and validates
+ * the result SYMORG_TEST - tests the functionality of the SymbolTableOrganizer class GARBAGE_COLLECTION_SCOPE - tests
+ * the functionality of garbage collection logic in the Scope class GARBAGE_COLLECTION_SYMBOL_TABLE - tests the
+ * functionality of garbage collection logic in the SymbolTableOrganizer class
  */
 
 #include "source/symbol_table/scope.hpp"
@@ -31,7 +31,8 @@ TEST(SCOPE_TEST, addToScope) {
 
 /**
  * @brief addPointerTest() checks if identical data between two different variables is shared
- * @details "bird" and "dog" are both initialized with a value of 8. These variables are expected to yield the same value, but not the same pointer
+ * @details "bird" and "dog" are both initialized with a value of 8. These variables are expected to yield the same
+ * value, but not the same pointer
  */
 TEST(SCOPE_TEST, addPointerTests) {
     Scope testScope = Scope();
@@ -47,7 +48,8 @@ TEST(SCOPE_TEST, addPointerTests) {
 
 /**
  * @brief updateVariableTest() tests if the value of a provided variable updates without issue
- * @details First, we attempt to update a variable which does not exist. Next, we update a variable which exists and verifies it retains the new value
+ * @details First, we attempt to update a variable which does not exist. Next, we update a variable which exists and
+ * verifies it retains the new value
  */
 TEST(SCOPE_TEST, updateVariableTest) {
     Scope testScope = Scope();
@@ -61,7 +63,8 @@ TEST(SCOPE_TEST, updateVariableTest) {
 }
 
 /**
- * @brief updateVariableBooleanTest acts similarly to updateVariableTest. This test ensures the boolean values returned are accurate
+ * @brief updateVariableBooleanTest acts similarly to updateVariableTest. This test ensures the boolean values returned
+ * are accurate
  * @details FALSE is expected when a variable does not exist, TRUE is expected if the variable has been updated
  */
 TEST(SCOPE_TEST, updateVariableBooleanTest) {
@@ -115,7 +118,7 @@ TEST(SCOPE_TEST, globalTest) {
 }
 
 /**
- * @brief getVariableTest adds a variable with an arbitrary value to a Scope object and verifies it with getVariable
+ * @brief getVariableTest adds a variable with an arbitrary value to a Scope object and verifies it with _getVariable
  */
 TEST(SCOPE_TEST, getVariableTest) {
     int catValue = 8;
@@ -184,7 +187,7 @@ TEST(SCOPE_STRESS_TEST, addStressTestLarge) {
     }
 }
 
-//SYMBOLTABLEORGANIZER TESTS
+// SYMBOLTABLEORGANIZER TESTS
 
 /**
  * @brief pushTest adds a Scope to a SymbolTable object and validates the global status of the scope
@@ -249,7 +252,8 @@ TEST(SYMORG_TEST, addItemsTest) {
     EXPECT_TRUE(testOrg.getScope()->hasLocalVariable("dog"));
     EXPECT_EQ(*testOrg.getScope()->getVariable("dog"), 6);
 
-    testOrg.pushSymbolTable(); //third test: we'll add a new Scope to ensure cat is being properly updated instead of re-initializing
+    testOrg.pushSymbolTable();  // third test: we'll add a new Scope to ensure cat is being properly updated instead of
+                                // re-initializing
     testOrg.addOrUpdateVariable("cat", 8);
     EXPECT_EQ(*testOrg.getScope()->getVariable("cat"), 8);
     testOrg.popSymbolTable();
@@ -264,28 +268,28 @@ TEST(SYMORG_TEST, addItemsTest) {
 TEST(SYMORG_TEST, addItemsStressTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
-    for(int currentVariable = 0; currentVariable < 100; currentVariable++) {
-        if((currentVariable != 0) && (currentVariable % 20 == 0)) {
-            testOrg.pushSymbolTable(); //every 20 items, add a new Scope
+    for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
+        if ((currentVariable != 0) && (currentVariable % 20 == 0)) {
+            testOrg.pushSymbolTable();  // every 20 items, add a new Scope
         }
         testOrg.addOrUpdateVariable(std::to_string(currentVariable), currentVariable);
     }
 
-    for(int currentVariable = 99; currentVariable > -1; currentVariable--) {
+    for (int currentVariable = 99; currentVariable > -1; currentVariable--) {
         EXPECT_TRUE(testOrg.varExistsInCurrentSymbolTable(std::to_string(currentVariable)));
         EXPECT_EQ(*testOrg.getVariable(std::to_string(currentVariable)), currentVariable);
-        if((currentVariable != 0) && (currentVariable % 20 == 0)) {
-            testOrg.popSymbolTable(); //every 20 items, remove a Scope
+        if ((currentVariable != 0) && (currentVariable % 20 == 0)) {
+            testOrg.popSymbolTable();  // every 20 items, remove a Scope
         }
     }
 }
 
 /**
- * @brief recursionTest tests the recursive nature of hasGlobalVariable() and getVariable()
+ * @brief recursionTest tests the recursive nature of hasGlobalVariable() and _getVariable()
  * @details 100 Scope objects are pushed to the SymbolTableOrganizer:
  *          The first Scope contains a variable "cat" with any value
  *          99 empty Scopes are added in turn with each Scope referencing the previous
- *          When hasGlobalVariable() and getVariable() are called, the Scope is expected to return a value present in
+ *          When hasGlobalVariable() and _getVariable() are called, the Scope is expected to return a value present in
  * the First Scope
  */
 TEST(SYMORG_TEST, recursionTest) {
@@ -330,8 +334,11 @@ TEST(SYMORG_TEST, copyTest) {
 }
 
 /**
- * @brief multiScopeCopyTest() tests the status of SymbolTableOrganizer's copy constructor on objects with multiple Scopes
- * @details One variable exists on each Scope in the organizer. A copy of the Symbol Table Organizer is created and its contents are modified. The contents of the copied organizer are not expected to impact the original symbol table organizer
+ * @brief multiScopeCopyTest() tests the status of SymbolTableOrganizer's copy constructor on objects with multiple
+ * Scopes
+ * @details One variable exists on each Scope in the organizer. A copy of the Symbol Table Organizer is created and its
+ * contents are modified. The contents of the copied organizer are not expected to impact the original symbol table
+ * organizer
  */
 TEST(SYMORG_TEST, multiScopeCopyTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
@@ -344,36 +351,39 @@ TEST(SYMORG_TEST, multiScopeCopyTest) {
     copiedOrg.addOrUpdateVariable("cat", 16);
     copiedOrg.addOrUpdateVariable("dog", 32);
 
-    EXPECT_NE(*testOrg.getVariable("cat"), *copiedOrg.getVariable("cat")); //data checks
+    EXPECT_NE(*testOrg.getVariable("cat"), *copiedOrg.getVariable("cat"));  // data checks
     EXPECT_EQ(*copiedOrg.getVariable("cat"), 16);
     EXPECT_EQ(*testOrg.getVariable("cat"), 8);
     EXPECT_NE(*testOrg.getVariable("dog"), *copiedOrg.getVariable("dog"));
     EXPECT_EQ(*copiedOrg.getVariable("dog"), 32);
     EXPECT_EQ(*testOrg.getVariable("dog"), 16);
-    EXPECT_NE(testOrg.getVariable("cat"), copiedOrg.getVariable("cat")); //pointer checks
+    EXPECT_NE(testOrg.getVariable("cat"), copiedOrg.getVariable("cat"));  // pointer checks
     EXPECT_NE(testOrg.getVariable("dog"), copiedOrg.getVariable("dog"));
 }
 
 /**
  * @brief deepCopyTest() is functionally similar to multiScopeCopyTest(). This test includes 100 Scope objects
- * @details A single variable is created on each scope. The contents of the copied Symbol Table Organizer are modified and validated. The contents of one organizer should not affect the other
+ * @details A single variable is created on each scope. The contents of the copied Symbol Table Organizer are modified
+ * and validated. The contents of one organizer should not affect the other
  */
 TEST(SYMORG_TEST, deepCopyTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
-    for(int currentScope = 0; currentScope < 100; currentScope++) {
+    for (int currentScope = 0; currentScope < 100; currentScope++) {
         testOrg.pushSymbolTable();
         testOrg.addOrUpdateVariable(std::to_string(currentScope), currentScope);
     }
 
     SymbolTableOrganizer copiedOrg = SymbolTableOrganizer(testOrg);
-    for(int currentScope = 0; currentScope < 100; currentScope++) {
+    for (int currentScope = 0; currentScope < 100; currentScope++) {
         copiedOrg.addOrUpdateVariable(std::to_string(currentScope), currentScope + 1);
-        EXPECT_NE(testOrg.getVariable(std::to_string(currentScope)), copiedOrg.getVariable(std::to_string(currentScope)));
-        EXPECT_NE(*testOrg.getVariable(std::to_string(currentScope)), *copiedOrg.getVariable(std::to_string(currentScope)));
+        EXPECT_NE(testOrg.getVariable(std::to_string(currentScope)),
+                  copiedOrg.getVariable(std::to_string(currentScope)));
+        EXPECT_NE(*testOrg.getVariable(std::to_string(currentScope)),
+                  *copiedOrg.getVariable(std::to_string(currentScope)));
     }
 }
 
-//GARBAGE COLLECTION TESTS
+// GARBAGE COLLECTION TESTS
 
 /**
  * @brief hasExpiredTest checks the functionality of the hasExpired() method
@@ -386,9 +396,7 @@ TEST(GARBAGE_COLLECTION_SCOPE, hasExpiredTest) {
     testScope.setVariableOccurrences("cat", 8);
 
     EXPECT_FALSE(testScope.hasExpired("cat"));
-    for(int calls = 0; calls < 8; calls++) {
-        testScope.decrementUses("cat");
-    }
+    for (int calls = 0; calls < 8; calls++) { testScope.decrementUses("cat"); }
     EXPECT_TRUE(testScope.hasExpired("cat"));
     EXPECT_FALSE(testScope.hasExpired("dog"));
 }
@@ -402,29 +410,29 @@ TEST(GARBAGE_COLLECTION_SCOPE, decrementTest) {
     testScope.setVariableOccurrences("cat", 1);
 
     EXPECT_FALSE(testScope.hasExpired("cat"));
-    testScope.decrementUses("cat"); //Should change 1 to 0
+    testScope.decrementUses("cat");  // Should change 1 to 0
     EXPECT_TRUE(testScope.hasExpired("cat"));
-    testScope.decrementUses("cat"); //Should not update from 0
+    testScope.decrementUses("cat");  // Should not update from 0
     EXPECT_TRUE(testScope.hasExpired("cat"));
 }
 
 /**
  * @brief expiredTest is a small stress test for the hasExpired() method
- * @details 10 variables are given 3 occurrences in the Scope object. These are decremented and expected to expire after the third call of decrementUses()
+ * @details 10 variables are given 3 occurrences in the Scope object. These are decremented and expected to expire after
+ * the third call of decrementUses()
  */
 TEST(GARBAGE_COLLECTION_SCOPE, expiredTest) {
     Scope testScope = Scope();
-    for(int currentVar = 0; currentVar < 10; currentVar++) {
+    for (int currentVar = 0; currentVar < 10; currentVar++) {
         testScope.addOrUpdateVariable(std::to_string(currentVar), 1);
         testScope.setVariableOccurrences(std::to_string(currentVar), 3);
     }
 
-    for(int currentVar = 0; currentVar < 10; currentVar++) {
-        for(int currentDec = 0; currentDec < 4; currentDec++) {
-            if(currentDec == 3) {
+    for (int currentVar = 0; currentVar < 10; currentVar++) {
+        for (int currentDec = 0; currentDec < 4; currentDec++) {
+            if (currentDec == 3) {
                 EXPECT_TRUE(testScope.hasExpired(std::to_string(currentVar)));
-            }
-            else {
+            } else {
                 EXPECT_FALSE(testScope.hasExpired(std::to_string(currentVar)));
             }
             testScope.decrementUses(std::to_string(currentVar));
@@ -434,7 +442,8 @@ TEST(GARBAGE_COLLECTION_SCOPE, expiredTest) {
 
 /**
  * @brief setOccurrences() is not reccommended outside of variable initialization, but will be tested regardless
- * @details The variable "cat" has its number of occurrences modified. The variable is expected to expire when the number of occurrences is zero
+ * @details The variable "cat" has its number of occurrences modified. The variable is expected to expire when the
+ * number of occurrences is zero
  */
 TEST(GARBAGE_COLLECTION_SCOPE, setOccurrencesTest) {
     Scope testScope = Scope();
@@ -454,13 +463,14 @@ TEST(GARBAGE_COLLECTION_SCOPE, setOccurrencesTest) {
 
 /**
  * @brief freeDataTest() checks the functionality of freeVariableData()
- * @details A variable "cat" is assigned a value. The test is expected to not throw an exception when freeVariableData() is called.
+ * @details A variable "cat" is assigned a value. The test is expected to not throw an exception when freeVariableData()
+ * is called.
  */
 TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 48);
-    ASSERT_NO_THROW(testScope.freeVariableData("cat")); //We shouldn't segfault here
-    ASSERT_NO_THROW(testScope.freeVariableData("cat")); //We shouldn't throw here either after removing the data
+    ASSERT_NO_THROW(testScope.freeVariableData("cat"));  // We shouldn't segfault here
+    ASSERT_NO_THROW(testScope.freeVariableData("cat"));  // We shouldn't throw here either after removing the data
 }
 
 /**
@@ -470,15 +480,17 @@ TEST(GARBAGE_COLLECTION_SCOPE, freeDataTest) {
 TEST(GARBAGE_COLLECTION_SCOPE, freeDataSuccessfulTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 48);
-    ASSERT_TRUE(testScope.freeVariableData("cat")); //TRUE indicates we trashed the data
-    ASSERT_TRUE(testScope.freeVariableData("cat")); //TRUE can also indicate we have already trashed data
+    ASSERT_TRUE(testScope.freeVariableData("cat"));  // TRUE indicates we trashed the data
+    ASSERT_TRUE(testScope.freeVariableData("cat"));  // TRUE can also indicate we have already trashed data
 
-    ASSERT_FALSE(testScope.freeVariableData("dog")); //We'll expect FALSE when data doesn't exist
+    ASSERT_FALSE(testScope.freeVariableData("dog"));  // We'll expect FALSE when data doesn't exist
 }
 
 /**
- * @brief tryFreeDataSuccessfullTest() tests the functionality of boolean values returned from SymbolTableOrganizer's tryFreevariableData() method
- * @details TRUE is expected for any variable which exists and has expired, FALSE is expected for variables which don't exist or have not expired
+ * @brief tryFreeDataSuccessfullTest() tests the functionality of boolean values returned from SymbolTableOrganizer's
+ * tryFreevariableData() method
+ * @details TRUE is expected for any variable which exists and has expired, FALSE is expected for variables which don't
+ * exist or have not expired
  */
 TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, tryFreeDataSuccessfulTest) {
     SymbolTableOrganizer organizer = SymbolTableOrganizer();
@@ -491,7 +503,8 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, tryFreeDataSuccessfulTest) {
 }
 
 /**
- * @brief tryFreeNestedDataSuccessfulTest() places two variables in different Scopes. They are expected to free without issues
+ * @brief tryFreeNestedDataSuccessfulTest() places two variables in different Scopes. They are expected to free without
+ * issues
  */
 TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, tryFreeNestedDataSuccessfulTest) {
     SymbolTableOrganizer organizer = SymbolTableOrganizer();
@@ -534,7 +547,8 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, forceFreeDataTest) {
 
 /**
  * @brief expirationTest() checks SymbolTableOrganizer's variableHasExpired() method
- * @details "cat" is expected to expire after calling getVariable(). "dog" and "birb" are expected to not expire. All variables are present in different Scope levels
+ * @details "cat" is expected to expire after calling _getVariable(). "dog" and "birb" are expected to not expire. All
+ * variables are present in different Scope levels
  */
 TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
     SymbolTableOrganizer organizer = SymbolTableOrganizer();
@@ -549,7 +563,7 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
     ASSERT_FALSE(organizer.variableHasExpired("dog"));
     ASSERT_FALSE(organizer.variableHasExpired("birb"));
 
-    organizer.getVariable("cat"); //We won't do anything with this data, we just need to decrement uses
+    organizer.getVariable("cat");  // We won't do anything with this data, we just need to decrement uses
     organizer.getVariable("dog");
     organizer.getVariable("birb");
 

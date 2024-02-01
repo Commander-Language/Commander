@@ -15,7 +15,7 @@
  *          Finally, the values for the variables are updated and checked
  */
 TEST(BASICTESTS, setOrUpdateTest) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
 
     EXPECT_FALSE(testChecker.hasVariable("cat"));
     EXPECT_FALSE(testChecker.hasVariable("dog"));
@@ -40,7 +40,7 @@ TEST(BASICTESTS, setOrUpdateTest) {
  * @brief stringTypeTests is an extension of setOrUpdateTest which confirms the type has been updated properly
  */
 TEST(BASICTESTS, stringTypeTests) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
     testChecker.setOrUpdateType("cat", "INTEGER");
     EXPECT_EQ("INTEGER", testChecker.getType("cat"));
     EXPECT_NE("FLOAT", testChecker.getType("cat"));
@@ -56,7 +56,7 @@ TEST(BASICTESTS, stringTypeTests) {
  *          should be yielded if the specified variable doesn't exist.
  */
 TEST(BASICTESTS, verifyTests) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
     testChecker.setOrUpdateType("cat", "INTEGER");
     EXPECT_TRUE(testChecker.verifyType("cat", "INTEGER"));
     EXPECT_FALSE(testChecker.verifyType("cat", "STRING"));
@@ -73,7 +73,7 @@ TEST(BASICTESTS, verifyTests) {
  *          is expected to be false
  */
 TEST(BASICTESTS, verifySimilarTypesTest) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
     testChecker.setOrUpdateType("cat", "INTEGER");
     EXPECT_TRUE(testChecker.verifyType("cat", "INTEGER"));
     EXPECT_TRUE(testChecker.verifyType("cat", "FLOAT"));
@@ -94,7 +94,7 @@ TEST(BASICTESTS, verifySimilarTypesTest) {
  * @brief varsExist assigns 100 variables with the Type "INTEGER" and confirms whether they have been properly added.
  */
 TEST(BASICTESTS, varsExist) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
     for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
         testChecker.setOrUpdateType(std::to_string(currentVariable), "INTEGER");
     }
@@ -109,7 +109,7 @@ TEST(BASICTESTS, varsExist) {
  *          should have the variableID "43" and a type of "43"
  */
 TEST(STRESSTESTS, stressTest100) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
     for (int currentString = 0; currentString < 100; currentString++) {
         testChecker.setOrUpdateType(std::to_string(currentString), std::to_string(currentString));
     }
@@ -123,7 +123,7 @@ TEST(STRESSTESTS, stressTest100) {
  * @brief stressTest100000 is an extension of stressTest100, but checks more items compared to its predecessor
  */
 TEST(STRESSTESTS, stressTest100000) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
     for (int currentString = 0; currentString < 100000; currentString++) {
         testChecker.setOrUpdateType(std::to_string(currentString), std::to_string(currentString));
     }

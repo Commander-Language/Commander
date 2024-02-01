@@ -7,7 +7,7 @@
 #define COMMANDER_BUILTIN_HPP
 #include <string>
 #include <vector>
-namespace builtins {
+namespace Builtins {
 
     /**
      * @brief Print something to the terminal
@@ -21,5 +21,5 @@ namespace builtins {
      * @return A string from user input
      */
     std::string scan(std::vector<std::string> args);
-}  // namespace builtins
+}  // namespace Builtins
 #endif

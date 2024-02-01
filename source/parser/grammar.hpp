@@ -31,7 +31,7 @@ namespace Parser {
         /**
          * @brief Shorthand for the `TokenType` enumeration from the lexer.
          */
-        using TokenType = lexer::tokenType;
+        using TokenType = Lexer::tokenType;
 
         /**
          * @brief A component of a grammar rule.

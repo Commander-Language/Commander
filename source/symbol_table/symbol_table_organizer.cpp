@@ -7,7 +7,7 @@
 #include "symbol_table_organizer.hpp"
 
 // Constructor
-SymbolTableOrganizer::SymbolTableOrganizer() {}
+SymbolTableOrganizer::SymbolTableOrganizer() = default;
 
 // Destructor
 SymbolTableOrganizer::~SymbolTableOrganizer() {
@@ -20,7 +20,8 @@ SymbolTableOrganizer::~SymbolTableOrganizer() {
 // Copy-Constructor
 SymbolTableOrganizer::SymbolTableOrganizer(SymbolTableOrganizer& otherTableOrganizer) {
     for (int currentScope = 0; currentScope < otherTableOrganizer._symbolTables.size(); currentScope++) {
-        // vector(otherVector) creates shallow copies of the Scope object, so we'll need to make our own deep copies here
+        // vector(otherVector) creates shallow copies of the Scope object, so we'll need to make our own deep copies
+        // here
         _symbolTables.push_back(new Scope(*otherTableOrganizer._symbolTables[currentScope]));
     }
 }
@@ -47,7 +48,7 @@ void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data)
     _symbolTables.back()->addOrUpdateVariable(variableID, data);
 }
 
-void SymbolTableOrganizer::addOrUpdateVariable(std::string variableID, int data, unsigned int occurrences) {
+void SymbolTableOrganizer::addOrUpdateVariable(const std::string& variableID, int data, unsigned int occurrences) {
     _symbolTables.back()->setVariableOccurrences(variableID, occurrences);
     _symbolTables.back()->addOrUpdateVariable(variableID, data);
 }
@@ -65,9 +66,7 @@ bool SymbolTableOrganizer::varExistsInScope(std::string variableID) {
     return _symbolTables.back()->hasGlobalVariable(variableID);
 }
 
-int* SymbolTableOrganizer::getVariable(std::string variableID) {
-    return _symbolTables.back()->getVariable(variableID);
-}
+int* SymbolTableOrganizer::getVariable(std::string variableID) { return _symbolTables.back()->getVariable(variableID); }
 
 bool SymbolTableOrganizer::isScopeGlobal() {
     if (_symbolTables.size() == 0) {
@@ -78,7 +77,7 @@ bool SymbolTableOrganizer::isScopeGlobal() {
 }
 
 bool SymbolTableOrganizer::tryFreeVariableData(std::string variableID) {
-    if(_symbolTables.back()->hasExpired(variableID)) {
+    if (_symbolTables.back()->hasExpired(variableID)) {
         _symbolTables.back()->freeVariableData(variableID);
         return true;
     }

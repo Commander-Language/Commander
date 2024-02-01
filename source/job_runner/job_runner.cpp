@@ -66,9 +66,9 @@ namespace jobRunner {
         // find a better way
         std::string const name = _args.getArgs()[0];
         if (name == "scan") {
-            builtins::scan(_args.getArgs());
+            Builtins::scan(_args.getArgs());
         } else if (name == "print" || name == "println") {
-            builtins::print(_args.getArgs());
+            Builtins::print(_args.getArgs());
         }
     }
 
@@ -103,8 +103,8 @@ namespace jobRunner {
         close(stderrPipe[1]);
 
         // bufferSizeOut
-        int bufferSizeOut = 4096;
-        int bufferSizeErr = 4096;
+        int bufferSizeOut = bufferSize;
+        int bufferSizeErr = bufferSize;
 
         // we will save output here
         char* stdoutBuffer = new char[bufferSizeOut];
@@ -245,7 +245,7 @@ namespace jobRunner {
             if (i != (_pipeline.size() - 1)) { command.append("| "); }
         }
 
-        int returnCode = system(command.data());
+        int const returnCode = system(command.data());
 
         return {"", "", returnCode};
     }
@@ -253,12 +253,7 @@ namespace jobRunner {
     /*
      * Job Class
      */
-    JobInfo Job::runJob() {
-        if (_mock) {
-            return runJobMocked();
-        } else
-            return _pipeline.runPipeLine(_save);
-    }
+    JobInfo Job::runJob() { return _mock ? runJobMocked() : _pipeline.runPipeLine(_save); }
 
     JobInfo Job::runJobMocked() { return _pipeline.runPipeLineMocked(); }
 

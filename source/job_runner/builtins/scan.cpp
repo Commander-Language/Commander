@@ -4,7 +4,7 @@
  */
 #include "builtins.hpp"
 #include <iostream>
-namespace builtins {
+namespace Builtins {
 
     std::string scan(std::vector<std::string> args) {
         if (args.size() <= 1) {
@@ -18,4 +18,4 @@ namespace builtins {
         return input;
     }
 
-}  // namespace builtins
+}  // namespace Builtins

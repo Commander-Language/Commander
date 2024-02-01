@@ -280,7 +280,7 @@ namespace Parser {
                  //  EXPR -> VARIABLE "[EQUALS]" EXPR
                  {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EQUALS, ASTNodeType::EXPR}},
                   [&](const ProductionItemList& productionList) {
-                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node), BinOpType::EQUAL,
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node), BinOpType::SET,
                                                              castExpr(productionList[2].node));
                   }},
                  //  EXPR -> VARIABLE
@@ -477,8 +477,7 @@ namespace Parser {
                  //  EXPR -> EXPR "[INCREMENT]"
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::INCREMENT}},
                   [&](const ProductionItemList& productionList) {
-                      return std::make_shared<UnOpExprNode>(UnOpType::POST_INCREMENT,
-                                                            castVariable(productionList[0].node));
+                      return std::make_shared<UnOpExprNode>(UnOpType::POST_INCREMENT, castExpr(productionList[0].node));
                   }},
                  //  EXPR -> EXPR "[DECREMENT]"
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DECREMENT}},
@@ -627,7 +626,7 @@ namespace Parser {
                  //  EXPR -> VARIABLE "[EQUALS]" EXPR
                  {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EQUALS, ASTNodeType::EXPR}},
                   [&](const ProductionItemList& productionList) {
-                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node), BinOpType::EQUAL,
+                      return std::make_shared<BinOpExprNode>(castVariable(productionList[0].node), BinOpType::SET,
                                                              castExpr(productionList[2].node));
                   }},
 

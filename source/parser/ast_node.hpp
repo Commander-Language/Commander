@@ -7,6 +7,7 @@
 #ifndef AST_NODE_HPP
 #define AST_NODE_HPP
 
+#include "source/type_checker/type.hpp"
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -19,48 +20,58 @@ namespace Parser {
      * @brief The overarching type of an AST node.
      *
      */
-    enum ASTNodeType { BINDING, BINDINGS, CMD, EXPR, EXPRS, PRGM, STMT, STMTS, STRING, TYPE, VARIABLE };
-
-    /**
-     * @brief The types of unary operation expressions
-     */
-    enum UnOpType { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
-
-    /**
-     * @brief The types of Expressions
-     */
-    enum ExprType {
+    enum ASTNodeType : uint8_t {
+        BINDING,
+        BINDINGS,
+        CMD,
+        CMD_CMD,
+        PIPE_CMD,
+        ASYNC_CMD,
         INT_EXPR,
         FLOAT_EXPR,
         STRING_EXPR,
         BOOL_EXPR,
-        VARIABLE_EXPR,
+        VAR_EXPR,
         ARRAY_EXPR,
-        ARRAY_INDEXED_EXPR,
+        ARRAY_INDEX_EXPR,
         TUPLE_EXPR,
-        TUPLE_INDEXED_EXPR,
+        TUPLE_INDEX_EXPR,
         TERNARY_EXPR,
-        UNARY_EXPR,
-        BINARY_EXPR,
-        FUNCTION_CALL_EXPR,
+        UNOP_EXPR,
+        BINOP_EXPR,
+        CALL_EXPR,
         LAMBDA_EXPR,
-        COMMAND_EXPR
-    };
-
-    /**
-     * @brief The types of Statements
-     */
-    enum StmtType {
+        CMD_EXPR,
+        EXPR,
+        EXPRS,
+        PRGM,
         IF_STMT,
         FOR_STMT,
         WHILE_STMT,
         DO_WHILE_STMT,
         RETURN_STMT,
         SCOPE_STMT,
-        COMMAND_STMT,
-        EXPRESSION_STMT,
-        ALIAS_STMT
+        CMD_STMT,
+        EXPR_STMT,
+        ALIAS_STMT,
+        STMT,
+        STMTS,
+        STRING,
+        INT_TYPE,
+        FLOAT_TYPE,
+        BOOL_TYPE,
+        STRING_TYPE,
+        ARRAY_TYPE,
+        TUPLE_TYPE,
+        FUNCTION_TYPE,
+        TYPE,
+        VARIABLE
     };
+
+    /**
+     * @brief The types of unary operation expressions
+     */
+    enum UnOpType : uint8_t { NEGATE, NOT, PRE_INCREMENT, POST_INCREMENT, PRE_DECREMENT, POST_DECREMENT };
 
     /**
      * @brief Helper method that gets the string representation of the Unop enum type
@@ -72,7 +83,7 @@ namespace Parser {
     /**
      * @brief The types of binop expressions
      */
-    enum BinOpType {
+    enum BinOpType : uint8_t {
         LESSER,
         GREATER,
         LESSER_EQUAL,
@@ -86,6 +97,7 @@ namespace Parser {
         AND,
         OR,
         EQUAL,
+        SET,
         NOT_EQUAL,
         ADD_EQUAL,
         SUBTRACT_EQUAL,
@@ -155,12 +167,20 @@ namespace Parser {
     class TypeNode : public ASTNode {
     public:
         /**
-         * @brief Reports the type of this type node.
-         *
-         * @return `TYPE` always.
+         * @brief The type of the node
          */
-        [[nodiscard]] ASTNodeType nodeType() const override;
+        TypeChecker::TyPtr type;
+        /**
+         * @brief Gets the string representation of the type
+         *
+         * @return The string representation of the type
+         */
+        [[nodiscard]] std::string getTypeString() const;
     };
+    /**
+     * @brief A pointer to a type node.
+     *
+     */
     using TypeNodePtr = std::shared_ptr<TypeNode>;
 
     /**
@@ -259,15 +279,8 @@ namespace Parser {
      * @brief A command node.
      *
      */
-    class CmdNode : public ASTNode {
-    public:
-        /**
-         * @brief Reports the type of this command node.
-         *
-         * @return `CMD` always.
-         */
-        [[nodiscard]] ASTNodeType nodeType() const override;
-    };
+    class CmdNode : public ASTNode {};
+
     /**
      * @brief A smart pointer to a command node.
      *
@@ -281,17 +294,15 @@ namespace Parser {
     class ExprNode : public ASTNode {
     public:
         /**
-         * @brief Reports the type of this expression node.
-         *
-         * @return `EXPR` always.
+         * @brief The type of the node
          */
-        [[nodiscard]] ASTNodeType nodeType() const override;
-
+        TypeChecker::TyPtr type;
         /**
-         * @brief Reports the type of expression
-         * @return ExprType
+         * @brief Gets the string representation of the type
+         *
+         * @return The string representation of the type
          */
-         [[nodiscard]] virtual ExprType exprType() const = 0;
+        [[nodiscard]] std::string getTypeString() const;
     };
     /**
      * @brief A pointer to an expression node.
@@ -351,20 +362,8 @@ namespace Parser {
      * @brief A statement AST node.
      *
      */
-    class StmtNode : public ASTNode {
-    public:
-        /**
-         * @brief Reports the type of this statement node.
-         *
-         * @return `STMT` always.
-         */
-        [[nodiscard]] ASTNodeType nodeType() const override;
+    class StmtNode : public ASTNode {};
 
-        /**
-         * @brief Reports the type of statment
-         */
-         [[nodiscard]] virtual StmtType stmtType() const = 0;
-    };
     /**
      * @brief A pointer to a statement node.
      *
@@ -396,7 +395,7 @@ namespace Parser {
         /**
          * @brief Reports the type of this expression-list node.
          *
-         * @return `EXPRS` always.
+         * @return `STMTS` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
 
@@ -454,6 +453,10 @@ namespace Parser {
          */
         [[nodiscard]] std::string sExpression() const override;
     };
+    /**
+     * @brief A pointer to a string node.
+     *
+     */
     using StringNodePtr = std::shared_ptr<StringNode>;
 
     /**
@@ -488,19 +491,20 @@ namespace Parser {
          */
         [[nodiscard]] std::string sExpression() const override;
     };
+    /**
+     * @brief A pointer to a program node.
+     *
+     */
+    using PrgmNodePtr = std::shared_ptr<PrgmNode>;
 
     /**
      * @brief A variable AST node.
      */
-    class VariableNode : public ASTNode {
-    public:
-        /**
-         * @brief Reports the type of this program node.
-         *
-         * @return `VARIABLE` always.
-         */
-        [[nodiscard]] ASTNodeType nodeType() const override;
-    };
+    class VariableNode : public ASTNode {};
+    /**
+     * @brief A pointer to a variable node.
+     *
+     */
     using VariableNodePtr = std::shared_ptr<VariableNode>;
 
 
@@ -517,14 +521,15 @@ namespace Parser {
         /**
          * The list of arguments for the command, consisting of variable expression nodes and strings nodes
          */
-        std::vector<ASTNode> arguments;
+        std::vector<ASTNodePtr> arguments;
 
         /**
          * @brief Class constructor.
-         * @details TODO: This.
          *
+         * @param arguments The arguments for the command
          */
         //  CmdCmdNode();
+        CmdCmdNode(std::vector<ASTNodePtr> arguments);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -532,7 +537,19 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `CMD` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a command node.
+     *
+     */
+    using CmdCmdNodePtr = std::shared_ptr<CmdCmdNode>;
 
     /**
      * @brief An asynchronous command AST node.
@@ -558,7 +575,19 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `ASYNC_CMD` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a async command node.
+     *
+     */
+    using AsyncCmdNodePtr = std::shared_ptr<AsyncCmdNode>;
 
     /**
      * @brief A pipe between two command nodes.
@@ -590,7 +619,19 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `PIPE_CMD` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a pipe command node.
+     *
+     */
+    using PipeCmdNodePtr = std::shared_ptr<PipeCmdNode>;
 
 
     //  ====================
@@ -623,12 +664,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `INT_EXPR` always.
          */
-         [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an int expression node.
+     *
+     */
+    using IntExprNodePtr = std::shared_ptr<IntExprNode>;
 
     /**
      * @brief A floating-point literal expression AST node.
@@ -655,12 +701,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `FLOAT_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an float expression node.
+     *
+     */
+    using FloatExprNodePtr = std::shared_ptr<FloatExprNode>;
 
     class StringExprNode : public ExprNode {
     public:
@@ -679,18 +730,23 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `STRING_EXPR` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
          * @brief The string node that makes up this expression.
          *
          */
         StringNodePtr stringNode;
-
-        /**
-         * @brief Reports the type of expression
-         *
-         * @return ExprType
-         */
-        [[nodiscard]] ExprType exprType() const override;
     };
+    /**
+     * @brief A pointer to an string expression node.
+     *
+     */
+    using StringExprNodePtr = std::shared_ptr<StringExprNode>;
 
     /**
      * @brief A boolean literal expression AST node.
@@ -718,12 +774,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `BOOL_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an bool expression node.
+     *
+     */
+    using BoolExprNodePtr = std::shared_ptr<BoolExprNode>;
 
     /**
      * @brief A variable reference expression AST node.
@@ -751,12 +812,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `VAR_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an variable expression node.
+     *
+     */
+    using VarExprNodePtr = std::shared_ptr<VarExprNode>;
 
     /**
      * @brief An array literal expression node.
@@ -784,12 +850,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `ARRAY_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an array expression node.
+     *
+     */
+    using ArrayExprNodePtr = std::shared_ptr<ArrayExprNode>;
 
     /**
      * @brief An array index expression node.
@@ -823,12 +894,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `ARRAY_INDEX_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an array index expression node.
+     *
+     */
+    using ArrayIndexExprNodePtr = std::shared_ptr<ArrayIndexExprNode>;
 
     /**
      * @brief A tuple literal expression node.
@@ -856,12 +932,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `TUPLE_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an tuple expression node.
+     *
+     */
+    using TupleExprNodePtr = std::shared_ptr<TupleExprNode>;
 
     /**
      * @brief An tuple index expression node.
@@ -895,12 +976,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `TUPLE_INDEX_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a tuple index expression node.
+     *
+     */
+    using TupleIndexExprNodePtr = std::shared_ptr<TupleIndexExprNode>;
 
     /**
      * @brief A ternary expression node.
@@ -940,12 +1026,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `TERNARY_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an ternary expression node.
+     *
+     */
+    using TernaryExprNodePtr = std::shared_ptr<TernaryExprNode>;
 
     /**
      * @brief Unary operation expression node.
@@ -959,15 +1050,8 @@ namespace Parser {
 
         /**
          * @brief The expression being operated on.
-         * @details Set to `nullptr` if the left-hand side is a variable.
          */
         ExprNodePtr expr;
-
-        /**
-         * @brief The variable being operated on.
-         * @details Set to `nullptr` if the left-hand side is an expression.
-         */
-        VariableNodePtr var;
 
         /**
          * @brief Class constructor for a unary operation on an expression.
@@ -978,14 +1062,6 @@ namespace Parser {
         UnOpExprNode(UnOpType opType, ExprNodePtr expr);
 
         /**
-         * @brief Class constructor for a unary operation on a variable.
-         *
-         * @param opType The unary operation type being performed.
-         * @param var The variable on which the unary operation is being performed.
-         */
-        UnOpExprNode(UnOpType opType, VariableNodePtr var);
-
-        /**
          * @brief Gets the string representation of the node as an s-expression
          *
          * @return The s-expression string of the node
@@ -993,12 +1069,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `UNOP_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a unary operation node.
+     *
+     */
+    using UnOpExprNodePtr = std::shared_ptr<UnOpExprNode>;
 
     /**
      * @brief Binary operation expression node.
@@ -1055,12 +1136,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `BINOP_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a binary operation expression node.
+     *
+     */
+    using BinOpExprNodePtr = std::shared_ptr<BinOpExprNode>;
 
     /**
      * @brief A function-call expression node.
@@ -1094,12 +1180,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `CALL_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a call expression node.
+     *
+     */
+    using CallExprNodePtr = std::shared_ptr<CallExprNode>;
 
     /**
      * @brief A lambda expression node.
@@ -1120,25 +1211,25 @@ namespace Parser {
         /**
          * The (optional) return type of the function
          */
-        TypeNodePtr type;
+        TypeNodePtr returnType;
 
         /**
          * @brief Class constructor with a statement body (the default).
          *
          * @param bindings The bindings (arguments) of the function.
          * @param body The body of the function.
-         * @param type The return type of the function.
+         * @param returnType The return type of the function.
          */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, StmtNodePtr body, TypeNodePtr type = nullptr);
+        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, StmtNodePtr body, TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Class constructor with a return type for lambdas with just an expression for the body.
          *
          * @param bindings The bindings (arguments) of the function.
          * @param body The body of the function.
-         * @param type The return type of the function.
+         * @param returnType The return type of the function.
          */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, ExprNodePtr body, TypeNodePtr type = nullptr);
+        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, ExprNodePtr body, TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1148,12 +1239,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of expression
+         * @brief Reports the type of this command node.
          *
-         * @return ExprType
+         * @return `LAMBDA_EXPR` always.
          */
-        [[nodiscard]] ExprType exprType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a lambda expression node.
+     *
+     */
+    using LambdaExprNodePtr = std::shared_ptr<LambdaExprNode>;
 
     /**
      * @brief A command expression node.
@@ -1176,17 +1272,22 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `CMD_EXPR` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
          * The command for the expression
          */
         CmdNodePtr cmd;
-
-        /**
-         * @brief Reports the type of expression
-         *
-         * @return ExprType
-         */
-        [[nodiscard]] ExprType exprType() const override;
     };
+    /**
+     * @brief A pointer to an command expression node.
+     *
+     */
+    using CmdExprNodePtr = std::shared_ptr<CmdExprNode>;
 
 
     //  ===================
@@ -1202,7 +1303,7 @@ namespace Parser {
         /**
          * The expressions representing the boolean conditions
          */
-        std::vector<ExprNodePtr> conds;
+        std::vector<ExprNodePtr> conditions;
 
         /**
          * The statements that are evaluated when the conditions are true
@@ -1217,11 +1318,11 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
-         * @param conds The conditions to test.
+         * @param conditions The conditions to test.
          * @param trueStmts The statements to evaluate if true.
-         * @param negStmts The statement to evaluate if false. (Defaults to `nullptr`).
+         * @param falseStmt The statement to evaluate if false. (Defaults to `nullptr`).
          */
-        IfStmtNode(const std::vector<ExprNodePtr>& conds, std::vector<StmtNodePtr> trueStmts,
+        IfStmtNode(const std::vector<ExprNodePtr>& conditions, std::vector<StmtNodePtr> trueStmts,
                    StmtNodePtr falseStmt = nullptr);
 
         /**
@@ -1232,12 +1333,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `IF_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a if statement node.
+     *
+     */
+    using IfStmtNodePtr = std::shared_ptr<IfStmtNode>;
 
     /**
      * @brief A `for` loop statement node.
@@ -1283,12 +1389,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `FOR_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a for statement node.
+     *
+     */
+    using ForStmtNodePtr = std::shared_ptr<ForStmtNode>;
 
     /**
      * @brief A `while` loop statement.
@@ -1322,12 +1433,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `WHILE_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a while statement node.
+     *
+     */
+    using WhileStmtNodePtr = std::shared_ptr<WhileStmtNode>;
 
     /**
      * @brief A `do`/`while` loop statement.
@@ -1361,12 +1477,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `DO_WHILE_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a do while statement node.
+     *
+     */
+    using DoWhileStmtNodePtr = std::shared_ptr<DoWhileStmtNode>;
 
     /**
      * @brief A return statement.
@@ -1393,12 +1514,17 @@ namespace Parser {
         ExprNodePtr retExpr;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `RETURN_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a return statement node.
+     *
+     */
+    using ReturnStmtNodePtr = std::shared_ptr<ReturnStmtNode>;
 
     /**
      * @brief A new scope statement.
@@ -1426,12 +1552,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `SCOPE_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a scope statement node.
+     *
+     */
+    using ScopeStmtNodePtr = std::shared_ptr<ScopeStmtNode>;
 
     /**
      * @brief A command statement node.
@@ -1459,12 +1590,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `CMD_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a command statement node.
+     *
+     */
+    using CmdStmtNodePtr = std::shared_ptr<CmdStmtNode>;
 
     /**
      * @brief An expression statement node.
@@ -1491,12 +1627,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `EXPR_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a expr statement node.
+     *
+     */
+    using ExprStmtNodePtr = std::shared_ptr<ExprStmtNode>;
 
     /**
      * @brief An `alias` statement node.
@@ -1530,13 +1671,17 @@ namespace Parser {
         [[nodiscard]] std::string sExpression() const override;
 
         /**
-         * @brief Reports the type of statment
+         * @brief Reports the type of this statement node.
          *
-         * @return StmtType
+         * @return `ALIAS_STMT` always.
          */
-        [[nodiscard]] StmtType stmtType() const override;
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
-
+    /**
+     * @brief A pointer to an alias statement node.
+     *
+     */
+    using AliasStmtNodePtr = std::shared_ptr<AliasStmtNode>;
 
     //  ==============
     //  ||  Types:  ||
@@ -1554,7 +1699,19 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `INT_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an int type node.
+     *
+     */
+    using IntTypeNodePtr = std::shared_ptr<IntTypeNode>;
 
     /**
      * @brief A `float` type node.
@@ -1568,7 +1725,71 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `FLOAT_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a float type node.
+     *
+     */
+    using FloatTypeNodePtr = std::shared_ptr<FloatTypeNode>;
+
+    /**
+     * @brief A `bool` type node.
+     *
+     */
+    class BoolTypeNode : public TypeNode {
+    public:
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `BOOL_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a bool type node.
+     *
+     */
+    using BoolTypeNodePtr = std::shared_ptr<BoolTypeNode>;
+
+    /**
+     * @brief A `string` type node.
+     *
+     */
+    class StringTypeNode : public TypeNode {
+    public:
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `STRING_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a string type node.
+     *
+     */
+    using StringTypeNodePtr = std::shared_ptr<StringTypeNode>;
 
     /**
      * @brief An array-type node.
@@ -1594,7 +1815,19 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `ARRAY_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to an array type node.
+     *
+     */
+    using ArrayTypeNodePtr = std::shared_ptr<ArrayTypeNode>;
 
     /**
      * @brief A tuple-type node.
@@ -1620,7 +1853,57 @@ namespace Parser {
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `TUPLE_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
     };
+    /**
+     * @brief A pointer to a tuple type node.
+     *
+     */
+    using TupleTypeNodePtr = std::shared_ptr<TupleTypeNode>;
+
+    /**
+     * @brief A function-type node.
+     *
+     */
+    class FunctionTypeNode : public TypeNode {
+    public:
+        /**
+         * @brief params The type of each of the function's params
+         */
+        std::vector<TypeNodePtr> params;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param params The type of each of the function's params
+         */
+        FunctionTypeNode(const std::vector<TypeNodePtr>& params);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `FUNCTION_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a function type node.
+     *
+     */
+    using FunctionTypeNodePtr = std::shared_ptr<FunctionTypeNode>;
 
 
     //  ==================
@@ -1646,12 +1929,24 @@ namespace Parser {
         IdentVariableNode(std::string varName);
 
         /**
+         * @brief Reports the type of this program node.
+         *
+         * @return `VARIABLE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
          * @brief Gets the string representation of the node as an s-expression
          *
          * @return The s-expression string of the node
          */
         [[nodiscard]] std::string sExpression() const override;
     };
+    /**
+     * @brief A pointer to an identity variable node.
+     *
+     */
+    using IdentVariableNodePtr = std::shared_ptr<IdentVariableNode>;
 
 }  //  namespace Parser
 

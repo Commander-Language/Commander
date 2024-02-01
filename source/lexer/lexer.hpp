@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace lexer {
+namespace Lexer {
 
     /**
      * @brief Enumeration of different types of tokens.
@@ -202,7 +202,7 @@ namespace lexer {
              {"do", DO},       {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
              {"if", IF},       {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
              {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"timeout", TIMEOUT},
-             {"to", TO}, {"true", TRUE},   {"type", TYPE},     {"while", WHILE}, {"write", WRITE}});
+             {"to", TO},       {"true", TRUE},     {"type", TYPE},   {"while", WHILE},   {"write", WRITE}});
 
     /**
      * Vector of string token literal pairs that are not keywords (order matters here; longest to shortest)
@@ -441,7 +441,7 @@ namespace lexer {
     void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position,
                        const tokenType& terminatingToken);
 
-}  // namespace lexer
+}  // namespace Lexer
 
 #endif  // COMMANDER_LEXER_HPP
 #pragma clang diagnostic pop

@@ -54,9 +54,10 @@ public:
      * If the user is unsure of the number of occurrences, they should use NULL
      * @param variableID - A string representing the variable's ID
      * @param data - An object which the variable should associate with
-     * @param occurrences - The number of times the variable is found in the Commander script - will not update if the parameter passed in is null
+     * @param occurrences - The number of times the variable is found in the Commander script - will not update if the
+     * parameter passed in is null
      */
-    void addOrUpdateVariable(std::string variableID, int data, unsigned int occurrences);
+    void addOrUpdateVariable(const std::string& variableID, int data, unsigned int occurrences);
 
     /**
      * freeVariableData() will attempt to remove the data associated with a string variableID.
@@ -109,7 +110,7 @@ public:
     bool isScopeGlobal();  // return TRUE if the current scope is a global scope
 
     /**
-     * getVariable() returns the data value of the requested item. This method will search the entire symbol table for
+     * _getVariable() returns the data value of the requested item. This method will search the entire symbol table for
      * the requested item
      * @param variableID - A string representing the ID of a variable
      * @return - data associated with the specified variable
