@@ -443,7 +443,7 @@ namespace FlowController {
 
     std::any FlowController::getVariable(std::string name) {
         int* value = _symbolTable.getVariable(name);
-        if (value != nullptr) { return value; }
+        if (value != nullptr) { return *value; }
         throw util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
