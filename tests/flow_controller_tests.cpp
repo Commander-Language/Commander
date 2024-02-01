@@ -23,9 +23,9 @@ std::string getFileContents(const std::string& filePath) {
  * @brief
  */
 TEST(FlowControllerTests, SaveIntToVariable) {
-    try{
-        lexer::TokenList tokens;
-        lexer::tokenize(tokens, "../tests/files/flow_controller_tests/script001.cmdr");
+    try {
+        Lexer::TokenList tokens;
+        Lexer::tokenize(tokens, "../tests/files/flow_controller_tests/script001.cmdr");
         Parser::ASTNodeList nodes = parser.parse(tokens);
         FlowController::FlowController controller(nodes);
         controller.runtime();
@@ -39,11 +39,9 @@ TEST(FlowControllerTests, SaveIntToVariable) {
         EXPECT_TRUE(controller.hasVariable("z"));
         EXPECT_EQ(controller.getVariableValue("z"), 2);
 
-    }catch (const util::CommanderException& err) { std::cout << "Error caught: " << err.what() << std::endl; }
+    } catch (const util::CommanderException& err) { std::cout << "Error caught: " << err.what() << std::endl; }
 }
 int main(int argc, char** argv) {
-        testing::InitGoogleTest(&argc, argv);
-        return RUN_ALL_TESTS();
-
-
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

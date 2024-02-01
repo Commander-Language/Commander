@@ -7,66 +7,58 @@
 #include "scope.hpp"
 
 // Default Constructor
-Scope::Scope() { _parentScope = nullptr; }
+Scope::Scope() = default;
 
 // Constructor for specifying a parent
-Scope::Scope(Scope* parent) { _parentScope = parent; }
+Scope::Scope(Scope* parent) : _parentScope(parent) {}
 
 // Destructor
 Scope::~Scope() = default;
 
 // Copy Constructor
 Scope::Scope(Scope& otherScope) {
-    if(_parentScope != nullptr) {
-        //If a Scope has a parent, recursively use the copy constructor, then set its address as this object's parent Scope
+    if (_parentScope != nullptr) {
+        // If a Scope has a parent, recursively use the copy constructor, then set its address as this object's parent
+        // Scope
         Scope newParent = Scope(*_parentScope);
         _parentScope = &newParent;
-    }
-    else {
-        //If we've reached the end of the line, set the parentScope to nullptr
+    } else {
+        // If we've reached the end of the line, set the parentScope to nullptr
         _parentScope = nullptr;
     }
-    std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
-    std::map<std::string, unsigned int> copyUses(otherScope._variableUses);
+    std::map<std::string, std::shared_ptr<int>> const copyData(otherScope._variableData);
+    std::map<std::string, unsigned int> const copyUses(otherScope._variableUses);
     _variableData = copyData;
     _variableUses = copyUses;
 }
 
-void Scope::addOrUpdateVariable(std::string variableID, int data) {
-    if(!updateVariable(variableID, data)) {
-        _variableData.insert_or_assign(variableID, std::make_shared<int>(data));
-    }
+void Scope::addOrUpdateVariable(const std::string& variableID, int data) {
+    if (!updateVariable(variableID, data)) { _variableData.insert_or_assign(variableID, std::make_shared<int>(data)); }
 }
 
-bool Scope::updateVariable(std::string variableID, int newData) {
-    if(!hasDataKey(variableID)) {
-        if(_parentScope != nullptr) {
-            return _parentScope->updateVariable(variableID, newData);
-        }
-        else {
-            return false;
-        }
+bool Scope::updateVariable(const std::string& variableID, int newData) {
+    if (!_hasDataKey(variableID)) {
+        if (_parentScope != nullptr) { return _parentScope->updateVariable(variableID, newData); }
+        return false;
     }
-    else {
-        _variableData.insert_or_assign(variableID, std::make_shared<int>(newData));
-        if(!hasUsesKey(variableID)) {
-            _variableUses.insert_or_assign(variableID, 0); //If the variable somehow doesn't have uses assigned, default to 0
-        }
-        else {
-            decrementUses(variableID);
-        }
-        return true;
+    _variableData.insert_or_assign(variableID, std::make_shared<int>(newData));
+    if (!_hasUsesKey(variableID)) {
+        _variableUses.insert_or_assign(variableID,
+                                       0);  // If the variable somehow doesn't have uses assigned, default to 0
+    } else {
+        decrementUses(variableID);
     }
+    return true;
 }
 
-bool Scope::hasLocalVariable(std::string variableID) { return hasDataKey(variableID); }
+bool Scope::hasLocalVariable(const std::string& variableID) { return _hasDataKey(variableID); }
 
-bool Scope::hasGlobalVariable(std::string variableID) {
-    return hasDataKey(variableID) || (_parentScope != nullptr && _parentScope->hasGlobalVariable(variableID));
+bool Scope::hasGlobalVariable(const std::string& variableID) {
+    return _hasDataKey(variableID) || (_parentScope != nullptr && _parentScope->hasGlobalVariable(variableID));
 }
 
-int* Scope::getVariable(std::string variableID) {
-    if (!hasDataKey(variableID)) {
+int* Scope::getVariable(const std::string& variableID) {
+    if (!_hasDataKey(variableID)) {
         if (_parentScope != nullptr) { return _parentScope->getVariable(variableID); }
         return nullptr;
     }
@@ -79,63 +71,41 @@ Scope* Scope::getParentScopePointer() { return _parentScope; }
 
 bool Scope::isGlobal() { return _parentScope == nullptr; }
 
-bool Scope::hasDataKey(std::string key) { return _variableData.count(key) > 0; }
+bool Scope::_hasDataKey(const std::string& key) { return _variableData.count(key) > 0; }
 
-bool Scope::hasUsesKey(std::string key) { return _variableUses.count(key) > 0; }
+bool Scope::_hasUsesKey(const std::string& key) { return _variableUses.count(key) > 0; }
 
-//Garbage Collection methods
+// Garbage Collection methods
 
-void Scope::setVariableOccurrences(std::string variableID, unsigned int occurrences) {
-    //We won't deep search for the variable here - This method is intended for initialization rather than updating!
+void Scope::setVariableOccurrences(const std::string& variableID, unsigned int occurrences) {
+    // We won't deep search for the variable here - This method is intended for initialization rather than updating!
     _variableUses.insert_or_assign(variableID, occurrences);
 }
 
-bool Scope::freeVariableData(std::string variableID) {
-    //if a shared pointer is unique, resetting (allegedly) destructs the object
-    if(!hasDataKey(variableID)) {
-        if(_parentScope != nullptr) {
-            return _parentScope->freeVariableData(variableID);
-        }
-        else {
-            return false; //return false if we've reached the end of the Scope chain and the variable doesn't exist
-        }
+bool Scope::freeVariableData(const std::string& variableID) {
+    // if a shared pointer is unique, resetting (allegedly) destructs the object
+    if (!_hasDataKey(variableID)) {
+        if (_parentScope != nullptr) { return _parentScope->freeVariableData(variableID); }
+        return false;  // return false if we've reached the end of the Scope chain and the variable doesn't exist
     }
-    else {
-        _variableData[variableID].reset();
-        return true; //return true if we've freed space or have already freed space
+    _variableData[variableID].reset();
+    return true;  // return true if we've freed space or have already freed space
+}
+
+void Scope::decrementUses(const std::string& variableID) {
+    if (!_tryGetUses(variableID)) {
+        if (_parentScope != nullptr) { return _parentScope->decrementUses(variableID); }
+    } else {
+        if (_variableUses[variableID] != 0) { _variableUses[variableID] = _variableUses[variableID] - 1; }
     }
 }
 
-void Scope::decrementUses(std::string variableID) {
-    if(!tryGetUses(variableID)) {
-        if(_parentScope != nullptr) {
-            return _parentScope->decrementUses(variableID);
-        }
+bool Scope::hasExpired(const std::string& variableID) {
+    if (!_hasUsesKey(variableID)) {
+        if (_parentScope != nullptr) { return _parentScope->hasExpired(variableID); }
+        return false;  // return false if nothing exists
     }
-    else{
-        if(_variableUses[variableID] != 0) {
-            _variableUses[variableID] = _variableUses[variableID] - 1;
-        }
-    }
+    return (_variableUses[variableID] == 0);
 }
 
-bool Scope::hasExpired(std::string variableID) {
-    if(!hasUsesKey(variableID)) {
-        if(_parentScope != nullptr) {
-            return _parentScope->hasExpired(variableID);
-        }
-        else {
-            return false; //return false if nothing exists
-        }
-    }
-    else {
-        return (_variableUses[variableID] == 0);
-    }
-}
-
-bool Scope::tryGetUses(std::string variableID) {
-    if(!hasUsesKey(variableID)) {
-        return false;
-    }
-    return true;
-}
+bool Scope::_tryGetUses(const std::string& variableID) { return _hasUsesKey(variableID); }

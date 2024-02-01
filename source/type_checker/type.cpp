@@ -35,18 +35,18 @@ namespace TypeChecker {
 
     bool areTypesEqual(const TyPtr& type1, const TyPtr& type2) {
         if (!type1 || !type2) { return false; }
-        Type t = type1->getType();
-        if (t != type2->getType()) { return false; }
-        switch (t) {
+        Type const typ = type1->getType();
+        if (typ != type2->getType()) { return false; }
+        switch (typ) {
             case ARRAY: {
-                std::shared_ptr<ArrayTy> ty1 = std::static_pointer_cast<ArrayTy>(type1);
-                std::shared_ptr<ArrayTy> ty2 = std::static_pointer_cast<ArrayTy>(type2);
+                std::shared_ptr<ArrayTy> const ty1 = std::static_pointer_cast<ArrayTy>(type1);
+                std::shared_ptr<ArrayTy> const ty2 = std::static_pointer_cast<ArrayTy>(type2);
                 return areTypesEqual(ty1->baseType, ty2->baseType);
             }
             case TUPLE: {
-                std::shared_ptr<TupleTy> ty1 = std::static_pointer_cast<TupleTy>(type1);
-                std::shared_ptr<TupleTy> ty2 = std::static_pointer_cast<TupleTy>(type2);
-                int size = ty1->contentTypes.size();
+                std::shared_ptr<TupleTy> const ty1 = std::static_pointer_cast<TupleTy>(type1);
+                std::shared_ptr<TupleTy> const ty2 = std::static_pointer_cast<TupleTy>(type2);
+                size_t const size = ty1->contentTypes.size();
                 if (size != ty2->contentTypes.size()) { return false; }
                 for (int i = 0; i < size; i++) {
                     if (!areTypesEqual(ty1->contentTypes[i], ty2->contentTypes[i])) { return false; }
@@ -54,9 +54,9 @@ namespace TypeChecker {
                 return true;
             }
             case FUNCTION: {
-                std::shared_ptr<FunctionTy> ty1 = std::static_pointer_cast<FunctionTy>(type1);
-                std::shared_ptr<FunctionTy> ty2 = std::static_pointer_cast<FunctionTy>(type2);
-                int size = ty1->parameters.size();
+                std::shared_ptr<FunctionTy> const ty1 = std::static_pointer_cast<FunctionTy>(type1);
+                std::shared_ptr<FunctionTy> const ty2 = std::static_pointer_cast<FunctionTy>(type2);
+                size_t const size = ty1->parameters.size();
                 if (size != ty2->parameters.size() || !areTypesEqual(ty1->returnType, ty2->returnType)) {
                     return false;
                 }
@@ -76,18 +76,16 @@ namespace TypeChecker {
 
     Type BoolTy::getType() const { return Type::BOOL; }
 
-    TupleTy::TupleTy(std::vector<std::shared_ptr<Ty>> types) { contentTypes = std::move(types); }
+    TupleTy::TupleTy(std::vector<std::shared_ptr<Ty>> types) : contentTypes(std::move(types)) {}
 
     Type TupleTy::getType() const { return Type::TUPLE; }
 
-    ArrayTy::ArrayTy(std::shared_ptr<Ty> type) { baseType = std::move(type); }
+    ArrayTy::ArrayTy(std::shared_ptr<Ty> type) : baseType(std::move(type)) {}
 
     Type ArrayTy::getType() const { return Type::ARRAY; }
 
-    FunctionTy::FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> retType) {
-        parameters = std::move(params);
-        returnType = std::move(retType);
-    }
+    FunctionTy::FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> retType)
+        : parameters(std::move(params)), returnType(std::move(retType)) {}
 
     Type FunctionTy::getType() const { return Type::FUNCTION; }
 

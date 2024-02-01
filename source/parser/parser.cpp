@@ -12,7 +12,7 @@ namespace Parser {
 
     Parser::Parser() { _parseTable = ParseTable(); }
 
-    ASTNodeList Parser::parse(const lexer::TokenList& tokens) {
+    ASTNodeList Parser::parse(const Lexer::TokenList& tokens) {
         std::vector<ProductionItem> productionStack;
         std::vector<ParserAction::StateNum> stateStack {0};
         size_t tokenIndex = 0;
@@ -28,7 +28,8 @@ namespace Parser {
                     stateStack.emplace_back(action.nextState);
                     break;
                 case ParserAction::REDUCE: {
-                    const std::vector<ProductionItem> poppedItems {productionStack.end() - (long)action.ruleSize,productionStack.end()};
+                    const std::vector<ProductionItem> poppedItems {productionStack.end() - (long)action.ruleSize,
+                                                                   productionStack.end()};
                     productionStack.erase(productionStack.end() - (long)action.ruleSize, productionStack.end());
 
                     const auto newNode = action.nodeConstructor.value()(poppedItems);

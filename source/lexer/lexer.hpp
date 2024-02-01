@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace lexer {
+namespace Lexer {
 
     /**
      * @brief Enumeration of different types of tokens.
@@ -441,7 +441,7 @@ namespace lexer {
     void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position,
                        const tokenType& terminatingToken);
 
-}  // namespace lexer
+}  // namespace Lexer
 
 #endif  // COMMANDER_LEXER_HPP
 #pragma clang diagnostic pop

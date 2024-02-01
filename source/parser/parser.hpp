@@ -100,7 +100,7 @@ namespace Parser {
          * @param tokens The tokens to parse.
          * @return The parsed AST nodes.
          */
-        ASTNodeList parse(const lexer::TokenList& tokens);
+        ASTNodeList parse(const Lexer::TokenList& tokens);
 
     private:
         /**
