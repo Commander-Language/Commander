@@ -45,7 +45,7 @@ public:
      * @param variableID - A string representing the variable's ID (e.g. cat)
      * @param data - An object which the variable should be associated with
      */
-    void addOrUpdateVariable(std::string variableID, int data);
+    void addOrUpdateVariable(const std::string& variableID, int data);
 
     /**
      * addOrUpdateVariable() will add the provided variable to the top of the stack (i.e. current scope)
@@ -65,21 +65,21 @@ public:
      * @param variableID - The variable to remove
      * @return - TRUE if the variable was removed, otherwise FALSE is returned
      */
-    bool tryFreeVariableData(std::string variableID);
+    bool tryFreeVariableData(const std::string& variableID);
 
     /**
      * forceFreeVariableData() will garbage collect the variable, regardless of whether it has expired.
      * If the variable does not exist, nothing will be removed
      * @param variableID - The variable to remove
      */
-    void forceFreeVariableData(std::string variableID);
+    void forceFreeVariableData(const std::string& variableID);
 
     /**
      * variableHasExpired() will check if the variable's occurrences are equal to zero
      * @param variableID - The variable to check
      * @return - TRUE if the variable has no more occurrences, otherwise FALSE is returned
      */
-    bool variableHasExpired(std::string variableID);
+    bool variableHasExpired(const std::string& variableID);
 
     /**
      * getScope() returns a pointer to the last scope in the symbol_table_organizer
@@ -93,7 +93,7 @@ public:
      * @param variableID - A string representing the ID of a variable (e.g. "cat")
      * @return - TRUE if the variable exists in the top of the stack, otherwise FALSE is returned
      */
-    bool varExistsInCurrentSymbolTable(std::string variableID);
+    bool varExistsInCurrentSymbolTable(const std::string& variableID);
 
     /**
      * varExistsInScope() returns a boolean according to whether a variable of the specified string ID exists anywhere
@@ -101,7 +101,7 @@ public:
      * @param variableID - A string representing the ID of a variable
      * @return - TRUE if the variable exists anywhere in the vector, otherwise FALSE is returned
      */
-    bool varExistsInScope(std::string variableID);
+    bool varExistsInScope(const std::string& variableID);
 
     /**
      * isScopeGlobal() returns a boolean according to whether a scope is the head.
@@ -115,7 +115,7 @@ public:
      * @param variableID - A string representing the ID of a variable
      * @return - data associated with the specified variable
      */
-    int* getVariable(std::string variableID);
+    int* getVariable(const std::string& variableID);
 
 private:
     std::vector<Scope*> _symbolTables {};  // A vector containing each symbol table; some methods will use this to find

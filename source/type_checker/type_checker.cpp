@@ -31,7 +31,7 @@ namespace TypeChecker {
                 if (binding->type) {
                     if (hasVariable(binding->variable)) {
                         // TODO: Improve error
-                        throw util::CommanderException("The variable '" + binding->variable
+                        throw Util::CommanderException("The variable '" + binding->variable
                                                        + "' already exists in scope.");
                     }
                     TyPtr bindingType = binding->type->type ? binding->type->type : typeCheck(binding->type);
@@ -51,7 +51,7 @@ namespace TypeChecker {
                     TyPtr const nodeType = typeCheck(node);
                     if (!nodeType || nodeType->getType() != Type::STRING) {
                         // TODO: Improve error
-                        throw util::CommanderException("Command has an argument that is not a string.");
+                        throw Util::CommanderException("Command has an argument that is not a string.");
                     }
                 }
                 std::vector<TyPtr> contentTypes;
@@ -103,7 +103,7 @@ namespace TypeChecker {
                     Parser::IdentVariableNodePtr const variablePtr
                             = std::static_pointer_cast<Parser::IdentVariableNode>(exprNode->variable);
                     // TODO: Improve error
-                    throw util::CommanderException("No variable by the name '" + variablePtr->varName
+                    throw Util::CommanderException("No variable by the name '" + variablePtr->varName
                                                    + "' has not been initialized yet (in the current scope).");
                 }
                 return (exprNode->type = varType);
@@ -116,12 +116,12 @@ namespace TypeChecker {
                 if (!exprNode->expressions.empty()) {
                     if (!type) {
                         // TODO: Improve error
-                        throw util::CommanderException("Array has an unknown type.");
+                        throw Util::CommanderException("Array has an unknown type.");
                     }
                     for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions) {
                         if (!areTypesEqual(type, typeCheck(exprNodePtr))) {
                             // TODO: Improve error
-                            throw util::CommanderException("Array contains multiple different types.");
+                            throw Util::CommanderException("Array contains multiple different types.");
                         }
                     }
                 }
@@ -134,13 +134,13 @@ namespace TypeChecker {
                 TyPtr const arrayType = typeCheck(exprNode->array);
                 if (!arrayType || arrayType->getType() != Type::ARRAY) {
                     // TODO: Improve error
-                    throw util::CommanderException("Tried to index a type that isn't an array");
+                    throw Util::CommanderException("Tried to index a type that isn't an array");
                 }
                 for (const Parser::ExprNodePtr& exprNodePtr : exprNode->indexExprs) {
                     TyPtr const indexType = typeCheck(exprNodePtr);
                     if (!indexType || indexType->getType() != Type::INT) {
                         // TODO: Improve error (not just position, but what type; same for the other errors)
-                        throw util::CommanderException("Tried to index an array with a different type than an int");
+                        throw Util::CommanderException("Tried to index an array with a different type than an int");
                     }
                 }
                 std::shared_ptr<ArrayTy> const arrayTy = std::static_pointer_cast<ArrayTy>(arrayType);
@@ -154,7 +154,7 @@ namespace TypeChecker {
                     TyPtr const exprType = typeCheck(exprNodePtr);
                     if (!exprType) {
                         // TODO: Improve error
-                        throw util::CommanderException("Unknown type for expression in tuple");
+                        throw Util::CommanderException("Unknown type for expression in tuple");
                     }
                     expressionTypes.push_back(exprType);
                 }
@@ -167,12 +167,12 @@ namespace TypeChecker {
                 TyPtr const tupleType = typeCheck(exprNode->tuple);
                 if (!tupleType || tupleType->getType() != Type::TUPLE) {
                     // TODO: Improve error
-                    throw util::CommanderException("Tried to index a type that isn't an tuple");
+                    throw Util::CommanderException("Tried to index a type that isn't an tuple");
                 }
                 TyPtr const indexType = typeCheck(exprNode->index);
                 if (!indexType || indexType->getType() != Type::INT) {
                     // TODO: Improve error (not just position, but what type; same for the other errors)
-                    throw util::CommanderException("Tried to index a tuple with a different type than an int");
+                    throw Util::CommanderException("Tried to index a tuple with a different type than an int");
                 }
                 // Impossible to know the type of this, especially if the index expression is a variable, so just return
                 // nullptr.
@@ -184,13 +184,13 @@ namespace TypeChecker {
                 TyPtr const conditionType = typeCheck(exprNode->condition);
                 if (!conditionType || conditionType->getType() != Type::BOOL) {
                     // TODO: Improve error
-                    throw util::CommanderException("Ternary condition does not evaluate to a boolean");
+                    throw Util::CommanderException("Ternary condition does not evaluate to a boolean");
                 }
                 TyPtr const trueType = typeCheck(exprNode->trueExpr);
                 TyPtr const falseType = typeCheck(exprNode->falseExpr);
                 if (!trueType || !falseType || !areTypesEqual(trueType, falseType)) {
                     // TODO: Improve error
-                    throw util::CommanderException("True and false expressions in ternary do not match the same type.");
+                    throw Util::CommanderException("True and false expressions in ternary do not match the same type.");
                 }
                 return (exprNode->type = trueType);
             }
@@ -200,16 +200,16 @@ namespace TypeChecker {
                 TyPtr const expressionType = typeCheck(exprNode->expr);
                 if (!expressionType) {
                     // TODO: Improve error
-                    throw util::CommanderException("Unknown type in unop expression.");
+                    throw Util::CommanderException("Unknown type in unop expression.");
                 }
                 Type const type = expressionType->getType();
                 if (exprNode->opType == Parser::NOT && type != Type::BOOL) {
                     // TODO: Improve error
-                    throw util::CommanderException("Expected boolean in not expression.");
+                    throw Util::CommanderException("Expected boolean in not expression.");
                 }
                 if (exprNode->opType != Parser::NOT && type != Type::INT && type != Type::FLOAT) {
                     // TODO: Improve error
-                    throw util::CommanderException("Expected int or float in unop expression.");
+                    throw Util::CommanderException("Expected int or float in unop expression.");
                 }
                 return (exprNode->type = expressionType);
             }
@@ -222,7 +222,7 @@ namespace TypeChecker {
                 // Right type must be known in all operations
                 if (!rightTy) {
                     // TODO: Improve error
-                    throw util::CommanderException("Expression evaluates to unknown type");
+                    throw Util::CommanderException("Expression evaluates to unknown type");
                 }
                 Type const rightType = rightTy->getType();
                 bool const isInt = rightType == Type::INT;
@@ -237,7 +237,7 @@ namespace TypeChecker {
                     case Parser::SET: {
                         if (!isVariable) {
                             // TODO: Improve error
-                            throw util::CommanderException(
+                            throw Util::CommanderException(
                                     "Invalid set expression; must have variable on left side of '='");
                         }
                         // TODO: Make variables a binding
@@ -255,19 +255,19 @@ namespace TypeChecker {
                             return (exprNode->type = std::make_shared<BoolTy>());
                         }
                         // TODO: Improve error
-                        throw util::CommanderException("Inequality operation has incompatible types.");
+                        throw Util::CommanderException("Inequality operation has incompatible types.");
                     case Parser::AND:
                     case Parser::OR:
                         // bool/bool --> bool
                         if (areEqual && isBool) { return (exprNode->type = std::make_shared<BoolTy>()); }
                         // TODO: Improve error
-                        throw util::CommanderException("Boolean operation has incompatible types.");
+                        throw Util::CommanderException("Boolean operation has incompatible types.");
                     case Parser::EQUAL:
                     case Parser::NOT_EQUAL:
                         // any/any --> bool
                         if (areIntFloat || areEqual) { return (exprNode->type = std::make_shared<BoolTy>()); }
                         // TODO: Improve error
-                        throw util::CommanderException("Equality operation has incompatible types.");
+                        throw Util::CommanderException("Equality operation has incompatible types.");
                     case Parser::ADD:
                     case Parser::ADD_EQUAL:
                     case Parser::MODULO:
@@ -292,7 +292,7 @@ namespace TypeChecker {
                             return (exprNode->type = std::make_shared<StringTy>());
                         }
                         // TODO: Improve error
-                        throw util::CommanderException("Binary operation has incompatible types.");
+                        throw Util::CommanderException("Binary operation has incompatible types.");
                 }
                 return nullptr;
             }
@@ -302,19 +302,19 @@ namespace TypeChecker {
                 TyPtr const functionType = typeCheck(exprNode->func);
                 if (!functionType || functionType->getType() != Type::FUNCTION) {
                     // TODO: Improve Error
-                    throw util::CommanderException("Tried to call something that wasn't a function.");
+                    throw Util::CommanderException("Tried to call something that wasn't a function.");
                 }
                 std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(functionType);
                 size_t const size = functionTy->parameters.size();
                 if (size != exprNode->args.size()) {
                     // TODO: Improve Error
-                    throw util::CommanderException(
+                    throw Util::CommanderException(
                             "Function being called doesn't match number of parameters in call expression.");
                 }
                 for (int i = 0; i < size; i++) {
                     if (!areTypesEqual(functionTy->parameters[i], typeCheck(exprNode->args[i]))) {
                         // TODO: Improve Error
-                        throw util::CommanderException(
+                        throw Util::CommanderException(
                                 "Parameter expression types in call expression don't match function signature.");
                     }
                 }
@@ -358,7 +358,7 @@ namespace TypeChecker {
                     TyPtr const conditionType = typeCheck(condition);
                     if (!conditionType || conditionType->getType() != Type::BOOL) {
                         // TODO: Improve error
-                        throw util::CommanderException("The condition does not evaluate to a bool type.");
+                        throw Util::CommanderException("The condition does not evaluate to a bool type.");
                     }
                 }
                 for (const Parser::StmtNodePtr& currentStatement : stmtNode->trueStmts) { typeCheck(currentStatement); }
@@ -371,7 +371,7 @@ namespace TypeChecker {
                 TyPtr const conditionType = typeCheck(stmtNode->condition);
                 if (!conditionType || conditionType->getType() != Type::BOOL) {
                     // TODO: Improve error
-                    throw util::CommanderException("The condition does not evaluate to a bool type.");
+                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
                 }
                 typeCheck(stmtNode->update);
                 typeCheck(stmtNode->body);
@@ -382,7 +382,7 @@ namespace TypeChecker {
                 TyPtr const conditionType = typeCheck(stmtNode->condition);
                 if (!conditionType || conditionType->getType() != Type::BOOL) {
                     // TODO: Improve error
-                    throw util::CommanderException("The condition does not evaluate to a bool type.");
+                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
                 }
                 typeCheck(stmtNode->body);
                 return nullptr;
@@ -393,7 +393,7 @@ namespace TypeChecker {
                 TyPtr const conditionType = typeCheck(stmtNode->condition);
                 if (!conditionType || conditionType->getType() != Type::BOOL) {
                     // TODO: Improve error
-                    throw util::CommanderException("The condition does not evaluate to a bool type.");
+                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
                 }
                 return nullptr;
             }
@@ -434,7 +434,7 @@ namespace TypeChecker {
                     TyPtr const exprType = typeCheck(exprPtr);
                     if (!exprPtr || exprType->getType() != Type::STRING) {
                         // TODO: Improve error
-                        throw util::CommanderException("String has an expression that is not a string.");
+                        throw Util::CommanderException("String has an expression that is not a string.");
                     }
                 }
                 return std::make_shared<StringTy>();
@@ -490,7 +490,7 @@ namespace TypeChecker {
                 return getType(variablePtr->varName);
             }
             default:
-                throw util::CommanderException(
+                throw Util::CommanderException(
                         "This should not have happened. Abstract ExprNode, TypeNode, or StmtNode was created...");
         }
     }
@@ -503,7 +503,7 @@ namespace TypeChecker {
 
     bool TypeChecker::verifyType(const std::string& variableID, const TyPtr& expected) {
         if (!hasVariable(variableID)) return false;  // return false if the variable doesnt exist
-        if (_assignedTypes[variableID] == expected)
+        if (areTypesEqual(_assignedTypes[variableID], expected))
             return true;  // return true if the variable is equal to the expected value
 
         // if neither check was successful, check if expected is compatible with the variableID's type

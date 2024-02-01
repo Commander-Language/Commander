@@ -36,7 +36,7 @@ namespace FlowController {
 
     void FlowController::runtime() {
         for (auto& node : _nodes) {
-            switch (node->nodeType()) {
+            switch (getAbstractNodeType(node->nodeType())) {
                 case Parser::BINDING: {
                     _binding(std::static_pointer_cast<Parser::BindingNode>(node));
                     break;
@@ -82,7 +82,7 @@ namespace FlowController {
                     break;
                 }
                 default: {
-                    throw util::CommanderException("Flow Controller: Encountered unknown node type");
+                    throw Util::CommanderException("Flow Controller: Encountered unknown node type");
                 }
             }
         }
@@ -157,7 +157,7 @@ namespace FlowController {
                 auto tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
 
                 if (index >= tuple.size() || index < 0) {
-                    throw util::CommanderException("Index out of bounds: Index " + std::to_string(index)
+                    throw Util::CommanderException("Index out of bounds: Index " + std::to_string(index)
                                                    + "out of bounds for tuple of size " + std::to_string(tuple.size()));
                 }
                 return tuple[index];
@@ -208,7 +208,7 @@ namespace FlowController {
                 break;
             }
             default: {
-                throw util::CommanderException("Flow Controller: Unknown expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown expression encountered");
             }
         }
         return -1;  // TODO: Find better default return
@@ -324,7 +324,7 @@ namespace FlowController {
                 return expr--;
             }
             default: {
-                throw util::CommanderException("Flow Controller: Unknown unary expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown unary expression encountered");
             }
         }
     }
@@ -359,7 +359,7 @@ namespace FlowController {
                 return left % right;
             }
             case Parser::DIVIDE: {
-                if (right == 0) { throw util::CommanderException("Divide by zero error encountered"); }
+                if (right == 0) { throw Util::CommanderException("Divide by zero error encountered"); }
                 return left / right;
             }
             case Parser::MULTIPLY: {
@@ -406,7 +406,7 @@ namespace FlowController {
                 return newValue;
             }
             case Parser::DIVIDE_EQUAL: {
-                if (right == 0) { throw util::CommanderException("Divide by zero error encountered"); }
+                if (right == 0) { throw Util::CommanderException("Divide by zero error encountered"); }
                 CommanderInt const newValue = *_symbolTable.getVariable(variableName) / right;
                 _setVariable(variableName, newValue);
                 return newValue;
@@ -422,7 +422,7 @@ namespace FlowController {
                 return newValue;
             }
             default: {
-                throw util::CommanderException("Flow Controller: Unknown binary expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
             }
         }
     }
@@ -442,7 +442,7 @@ namespace FlowController {
     std::any FlowController::_getVariable(const std::string& name) {
         int* value = _symbolTable.getVariable(name);
         if (value != nullptr) { return *value; }
-        throw util::CommanderException("Symbol Error: Not found \"" + name + "\"");
+        throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
     std::string FlowController::_commanderTypeToString(std::any value) {

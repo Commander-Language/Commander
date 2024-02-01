@@ -14,7 +14,7 @@ Parser::Parser parser;
 
 std::string getFileContents(const std::string& filePath) {
     std::ifstream file(filePath);
-    if (!file.is_open()) throw util::CommanderException("Flow Controller Tests: Can't find file");
+    if (!file.is_open()) throw Util::CommanderException("Flow Controller Tests: Can't find file");
     std::stringstream buf;
     buf << file.rdbuf();
     return buf.str();
@@ -39,7 +39,7 @@ TEST(FlowControllerTests, SaveIntToVariable) {
         EXPECT_TRUE(controller.hasVariable("z"));
         EXPECT_EQ(controller.getVariableValue("z"), 2);
 
-    } catch (const util::CommanderException& err) { std::cout << "Error caught: " << err.what() << std::endl; }
+    } catch (const Util::CommanderException& err) { std::cout << "Error caught: " << err.what() << std::endl; }
 }
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
