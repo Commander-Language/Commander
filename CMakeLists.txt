@@ -151,8 +151,12 @@ add_library(parser source/parser/parser.cpp
         source/util/commander_exception.cpp
 )
 
+add_library(flow_controller source/flow_controller/flow_controller.cpp source/util/commander_exception.cpp)
+
+add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
+
 add_executable(commander source/interpreter/commander.cpp)
-target_link_libraries(commander lexer parser)
+target_link_libraries(commander lexer parser flow_controller symbol_table)
 
 
 #  Test configurations:
@@ -173,6 +177,10 @@ gtest_discover_tests(typeCheckerTests)
 add_executable(symbolTableTests tests/symbol_table_tests.cpp source/symbol_table/scope.cpp source/symbol_table/symbol_table_organizer.cpp)
 target_link_libraries(symbolTableTests GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
+
+add_executable(flowControllerTests tests/flow_controller_tests.cpp)
+target_link_libraries(flowControllerTests lexer parser flow_controller symbol_table GTest::gtest_main)
+gtest_discover_tests(flowControllerTests)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 add_executable(jobRunnerTests ${builtins} source/util/commander_exception.cpp source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)

@@ -1,6 +1,7 @@
 #include "../lexer/lexer.hpp"
 #include "../parser/parser.hpp"
 #include "../util/commander_exception.hpp"
+#include "../flow_controller/flow_controller.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -20,6 +21,8 @@ void interpretFile(std::string& fileName, std::string& option, Parser::Parser& p
         // TODO: type checking
         return;
     }
+    FlowController::FlowController flow(nodes);
+    flow.runtime();
 }
 
 int main(int argc, char** argv) {
