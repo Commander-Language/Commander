@@ -291,6 +291,10 @@ namespace FlowController {
         // TODO: Implement
     }
 
+    void FlowController::_variable(Parser::VariableNodePtr) {
+
+    }
+
     std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
@@ -447,5 +451,13 @@ namespace FlowController {
         // TODO: Fix this.
         // This is not the right approach, send type of value as a parameter instead.
         return std::any_cast<std::string>(value);
+    }
+
+    bool FlowController::hasVariable(std::string name){
+        return _symbolTable.varExistsInScope(name);
+    }
+
+    int FlowController::getVariableValue(std::string name){
+        return std::any_cast<int>(getVariable(name));
     }
 }  // namespace FlowController

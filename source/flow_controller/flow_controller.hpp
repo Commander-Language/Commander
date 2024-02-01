@@ -58,6 +58,17 @@ namespace FlowController {
          */
         void runtime();
 
+        /**
+         * @brief Check if flow controller could find a varible
+         * @returns True or False
+         */
+        bool hasVariable(std::string);
+
+        /**
+         * @brief Get value of variable
+         */
+        int getVariableValue(std::string);
+
     private:
         /**
          * @brief The AST nodes in a list
