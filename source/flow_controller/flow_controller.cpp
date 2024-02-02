@@ -380,7 +380,7 @@ namespace FlowController {
             case Parser::OR: {
                 return std::any_cast<CommanderBool>(left) || std::any_cast<CommanderBool>(right);
             }
-            case Parser::EQUAL: {
+            case Parser::SET: {
                 auto variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
                 std::any value = _expr(binOp->rightExpr);
 
