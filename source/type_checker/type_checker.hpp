@@ -6,7 +6,7 @@
 
 #ifndef CPP_UTILITIES_TYPE_CHECKER_HPP
 #define CPP_UTILITIES_TYPE_CHECKER_HPP
-#include "../parser/parser.hpp"
+#include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/type_checker/type.hpp"
 #include "source/util/commander_exception.hpp"

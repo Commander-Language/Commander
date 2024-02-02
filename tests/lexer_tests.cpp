@@ -32,7 +32,7 @@ TEST_P(LexerLexTests, ShouldLexFileAndMatchExpectedExamples) {
         const std::string expectedOutput = Lexer::readFile(expectedFilePath);
 
         expectOutputEqualsTokens(tokens, expectedOutput);
-    } catch (const util::CommanderException& e) {
+    } catch (const Util::CommanderException& e) {
         std::cout << "Lexer Error: " << e.what() << "\n";
         FAIL();
     }
@@ -45,7 +45,7 @@ TEST_P(LexerFailTests, ShouldNotLexFile) {
     auto param = GetParam();
     const std::string filePath = "../tests/files/lexer_tests/should_fail/" + param;
     Lexer::TokenList tokens;
-    ASSERT_THROW(Lexer::tokenize(tokens, filePath), util::CommanderException);
+    ASSERT_THROW(Lexer::tokenize(tokens, filePath), Util::CommanderException);
 }
 
 /**
@@ -53,7 +53,7 @@ TEST_P(LexerFailTests, ShouldNotLexFile) {
  */
 TEST(LexerFailTests, ShouldFailIfFileNotFound) {
     Lexer::TokenList tokens;
-    ASSERT_THROW(Lexer::tokenize(tokens, "non-existent-file-name.txt"), util::CommanderException);
+    ASSERT_THROW(Lexer::tokenize(tokens, "non-existent-file-name.txt"), Util::CommanderException);
 }
 
 /**

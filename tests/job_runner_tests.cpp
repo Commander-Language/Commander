@@ -9,7 +9,7 @@
 #include <iostream>
 std::string getFileContents(const std::string& filePath) {
     std::ifstream file(filePath);
-    if (!file.is_open()) throw util::CommanderException("Job Runner Tests: Can't find file");
+    if (!file.is_open()) throw Util::CommanderException("Job Runner Tests: Can't find file");
     std::stringstream buf;
     buf << file.rdbuf();
     return buf.str();

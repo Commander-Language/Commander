@@ -1,8 +1,8 @@
-#include "../flow_controller/flow_controller.hpp"
-#include "../lexer/lexer.hpp"
-#include "../parser/parser.hpp"
-#include "../type_checker/type_checker.hpp"
-#include "../util/commander_exception.hpp"
+#include "source/flow_controller/flow_controller.hpp"
+#include "source/lexer/lexer.hpp"
+#include "source/parser/parser.hpp"
+#include "source/type_checker/type_checker.hpp"
+#include "source/util/commander_exception.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
         std::string arg;
         if (argc > 1) { arg = std::string(argv[1]); }
         if (arg == "-f") {
-            if (argc == 2) { throw util::CommanderException("No file name provided."); }
+            if (argc == 2) { throw Util::CommanderException("No file name provided."); }
             std::string file = std::string(argv[2]);
             std::string option = "-l";
             interpretFile(file, option, parser, typeChecker);
@@ -70,10 +70,10 @@ int main(int argc, char** argv) {
                 interpretFile(tmpFileName, arg, parser, typeChecker);
 
                 std::remove(tmpFileName.c_str());
-            } catch (const util::CommanderException& err) { std::cout << err.what() << '\n'; }
+            } catch (const Util::CommanderException& err) { std::cout << err.what() << '\n'; }
         }
         return 0;
-    } catch (const util::CommanderException& e) {
+    } catch (const Util::CommanderException& e) {
         std::cout << e.what() << '\n';
         return 1;
     }

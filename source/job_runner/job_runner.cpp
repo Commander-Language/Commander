@@ -74,7 +74,7 @@ namespace jobRunner {
 
     void Command::_execCommand() {
         execvp(_name.c_str(), _args.getCArgs());
-        throw util::CommanderException("Job Runner: error trying to exec command");
+        throw Util::CommanderException("Job Runner: error trying to exec command");
     }
 
     JobInfo Command::runCommandSave() {
@@ -268,7 +268,7 @@ namespace jobRunner {
      */
     int forkCheckErrors() {
         int const processID = fork();
-        if (processID < 0) { throw util::CommanderException("Job Runner: error trying to fork"); }
+        if (processID < 0) { throw Util::CommanderException("Job Runner: error trying to fork"); }
         return processID;
     }
 

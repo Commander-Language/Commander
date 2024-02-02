@@ -27,7 +27,7 @@ TEST_P(ParserParseTests, ShouldParseFileAndMatchExpectedExamples) {
     Lexer::TokenList tokens;
     try {
         Lexer::tokenize(tokens, filePath);
-    } catch (const util::CommanderException& e) {
+    } catch (const Util::CommanderException& e) {
         std::cout << "Lexer Error: " << e.what() << "\n";
         FAIL();
     }
@@ -37,7 +37,7 @@ TEST_P(ParserParseTests, ShouldParseFileAndMatchExpectedExamples) {
         Parser::ASTNodeList const nodes = parser.parse(tokens);
         const std::string expectedOutput = Lexer::readFile(expectedFilePath);
         expectOutputEqualsSExpressions(nodes, expectedOutput);
-    } catch (const util::CommanderException& e) {
+    } catch (const Util::CommanderException& e) {
         std::cout << "Parser Error: " << e.what() << "\n";
         FAIL();
     }
@@ -53,12 +53,12 @@ TEST_P(ParserFailTests, ShouldNotParseFile) {
     Lexer::TokenList tokens;
     try {
         Lexer::tokenize(tokens, filePath);
-    } catch (const util::CommanderException& e) {
+    } catch (const Util::CommanderException& e) {
         std::cout << "Lexer Error: " << e.what() << "\n";
         FAIL();
     }
     // Parse
-    ASSERT_THROW(parser.parse(tokens), util::CommanderException);
+    ASSERT_THROW(parser.parse(tokens), Util::CommanderException);
 }
 
 /**

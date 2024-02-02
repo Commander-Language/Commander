@@ -7,11 +7,11 @@
 #ifndef COMMANDER_COMMANDER_EXCEPTION_HPP
 #define COMMANDER_COMMANDER_EXCEPTION_HPP
 
-#include "../lexer/lexer.hpp"
+#include "source/lexer/lexer.hpp"
 #include <string>
 #include <utility>
 
-namespace util {
+namespace Util {
 
     /**
      * @brief Class that represents an exception that gets thrown as a result of an error when running Commander.
@@ -22,15 +22,14 @@ namespace util {
          * @brief Constructor for the exception that stores a single message directly
          * @param message The message of the exception
          */
-        CommanderException(std::string message) : _errorMessage(std::move(message)) {}
+        CommanderException(const std::string& message);
 
         /**
          * @brief Constructor for the exception that creates the message with the include position in the file
          * @param message The message of the exception
          * @param position The position in the file that the exception occurs
          */
-        CommanderException(const std::string& message, const Lexer::FilePosition& position)
-            : _errorMessage(message + "\n" + position.toString()) {}
+        CommanderException(const std::string& message, const Lexer::FilePosition& position);
 
         /**
          * Returns the error message associated with the exception
@@ -45,6 +44,6 @@ namespace util {
         std::string _errorMessage;
     };
 
-}  // namespace util
+}  // namespace Util
 
 #endif  // COMMANDER_COMMANDER_EXCEPTION_HPP
