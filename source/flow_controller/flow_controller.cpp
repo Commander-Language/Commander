@@ -393,33 +393,33 @@ namespace FlowController {
             case Parser::NOT_EQUAL: {
                 return left != right;
             }
-            case Parser::ADD_EQUAL: {
+            case Parser::ADD_SET: {
                 CommanderInt const newValue = *_symbolTable.getVariable(variableName) + right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
-            case Parser::SUBTRACT_EQUAL: {
+            case Parser::SUBTRACT_SET: {
                 CommanderInt const newValue = *_symbolTable.getVariable(variableName) - right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
-            case Parser::MULTIPLY_EQUAL: {
+            case Parser::MULTIPLY_SET: {
                 CommanderInt const newValue = *_symbolTable.getVariable(variableName) * right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
-            case Parser::DIVIDE_EQUAL: {
+            case Parser::DIVIDE_SET: {
                 if (right == 0) { throw Util::CommanderException("Divide by zero error encountered"); }
                 CommanderInt const newValue = *_symbolTable.getVariable(variableName) / right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
-            case Parser::MODULO_EQUAL: {
+            case Parser::MODULO_SET: {
                 CommanderInt const newValue = *_symbolTable.getVariable(variableName) % right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
-            case Parser::EXPONENTIATE_EQUAL: {
+            case Parser::EXPONENTIATE_SET: {
                 CommanderInt const newValue = std::pow(*_symbolTable.getVariable(variableName), right);
                 _setVariable(variableName, newValue);
                 return newValue;

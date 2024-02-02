@@ -45,7 +45,9 @@ namespace Parser {
                         return result;
                     }();
                 case ParserAction::ERROR:
-                    throw Util::CommanderException("Unexpected token: `" + token->contents + "`", token->position);
+                    throw Util::CommanderException("Unexpected `" + Lexer::tokenTypeToString(token->type) + "` token: `"
+                                                           + token->contents + "`",
+                                                   token->position);
             }
         }
     }

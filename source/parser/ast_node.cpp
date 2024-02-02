@@ -10,6 +10,103 @@
 
 namespace Parser {
 
+    std::string nodeTypeToString(ASTNodeType nodeType) {
+        switch (nodeType) {
+            case BINDING:
+                return "BINDING";
+            case BINDINGS:
+                return "BINDINGS";
+            case CMD:
+                return "CMD";
+            case CMD_CMD:
+                return "CMD_CMD";
+            case PIPE_CMD:
+                return "PIPE_CMD";
+            case ASYNC_CMD:
+                return "ASYNC_CMD";
+            case INT_EXPR:
+                return "INT_EXPR";
+            case FLOAT_EXPR:
+                return "FLOAT_EXPR";
+            case STRING_EXPR:
+                return "STRING_EXPR";
+            case BOOL_EXPR:
+                return "BOOL_EXPR";
+            case VAR_EXPR:
+                return "VAR_EXPR";
+            case ARRAY_EXPR:
+                return "ARRAY_EXPR";
+            case ARRAY_INDEX_EXPR:
+                return "ARRAY_INDEX_EXPR";
+            case TUPLE_EXPR:
+                return "TUPLE_EXPR";
+            case TUPLE_INDEX_EXPR:
+                return "TUPLE_INDEX_EXPR";
+            case TERNARY_EXPR:
+                return "TERNARY_EXPR";
+            case UNOP_EXPR:
+                return "UNOP_EXPR";
+            case BINOP_EXPR:
+                return "BINOP_EXPR";
+            case CALL_EXPR:
+                return "CALL_EXPR";
+            case LAMBDA_EXPR:
+                return "LAMBDA_EXPR";
+            case CMD_EXPR:
+                return "CMD_EXPR";
+            case EXPR:
+                return "EXPR";
+            case EXPRS:
+                return "EXPRS";
+            case PRGM:
+                return "PRGM";
+            case IF_STMT:
+                return "IF_STMT";
+            case FOR_STMT:
+                return "FOR_STMT";
+            case WHILE_STMT:
+                return "WHILE_STMT";
+            case DO_WHILE_STMT:
+                return "DO_WHILE_STMT";
+            case RETURN_STMT:
+                return "RETURN_STMT";
+            case SCOPE_STMT:
+                return "SCOPE_STMT";
+            case CMD_STMT:
+                return "CMD_STMT";
+            case EXPR_STMT:
+                return "EXPR_STMT";
+            case ALIAS_STMT:
+                return "ALIAS_STMT";
+            case STMT:
+                return "STMT";
+            case STMTS:
+                return "STMTS";
+            case STRING:
+                return "STRING";
+            case INT_TYPE:
+                return "INT_TYPE";
+            case FLOAT_TYPE:
+                return "FLOAT_TYPE";
+            case BOOL_TYPE:
+                return "BOOL_TYPE";
+            case STRING_TYPE:
+                return "STRING_TYPE";
+            case ARRAY_TYPE:
+                return "ARRAY_TYPE";
+            case TUPLE_TYPE:
+                return "TUPLE_TYPE";
+            case FUNCTION_TYPE:
+                return "FUNCTION_TYPE";
+            case TYPE:
+                return "TYPE";
+            case VARIABLE:
+                return "VARIABLE";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     std::string unOpToString(UnOpType unop) {
         switch (unop) {
             case NEGATE:
@@ -39,40 +136,40 @@ namespace Parser {
                 return "LESSER_EQUAL";
             case GREATER_EQUAL:
                 return "GREATER_EQUAL";
-            case MODULO:
-                return "MODULO";
-            case DIVIDE:
-                return "DIVIDE";
-            case MULTIPLY:
-                return "MULTIPLY";
-            case SUBTRACT:
-                return "SUBTRACT";
-            case ADD:
-                return "ADD";
-            case EXPONENTIATE:
-                return "EXPONENTIATE";
+            case EQUAL:
+                return "EQUAL";
+            case NOT_EQUAL:
+                return "NOT_EQUAL";
             case AND:
                 return "AND";
             case OR:
                 return "OR";
-            case EQUAL:
-                return "EQUAL";
+            case EXPONENTIATE:
+                return "EXPONENTIATE";
+            case MULTIPLY:
+                return "MULTIPLY";
+            case DIVIDE:
+                return "DIVIDE";
+            case MODULO:
+                return "MODULO";
+            case ADD:
+                return "ADD";
+            case SUBTRACT:
+                return "SUBTRACT";
+            case EXPONENTIATE_SET:
+                return "EXPONENTIATE_SET";
+            case MULTIPLY_SET:
+                return "MULTIPLY_SET";
+            case DIVIDE_SET:
+                return "DIVIDE_SET";
+            case MODULO_SET:
+                return "MODULO_SET";
+            case ADD_SET:
+                return "ADD_SET";
+            case SUBTRACT_SET:
+                return "SUBTRACT_SET";
             case SET:
                 return "SET";
-            case NOT_EQUAL:
-                return "NOT_EQUAL";
-            case ADD_EQUAL:
-                return "ADD_EQUAL";
-            case SUBTRACT_EQUAL:
-                return "SUBTRACT_EQUAL";
-            case MULTIPLY_EQUAL:
-                return "MULTIPLY_EQUAL";
-            case DIVIDE_EQUAL:
-                return "DIVIDE_EQUAL";
-            case MODULO_EQUAL:
-                return "MODULO_EQUAL";
-            case EXPONENTIATE_EQUAL:
-                return "EXPONENTIATE_EQUAL";
             default:
                 return "UNKNOWN";
         }
@@ -226,6 +323,8 @@ namespace Parser {
         return result.str();
     }
 
+    StringNode::StringNode(std::string literal) : literals({std::move(literal)}) {}
+
     ASTNodeType StringNode::nodeType() const { return ASTNodeType::STRING; }
 
     std::string StringNode::sExpression() const {
@@ -253,13 +352,21 @@ namespace Parser {
     //  ||  Commands:  ||
     //  =================
 
+    CmdCmdNode::CmdCmdNode(Parser::ASTNodePtr argument) : arguments({std::move(argument)}) {}
+
+    CmdCmdNode::CmdCmdNode(Parser::CmdNodePtr command, Parser::ASTNodePtr argument)
+        : arguments([&]() {
+              //  FIXME: assumes the command is a `CmdCmd`.
+              std::vector<ASTNodePtr> result = std::reinterpret_pointer_cast<CmdCmdNode>(command)->arguments;
+              result.push_back(std::move(argument));
+              return result;
+          }()) {}
+
     std::string CmdCmdNode::sExpression() const {
         std::stringstream builder;
         for (const ASTNodePtr& arg : arguments) { builder << " " << arg->sExpression(); }
         return "(CmdCmdNode" + builder.str() + ")";
     }
-
-    CmdCmdNode::CmdCmdNode(std::vector<ASTNodePtr> arguments) : arguments(std::move(arguments)) {}
 
     AsyncCmdNode::AsyncCmdNode(Parser::CmdNodePtr cmd) : cmd(std::move(cmd)) {}
 
