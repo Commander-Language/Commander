@@ -19,11 +19,13 @@ void interpretFile(std::string& fileName, std::string& option, Parser::Parser& p
         for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
         return;
     }
+    typeChecker.typeCheck(nodes);
     if (option == "-t") {
-        typeChecker.typeCheck(nodes);
         for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
         return;
     }
+    FlowController::FlowController controller(nodes);
+    controller.runtime();
 }
 
 int main(int argc, char** argv) {
@@ -41,7 +43,7 @@ int main(int argc, char** argv) {
         if (arg == "-f") {
             if (argc == 2) { throw Util::CommanderException("No file name provided."); }
             std::string file = std::string(argv[2]);
-            std::string option = "-l";
+            std::string option = "";
             interpretFile(file, option, parser, typeChecker);
             return 0;
         }
