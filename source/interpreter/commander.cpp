@@ -46,7 +46,6 @@ int main(int argc, char** argv) {
         if (fileIterator++ != arguments.end()) {
             if (fileIterator == arguments.end()) { throw Util::CommanderException("No file name provided."); }
             std::string file = *fileIterator;
-            std::cout << file << std::endl;
             interpretFile(file, arguments, parser, typeChecker);
             return 0;
         }
