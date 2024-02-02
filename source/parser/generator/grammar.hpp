@@ -40,16 +40,26 @@ namespace Parser {
          */
         struct GrammarEntry {
             /**
+             * @brief An enumeration of the types of `GrammarEntry`s (i.e., a token type or a node type).
+             */
+            enum GrammarEntryType : uint8_t { TOKEN_TYPE, NODE_TYPE };
+
+            /**
+             * @brief The type of this `GrammarEntry`.
+             */
+            GrammarEntryType grammarEntryType;
+
+            /**
              * @brief The token type of this `GrammarEntry`.
              * @details Void if `nodeType` is set.
              */
-            std::optional<TokenType> tokenType;
+            TokenType tokenType;
 
             /**
              * @brief The AST node type of this `GrammarEntry`.
              * @details Void if `tokenType` is set.
              */
-            std::optional<ASTNodeType> nodeType;
+            ASTNodeType nodeType;
 
             /**
              * @brief Class constructor for a token type.
@@ -144,6 +154,12 @@ namespace Parser {
          * @details Does a lot of work under the hood. Avoid calling more than once.
          */
         Grammar();
+
+        /**
+         * @brief Copy constructor.
+         * @details Explicitly deleted.
+         */
+        Grammar(const Grammar& other) = delete;
 
         /**
          * @brief The grammar rules to use.

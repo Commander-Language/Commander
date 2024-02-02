@@ -9,39 +9,23 @@
 
 namespace Parser {
 
-    Grammar::GrammarEntry::GrammarEntry(Grammar::TokenType tokenType) : tokenType(tokenType) {}
+    Grammar::GrammarEntry::GrammarEntry(Grammar::TokenType tokenType)
+        : grammarEntryType(TOKEN_TYPE), tokenType(tokenType), nodeType() {}
 
-    Grammar::GrammarEntry::GrammarEntry(ASTNodeType nodeType) : nodeType(nodeType) {}
+    Grammar::GrammarEntry::GrammarEntry(ASTNodeType nodeType)
+        : grammarEntryType(NODE_TYPE), tokenType(), nodeType(nodeType) {}
 
     size_t Grammar::GrammarEntry::Hash::operator()(const Grammar::GrammarEntry& entry) const {
-        const std::hash<size_t> hash;
-
-        size_t val = 0;
-        if (entry.tokenType.has_value()) val = Util::combineHashes(val, hash(entry.tokenType.value()));
-        if (entry.nodeType.has_value()) val = Util::combineHashes(val, hash(entry.nodeType.value()));
-
-        return val;
+        return Util::combineHashes(entry.grammarEntryType, entry.tokenType, entry.nodeType);
     }
 
     bool Grammar::GrammarEntry::operator==(const Grammar::GrammarEntry& other) const {
-        if (this->tokenType.has_value()) {
-            if (!other.tokenType.has_value()) return false;
-            if (this->tokenType.value() != other.tokenType.value()) return false;
-        } else {
-            if (other.tokenType.has_value()) return false;
-        }
-
-        if (this->nodeType.has_value()) {
-            if (!other.nodeType.has_value()) return false;
-            if (this->nodeType.value() != other.nodeType.value()) return false;
-        } else {
-            if (other.nodeType.has_value()) return false;
-        }
-
-        return true;
+        const Hash hash;
+        return hash(*this) == hash(other);
     }
 
     bool Grammar::GrammarEntry::operator!=(const Grammar::GrammarEntry& other) const { return !(*this == other); }
+
 
     bool Grammar::GrammarRule::operator==(const Grammar::GrammarRule& other) const {
         if (this->result != other.result) return false;
@@ -58,12 +42,13 @@ namespace Parser {
     bool Grammar::GrammarRule::operator!=(const Grammar::GrammarRule& other) const { return !(*this == other); }
 
     size_t Grammar::GrammarRule::Hash::operator()(const Grammar::GrammarRule& rule) const {
-        const GrammarEntry::Hash hashEntry;
+        const GrammarEntry::Hash hash;
 
-        size_t val = std::hash<size_t> {}(rule.result);
-        for (const auto& entry : rule.components) val = Util::combineHashes(val, hashEntry(entry));
+        std::vector<size_t> hashes(rule.components.size() + 1);
+        for (size_t ind = 0; ind < rule.components.size(); ++ind) hashes[ind] = hash(rule.components[ind]);
+        hashes.back() = std::hash<size_t> {}(rule.result);
 
-        return val;
+        return Util::combineHashes(hashes);
     }
 
 
@@ -111,6 +96,107 @@ namespace Parser {
                             {"productionList[" + std::to_string(index) + "].token"})
                  + "->subTokens[0]->contents";
         };
+
+        constexpr bool simple = false;
+        if (simple)
+            return {
+                    //  ================
+                    //  ||  Program:  ||
+                    //  ================
+
+                    //  (PRGM) -> (STMTS)
+                    {{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0) + "->stmts"})},
+
+
+                    //  ====================
+                    //  ||  Expressions:  ||
+                    //  ====================
+
+                    //  Literals:
+                    //  ---------
+                    //  (EXPR) -> [INTVAL]
+                    {{ASTNodeType::EXPR, {TokenType::INTVAL}},
+                     makeNode("IntExpr", {callFunc("std::stoll", {tokenContents(0)})})},
+                    //  (EXPR) -> [FLOATVAL]
+                    {{ASTNodeType::EXPR, {TokenType::FLOATVAL}},
+                     makeNode("FloatExpr", {callFunc("std::stold", {tokenContents(0)})})},
+                    //  (EXPR) -> [TRUE]
+                    {{ASTNodeType::EXPR, {TokenType::TRUE}}, makeNode("BoolExpr", {"true"})},
+                    //  (EXPR) -> [FALSE]
+                    {{ASTNodeType::EXPR, {TokenType::FALSE}}, makeNode("BoolExpr", {"false"})},
+
+                    //  Number operations:
+                    //  ------------------
+                    //  (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EXPONENTIATE", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MULTIPLY", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [DIVIDE] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DIVIDE, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::DIVIDE", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [MODULO] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MODULO, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MODULO", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [ADD] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::ADD, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::ADD", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [MINUS] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MINUS, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::SUBTRACT", castNode("Expr", 2)})},
+
+                    //  Comparison operations:
+                    //  ----------------------
+                    //  (EXPR) -> (EXPR) [LESSER] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::LESSER", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [LESSER_EQUAL] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER_EQUAL, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::LESSER_EQUAL", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [GREATER] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::GREATER, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::GREATER", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [GREATER_EQUAL] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::GREATER_EQUAL, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::GREATER_EQUAL", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [DOUBLE_EQUALS] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DOUBLE_EQUALS, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EQUAL", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [NOT_EQUALS] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::NOT_EQUALS, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::NOT_EQUAL", castNode("Expr", 2)})},
+
+                    //  Boolean operations:
+                    //  -------------------
+                    //  (EXPR) -> (EXPR) [AND] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::AND, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::AND", castNode("Expr", 2)})},
+                    //  (EXPR) -> (EXPR) [OR] (EXPR)
+                    {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::OR, ASTNodeType::EXPR}},
+                     makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::OR", castNode("Expr", 2)})},
+
+                    //  Parentheses:
+                    //  ------------
+                    //  (EXPR) -> [LPAREN] (EXPR) [RPAREN]
+                    {{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
+                     "productionList[1].node"},
+
+
+                    //  ===================
+                    //  ||  Statements:  ||
+                    //  ===================
+
+                    //  (STMTS) -> (STMT)
+                    {{ASTNodeType::STMTS, {ASTNodeType::STMT}}, makeNode("Stmts", {castNode("Stmt", 0)})},
+                    //  (STMTS) -> (STMTS) (STMT)
+                    {{ASTNodeType::STMTS, {ASTNodeType::STMTS, ASTNodeType::STMT}},
+                     makeNode("Stmts", {castNode("Stmts", 0) + "->stmts", castNode("Stmt", 1)})},
+
+                    //  (STMT) -> (EXPR) [SEMICOLON]
+                    {{ASTNodeType::STMT, {ASTNodeType::EXPR, TokenType::SEMICOLON}},
+                     makeNode("ExprStmt", {castNode("Expr", 0)})},
+            };
         return {
                 //  ================
                 //  ||  Program:  ||
@@ -274,7 +360,7 @@ namespace Parser {
                 //  (EXPR) -> (VARIABLE)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE}}, makeNode("VarExpr", {castNode("Variable", 0)})},
                 //  (EXPR) -> (STRING)
-                //  {{ASTNodeType::EXPR, {ASTNodeType::STRING}}, makeNode("StringExpr", {castNode("String", 0)})},
+                {{ASTNodeType::EXPR, {ASTNodeType::STRING}}, makeNode("StringExpr", {castNode("String", 0)})},
 
 
                 //  ===================
