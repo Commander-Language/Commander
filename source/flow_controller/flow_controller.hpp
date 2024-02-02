@@ -153,12 +153,12 @@ namespace FlowController {
         void _variable(const Parser::VariableNodePtr&);
 
         /**
-         * @brief
+         * @brief Helper to interpret unary operations
          */
         std::any _unaryOp(std::shared_ptr<Parser::UnOpExprNode>&);
 
         /**
-         * @brief
+         * @brief Helper to interpret binary operations
          */
         std::any _binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp);
     };

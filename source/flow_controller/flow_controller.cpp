@@ -195,7 +195,7 @@ namespace FlowController {
                 }
                 std::any returnValue = _stmt(function.body);
 
-                _symbolTable.popSymbolTable();  // remove funciton scope!
+                _symbolTable.popSymbolTable();  // remove function scope!
                 return returnValue;
             }
             case Parser::LAMBDA_EXPR: {
@@ -259,6 +259,9 @@ namespace FlowController {
             case Parser::ALIAS_STMT: {
                 // TODO: Implement
                 break;
+            }
+            default: {
+                throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
             }
         }
         return nullptr;
