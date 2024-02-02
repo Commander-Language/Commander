@@ -124,7 +124,8 @@ namespace FlowController {
             }
             case Parser::VAR_EXPR: {
                 auto varExp = std::static_pointer_cast<Parser::VarExprNode>(node);
-                return _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(varExp->variable)->varName);
+                std::any value = _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(varExp->variable)->varName);
+                return value;
             }
             case Parser::ARRAY_EXPR: {
                 auto arrExp = std::static_pointer_cast<Parser::ArrayExprNode>(node);
@@ -375,7 +376,7 @@ namespace FlowController {
                 return left + right;
             }
             case Parser::EXPONENTIATE: {
-                return std::pow(left, right);
+                return static_cast<CommanderInt>(std::pow(left, right));
             }
             case Parser::AND: {
                 return std::any_cast<CommanderBool>(left) && std::any_cast<CommanderBool>(right);
@@ -384,11 +385,11 @@ namespace FlowController {
                 return std::any_cast<CommanderBool>(left) || std::any_cast<CommanderBool>(right);
             }
             case Parser::SET: {
-                auto variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
-                std::any value = _expr(binOp->rightExpr);
+                //auto variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
+                //std::any value = _expr(binOp->rightExpr);
 
-                _setVariable(variable->varName, value);
-                return value;
+                _setVariable(variableName, right);
+                return right;
             }
             case Parser::NOT_EQUAL: {
                 return left != right;
@@ -444,7 +445,9 @@ namespace FlowController {
 
     std::any FlowController::_getVariable(const std::string& name) {
         int* value = _symbolTable.getVariable(name);
-        if (value != nullptr) { return *value; }
+        if (value != nullptr) {
+            return static_cast<CommanderInt>(*value);
+        }
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
@@ -456,5 +459,5 @@ namespace FlowController {
 
     bool FlowController::hasVariable(std::string name) { return _symbolTable.varExistsInScope(name); }
 
-    int FlowController::getVariableValue(std::string name) { return std::any_cast<int>(_getVariable(name)); }
+    CommanderInt FlowController::getVariableValue(std::string name) { return std::any_cast<CommanderInt>(_getVariable(name)); }
 }  // namespace FlowController

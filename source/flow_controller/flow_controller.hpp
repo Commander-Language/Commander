@@ -67,7 +67,7 @@ namespace FlowController {
         /**
          * @brief Get value of variable
          */
-        int getVariableValue(std::string);
+        CommanderInt getVariableValue(std::string);
 
     private:
         /**

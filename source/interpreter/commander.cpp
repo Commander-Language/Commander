@@ -24,8 +24,6 @@ void interpretFile(std::string& fileName, std::string& option, Parser::Parser& p
         for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
         return;
     }
-    FlowController::FlowController flow(nodes);
-    flow.runtime();
 }
 
 int main(int argc, char** argv) {

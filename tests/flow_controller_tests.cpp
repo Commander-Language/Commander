@@ -23,23 +23,27 @@ std::string getFileContents(const std::string& filePath) {
  * @brief
  */
 TEST(FlowControllerTests, SaveIntToVariable) {
-    try {
-        Lexer::TokenList tokens;
-        Lexer::tokenize(tokens, "../tests/files/flow_controller_tests/script001.cmdr");
-        Parser::ASTNodeList nodes = parser.parse(tokens);
-        FlowController::FlowController controller(nodes);
-        controller.runtime();
+    Lexer::TokenList tokens;
+    Lexer::tokenize(tokens, "../tests/files/flow_controller_tests/script001.cmdr");
+    Parser::ASTNodeList nodes = parser.parse(tokens);
+    FlowController::FlowController controller(nodes);
+    controller.runtime();
 
-        EXPECT_TRUE(controller.hasVariable("x"));
-        EXPECT_EQ(controller.getVariableValue("x"), 1);
+    EXPECT_TRUE(controller.hasVariable("one"));
+    EXPECT_TRUE(controller.hasVariable("two"));
+    EXPECT_TRUE(controller.hasVariable("three"));
+    EXPECT_TRUE(controller.hasVariable("nine"));
+    EXPECT_TRUE(controller.hasVariable("twenty"));
+    EXPECT_TRUE(controller.hasVariable("eight_one"));
+    EXPECT_TRUE(controller.hasVariable("mod5_2"));
 
-        EXPECT_TRUE(controller.hasVariable("y"));
-        EXPECT_EQ(controller.getVariableValue("y"), 1);
-
-        EXPECT_TRUE(controller.hasVariable("z"));
-        EXPECT_EQ(controller.getVariableValue("z"), 2);
-
-    } catch (const Util::CommanderException& err) { std::cout << "Error caught: " << err.what() << std::endl; }
+    EXPECT_EQ(controller.getVariableValue("one"), 1);
+    EXPECT_EQ(controller.getVariableValue("two"), 2);
+    EXPECT_EQ(controller.getVariableValue("three"), 3);
+    EXPECT_EQ(controller.getVariableValue("nine"), 9);
+    EXPECT_EQ(controller.getVariableValue("twenty"), 20);
+    EXPECT_EQ(controller.getVariableValue("eight_one"), 81);
+    EXPECT_EQ(controller.getVariableValue("mod5_2"), 1);
 }
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
