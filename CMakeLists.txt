@@ -145,7 +145,6 @@ add_executable(parseTableGenerator source/parser/generator/generator.cpp
 
         source/parser/ast_node.cpp
         source/parser/parser_action.cpp
-        source/util/combine_hashes.cpp
 )
 target_link_libraries(parseTableGenerator lexer)
 
@@ -161,7 +160,6 @@ add_library(parser source/parser/parser.cpp
         source/parser/production_item.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/parse_table.cpp
 
-        source/util/combine_hashes.cpp
         source/util/commander_exception.cpp
 )
 
