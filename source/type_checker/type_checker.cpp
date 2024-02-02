@@ -269,16 +269,16 @@ namespace TypeChecker {
                         // TODO: Improve error
                         throw Util::CommanderException("Equality operation has incompatible types.");
                     case Parser::ADD:
-                    case Parser::ADD_EQUAL:
+                    case Parser::ADD_SET:
                     case Parser::MODULO:
                     case Parser::DIVIDE:
                     case Parser::MULTIPLY:
                     case Parser::SUBTRACT:
-                    case Parser::SUBTRACT_EQUAL:
-                    case Parser::MULTIPLY_EQUAL:
-                    case Parser::DIVIDE_EQUAL:
-                    case Parser::MODULO_EQUAL:
-                    case Parser::EXPONENTIATE_EQUAL:
+                    case Parser::SUBTRACT_SET:
+                    case Parser::MULTIPLY_SET:
+                    case Parser::DIVIDE_SET:
+                    case Parser::MODULO_SET:
+                    case Parser::EXPONENTIATE_SET:
                     case Parser::EXPONENTIATE:
                         // Int/float | float/float --> float
                         // Int/int --> int
@@ -288,7 +288,7 @@ namespace TypeChecker {
                         }
                         if (areEqual && isInt) { return (exprNode->type = std::make_shared<IntTy>()); }
                         if (areEqual && isString
-                            && (exprNode->opType == Parser::ADD || exprNode->opType == Parser::ADD_EQUAL)) {
+                            && (exprNode->opType == Parser::ADD || exprNode->opType == Parser::ADD_SET)) {
                             return (exprNode->type = std::make_shared<StringTy>());
                         }
                         // TODO: Improve error

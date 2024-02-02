@@ -26,7 +26,7 @@ namespace Parser {
         /**
          * @brief Shorthand for the `TokenType` enumeration from the lexer.
          */
-        using TokenType = lexer::tokenType;
+        using TokenType = Lexer::tokenType;
 
         /**
          * @brief A method that makes a new AST node smart pointer.

@@ -107,7 +107,7 @@ namespace Parser {
         };
         const auto stringTokenContents = [&](size_t index) -> std::string {
             //  FIXME: Doesn't support string interpolation.
-            return callFunc("std::reinterpret_pointer_cast<lexer::StringToken>",
+            return callFunc("std::reinterpret_pointer_cast<Lexer::StringToken>",
                             {"productionList[" + std::to_string(index) + "].token"})
                  + "->subTokens[0]->contents";
         };

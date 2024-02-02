@@ -102,6 +102,8 @@ namespace Parser {
                 return "TYPE";
             case VARIABLE:
                 return "VARIABLE";
+            default:
+                return "UNKNOWN";
         }
     }
 
