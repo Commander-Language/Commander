@@ -255,7 +255,34 @@ namespace FlowController {
             }
             case Parser::EXPR_STMT: {
                 auto expr = std::static_pointer_cast<Parser::ExprStmtNode>(node);
-                return _expr(expr->expression);
+                std::any value = _expr(expr->expression);
+                switch (expr->expression->type->getType()) {
+                    case TypeChecker::INT:
+                        //TODO: Implement method that stringifies a int
+                        std::cout << std::any_cast<CommanderInt>(value) << std::endl;
+                        break;
+                    case TypeChecker::FLOAT:
+                        //TODO: Implement method that stringifies a float
+                        std::cout << std::any_cast<double_t>(value) << std::endl;
+                        break;
+                    case TypeChecker::BOOL:
+                        //TODO: Implement method that stringifies a bool
+                        std::cout << std::any_cast<CommanderBool>(value) << std::endl;
+                        break;
+                    case TypeChecker::TUPLE:
+                        //TODO: Implement method that stringifies a tuple and call it here
+                        break;
+                    case TypeChecker::ARRAY:
+                        //TODO: Implement method that stringifies an array and call it here
+                        break;
+                    case TypeChecker::FUNCTION:
+                        //TODO: Implement method that stringifies a function and call it here
+                        break;
+                    case TypeChecker::STRING:
+                        //TODO: Implement method that stringifies a string and call it here
+                        break;
+                }
+                return value;
             }
             case Parser::ALIAS_STMT: {
                 // TODO: Implement

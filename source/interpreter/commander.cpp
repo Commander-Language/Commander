@@ -6,43 +6,47 @@
 #include <fstream>
 #include <iostream>
 
-void interpretFile(std::string& fileName, std::string& option, Parser::Parser& parser,
+void interpretFile(std::string& fileName, std::vector<std::string>& arguments, Parser::Parser& parser,
                    TypeChecker::TypeChecker& typeChecker) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, fileName);
-    if (option == "-l") {
+    if (std::find(arguments.begin(), arguments.end(), "-l") != arguments.end()) {
         for (const Lexer::TokenPtr& token : tokens) std::cout << token->toString() << '\n';
         return;
     }
     Parser::ASTNodeList nodes = parser.parse(tokens);
-    if (option == "-p") {
+    if (std::find(arguments.begin(), arguments.end(), "-p") != arguments.end()) {
         for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
         return;
     }
-    if (option == "-t") {
-        typeChecker.typeCheck(nodes);
+    typeChecker.typeCheck(nodes);
+    if (std::find(arguments.begin(), arguments.end(), "-t") != arguments.end()) {
         for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
         return;
     }
+    FlowController::FlowController controller(nodes);
+    controller.runtime();
 }
 
 int main(int argc, char** argv) {
     try {
+        std::vector<std::string> arguments;
+        for (int i = 1; i < argc; i++) {
+            arguments.push_back(argv[i]);
+        }
         clock_t const start = clock();
         Parser::Parser parser;
         clock_t const end = clock();
         std::cout << "Parse Table Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds"
                   << '\n';
         TypeChecker::TypeChecker typeChecker;
-        std::cout << "Commander Language Prototype" << '\n';
+        std::cout << "Commander Language Version Alpha" << '\n';
         std::cout << "Basic REPL for Commander scripting language." << '\n';
-        std::string arg;
-        if (argc > 1) { arg = std::string(argv[1]); }
-        if (arg == "-f") {
-            if (argc == 2) { throw Util::CommanderException("No file name provided."); }
-            std::string file = std::string(argv[2]);
-            std::string option = "-l";
-            interpretFile(file, option, parser, typeChecker);
+        auto fileIterator = std::find(arguments.begin(), arguments.end(), "-f");
+        if (fileIterator++ != arguments.end()) {
+            if (fileIterator == arguments.end()) { throw Util::CommanderException("No file name provided."); }
+            std::string file = *fileIterator;
+            interpretFile(file, arguments, parser, typeChecker);
             return 0;
         }
         while (true) {
@@ -65,7 +69,7 @@ int main(int argc, char** argv) {
                 tmp << source;
                 tmp.close();  // close file here to save changes
 
-                interpretFile(tmpFileName, arg, parser, typeChecker);
+                interpretFile(tmpFileName, arguments, parser, typeChecker);
 
                 std::remove(tmpFileName.c_str());
             } catch (const Util::CommanderException& err) { std::cout << err.what() << '\n'; }
