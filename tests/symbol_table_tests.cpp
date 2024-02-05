@@ -574,11 +574,50 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
 
 // GENERIC DATA TYPE TESTS
 
-//TEST(ANY_DATA, alternateIntTest) {
-//    Scope testScope = Scope();
-//    testScope.addOrUpdateVariable("cat", 8);
-//
-//    EXPECT_NO_THROW(testScope.getVariableAsType<int>("cat")); //Shouldn't throw an error here
-//    EXPECT_EQ(*testScope.getVariable("cat"), 8);
-//    EXPECT_EQ(testScope.getVariableAsType<int>("cat"), 8);
-//}
+TEST(ANY_DATA, alternateIntTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 8);
+
+    EXPECT_NO_THROW(testScope.getVariableAsType<int>("cat")); //Shouldn't throw an error here
+    EXPECT_EQ(*testScope.getVariable("cat"), 8);
+}
+
+TEST(ANY_DATA, alternateIntMultiScopeTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 8);
+    Scope otherScope = Scope(&testScope);
+    otherScope.addOrUpdateVariable("dog", 16);
+    Scope finalScope = Scope(&otherScope);
+    finalScope.addOrUpdateVariable("bird", 32);
+
+    EXPECT_NO_THROW(finalScope.getVariableAsType<int>("bird"));
+    EXPECT_NO_THROW(finalScope.getVariableAsType<int>("dog"));
+    EXPECT_NO_THROW(finalScope.getVariableAsType<int>("cat"));
+
+    EXPECT_EQ(*finalScope.getVariableAsType<int>("bird"), 32);
+    EXPECT_EQ(*finalScope.getVariableAsType<int>("dog"), 16);
+    EXPECT_EQ(*finalScope.getVariableAsType<int>("cat"), 8);
+}
+
+TEST(ANY_DATA, noBadCastsTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 8);
+    testScope.addOrUpdateVariable("dog", 3.14f);
+    testScope.addOrUpdateVariable("bird", true);
+
+    //Get the requested data and check if no exceptions throw
+    //TODO: should std::any_cast() cast to the desired type?
+    EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<int>("cat"), 8));
+    EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<int>("dog"), 3));
+    EXPECT_NO_THROW(EXPECT_NE(*testScope.getVariableAsType<int>("bird"), 0));
+    EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<float>("cat"), 8.0f));
+    EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<float>("dog"), 3.14f));
+    EXPECT_NO_THROW(EXPECT_NE(*testScope.getVariableAsType<float>("bird"), 0.0f));
+    EXPECT_NO_THROW(EXPECT_TRUE(testScope.getVariableAsType<bool>("cat")));
+    EXPECT_NO_THROW(EXPECT_TRUE(testScope.getVariableAsType<bool>("dog")));
+    EXPECT_NO_THROW(EXPECT_TRUE(testScope.getVariableAsType<bool>("bird")));
+}
+
+TEST(ANY_DATA, stringTest) {
+    FAIL(); //unimplemented
+}

@@ -41,7 +41,7 @@ public:
      * @param data - An object which will be stored as data (e.g. 14, "dog", std::vector<int>, etc.)
      * @param occurences - The number of times the variable is used in the script (used for garbage collection)
      */
-    void addOrUpdateVariable(const std::string& variableID, int data);
+    void addOrUpdateVariable(const std::string& variableID, std::any data);
 
     /**
      * updateVariable() is similar to addOrUpdateVariable. This method will only update variables if they exist anywhere
@@ -50,7 +50,7 @@ public:
      * @param newData - The new data to associate with the variable
      * @return - TRUE if the variable was successfully updated, otherwise FALSE is returned
      */
-    bool updateVariable(const std::string& variableID, int newData);
+    bool updateVariable(const std::string& variableID, std::any newData);
 
     /**
      * hasLocalVariable returns a boolean value according to whether the specified variable exists in this scope.
@@ -69,23 +69,35 @@ public:
     bool hasGlobalVariable(const std::string& variableID);
 
     /**
+     * @deprecated
      * _getVariable returns a pointer to the desired variable in the scope. If the variable does not exist in this
      * scope, the parent scope will be scanned for the variable
      * @param variableID - A string ID which the variable will be referenced by
      * @return - A pointer to the specified data if it exists, otherwise a nullptr will return
      */
-    int* getVariable(const std::string& variableID);
+    int* getVariable(const std::string& variableID); //TODO: replace with below method
 
-    int* getVariableAsInt(std::string variableID);
-
-    //float
-    //double
-    //string
-    //char
-    //
-
-//    template<typename _Type>
-//        inline _Type getVariableAsType(std::string variableID);
+    /**
+     * getVariableAsType() returns data from the Scope. If the variable does not exist in this scope, the parent will
+     * be scanned for the variable
+     * @tparam T - The type to cast the desired data as (e.g. int, std::string, float, etc.)
+     * @param variableID - A string ID which the variable will be referenced by
+     * @return - A type T pointer to the specified data if it exists, otherwise a nullptr will return
+     */
+    template <typename T>
+    T* getVariableAsType(std::string variableID) {
+        if(!hasDataKey(variableID)) {
+            if(_parentScope != nullptr) { return _parentScope->getVariableAsType<T>(variableID); }
+            return nullptr;
+        }
+        decrementUses(variableID);
+        try{
+            return std::any_cast<T>(_variableData[variableID].get()); //try to get the data as the requested type
+        }
+        catch(std::exception ex) {
+            throw std::bad_any_cast().what(); //if we've failed, throw an exception
+        }
+    }
 
     /**
      * getParenScopePointer() returns a pointer to the parent of this scope
@@ -129,9 +141,8 @@ public:
     bool hasExpired(const std::string& variableID);
 
 private:
-    std::map<std::string, std::shared_ptr<int>>
-            _variableData {};                           // uses a Key variableName to find it's associated object
-    std::map<std::string, unsigned int> _variableUses;  // uses a Key variableName to find usages left (unsigned int)
+    std::map<std::string, std::shared_ptr<std::any>> _variableData {};  // uses a Key variableName to find it's associated object
+    std::map<std::string, unsigned int> _variableUses; //uses a Key variableName to find usages left (unsigned int)
     Scope* _parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)
 
 
@@ -156,6 +167,9 @@ private:
      * @return - TRUE if the method created a new entry in _variableUses, otherwise FALSE is returned
      */
     bool _tryGetUses(const std::string& variableID);
+
+    //TODO: may not work as intended
+    const char* what() const noexcept;
 };
 
 
