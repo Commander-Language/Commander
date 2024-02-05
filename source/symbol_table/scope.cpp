@@ -26,19 +26,19 @@ Scope::Scope(Scope& otherScope) {
         //If we've reached the end of the line, set the parentScope to nullptr
         _parentScope = nullptr;
     }
-    std::map<std::string, std::shared_ptr<int>> copyData(otherScope._variableData);
+    std::map<std::string, std::shared_ptr<std::any>> copyData(otherScope._variableData);
     std::map<std::string, unsigned int> copyUses(otherScope._variableUses);
     _variableData = copyData;
     _variableUses = copyUses;
 }
 
-void Scope::addOrUpdateVariable(std::string variableID, int data) {
+void Scope::addOrUpdateVariable(std::string variableID, std::any data) {
     if(!updateVariable(variableID, data)) {
-        _variableData.insert_or_assign(variableID, std::make_shared<int>(data));
+        _variableData.insert_or_assign(variableID, std::make_shared<std::any>(data));
     }
 }
 
-bool Scope::updateVariable(std::string variableID, int newData) {
+bool Scope::updateVariable(std::string variableID, std::any newData) {
     if(!hasDataKey(variableID)) {
         if(_parentScope != nullptr) {
             return _parentScope->updateVariable(variableID, newData);
@@ -48,7 +48,7 @@ bool Scope::updateVariable(std::string variableID, int newData) {
         }
     }
     else {
-        _variableData.insert_or_assign(variableID, std::make_shared<int>(newData));
+        _variableData.insert_or_assign(variableID, std::make_shared<std::any>(newData));
         if(!hasUsesKey(variableID)) {
             _variableUses.insert_or_assign(variableID, 0); //If the variable somehow doesn't have uses assigned, default to 0
         }
@@ -71,21 +71,21 @@ int* Scope::getVariable(std::string variableID) {
         return nullptr;
     }
     decrementUses(variableID);
-    return _variableData[variableID].get();
+    return std::any_cast<int>(_variableData[variableID].get());
 }
 
-//template<typename _Type>
-//_Type Scope::getVariableAsType(std::string variableID) {
+//template<typename T>
+//T* Scope::getVariableAsType(std::string variableID) {
+//    if(!hasDataKey(variableID)) {
+//        if(_parentScope != nullptr) { return _parentScope->getVariableAsType<T>(variableID); }
+//        return nullptr;
+//    }
+//    decrementUses(variableID);
 //    try{
-//        if (!hasDataKey(variableID)) {
-//            if (_parentScope != nullptr) { return _parentScope->getVariableAsType<_Type>(variableID); }
-//            return nullptr;
-//        }
-//        decrementUses(variableID);
-//        return std::any_cast<_Type>(_variableData[variableID].get());
+//        return std::any_cast<T>(_variableData[variableID].get()); //try to get the data as the requested type
 //    }
 //    catch(std::exception ex) {
-//        throw(std::bad_any_cast());
+//        throw std::bad_any_cast().what(); //if we've failed, throw an exception
 //    }
 //}
 
@@ -153,4 +153,8 @@ bool Scope::tryGetUses(std::string variableID) {
         return false;
     }
     return true;
+}
+
+const char* Scope::what() const noexcept { //TODO: may not work as intended
+    return "The provided data could not be cast to the provided type";
 }
