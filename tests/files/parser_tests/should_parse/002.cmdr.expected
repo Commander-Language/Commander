@@ -1,4 +1,4 @@
 (PrgmNode
-	(CmdCmdNode echo (StringNode 'int float bool string array tuple function echo "Hello, World!"
+	(CmdStmtNode (CmdCmdNode (StringNode "echo") (StringNode "int float bool string array tuple function echo "Hello, World!"
         length() [] () &  | alias = const while do for if else + - / %  ** += -=
-        /= %= **= "UT" + "AH"  (x) -> {return 0;} scan read \\ // ln"')))
+        /= %= **= "UT" + "AH"  (x) -> {return 0;} scan read \\ // ln""))))

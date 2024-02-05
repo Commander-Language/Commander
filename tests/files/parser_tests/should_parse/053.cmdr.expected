@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode val) SET (BinOpExprNode (BoolExprNode true) EQUAL (BoolExprNode false)))))

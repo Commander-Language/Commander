@@ -1,2 +1,2 @@
 (PrgmNode
-	(AliasStmtNode x (CmdCmdNode ls)))
+	(AliasStmtNode x (CmdCmdNode (StringNode "ls"))))

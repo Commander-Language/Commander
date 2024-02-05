@@ -1,2 +1,2 @@
 (PrgmNode
-	(VarStmtNode isInt (IntExprNode 24)))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode isInt) SET (IntExprNode 24))))

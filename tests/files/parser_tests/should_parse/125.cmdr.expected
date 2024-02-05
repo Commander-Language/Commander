@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) DIVIDE_SET (BinOpExprNode (VarExprNode (IdentVariableNode x)) DIVIDE (BinOpExprNode (VarExprNode (IdentVariableNode x)) DIVIDE (BinOpExprNode (VarExprNode (IdentVariableNode x)) DIVIDE (VarExprNode (IdentVariableNode x))))))))

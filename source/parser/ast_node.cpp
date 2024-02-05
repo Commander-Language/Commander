@@ -329,9 +329,9 @@ namespace Parser {
 
     std::string StringNode::sExpression() const {
         std::stringstream builder;
-        for (int i = 0; i < (int)literals.size(); i++) {
-            builder << " " << literals[i];
-            if (i < (int)expressions.size()) { builder << " " << expressions[i]->sExpression(); }
+        for (size_t i = 0; i < literals.size(); i++) {
+            builder << " \"" << literals[i] << "\"";
+            if (i < expressions.size()) { builder << " " << expressions[i]->sExpression(); }
         }
         return "(StringNode" + builder.str() + ")";
     }
