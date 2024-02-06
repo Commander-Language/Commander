@@ -294,7 +294,7 @@ namespace Parser {
                 std::cout << "    * Reductions (" << reductions.size() << "):\n";
                 for (const auto& reduction : reductions)
                     std::cout << "        * [[" << reductionPriorities[reduction.first] << "]]:  ["
-                              << lexer::tokenTypeToString(reduction.second.lookahead) << "]: " << reduction.second.rule
+                              << Lexer::tokenTypeToString(reduction.second.lookahead) << "]: " << reduction.second.rule
                               << "\n";
             }
         }
@@ -433,7 +433,7 @@ namespace Parser {
             stream << kernel.rule.components[ind] << " ";
         }
         if (kernel.index == kernel.rule.components.size()) stream << "* ";
-        stream << ":: [" << lexer::tokenTypeToString(kernel.lookahead) << "]}";
+        stream << ":: [" << Lexer::tokenTypeToString(kernel.lookahead) << "]}";
 
         return stream;
     }

@@ -39,7 +39,7 @@ namespace Parser {
 
     std::ostream& operator<<(std::ostream& stream, const Grammar::GrammarEntry& grammarEntry) {
         if (grammarEntry.grammarEntryType == Grammar::GrammarEntry::TOKEN_TYPE) {
-            stream << "[" << lexer::tokenTypeToString(grammarEntry.tokenType) << "]";
+            stream << "[" << Lexer::tokenTypeToString(grammarEntry.tokenType) << "]";
         } else {
             stream << "(" << nodeTypeToString(grammarEntry.nodeType) << ")";
         }
