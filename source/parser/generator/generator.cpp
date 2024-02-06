@@ -4,15 +4,21 @@
  */
 
 #include "generator.hpp"
+#include "grammar.hpp"
 
-#include "source/util/combine_hashes.hpp"
+#include "source/parser/ast_node.hpp"
 #include "source/util/generated_map.hpp"
 
+#include <cstddef>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace Parser {
     Generator::Generator() {
@@ -254,39 +260,43 @@ namespace Parser {
                 //  Add this reduce action, if it has a higher priority than a conflicting shift action.
                 if (shiftPriorities.count(tokenType) == 0 || shiftPriorities[tokenType] >= priority) {
                     _nextAction[stateNum][tokenType] = _join("",
-                                                             {"[&](const ProductionItemList& productionList) { return ",
-                                                              grammar.reductions.at(kernel.rule), "; }"});
+                                                             {"{", std::to_string(kernel.rule.components.size()), ", ",
+                                                              "[&](const ProductionItemList& productionList) { return ",
+                                                              grammar.reductions.at(kernel.rule), "; }}"});
                 }
             }
 
             //  TODO: Remove.
-            /*
-            std::cout << "State " << stateNum << "/" << states.size() << "+:\n";
+            constexpr bool print = true;
+            if (print) {
+                std::cout << "State " << stateNum << "/" << states.size() << "+:\n";
 
-            std::cout << "    * Kernels (" << currentState.size() << "):\n";
-            for (const auto& kernel : currentState) std::cout << "        * " << kernel << "\n";
+                std::cout << "    * Kernels (" << currentState.size() << "):\n";
+                for (const auto& kernel : currentState) std::cout << "        * " << kernel << "\n";
 
-            std::cout << "    * Closure (" << enclosedKernels.size() << "):\n";
-            for (const auto& kernel : enclosedKernels) std::cout << "        * " << kernel << "\n";
+                std::cout << "    * Closure (" << enclosedKernels.size() << "):\n";
+                for (const auto& kernel : enclosedKernels) std::cout << "        * " << kernel << "\n";
 
-            std::cout << "    * Shifts (" << shifts.size() << "):\n";
-            for (const auto& shift : shifts) {
-                std::cout << "        * [[" << shiftPriorities[shift.first] << "]]:  " << shift.first << " -> "
-                          << stateNums[shift.second] << ":\n";
-                for (const auto& nextKern : shift.second) std::cout << "            * " << nextKern << "\n";
+                std::cout << "    * Shifts (" << shifts.size() << "):\n";
+                for (const auto& shift : shifts) {
+                    std::cout << "        * [[" << shiftPriorities[shift.first] << "]]:  ["
+                              << tokenTypeToString(shift.first) << "] -> " << stateNums[shift.second] << ":\n";
+                    for (const auto& nextKern : shift.second) std::cout << "            * " << nextKern << "\n";
+                }
+
+                std::cout << "    * Moves (" << nextStates.size() << "):\n";
+                for (const auto& nextState : nextStates) {
+                    std::cout << "        * (" << nodeTypeToString(nextState.first) << ") -> "
+                              << stateNums[nextState.second] << "\n";
+                    for (const auto& nextKern : nextState.second) std::cout << "            * " << nextKern << "\n";
+                }
+
+                std::cout << "    * Reductions (" << reductions.size() << "):\n";
+                for (const auto& reduction : reductions)
+                    std::cout << "        * [[" << reductionPriorities[reduction.first] << "]]:  ["
+                              << lexer::tokenTypeToString(reduction.second.lookahead) << "]: " << reduction.second.rule
+                              << "\n";
             }
-
-            std::cout << "    * Moves (" << nextStates.size() << "):\n";
-            for (const auto& nextState : nextStates) {
-                std::cout << "        * " << nextState.first << " -> " << stateNums[nextState.second] << "\n";
-                for (const auto& nextKern : nextState.second) std::cout << "            * " << nextKern << "\n";
-            }
-
-            std::cout << "    * Reductions (" << reductions.size() << "):\n";
-            for (const auto& reduction : reductions)
-                std::cout << "        * [[" << reductionPriorities[reduction.first] << "]]:  " << reduction.first
-                          << " -> " << reduction.second.rule << "\n";
-            */
         }
 
         std::cout << states.size() << "\n";
@@ -356,11 +366,11 @@ namespace Parser {
         std::vector<std::string> allNextActions(_nextAction.size());
         for (const auto& statePair : _nextAction) {
             const size_t allActionsIndex = statePair.first;
-            std::unordered_map<TokenType, ParserActionInitializer> statesNextActions = statePair.second;
+            const std::unordered_map<TokenType, ParserActionInitializer> statesNextActions = statePair.second;
             std::vector<std::string> statesNextActionStrings(statesNextActions.size());
             size_t statesNextActionIndex = 0;
             for (const auto& tokenPair : statesNextActions) {
-                TokenType tokenType = tokenPair.first;
+                const TokenType tokenType = tokenPair.first;
                 const ParserActionInitializer& action = tokenPair.second;
                 const std::string tokenTypeString = "lexer::tokenType::" + lexer::tokenTypeToString(tokenType);
                 statesNextActionStrings[statesNextActionIndex++] = _pair(tokenTypeString, action);
@@ -416,16 +426,28 @@ namespace Parser {
         return hash(*this) < hash(other);
     }
 
+    std::ostream& operator<<(std::ostream& stream, const Generator::Kernel& kernel) {
+        stream << "{" << kernel.priority << ": (" << nodeTypeToString(kernel.rule.result) << ") -> ";
+        for (size_t ind = 0; ind < kernel.rule.components.size(); ++ind) {
+            if (ind == kernel.index) stream << "* ";
+            stream << kernel.rule.components[ind] << " ";
+        }
+        if (kernel.index == kernel.rule.components.size()) stream << "* ";
+        stream << ":: [" << lexer::tokenTypeToString(kernel.lookahead) << "]}";
+
+        return stream;
+    }
+
     size_t Generator::Kernel::Hash::operator()(const Generator::Kernel& kernel) const {
-        return Util::combineHashes(Grammar::GrammarRule::Hash {}(kernel.rule), kernel.index, kernel.lookahead);
+        std::stringstream stream;
+        stream << kernel;
+        return std::hash<std::string> {}(stream.str());
     }
 
     size_t Generator::HashKernelSet::operator()(const Parser::Generator::KernelSet& kernelSet) const {
-        const Kernel::Hash hash;
-        std::vector<size_t> hashes(kernelSet.size());
-        size_t ind = 0;
-        for (const auto& kernel : kernelSet) hashes[ind++] = hash(kernel);
-        return Util::combineHashes(hashes);
+        std::stringstream stream;
+        for (const auto& kernel : kernelSet) stream << kernel << " ";
+        return std::hash<std::string> {}(stream.str());
     }
 
     std::string Generator::_join(const std::string& delimiter, const std::vector<std::string>& strings) {
@@ -462,7 +484,7 @@ int main(int, char**) {
     }
 
     //  First, build the parse table.
-    Parser::Generator generator;
+    const Parser::Generator generator;
 
     //  Then, generate the C++ source file.
     generator.generateSource(file);

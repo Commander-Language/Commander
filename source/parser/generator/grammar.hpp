@@ -8,9 +8,12 @@
 #ifndef GRAMMAR_HPP
 #define GRAMMAR_HPP
 
-#include "source/parser/parser_action.hpp"
+#include "source/lexer/lexer.hpp"
+#include "source/parser/ast_node.hpp"
 
-#include <optional>
+#include <cstddef>
+#include <cstdint>
+#include <ostream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -92,6 +95,15 @@ namespace Parser {
             bool operator!=(const GrammarEntry& other) const;
 
             /**
+             * @brief Stream insertion operator.
+             *
+             * @param stream The `std::ostream` that will receive a grammar entry as input.
+             * @param grammarEntry The grammar entry to stream to the given `std::ostream`.
+             * @return The given stream.
+             */
+            friend std::ostream& operator<<(std::ostream& stream, const GrammarEntry& grammarEntry);
+
+            /**
              * @brief Hashing functor for `GrammarEntry` objects.
              */
             struct Hash {
@@ -134,6 +146,15 @@ namespace Parser {
              * @return False if the two grammar rules are equal; true otherwise.
              */
             bool operator!=(const GrammarRule& other) const;
+
+            /**
+             * @brief Stream insertion operator.
+             *
+             * @param stream The `std::ostream` that will receive a grammar rule as input.
+             * @param grammarRule The grammar rule to stream to the given `std::ostream`.
+             * @return The given stream.
+             */
+            friend std::ostream& operator<<(std::ostream& stream, const GrammarRule& grammarRule);
 
             /**
              * @brief Hashing functor for `GrammarRule` objects.
