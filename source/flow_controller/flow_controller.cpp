@@ -124,7 +124,8 @@ namespace FlowController {
             }
             case Parser::VAR_EXPR: {
                 auto varExp = std::static_pointer_cast<Parser::VarExprNode>(node);
-                return _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(varExp->variable)->varName);
+                std::any value = _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(varExp->variable)->varName);
+                return value;
             }
             case Parser::ARRAY_EXPR: {
                 auto arrExp = std::static_pointer_cast<Parser::ArrayExprNode>(node);
@@ -254,7 +255,34 @@ namespace FlowController {
             }
             case Parser::EXPR_STMT: {
                 auto expr = std::static_pointer_cast<Parser::ExprStmtNode>(node);
-                return _expr(expr->expression);
+                std::any value = _expr(expr->expression);
+                switch (expr->expression->type->getType()) {
+                    case TypeChecker::INT:
+                        //TODO: Implement method that stringifies a int
+                        std::cout << std::any_cast<CommanderInt>(value) << std::endl;
+                        break;
+                    case TypeChecker::FLOAT:
+                        //TODO: Implement method that stringifies a float
+                        std::cout << std::any_cast<double_t>(value) << std::endl;
+                        break;
+                    case TypeChecker::BOOL:
+                        //TODO: Implement method that stringifies a bool
+                        std::cout << std::any_cast<CommanderBool>(value) << std::endl;
+                        break;
+                    case TypeChecker::TUPLE:
+                        //TODO: Implement method that stringifies a tuple and call it here
+                        break;
+                    case TypeChecker::ARRAY:
+                        //TODO: Implement method that stringifies an array and call it here
+                        break;
+                    case TypeChecker::FUNCTION:
+                        //TODO: Implement method that stringifies a function and call it here
+                        break;
+                    case TypeChecker::STRING:
+                        //TODO: Implement method that stringifies a string and call it here
+                        break;
+                }
+                return value;
             }
             case Parser::ALIAS_STMT: {
                 // TODO: Implement
@@ -375,7 +403,7 @@ namespace FlowController {
                 return left + right;
             }
             case Parser::EXPONENTIATE: {
-                return std::pow(left, right);
+                return static_cast<CommanderInt>(std::pow(left, right));
             }
             case Parser::AND: {
                 return std::any_cast<CommanderBool>(left) && std::any_cast<CommanderBool>(right);
@@ -384,11 +412,11 @@ namespace FlowController {
                 return std::any_cast<CommanderBool>(left) || std::any_cast<CommanderBool>(right);
             }
             case Parser::SET: {
-                auto variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
-                std::any value = _expr(binOp->rightExpr);
+                //auto variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
+                //std::any value = _expr(binOp->rightExpr);
 
-                _setVariable(variable->varName, value);
-                return value;
+                _setVariable(variableName, right);
+                return right;
             }
             case Parser::NOT_EQUAL: {
                 return left != right;
@@ -444,7 +472,9 @@ namespace FlowController {
 
     std::any FlowController::_getVariable(const std::string& name) {
         int* value = _symbolTable.getVariable(name);
-        if (value != nullptr) { return *value; }
+        if (value != nullptr) {
+            return static_cast<CommanderInt>(*value);
+        }
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
@@ -456,5 +486,5 @@ namespace FlowController {
 
     bool FlowController::hasVariable(std::string name) { return _symbolTable.varExistsInScope(name); }
 
-    int FlowController::getVariableValue(std::string name) { return std::any_cast<int>(_getVariable(name)); }
+    CommanderInt FlowController::getVariableValue(std::string name) { return std::any_cast<CommanderInt>(_getVariable(name)); }
 }  // namespace FlowController

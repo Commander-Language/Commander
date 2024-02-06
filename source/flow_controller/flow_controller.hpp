@@ -11,6 +11,7 @@
 
 #include <any>
 #include <tuple>
+#include <iostream>
 
 namespace FlowController {
 
@@ -67,7 +68,7 @@ namespace FlowController {
         /**
          * @brief Get value of variable
          */
-        int getVariableValue(std::string);
+        CommanderInt getVariableValue(std::string);
 
     private:
         /**
