@@ -1,0 +1,2 @@
+//Test that command parses
+x = `./commander -l`;

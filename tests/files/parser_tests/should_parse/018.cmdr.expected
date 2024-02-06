@@ -1,0 +1,3 @@
+(PrgmNode
+	(AliasStmtNode (VarStmtNode ls) (CmdCmdNode dir))
+	(CmdCmdNode ls))

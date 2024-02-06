@@ -27,7 +27,7 @@ namespace Parser {
          *
          * @param token The token that makes up this `ProductionItem`.
          */
-        ProductionItem(lexer::TokenPtr token);
+        ProductionItem(Lexer::TokenPtr token);
 
         /**
          * @brief Class constructor from an AST node.
@@ -40,7 +40,7 @@ namespace Parser {
          * @brief The token, if this is a token.
          *
          */
-        lexer::TokenPtr token;
+        Lexer::TokenPtr token;
 
         /**
          * @brief The AST node, if this is an AST node.

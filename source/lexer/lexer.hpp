@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace lexer {
+namespace Lexer {
 
     /**
      * @brief Enumeration of different types of tokens.
@@ -40,6 +40,7 @@ namespace lexer {
         DIVIDE,
         DIVIDE_EQUALS,
         DO,
+        DOT,
         DOUBLE_EQUALS,
         ELSE,
         END_OF_FILE,
@@ -86,6 +87,7 @@ namespace lexer {
         STRING,
         STRINGLITERAL,
         STRINGVAL,
+        TIMEOUT,
         TO,
         TRUE,
         TYPE,
@@ -199,8 +201,8 @@ namespace lexer {
             {{"alias", ALIAS}, {"bool", BOOL},     {"break", BREAK}, {"const", CONST},   {"continue", CONTINUE},
              {"do", DO},       {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
              {"if", IF},       {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
-             {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"to", TO},
-             {"true", TRUE},   {"type", TYPE},     {"while", WHILE}, {"write", WRITE}});
+             {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"timeout", TIMEOUT},
+             {"to", TO},       {"true", TRUE},     {"type", TYPE},   {"while", WHILE},   {"write", WRITE}});
 
     /**
      * Vector of string token literal pairs that are not keywords (order matters here; longest to shortest)
@@ -236,7 +238,8 @@ namespace lexer {
                                                                         {"[", LSQUARE},
                                                                         {"?", QUESTION},
                                                                         {"}", RCURLY},
-                                                                        {"]", RSQUARE}});
+                                                                        {"]", RSQUARE},
+                                                                        {".", DOT}});
 
     /**
      * Vector of string token literal pairs that can be parsed in commands as well as normally
@@ -438,7 +441,7 @@ namespace lexer {
     void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position,
                        const tokenType& terminatingToken);
 
-}  // namespace lexer
+}  // namespace Lexer
 
 #endif  // COMMANDER_LEXER_HPP
 #pragma clang diagnostic pop

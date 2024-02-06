@@ -372,7 +372,7 @@ namespace Parser {
             for (const auto& tokenPair : statesNextActions) {
                 const TokenType tokenType = tokenPair.first;
                 const ParserActionInitializer& action = tokenPair.second;
-                const std::string tokenTypeString = "lexer::tokenType::" + lexer::tokenTypeToString(tokenType);
+                const std::string tokenTypeString = "Lexer::tokenType::" + Lexer::tokenTypeToString(tokenType);
                 statesNextActionStrings[statesNextActionIndex++] = _pair(tokenTypeString, action);
             }
             allNextActions[allActionsIndex] = _wrap(_join(", ", statesNextActionStrings));

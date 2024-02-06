@@ -1,22 +1,52 @@
-#include "../lexer/lexer.hpp"
-#include "../parser/parser.hpp"
-#include "../util/commander_exception.hpp"
+#include "source/flow_controller/flow_controller.hpp"
+#include "source/lexer/lexer.hpp"
+#include "source/parser/parser.hpp"
+#include "source/type_checker/type_checker.hpp"
+#include "source/util/commander_exception.hpp"
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <variant>
+
+void interpretFile(std::string& fileName, std::string& option, Parser::Parser& parser,
+                   TypeChecker::TypeChecker& typeChecker) {
+    Lexer::TokenList tokens;
+    Lexer::tokenize(tokens, fileName);
+    if (option == "-l") {
+        for (const Lexer::TokenPtr& token : tokens) std::cout << token->toString() << '\n';
+        return;
+    }
+    Parser::ASTNodeList nodes = parser.parse(tokens);
+    if (option == "-p") {
+        for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
+        return;
+    }
+    if (option == "-t") {
+        typeChecker.typeCheck(nodes);
+        for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << '\n';
+        return;
+    }
+    FlowController::FlowController flow(nodes);
+    flow.runtime();
+}
 
 int main(int argc, char** argv) {
     try {
-        std::string arg = "";
-        if (argc > 1) { arg = std::string(argv[1]); }
-        clock_t start = clock();
+        clock_t const start = clock();
         Parser::Parser parser;
-        clock_t end = clock();
+        clock_t const end = clock();
         std::cout << "Parse Table Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds"
-                  << std::endl;
-        std::cout << "Commander Language Prototype" << std::endl;
-        std::cout << "Basic REPL for Commander scripting language." << std::endl;
+                  << '\n';
+        TypeChecker::TypeChecker typeChecker;
+        std::cout << "Commander Language Prototype" << '\n';
+        std::cout << "Basic REPL for Commander scripting language." << '\n';
+        std::string arg;
+        if (argc > 1) { arg = std::string(argv[1]); }
+        if (arg == "-f") {
+            if (argc == 2) { throw Util::CommanderException("No file name provided."); }
+            std::string file = std::string(argv[2]);
+            std::string option = "-l";
+            interpretFile(file, option, parser, typeChecker);
+            return 0;
+        }
         while (true) {
             try {
                 std::cout << ">> ";
@@ -25,7 +55,7 @@ int main(int argc, char** argv) {
                 std::getline(std::cin, source);
 
                 if (source == "clear") {
-                    std::cout << "\033[2J\033[H" << std::endl;
+                    std::cout << "\033[2J\033[H" << '\n';
                     continue;
                 }
 
@@ -37,51 +67,14 @@ int main(int argc, char** argv) {
                 tmp << source;
                 tmp.close();  // close file here to save changes
 
-                lexer::TokenList tokens;
-                lexer::tokenize(tokens, tmpFileName);
+                interpretFile(tmpFileName, arg, parser, typeChecker);
+
                 std::remove(tmpFileName.c_str());
-                if (arg == "-l") {
-                    for (const lexer::TokenPtr& token : tokens) std::cout << token->toString() << std::endl;
-                    continue;
-                }
-                Parser::ASTNodeList nodes = parser.parse(tokens);
-                if (arg == "-p") {
-                    for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << std::endl;
-                    continue;
-                }
-                if (arg == "-t") {
-                    // TODO: type checking
-                    continue;
-                }
-                // TODO: Run script
-                std::map<std::string, std::variant<long, double, bool>> variables;
-                for (const Parser::ASTNodePtr& node : nodes) {
-                    if (node->nodeType() == Parser::ASTNodeType::STMTS) {
-                        switch (node->nodeType()) {
-                            // Basic commands
-                            case Parser::ASTNodeType::CMD:
-                                // TODO
-                                break;
-                            // Variables
-                            case Parser::ASTNodeType::VARIABLE:
-                                // TODO
-                                break;
-                            // Expressions (math, boolean, variables, strings and string interpolation)
-                            case Parser::ASTNodeType::EXPRS:
-                                // TODO
-                                break;
-                            // User I/O (need to handle read, write, scan, print)
-                            case Parser::ASTNodeType::STMT:
-                                // TODO
-                                break;
-                        }
-                    }
-                }
-            } catch (const util::CommanderException& err) { std::cout << err.what() << std::endl; }
+            } catch (const Util::CommanderException& err) { std::cout << err.what() << '\n'; }
         }
         return 0;
-    } catch (const util::CommanderException& e) {
-        std::cout << e.what() << std::endl;
+    } catch (const Util::CommanderException& e) {
+        std::cout << e.what() << '\n';
         return 1;
     }
 }

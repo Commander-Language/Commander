@@ -1,0 +1,4 @@
+//Should parse alias commands
+alias all = ls -a;
+alias allGrep = all | grep myDir &;
+allGrep;

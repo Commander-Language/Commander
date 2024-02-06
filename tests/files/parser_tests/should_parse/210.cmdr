@@ -1,0 +1,2 @@
+//Test that command parses
+echo -f -a -b -abc --arg;

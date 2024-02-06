@@ -1,0 +1,4 @@
+//Should not parse due to unterminated parameters
+add(a, b {
+    return a + b;
+}

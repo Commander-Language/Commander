@@ -5,8 +5,13 @@
  *          number of items before validating
  */
 
-#include "../source/type_checker/type_checker.hpp"
+#include "source/type_checker/type_checker.hpp"
 #include "gtest/gtest.h"
+
+template<typename TType>
+std::shared_ptr<TType> makeType() {
+    return std::make_shared<TType>();
+}
 
 /**
  * @brief setOrUpdateTest tests the setOrUpdate() method in TypeChecker.
@@ -15,39 +20,39 @@
  *          Finally, the values for the variables are updated and checked
  */
 TEST(BASICTESTS, setOrUpdateTest) {
-    TypeChecker testChecker = TypeChecker();
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
 
     EXPECT_FALSE(testChecker.hasVariable("cat"));
     EXPECT_FALSE(testChecker.hasVariable("dog"));
     EXPECT_FALSE(testChecker.hasVariable("bird"));
 
-    testChecker.setOrUpdateType("cat", "INTEGER");
-    testChecker.setOrUpdateType("dog", "FLOAT");
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::IntTy>());
+    testChecker.setOrUpdateType("dog", makeType<TypeChecker::FloatTy>());
 
     EXPECT_TRUE(testChecker.hasVariable("cat"));
     EXPECT_TRUE(testChecker.hasVariable("dog"));
     EXPECT_FALSE(testChecker.hasVariable("bird"));
-    EXPECT_TRUE(testChecker.getType("cat") == "INTEGER");
-    EXPECT_TRUE(testChecker.getType("dog") == "FLOAT");
+    EXPECT_EQ(TypeChecker::INT, testChecker.getType("cat")->getType());
+    EXPECT_EQ(TypeChecker::FLOAT, testChecker.getType("dog")->getType());
 
-    testChecker.setOrUpdateType("cat", "STRING");
-    testChecker.setOrUpdateType("dog", "NULL");
-    EXPECT_TRUE(testChecker.getType("cat") == "STRING");
-    EXPECT_TRUE(testChecker.getType("dog") == "NULL");
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::StringTy>());
+    testChecker.setOrUpdateType("dog", makeType<TypeChecker::BoolTy>());
+    EXPECT_EQ(TypeChecker::STRING, testChecker.getType("cat")->getType());
+    EXPECT_EQ(TypeChecker::BOOL, testChecker.getType("dog")->getType());
 }
 
 /**
  * @brief stringTypeTests is an extension of setOrUpdateTest which confirms the type has been updated properly
  */
 TEST(BASICTESTS, stringTypeTests) {
-    TypeChecker testChecker = TypeChecker();
-    testChecker.setOrUpdateType("cat", "INTEGER");
-    EXPECT_EQ("INTEGER", testChecker.getType("cat"));
-    EXPECT_NE("FLOAT", testChecker.getType("cat"));
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::IntTy>());
+    EXPECT_EQ(TypeChecker::INT, testChecker.getType("cat")->getType());
+    EXPECT_NE(TypeChecker::FLOAT, testChecker.getType("cat")->getType());
 
-    testChecker.setOrUpdateType("cat", "FLOAT");
-    EXPECT_EQ("FLOAT", testChecker.getType("cat"));
-    EXPECT_NE("INTEGER", testChecker.getType("cat"));
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::FloatTy>());
+    EXPECT_EQ(TypeChecker::FLOAT, testChecker.getType("cat")->getType());
+    EXPECT_NE(TypeChecker::INT, testChecker.getType("cat")->getType());
 }
 
 /**
@@ -56,14 +61,14 @@ TEST(BASICTESTS, stringTypeTests) {
  *          should be yielded if the specified variable doesn't exist.
  */
 TEST(BASICTESTS, verifyTests) {
-    TypeChecker testChecker = TypeChecker();
-    testChecker.setOrUpdateType("cat", "INTEGER");
-    EXPECT_TRUE(testChecker.verifyType("cat", "INTEGER"));
-    EXPECT_FALSE(testChecker.verifyType("cat", "STRING"));
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::IntTy>());
+    EXPECT_TRUE(testChecker.verifyType("cat", makeType<TypeChecker::IntTy>()));
+    EXPECT_FALSE(testChecker.verifyType("cat", makeType<TypeChecker::StringTy>()));
 
     EXPECT_FALSE(testChecker.hasVariable("dog"));
-    EXPECT_FALSE(testChecker.verifyType("dog", "INTEGER"));
-    EXPECT_FALSE(testChecker.verifyType("dog", "STRING"));
+    EXPECT_FALSE(testChecker.verifyType("dog", makeType<TypeChecker::IntTy>()));
+    EXPECT_FALSE(testChecker.verifyType("dog", makeType<TypeChecker::StringTy>()));
 }
 
 /**
@@ -73,49 +78,32 @@ TEST(BASICTESTS, verifyTests) {
  *          is expected to be false
  */
 TEST(BASICTESTS, verifySimilarTypesTest) {
-    TypeChecker testChecker = TypeChecker();
-    testChecker.setOrUpdateType("cat", "INTEGER");
-    EXPECT_TRUE(testChecker.verifyType("cat", "INTEGER"));
-    EXPECT_TRUE(testChecker.verifyType("cat", "FLOAT"));
-    EXPECT_TRUE(testChecker.verifyType("cat", "DOUBLE"));
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::IntTy>());
+    EXPECT_TRUE(testChecker.verifyType("cat", makeType<TypeChecker::IntTy>()));
+    EXPECT_TRUE(testChecker.verifyType("cat", makeType<TypeChecker::FloatTy>()));
 
-    testChecker.setOrUpdateType("cat", "DOUBLE");
-    EXPECT_TRUE(testChecker.verifyType("cat", "INTEGER"));
-    EXPECT_TRUE(testChecker.verifyType("cat", "FLOAT"));
-    EXPECT_TRUE(testChecker.verifyType("cat", "DOUBLE"));
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::FloatTy>());
+    EXPECT_TRUE(testChecker.verifyType("cat", makeType<TypeChecker::IntTy>()));
+    EXPECT_TRUE(testChecker.verifyType("cat", makeType<TypeChecker::FloatTy>()));
 
-    testChecker.setOrUpdateType("cat", "STRING");
-    EXPECT_FALSE(testChecker.verifyType("cat", "INTEGER"));
-    EXPECT_FALSE(testChecker.verifyType("cat", "FLOAT"));
-    EXPECT_FALSE(testChecker.verifyType("cat", "DOUBLE"));
+    testChecker.setOrUpdateType("cat", makeType<TypeChecker::StringTy>());
+    EXPECT_FALSE(testChecker.verifyType("cat", makeType<TypeChecker::IntTy>()));
+    EXPECT_FALSE(testChecker.verifyType("cat", makeType<TypeChecker::FloatTy>()));
 }
 
 /**
- * @brief varsExist assigns 100 variables with the Type "INTEGER" and confirms whether they have been properly added.
+ * @brief stressTest100 assigns 100 variables with the Type "INTEGER" and confirms whether they have been properly added
+ * with the expected type.
  */
-TEST(BASICTESTS, varsExist) {
-    TypeChecker testChecker = TypeChecker();
+TEST(BASICTESTS, stressTest100) {
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
     for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
-        testChecker.setOrUpdateType(std::to_string(currentVariable), "INTEGER");
+        testChecker.setOrUpdateType(std::to_string(currentVariable), makeType<TypeChecker::IntTy>());
     }
     for (int currentVariable = 0; currentVariable < 100; currentVariable++) {
         EXPECT_TRUE(testChecker.hasVariable(std::to_string(currentVariable)));
-    }
-}
-
-/**
- * @brief stressTest100 adds 100 variables with an associated type and validates if they are equal
- * @details variables are assigned a key according to the order they were added and a dummy value. For example, item 43
- *          should have the variableID "43" and a type of "43"
- */
-TEST(STRESSTESTS, stressTest100) {
-    TypeChecker testChecker = TypeChecker();
-    for (int currentString = 0; currentString < 100; currentString++) {
-        testChecker.setOrUpdateType(std::to_string(currentString), std::to_string(currentString));
-    }
-
-    for (int currentString = 0; currentString < 100; currentString++) {
-        EXPECT_EQ(std::to_string(currentString), testChecker.getType(std::to_string(currentString)));
+        EXPECT_EQ(TypeChecker::INT, testChecker.getType(std::to_string(currentVariable))->getType());
     }
 }
 
@@ -123,13 +111,13 @@ TEST(STRESSTESTS, stressTest100) {
  * @brief stressTest100000 is an extension of stressTest100, but checks more items compared to its predecessor
  */
 TEST(STRESSTESTS, stressTest100000) {
-    TypeChecker testChecker = TypeChecker();
-    for (int currentString = 0; currentString < 100000; currentString++) {
-        testChecker.setOrUpdateType(std::to_string(currentString), std::to_string(currentString));
+    TypeChecker::TypeChecker testChecker = TypeChecker::TypeChecker();
+    for (int currentVariable = 0; currentVariable < 100000; currentVariable++) {
+        testChecker.setOrUpdateType(std::to_string(currentVariable), makeType<TypeChecker::IntTy>());
     }
-
-    for (int currentString = 0; currentString < 100000; currentString++) {
-        EXPECT_EQ(std::to_string(currentString), testChecker.getType(std::to_string(currentString)));
+    for (int currentVariable = 0; currentVariable < 100000; currentVariable++) {
+        EXPECT_TRUE(testChecker.hasVariable(std::to_string(currentVariable)));
+        EXPECT_EQ(TypeChecker::INT, testChecker.getType(std::to_string(currentVariable))->getType());
     }
 }
 

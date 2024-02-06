@@ -1,0 +1,4 @@
+//Should not parse due to missing types
+add = (a:, b) {
+    return a + b;
+}

@@ -1,0 +1,3 @@
+// test unary operations
+x = 1;
+x++;

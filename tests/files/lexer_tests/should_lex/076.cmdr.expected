@@ -1,0 +1,6 @@
+TIMEOUT 'timeout' 2:1
+INTVAL '40000' 2:9
+CMDSTRINGVAL 'ping' 2:15
+CMDSTRINGVAL 'http://google.com' 2:20
+SEMICOLON ';' 2:37
+END_OF_FILE 2:38

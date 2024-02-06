@@ -1,0 +1,4 @@
+//Should not parse if-chain
+else {
+    echo "hello";
+}

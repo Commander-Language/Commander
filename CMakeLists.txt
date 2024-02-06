@@ -135,16 +135,14 @@ include(GoogleTest)
 #  Main build configurations:
 #  --------------------------
 
-add_library(lexer source/lexer/lexer.cpp
-
-        source/util/commander_exception.cpp
-)
+add_library(lexer source/lexer/lexer.cpp source/util/commander_exception.cpp)
 
 add_executable(parseTableGenerator source/parser/generator/generator.cpp
         source/parser/generator/grammar.cpp
-
         source/parser/ast_node.cpp
         source/parser/parser_action.cpp
+        source/util/combine_hashes.cpp
+        source/type_checker/type.cpp
 )
 target_link_libraries(parseTableGenerator lexer)
 
@@ -159,13 +157,18 @@ add_library(parser source/parser/parser.cpp
         source/parser/parser_action.cpp
         source/parser/production_item.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/parse_table.cpp
+        source/util/combine_hashes.cpp
 
         source/util/commander_exception.cpp
 )
+add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp)
+add_library(flow_controller source/flow_controller/flow_controller.cpp)
+add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
+add_library(job_runner source/job_runner/job_runner.cpp)
 
 add_executable(commander source/interpreter/commander.cpp)
-target_link_libraries(commander lexer parser)
 
+target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner)
 
 #  Test configurations:
 #  --------------------
@@ -175,18 +178,22 @@ target_link_libraries(lexerTests lexer GTest::gtest_main)
 gtest_discover_tests(lexerTests)
 
 add_executable(parserTests tests/parser_tests.cpp)
-target_link_libraries(parserTests lexer parser GTest::gtest_main)
+target_link_libraries(parserTests lexer parser type_checker GTest::gtest_main)
 gtest_discover_tests(parserTests)
 
-add_executable(typeCheckerTests tests/type_checker_tests.cpp source/type_checker/type_checker.cpp)
-target_link_libraries(typeCheckerTests GTest::gtest_main)
+add_executable(typeCheckerTests tests/type_checker_tests.cpp)
+target_link_libraries(typeCheckerTests lexer type_checker GTest::gtest_main)
 gtest_discover_tests(typeCheckerTests)
 
-add_executable(symbolTableTests tests/symbol_table_tests.cpp source/symbol_table/scope.cpp source/symbol_table/symbol_table_organizer.cpp)
-target_link_libraries(symbolTableTests GTest::gtest_main)
+add_executable(symbolTableTests tests/symbol_table_tests.cpp)
+target_link_libraries(symbolTableTests symbol_table GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
 
+add_executable(flowControllerTests tests/flow_controller_tests.cpp)
+target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table GTest::gtest_main)
+gtest_discover_tests(flowControllerTests)
+
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
-add_executable(jobRunnerTests ${builtins} source/util/commander_exception.cpp source/job_runner/job_runner.cpp tests/job_runner_tests.cpp)
-target_link_libraries(jobRunnerTests GTest::gtest_main)
+add_executable(jobRunnerTests ${builtins} tests/job_runner_tests.cpp)
+target_link_libraries(jobRunnerTests lexer job_runner GTest::gtest_main)
 gtest_discover_tests(jobRunnerTests)

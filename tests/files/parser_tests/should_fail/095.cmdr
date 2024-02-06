@@ -1,0 +1,2 @@
+//Should not parse write statement when incorrectly written
+write "hello" "myfile.txt";

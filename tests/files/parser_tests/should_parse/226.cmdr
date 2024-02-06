@@ -1,0 +1,2 @@
+//Should parse piping
+x = `netstat -tlnp & | grep 8080 & | echo hi &`;

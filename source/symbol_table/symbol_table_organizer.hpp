@@ -42,11 +42,44 @@ public:
 
     /**
      * addOrUpdateVariable() will add a provided variable to the top of the stack (i.e. current scope)
-     * For updating a previously-established variable, use updateVariable().
      * @param variableID - A string representing the variable's ID (e.g. cat)
      * @param data - An object which the variable should be associated with
      */
-    void addOrUpdateVariable(std::string variableID, int data);  // add a variable to the current scope
+    void addOrUpdateVariable(const std::string& variableID, int data);
+
+    /**
+     * addOrUpdateVariable() will add the provided variable to the top of the stack (i.e. current scope)
+     * This is an overloaded version of a two-parameter addOrUpdate variable. This method is reccommended for
+     * initializing variables for garbage collection.
+     * If the user is unsure of the number of occurrences, they should use NULL
+     * @param variableID - A string representing the variable's ID
+     * @param data - An object which the variable should associate with
+     * @param occurrences - The number of times the variable is found in the Commander script - will not update if the
+     * parameter passed in is null
+     */
+    void addOrUpdateVariable(const std::string& variableID, int data, unsigned int occurrences);
+
+    /**
+     * freeVariableData() will attempt to remove the data associated with a string variableID.
+     * If the variable does not exist, nothing will be removed
+     * @param variableID - The variable to remove
+     * @return - TRUE if the variable was removed, otherwise FALSE is returned
+     */
+    bool tryFreeVariableData(const std::string& variableID);
+
+    /**
+     * forceFreeVariableData() will garbage collect the variable, regardless of whether it has expired.
+     * If the variable does not exist, nothing will be removed
+     * @param variableID - The variable to remove
+     */
+    void forceFreeVariableData(const std::string& variableID);
+
+    /**
+     * variableHasExpired() will check if the variable's occurrences are equal to zero
+     * @param variableID - The variable to check
+     * @return - TRUE if the variable has no more occurrences, otherwise FALSE is returned
+     */
+    bool variableHasExpired(const std::string& variableID);
 
     /**
      * getScope() returns a pointer to the last scope in the symbol_table_organizer
@@ -60,8 +93,7 @@ public:
      * @param variableID - A string representing the ID of a variable (e.g. "cat")
      * @return - TRUE if the variable exists in the top of the stack, otherwise FALSE is returned
      */
-    bool varExistsInCurrentSymbolTable(
-            std::string variableID);  // return TRUE if the variable exists at the top of the stack
+    bool varExistsInCurrentSymbolTable(const std::string& variableID);
 
     /**
      * varExistsInScope() returns a boolean according to whether a variable of the specified string ID exists anywhere
@@ -69,8 +101,7 @@ public:
      * @param variableID - A string representing the ID of a variable
      * @return - TRUE if the variable exists anywhere in the vector, otherwise FALSE is returned
      */
-    bool varExistsInScope(
-            std::string variableID);  // return TRUE if the variable can be found anywhere in the stack (recursive)
+    bool varExistsInScope(const std::string& variableID);
 
     /**
      * isScopeGlobal() returns a boolean according to whether a scope is the head.
@@ -79,12 +110,12 @@ public:
     bool isScopeGlobal();  // return TRUE if the current scope is a global scope
 
     /**
-     * getVariable() returns the data value of the requested item. This method will search the entire symbol table for
+     * _getVariable() returns the data value of the requested item. This method will search the entire symbol table for
      * the requested item
      * @param variableID - A string representing the ID of a variable
      * @return - data associated with the specified variable
      */
-    int* getVariable(std::string variableID);
+    int* getVariable(const std::string& variableID);
 
 private:
     std::vector<Scope*> _symbolTables {};  // A vector containing each symbol table; some methods will use this to find

@@ -1,0 +1,2 @@
+//Tests multiple piping parses correctly
+cd .. | ls -a | grep text;

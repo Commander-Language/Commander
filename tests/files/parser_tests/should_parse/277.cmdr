@@ -1,0 +1,2 @@
+//Should parse string concatenation
+x += hello + "" + (y + 'world') + ("i");

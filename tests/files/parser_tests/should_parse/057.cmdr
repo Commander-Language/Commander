@@ -1,0 +1,2 @@
+// Test that lambda expressions with return type and no curly braces parse correctly.
+myFunction = (x,y) : int -> x+1;

@@ -1,0 +1,2 @@
+// Test that imports parse correctly
+import "lib.cmdr";

@@ -7,10 +7,10 @@
 #include <fstream>
 #include <sstream>
 
-#include "../util/commander_exception.hpp"
 #include "lexer.hpp"
+#include "source/util/commander_exception.hpp"
 
-namespace lexer {
+namespace Lexer {
 
     std::string tokenTypeToString(const tokenType& type) {
         switch (type) {
@@ -48,6 +48,8 @@ namespace lexer {
                 return "DIVIDE_EQUALS";
             case DO:
                 return "DO";
+            case DOT:
+                return "DOT";
             case DOUBLE_EQUALS:
                 return "DOUBLE_EQUALS";
             case ELSE:
@@ -140,6 +142,8 @@ namespace lexer {
                 return "STRINGLITERAL";
             case STRINGVAL:
                 return "STRINGVAL";
+            case TIMEOUT:
+                return "TIMEOUT";
             case TO:
                 return "TO";
             case TRUE:
@@ -180,8 +184,8 @@ namespace lexer {
 
     std::string readFile(const std::string& filePath) {
         std::ifstream input(filePath);
-        if (!input.is_open()) { throw util::CommanderException("File not found at " + filePath); }
-        return std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+        if (!input.is_open()) { throw Util::CommanderException("File not found at " + filePath); }
+        return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
     }
 
     void tokenize(TokenList& tokens, const std::string& filePath) {
@@ -243,10 +247,10 @@ namespace lexer {
             }
             // If a comment is started incorrectly, throw an error
             if (character == '/' && !startLineComment && !startBlockComment) {
-                throw util::CommanderException("Expected either '*' or '/' after '/'", position);
+                throw Util::CommanderException("Expected either '*' or '/' after '/'", position);
             }
         }
-        if (isBlockComment) { throw util::CommanderException("Unterminated block comment", blockCommentPosition); }
+        if (isBlockComment) { throw Util::CommanderException("Unterminated block comment", blockCommentPosition); }
     }
 
     TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst) {
@@ -285,10 +289,10 @@ namespace lexer {
             return token;
         }
         if (isIllegalCharacter(file[position.index])) {
-            throw util::CommanderException(
+            throw Util::CommanderException(
                     "Illegal character (ascii " + std::to_string((int)(file[position.index])) + ")", position);
         }
-        throw util::CommanderException("Unrecognized token", position);
+        throw Util::CommanderException("Unrecognized token", position);
     }
 
     TokenPtr
@@ -407,7 +411,7 @@ namespace lexer {
             if (character == '\t') { continue; }
             // Ensure the string contains no illegal characters
             if (isIllegalCharacter(character)) {
-                throw util::CommanderException(
+                throw Util::CommanderException(
                         "String contains illegal character (ascii " + std::to_string((int)character) + ")", position);
             }
             // Check if string is terminated
@@ -460,7 +464,7 @@ namespace lexer {
                     if (secondCharacter == '\'') {
                         currentString << '\'';
                     } else {
-                        throw util::CommanderException(
+                        throw Util::CommanderException(
                                 "Unknown escape sequence \\" + std::string(1, secondCharacter),
                                 {position.fileName, position.line, position.index - 2, position.index - 2});
                     }
@@ -483,7 +487,7 @@ namespace lexer {
                         currentString << '$';
                         break;
                     default:
-                        throw util::CommanderException(
+                        throw Util::CommanderException(
                                 "Unknown escape sequence \\" + std::string(1, secondCharacter),
                                 {position.fileName, position.line, position.index - 2, position.index - 2});
                 }
@@ -522,7 +526,7 @@ namespace lexer {
             currentString << character;
         }
         if (!stringTerminated) {
-            throw util::CommanderException("String wasn't terminated with " + std::string((isSingle ? "'" : "\"")),
+            throw Util::CommanderException("String wasn't terminated with " + std::string((isSingle ? "'" : "\"")),
                                            token.position);
         }
         return std::make_shared<StringToken>(token);
@@ -600,11 +604,11 @@ namespace lexer {
     TokenPtr expectToken(const tokenType& type, const std::string& file, FilePosition& position, bool& isCommand) {
         skipWhitespace(file, position);
         if (position.index >= file.length()) {
-            throw util::CommanderException("Expected " + tokenTypeToString(type) + " token, but file ended.", position);
+            throw Util::CommanderException("Expected " + tokenTypeToString(type) + " token, but file ended.", position);
         }
         const TokenPtr token = lexToken(file, position, isCommand, false);
         if (token->type != type) {
-            throw util::CommanderException("Expected " + tokenTypeToString(type) + " token, but found "
+            throw Util::CommanderException("Expected " + tokenTypeToString(type) + " token, but found "
                                                    + tokenTypeToString(token->type) + " token.",
                                            token->position);
         }
@@ -635,7 +639,7 @@ namespace lexer {
                     lexStatement(tokens, file, position, SEMICOLON);
                     skipWhitespace(file, position);
                 }
-                throw util::CommanderException("Unterminated scope", token->position);
+                throw Util::CommanderException("Unterminated scope", token->position);
             }
             if (isCommand && isFirst) { commandPosition = token->position; }
             if (token->type == BACKTICK) {
@@ -644,7 +648,7 @@ namespace lexer {
                     isCommand = true;
                     isBacktickCommand = true;
                 } else if (!isBacktickCommand) {
-                    throw util::CommanderException("Cannot use backticks in command", token->position);
+                    throw Util::CommanderException("Cannot use backticks in command", token->position);
                 } else {
                     isCommand = false;
                     isBacktickCommand = false;
@@ -668,7 +672,7 @@ namespace lexer {
                     || nextToken->type == NOT_EQUALS || nextToken->type == LESSER_EQUAL
                     || nextToken->type == GREATER_EQUAL || nextToken->type == MODULO_EQUALS
                     || nextToken->type == DIVIDE_EQUALS || nextToken->type == MULTIPLY_EQUALS
-                    || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS
+                    || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS || nextToken->type == LSQUARE
                     || (noSpace && (nextToken->type == DECREMENT || nextToken->type == INCREMENT))) {
                     tokens.push_back(nextToken);
                 } else {
@@ -687,6 +691,11 @@ namespace lexer {
                 tokens.push_back(expectToken(EQUALS, file, position, isCommand));
                 isCommand = true;
             }
+            // Look ahead for timeout
+            if (token->type == TIMEOUT && isFirst) {
+                tokens.push_back(expectToken(INTVAL, file, position, isCommand));
+                isCommand = true;
+            }
             // Look ahead for for-loop
             if (token->type == FOR && isFirst && !isCommand) {
                 tokens.push_back(expectToken(LPAREN, file, position, isCommand));
@@ -695,18 +704,18 @@ namespace lexer {
                 lexStatement(tokens, file, position, RPAREN);
             }
             skipWhitespace(file, position);
-            if (token->type == ALIAS && isFirst) { commandPosition = position; }
+            if ((token->type == ALIAS || token->type == TIMEOUT) && isFirst) { commandPosition = position; }
             if (isFirst) { isFirst = false; }
         }
         if (isCommand && isBacktickCommand) {
-            throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
+            throw Util::CommanderException("Command was not terminated with a backtick", commandPosition);
         }
         if (isCommand) {
-            throw util::CommanderException("Command was not terminated with " + tokenTypeToString(terminatingToken)
+            throw Util::CommanderException("Command was not terminated with " + tokenTypeToString(terminatingToken)
                                                    + " token",
                                            commandPosition);
         }
-        throw util::CommanderException(
+        throw Util::CommanderException(
                 "Statement was not terminated with " + tokenTypeToString(terminatingToken) + " token", startPosition);
     }
 
@@ -732,10 +741,10 @@ namespace lexer {
             skipWhitespace(file, position);
         }
         if (isCommand) {
-            throw util::CommanderException("Command was not terminated with a backtick", commandPosition);
+            throw Util::CommanderException("Command was not terminated with a backtick", commandPosition);
         }
-        throw util::CommanderException("Expression not terminated by " + tokenTypeToString(terminatingToken) + " token",
+        throw Util::CommanderException("Expression not terminated by " + tokenTypeToString(terminatingToken) + " token",
                                        startPosition);
     }
 
-}  // namespace lexer
+}  // namespace Lexer

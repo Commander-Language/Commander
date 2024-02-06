@@ -7,7 +7,7 @@
 
 namespace Parser {
 
-    ProductionItem::ProductionItem(lexer::TokenPtr token) : token(std::move(token)) {}
+    ProductionItem::ProductionItem(Lexer::TokenPtr token) : token(std::move(token)) {}
 
     ProductionItem::ProductionItem(ASTNodePtr node) : node(std::move(node)) {}
 
