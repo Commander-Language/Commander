@@ -4,9 +4,8 @@
  */
 #include "builtins.hpp"
 #include <iostream>
-namespace Builtins {
-
-    std::string scan(std::vector<std::string> args) {
+namespace Scan {
+    Builtins::List scan(Builtins::List args) {
         if (args.size() <= 1) {
             std::cout << "scan: no arguments given\n";
             return {};
@@ -15,7 +14,6 @@ namespace Builtins {
         std::string input;
         std::cout << args[1];
         std::cin >> input;
-        return input;
+        return {input};
     }
-
-}  // namespace Builtins
+}  // namespace Scan
