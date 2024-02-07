@@ -124,7 +124,3 @@ bool Scope::hasExpired(const std::string& variableID) {
 }
 
 bool Scope::_tryGetUses(const std::string& variableID) { return _hasUsesKey(variableID); }
-
-const char* Scope::what() const noexcept { //TODO: may not work as intended
-    return "The provided data could not be cast to the provided type";
-}

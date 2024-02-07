@@ -573,8 +573,8 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
 }
 
 // GENERIC DATA TYPE TESTS
-
-TEST(ANY_DATA, alternateIntTest) {
+//TODO: document
+TEST(ANY_DATA, scopeAlternateIntTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
 
@@ -582,7 +582,7 @@ TEST(ANY_DATA, alternateIntTest) {
     EXPECT_EQ(*testScope.getVariable("cat"), 8);
 }
 
-TEST(ANY_DATA, alternateIntMultiScopeTest) {
+TEST(ANY_DATA, scopeAlternateIntMultiScopeTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
     Scope otherScope = Scope(&testScope);
@@ -599,25 +599,114 @@ TEST(ANY_DATA, alternateIntMultiScopeTest) {
     EXPECT_EQ(*finalScope.getVariableAsType<int>("cat"), 8);
 }
 
-TEST(ANY_DATA, noBadCastsTest) {
+TEST(ANY_DATA, scopeNoBadCastsTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
     testScope.addOrUpdateVariable("dog", 3.14f);
     testScope.addOrUpdateVariable("bird", true);
 
     //Get the requested data and check if no exceptions throw
-    //TODO: should std::any_cast() cast to the desired type?
     EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<int>("cat"), 8));
-    EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<int>("dog"), 3));
-    EXPECT_NO_THROW(EXPECT_NE(*testScope.getVariableAsType<int>("bird"), 0));
-    EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<float>("cat"), 8.0f));
+    EXPECT_THROW(*testScope.getVariableAsType<int>("dog"), std::bad_any_cast); //TODO does not throw, but doesn't return anything?
+    EXPECT_THROW(*testScope.getVariableAsType<int>("bird"), std::bad_any_cast);
+    EXPECT_THROW(*testScope.getVariableAsType<float>("cat"), std::bad_any_cast);
     EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariableAsType<float>("dog"), 3.14f));
-    EXPECT_NO_THROW(EXPECT_NE(*testScope.getVariableAsType<float>("bird"), 0.0f));
-    EXPECT_NO_THROW(EXPECT_TRUE(testScope.getVariableAsType<bool>("cat")));
-    EXPECT_NO_THROW(EXPECT_TRUE(testScope.getVariableAsType<bool>("dog")));
+    EXPECT_THROW(*testScope.getVariableAsType<float>("bird"), std::bad_any_cast);
+    EXPECT_THROW(*testScope.getVariableAsType<bool>("cat"), std::bad_any_cast);
+    EXPECT_THROW(*testScope.getVariableAsType<bool>("dog"), std::bad_any_cast);
     EXPECT_NO_THROW(EXPECT_TRUE(testScope.getVariableAsType<bool>("bird")));
 }
 
-TEST(ANY_DATA, stringTest) {
-    FAIL(); //unimplemented
+TEST(ANY_DATA, scopeCastTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 8);
+    testScope.addOrUpdateVariable("dog", 3.14f);
+    testScope.addOrUpdateVariable("bird", true);
+
+    EXPECT_EQ(*testScope.getVariableAsType<int>("cat"), 8);
+    EXPECT_EQ(*testScope.getVariableAsType<float>("dog"), 3.14f);
+    EXPECT_EQ(*testScope.getVariableAsType<bool>("bird"), true);
+
+    int dogAsInt = (int) *testScope.getVariableAsType<float>("dog");
+    int birdAsInt = (int) *testScope.getVariableAsType<bool>("bird");
+
+    EXPECT_EQ(*testScope.getVariableAsType<int>("cat") + dogAsInt + birdAsInt, 8 + 3 + 1);
+
+    float catAsFloat = (float) *testScope.getVariableAsType<int>("cat");
+    float birdAsFloat = (float) *testScope.getVariableAsType<bool>("bird");
+
+    EXPECT_EQ(*testScope.getVariableAsType<float>("dog") + catAsFloat + birdAsFloat, 3.14f + 8.0f + 1.0f);
+
+    bool catAsBool = (bool) *testScope.getVariableAsType<int>("cat");
+    bool dogAsBool = (bool) *testScope.getVariableAsType<float>("dog");
+
+    EXPECT_TRUE(*testScope.getVariableAsType<bool>("bird") + catAsBool + dogAsBool);
+}
+
+TEST(ANY_DATA, scopeStringTest) {
+    std::string catAsString = "meow";
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", catAsString);
+    EXPECT_EQ(*testScope.getVariableAsType<std::string>("cat"), "meow");
+}
+
+TEST(ANY_DATA, scopeAddOrUpdateTest) {
+    Scope testScope = Scope();
+    testScope.addOrUpdateVariable("cat", 8);
+
+    EXPECT_EQ(*testScope.getVariableAsType<int>("cat"), 8);
+    EXPECT_NE((float) *testScope.getVariableAsType<int>("cat"), 3.14f);
+
+    testScope.addOrUpdateVariable("cat", 3.14f);
+    EXPECT_EQ(*testScope.getVariableAsType<float>("cat"), 3.14f);
+    EXPECT_NE((int) *testScope.getVariableAsType<float>("cat"), 8);
+}
+
+TEST(ANY_DATA, symbolTableAlternateIntTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    testOrg.pushSymbolTable();
+
+    testOrg.addOrUpdateVariable("cat", 8);
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("dog", 16);
+
+    EXPECT_NO_THROW(EXPECT_EQ(*testOrg.getVariableAsType<int>("dog"), 16));
+    EXPECT_NO_THROW(EXPECT_EQ(*testOrg.getVariableAsType<int>("cat"), 8));
+}
+
+TEST(ANY_DATA, symbolTableCastTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("cat", 8);
+
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("dog", 3.14f);
+
+    testOrg.pushSymbolTable();
+    testOrg.addOrUpdateVariable("bird", true);
+
+    int dogAsInt = (int) *testOrg.getVariableAsType<float>("dog");
+    int birdAsInt = (int) *testOrg.getVariableAsType<bool>("bird");
+
+    EXPECT_EQ(*testOrg.getVariableAsType<int>("cat") + dogAsInt + birdAsInt, 8 + 3 + 1);
+
+    float catAsFloat = (float) *testOrg.getVariableAsType<int>("cat");
+    float birdAsFloat = (float) *testOrg.getVariableAsType<bool>("bird");
+
+    EXPECT_EQ(*testOrg.getVariableAsType<float>("dog") + catAsFloat + birdAsFloat, 3.14f + 8.0f + 1.0f);
+
+    bool catAsBool = (bool) *testOrg.getVariableAsType<int>("cat");
+    bool dogAsBool = (bool) *testOrg.getVariableAsType<float>("dog");
+
+    EXPECT_TRUE(*testOrg.getVariableAsType<bool>("bird") + catAsBool + dogAsBool);
+}
+
+TEST(ANY_DATA, symbolTableStringTest) {
+    SymbolTableOrganizer testOrg = SymbolTableOrganizer();
+    testOrg.pushSymbolTable();
+    std::string catAsString = "meow";
+    std::string dogAsString = "woof";
+    FAIL(); //TODO
+
 }
