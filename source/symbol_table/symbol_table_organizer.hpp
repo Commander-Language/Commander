@@ -116,6 +116,18 @@ public:
      */
     int* getVariable(std::string variableID);
 
+    /**
+     * getVariableAsType() returns a Type pointer to the desired variable
+     * @tparam T - The expected type of the variable
+     * @param variableID - A string ID which the variable is referenced by
+     * @return - A Type pointer to the variable's data if it exists, otherwise a nullptr is returned
+     * @warning - The desired type must be identical to the stored type. If one wishes to retrieve an int as a float, for instance, they must first call getVariableAsType<int>() and cast the result.
+     */
+    template <typename T>
+    T* getVariableAsType(std::string variableID) {
+        return _symbolTables.back()->getVariableAsType<T>(variableID);
+    }
+
 private:
     std::vector<Scope*> _symbolTables {};  // A vector containing each symbol table; some methods will use this to find
                                            // a value while others will rely on scope's recursiveness

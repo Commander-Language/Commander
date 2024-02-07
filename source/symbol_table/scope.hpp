@@ -82,7 +82,9 @@ public:
      * @tparam T - The type to cast the desired data as (e.g. int, std::string, float, etc.)
      * @param variableID - A string ID which the variable will be referenced by
      * @return - A type T pointer to the specified data if it exists, otherwise a nullptr will return
+     * @warning - The desired type must be identical to the stored type. If one wishes to retrieve an int as a float, for instance, they must first call getVariableAsType<int>() and cast the result.
      */
+     //TODO: if T == std::string...
     template <typename T>
     T* getVariableAsType(std::string variableID) {
         if(!hasDataKey(variableID)) {
@@ -94,7 +96,7 @@ public:
             return std::any_cast<T>(_variableData[variableID].get()); //try to get the data as the requested type
         }
         catch(std::exception ex) {
-            throw std::bad_any_cast().what(); //if we've failed, throw an exception
+            throw std::bad_any_cast(); //if we've failed, throw an exception
         }
     }
 
@@ -166,9 +168,6 @@ private:
      * @return - TRUE if the method created a new entry in _variableUses, otherwise FALSE is returned
      */
     bool tryGetUses(std::string variableID);
-
-    //TODO: may not work as intended
-    const char* what() const noexcept;
 
 };
 

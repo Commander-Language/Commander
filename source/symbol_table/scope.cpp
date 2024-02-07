@@ -154,7 +154,3 @@ bool Scope::tryGetUses(std::string variableID) {
     }
     return true;
 }
-
-const char* Scope::what() const noexcept { //TODO: may not work as intended
-    return "The provided data could not be cast to the provided type";
-}
