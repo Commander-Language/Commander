@@ -13,11 +13,156 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <ostream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+
+namespace Parser {
+
+    /**
+     * @brief A component of a grammar rule.
+     * @details Either a token type or an AST node type.
+     */
+    struct GrammarEntry {
+        /**
+         * @brief An enumeration of the types of `GrammarEntry`s (i.e., a token type or a node type).
+         */
+        enum GrammarEntryType : uint8_t { TOKEN_TYPE, NODE_TYPE };
+
+        /**
+         * @brief The type of this `GrammarEntry`.
+         */
+        GrammarEntryType grammarEntryType;
+
+        /**
+         * @brief The token type of this `GrammarEntry`.
+         * @details Void if `nodeType` is set.
+         */
+        Lexer::tokenType tokenType;
+
+        /**
+         * @brief The AST node type of this `GrammarEntry`.
+         * @details Void if `tokenType` is set.
+         */
+        ASTNodeType nodeType;
+
+        /**
+         * @brief Class constructor for a token type.
+         *
+         * @param tokenType The token type of this `GrammarEntry`.
+         */
+        GrammarEntry(Lexer::tokenType tokenType);
+
+        /**
+         * @brief Class constructor for an AST node type.
+         *
+         * @param tokenType The AST node type of this `GrammarEntry`.
+         */
+        GrammarEntry(ASTNodeType nodeType);
+
+        /**
+         * @brief Equality operator.
+         *
+         * @param other The other `GrammarEntry` against which to compare.
+         * @return True if the two grammar entries are equal; false otherwise.
+         */
+        bool operator==(const GrammarEntry& other) const;
+
+        /**
+         * @brief Inequality operator.
+         *
+         * @param other The other `GrammarEntry` against which to compare.
+         * @return False if the two grammar entries are equal; true otherwise.
+         */
+        bool operator!=(const GrammarEntry& other) const;
+
+        /**
+         * @brief Stream insertion operator.
+         *
+         * @param stream The `std::ostream` that will receive a grammar entry as input.
+         * @param grammarEntry The grammar entry to stream to the given `std::ostream`.
+         * @return The given stream.
+         */
+        friend std::ostream& operator<<(std::ostream& stream, const GrammarEntry& grammarEntry);
+    };
+
+    /**
+     * @brief Defines a grammar rule for constructing an AST node.
+     */
+    struct GrammarRule {
+        /**
+         * @brief The resulting AST node type.
+         */
+        ASTNodeType result;
+
+        /**
+         * @brief The parts that make up the grammar rule.
+         */
+        std::vector<GrammarEntry> components;
+
+        /**
+         * @brief Equality operator.
+         *
+         * @param other The other `GrammarRule` against which to compare.
+         * @return True if the two grammar rules are equal; false otherwise.
+         */
+        bool operator==(const GrammarRule& other) const;
+
+        /**
+         * @brief Inequality operator.
+         *
+         * @param other The other `GrammarRule` against which to compare.
+         * @return False if the two grammar rules are equal; true otherwise.
+         */
+        bool operator!=(const GrammarRule& other) const;
+
+        /**
+         * @brief Stream insertion operator.
+         *
+         * @param stream The `std::ostream` that will receive a grammar rule as input.
+         * @param grammarRule The grammar rule to stream to the given `std::ostream`.
+         * @return The given stream.
+         */
+        friend std::ostream& operator<<(std::ostream& stream, const GrammarRule& grammarRule);
+    };
+
+}  //  namespace Parser
+
+namespace std {
+
+    /**
+     * @brief Specialization of `std::hash` for `GrammarEntry` objects.
+     */
+    template<>
+    struct hash<Parser::GrammarEntry> {
+        /**
+         * @brief Hashes the given `GrammarEntry`.
+         *
+         * @param grammarEntry The grammar entry to hash.
+         * @return The hash value of the given grammar entry.
+         */
+        size_t operator()(const Parser::GrammarEntry& grammarEntry) const;
+    };
+
+
+    /**
+     * @brief Specialization of `std::hash` for `GrammarRule` objects.
+     */
+    template<>
+    struct hash<Parser::GrammarRule> {
+        /**
+         * @brief Hashes the given `GrammarRule`.
+         *
+         * @param grammarRule The grammar rule to hash.
+         * @return The hash value of the given grammar rule.
+         */
+        size_t operator()(const Parser::GrammarRule& grammarRule) const;
+    };
+
+}  //  namespace std
 
 namespace Parser {
 
@@ -36,139 +181,6 @@ namespace Parser {
          * @details Uses a list of `ProductionItem`s.
          */
         using NodeConstructor = std::string;
-
-        /**
-         * @brief A component of a grammar rule.
-         * @details Either a token type or an AST node type.
-         */
-        struct GrammarEntry {
-            /**
-             * @brief An enumeration of the types of `GrammarEntry`s (i.e., a token type or a node type).
-             */
-            enum GrammarEntryType : uint8_t { TOKEN_TYPE, NODE_TYPE };
-
-            /**
-             * @brief The type of this `GrammarEntry`.
-             */
-            GrammarEntryType grammarEntryType;
-
-            /**
-             * @brief The token type of this `GrammarEntry`.
-             * @details Void if `nodeType` is set.
-             */
-            TokenType tokenType;
-
-            /**
-             * @brief The AST node type of this `GrammarEntry`.
-             * @details Void if `tokenType` is set.
-             */
-            ASTNodeType nodeType;
-
-            /**
-             * @brief Class constructor for a token type.
-             *
-             * @param tokenType The token type of this `GrammarEntry`.
-             */
-            GrammarEntry(TokenType tokenType);
-
-            /**
-             * @brief Class constructor for an AST node type.
-             *
-             * @param tokenType The AST node type of this `GrammarEntry`.
-             */
-            GrammarEntry(ASTNodeType nodeType);
-
-            /**
-             * @brief Equality operator.
-             *
-             * @param other The other `GrammarEntry` against which to compare.
-             * @return True if the two grammar entries are equal; false otherwise.
-             */
-            bool operator==(const GrammarEntry& other) const;
-
-            /**
-             * @brief Inequality operator.
-             *
-             * @param other The other `GrammarEntry` against which to compare.
-             * @return False if the two grammar entries are equal; true otherwise.
-             */
-            bool operator!=(const GrammarEntry& other) const;
-
-            /**
-             * @brief Stream insertion operator.
-             *
-             * @param stream The `std::ostream` that will receive a grammar entry as input.
-             * @param grammarEntry The grammar entry to stream to the given `std::ostream`.
-             * @return The given stream.
-             */
-            friend std::ostream& operator<<(std::ostream& stream, const GrammarEntry& grammarEntry);
-
-            /**
-             * @brief Hashing functor for `GrammarEntry` objects.
-             */
-            struct Hash {
-                /**
-                 * @brief Hashes the given `GrammarEntry`.
-                 *
-                 * @param entry The grammar entry to hash.
-                 * @return The hash value of the given grammar entry.
-                 */
-                size_t operator()(const GrammarEntry& entry) const;
-            };
-        };
-
-        /**
-         * @brief Defines a grammar rule for constructing an AST node.
-         */
-        struct GrammarRule {
-            /**
-             * @brief The resulting AST node type.
-             */
-            ASTNodeType result;
-
-            /**
-             * @brief The parts that make up the grammar rule.
-             */
-            std::vector<GrammarEntry> components;
-
-            /**
-             * @brief Equality operator.
-             *
-             * @param other The other `GrammarRule` against which to compare.
-             * @return True if the two grammar rules are equal; false otherwise.
-             */
-            bool operator==(const GrammarRule& other) const;
-
-            /**
-             * @brief Inequality operator.
-             *
-             * @param other The other `GrammarRule` against which to compare.
-             * @return False if the two grammar rules are equal; true otherwise.
-             */
-            bool operator!=(const GrammarRule& other) const;
-
-            /**
-             * @brief Stream insertion operator.
-             *
-             * @param stream The `std::ostream` that will receive a grammar rule as input.
-             * @param grammarRule The grammar rule to stream to the given `std::ostream`.
-             * @return The given stream.
-             */
-            friend std::ostream& operator<<(std::ostream& stream, const GrammarRule& grammarRule);
-
-            /**
-             * @brief Hashing functor for `GrammarRule` objects.
-             */
-            struct Hash {
-                /**
-                 * @brief Hashes the given `GrammarRule`.
-                 *
-                 * @param rule The grammar rule to hash.
-                 * @return The hash value of the given grammar rule.
-                 */
-                size_t operator()(const GrammarRule& rule) const;
-            };
-        };
 
         /**
          * @brief Class constructor.
@@ -191,7 +203,7 @@ namespace Parser {
         /**
          * @brief The node constructor functions to use.
          */
-        const std::unordered_map<GrammarRule, NodeConstructor, GrammarRule::Hash> reductions;
+        const std::unordered_map<GrammarRule, NodeConstructor> reductions;
 
     private:
         /**

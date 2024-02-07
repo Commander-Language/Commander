@@ -5,19 +5,19 @@
 
 #include "generator.hpp"
 #include "grammar.hpp"
+#include "kernel.hpp"
 
-#include "source/parser/ast_node.hpp"
+#include "source/util/combine_hashes.hpp"
 #include "source/util/generated_map.hpp"
 
-#include <cstddef>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 namespace Parser {
@@ -33,26 +33,37 @@ namespace Parser {
         //  The grammar's goal AST node type is `ASTNodeType::PRGM`.
         //  This is also the result of the first (highest-priority) rule in the grammar specification.
         const ASTNodeType goalNode = grammar.rules[0].result;
-        const Grammar::GrammarRule goalRule {goalNode, {goalNode}};
+        const GrammarRule goalRule {goalNode, {goalNode}};
+
+        //  A `KernelSet` simply represents an ordered set of kernels.
+        using KernelSet = std::set<Kernel>;
+        struct HashKernelSet {
+            size_t operator()(const KernelSet& kernelSet) const {
+                const std::hash<Kernel> hash;
+                std::vector<size_t> hashes(kernelSet.size());
+                size_t index = 0;
+                for (const Kernel& kernel : kernelSet) hashes[index++] = hash(kernel);
+                return Util::combineHashes(hashes);
+            }
+        };
 
         //  A `Kernel` mainly consists of a `GrammarRule` and an index into that `GrammarRule`.
 
         //  This is a mapping from an AST node type to a set of all kernels that produce that node type.
-        Util::GeneratedMap<ASTNodeType, KernelSet, std::hash<ASTNodeType>> nodeGenerators {
-                [&](const ASTNodeType& nodeType) {
-                    KernelSet generators;
+        Util::GeneratedMap<ASTNodeType, KernelSet> nodeGenerators {[&](const ASTNodeType& nodeType) {
+            KernelSet generators;
 
-                    for (size_t ruleInd = 0; ruleInd < grammar.rules.size(); ++ruleInd) {
-                        //  If this rule generates the given `nodeType`, then make a `Kernel` for that rule.
-                        if (grammar.rules[ruleInd].result == nodeType) {
-                            //  The kernel is made of the rule, the rule's priority,
-                            //  the index 0 (this is the beginning of that rule), and a lookahead that's never used.
-                            generators.emplace(grammar.rules[ruleInd], ruleInd + 1, 0, TokenType {});
-                        }
-                    }
+            for (size_t ruleInd = 0; ruleInd < grammar.rules.size(); ++ruleInd) {
+                //  If this rule generates the given `nodeType`, then make a `Kernel` for that rule.
+                if (grammar.rules[ruleInd].result == nodeType) {
+                    //  The kernel is made of the rule, the rule's priority,
+                    //  the index 0 (this is the beginning of that rule), and a lookahead that's never used.
+                    generators.emplace(grammar.rules[ruleInd], ruleInd + 1, 0, TokenType {});
+                }
+            }
 
-                    return generators;
-                }};
+            return generators;
+        }};
 
         //  Reports the set of all token types that can be the first of the given GrammarEntry type.
         Util::GeneratedMap<GrammarEntry, std::unordered_set<TokenType>> first {[&](const GrammarEntry& entry) {
@@ -209,7 +220,7 @@ namespace Parser {
                 const auto& nextItem = enclosedKernel.rule.components[enclosedKernel.index];
                 const Kernel nextKernel {enclosedKernel.rule, enclosedKernel.priority, enclosedKernel.index + 1,
                                          enclosedKernel.lookahead};
-                if (nextItem.grammarEntryType == Grammar::GrammarEntry::TOKEN_TYPE) {
+                if (nextItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
                     //  If the next item type is a token, we can do a shift action.
                     shifts[nextItem.tokenType].insert(nextKernel);
                     //  Record the rule's priority.
@@ -264,38 +275,6 @@ namespace Parser {
                                                               "[&](const ProductionItemList& productionList) { return ",
                                                               grammar.reductions.at(kernel.rule), "; }}"});
                 }
-            }
-
-            //  TODO: Remove.
-            constexpr bool print = true;
-            if (print) {
-                std::cout << "State " << stateNum << "/" << states.size() << "+:\n";
-
-                std::cout << "    * Kernels (" << currentState.size() << "):\n";
-                for (const auto& kernel : currentState) std::cout << "        * " << kernel << "\n";
-
-                std::cout << "    * Closure (" << enclosedKernels.size() << "):\n";
-                for (const auto& kernel : enclosedKernels) std::cout << "        * " << kernel << "\n";
-
-                std::cout << "    * Shifts (" << shifts.size() << "):\n";
-                for (const auto& shift : shifts) {
-                    std::cout << "        * [[" << shiftPriorities[shift.first] << "]]:  ["
-                              << tokenTypeToString(shift.first) << "] -> " << stateNums[shift.second] << ":\n";
-                    for (const auto& nextKern : shift.second) std::cout << "            * " << nextKern << "\n";
-                }
-
-                std::cout << "    * Moves (" << nextStates.size() << "):\n";
-                for (const auto& nextState : nextStates) {
-                    std::cout << "        * (" << nodeTypeToString(nextState.first) << ") -> "
-                              << stateNums[nextState.second] << "\n";
-                    for (const auto& nextKern : nextState.second) std::cout << "            * " << nextKern << "\n";
-                }
-
-                std::cout << "    * Reductions (" << reductions.size() << "):\n";
-                for (const auto& reduction : reductions)
-                    std::cout << "        * [[" << reductionPriorities[reduction.first] << "]]:  ["
-                              << Lexer::tokenTypeToString(reduction.second.lookahead) << "]: " << reduction.second.rule
-                              << "\n";
             }
         }
 
@@ -406,48 +385,6 @@ namespace Parser {
                << "        {}\n";
 
         output << foot;
-    }
-
-    Generator::Kernel::Kernel() : priority(), index(), lookahead() {}
-
-    Generator::Kernel::Kernel(Generator::GrammarRule rule, size_t priority, size_t index,
-                              Generator::TokenType lookahead)
-        : rule(std::move(rule)), priority(priority), index(index), lookahead(lookahead) {}
-
-    bool Generator::Kernel::operator==(const Generator::Kernel& other) const {
-        const Generator::Kernel::Hash hash;
-        return hash(*this) == hash(other);
-    }
-
-    bool Generator::Kernel::operator!=(const Generator::Kernel& other) const { return !(*this == other); }
-
-    bool Generator::Kernel::operator<(const Generator::Kernel& other) const {
-        const Kernel::Hash hash;
-        return hash(*this) < hash(other);
-    }
-
-    std::ostream& operator<<(std::ostream& stream, const Generator::Kernel& kernel) {
-        stream << "{" << kernel.priority << ": (" << nodeTypeToString(kernel.rule.result) << ") -> ";
-        for (size_t ind = 0; ind < kernel.rule.components.size(); ++ind) {
-            if (ind == kernel.index) stream << "* ";
-            stream << kernel.rule.components[ind] << " ";
-        }
-        if (kernel.index == kernel.rule.components.size()) stream << "* ";
-        stream << ":: [" << Lexer::tokenTypeToString(kernel.lookahead) << "]}";
-
-        return stream;
-    }
-
-    size_t Generator::Kernel::Hash::operator()(const Generator::Kernel& kernel) const {
-        std::stringstream stream;
-        stream << kernel;
-        return std::hash<std::string> {}(stream.str());
-    }
-
-    size_t Generator::HashKernelSet::operator()(const Parser::Generator::KernelSet& kernelSet) const {
-        std::stringstream stream;
-        for (const auto& kernel : kernelSet) stream << kernel << " ";
-        return std::hash<std::string> {}(stream.str());
     }
 
     std::string Generator::_join(const std::string& delimiter, const std::vector<std::string>& strings) {

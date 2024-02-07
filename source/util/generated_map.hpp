@@ -19,7 +19,7 @@ namespace Util {
      * @tparam ValueType The type of the map's values.
      * @tparam KeyHashType An invocable class (i.e., a functor class) for hashing the map's `KeyType`.
      */
-    template<typename KeyType, typename ValueType, typename KeyHashType = typename KeyType::Hash>
+    template<typename KeyType, typename ValueType, typename KeyHashType = typename std::hash<KeyType>>
     class GeneratedMap {
     public:
         /**

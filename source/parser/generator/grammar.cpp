@@ -5,12 +5,9 @@
 
 #include "grammar.hpp"
 
-#include "source/parser/ast_node.hpp"
+#include "source/util/combine_hashes.hpp"
 
-#include <cstddef>
-#include <functional>
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -18,27 +15,20 @@
 
 namespace Parser {
 
-    Grammar::GrammarEntry::GrammarEntry(Grammar::TokenType tokenType)
+    GrammarEntry::GrammarEntry(Grammar::TokenType tokenType)
         : grammarEntryType(TOKEN_TYPE), tokenType(tokenType), nodeType() {}
 
-    Grammar::GrammarEntry::GrammarEntry(ASTNodeType nodeType)
-        : grammarEntryType(NODE_TYPE), tokenType(), nodeType(nodeType) {}
+    GrammarEntry::GrammarEntry(ASTNodeType nodeType) : grammarEntryType(NODE_TYPE), tokenType(), nodeType(nodeType) {}
 
-    size_t Grammar::GrammarEntry::Hash::operator()(const Grammar::GrammarEntry& entry) const {
-        std::stringstream stream;
-        stream << entry;
-        return std::hash<std::string> {}(stream.str());
-    }
-
-    bool Grammar::GrammarEntry::operator==(const Grammar::GrammarEntry& other) const {
-        const Hash hash;
+    bool GrammarEntry::operator==(const GrammarEntry& other) const {
+        const std::hash<GrammarEntry> hash;
         return hash(*this) == hash(other);
     }
 
-    bool Grammar::GrammarEntry::operator!=(const Grammar::GrammarEntry& other) const { return !(*this == other); }
+    bool GrammarEntry::operator!=(const GrammarEntry& other) const { return !(*this == other); }
 
-    std::ostream& operator<<(std::ostream& stream, const Grammar::GrammarEntry& grammarEntry) {
-        if (grammarEntry.grammarEntryType == Grammar::GrammarEntry::TOKEN_TYPE) {
+    std::ostream& operator<<(std::ostream& stream, const GrammarEntry& grammarEntry) {
+        if (grammarEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
             stream << "[" << Lexer::tokenTypeToString(grammarEntry.tokenType) << "]";
         } else {
             stream << "(" << nodeTypeToString(grammarEntry.nodeType) << ")";
@@ -46,7 +36,7 @@ namespace Parser {
         return stream;
     }
 
-    bool Grammar::GrammarRule::operator==(const Grammar::GrammarRule& other) const {
+    bool GrammarRule::operator==(const GrammarRule& other) const {
         if (this->result != other.result) return false;
 
         if (this->components.size() != other.components.size()) return false;
@@ -58,14 +48,14 @@ namespace Parser {
         return true;
     }
 
-    bool Grammar::GrammarRule::operator!=(const Grammar::GrammarRule& other) const { return !(*this == other); }
+    bool GrammarRule::operator!=(const GrammarRule& other) const { return !(*this == other); }
 
-    std::ostream& operator<<(std::ostream& stream, const Grammar::GrammarRule& grammarRule) {
+    std::ostream& operator<<(std::ostream& stream, const GrammarRule& grammarRule) {
         stream << "{(" << nodeTypeToString(grammarRule.result) << ") -> ";
 
         if (!grammarRule.components.empty()) {
-            for (const auto& component : std::vector<Grammar::GrammarEntry> {grammarRule.components.begin(),
-                                                                             grammarRule.components.end() - 1}) {
+            for (const auto& component :
+                 std::vector<GrammarEntry> {grammarRule.components.begin(), grammarRule.components.end() - 1}) {
                 stream << component << " ";
             }
             stream << grammarRule.components.back();
@@ -74,13 +64,6 @@ namespace Parser {
 
         return stream;
     }
-
-    size_t Grammar::GrammarRule::Hash::operator()(const Grammar::GrammarRule& rule) const {
-        std::stringstream stream;
-        stream << rule;
-        return std::hash<std::string> {}(stream.str());
-    }
-
 
     Grammar::Grammar() : Grammar(_defineGrammar()) {}
 
@@ -92,14 +75,14 @@ namespace Parser {
               return result;
           }()),
           reductions([&]() {
-              std::unordered_map<GrammarRule, NodeConstructor, GrammarRule::Hash> result;
+              std::unordered_map<GrammarRule, NodeConstructor> result;
               for (const auto& item : grammarDefinitions) result[std::get<0>(item)] = std::get<1>(item);
               return result;
           }()) {}
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cppcoreguidelines-avoid-magic-numbers"
-    std::vector<std::tuple<Grammar::GrammarRule, Grammar::NodeConstructor>> Grammar::_defineGrammar() {
+    std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>> Grammar::_defineGrammar() {
         const auto fold = [](const std::vector<std::string>& strings) -> std::string {
             if (strings.empty()) return "";
             const std::string delim = ", ";
@@ -361,3 +344,24 @@ namespace Parser {
 #pragma clang diagnostic pop
 
 }  //  namespace Parser
+
+namespace std {
+
+    size_t hash<Parser::GrammarEntry>::operator()(const Parser::GrammarEntry& grammarEntry) const {
+        if (grammarEntry.grammarEntryType == Parser::GrammarEntry::TOKEN_TYPE) {
+            return Util::combineHashes(grammarEntry.grammarEntryType, grammarEntry.tokenType);
+        }
+        return Util::combineHashes(grammarEntry.grammarEntryType, grammarEntry.nodeType);
+    }
+
+    size_t hash<Parser::GrammarRule>::operator()(const Parser::GrammarRule& grammarRule) const {
+        const hash<Parser::GrammarEntry> hashEntry;
+        vector<size_t> hashVals(grammarRule.components.size() + 1);
+        for (size_t ind = 0; ind < grammarRule.components.size(); ++ind) {
+            hashVals[ind] = hashEntry(grammarRule.components[ind]);
+        }
+        hashVals.back() = hashEntry(grammarRule.result);
+        return Util::combineHashes(hashVals);
+    }
+
+}  //  namespace std
