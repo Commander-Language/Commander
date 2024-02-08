@@ -14,13 +14,14 @@
 
 namespace Builtins {
 
-    using Function = List (*)(std::vector<std::string>);
+    using Function = ReturnInfo (*)(std::vector<std::string>);
 
     inline Function getBuiltinFunction(const std::string& name){
-
-        if(name == "print")
+        if(name == "print" || name == "println")
             return Print::print;
 
+        // should we destroy name string here?!?!?
+        // possible memory leak
         return nullptr;
     }
 }  // namespace Builtins
