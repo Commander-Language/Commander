@@ -202,11 +202,6 @@ namespace Parser {
                 //  we're able to perform a `REDUCE` action.
                 if (enclosedKernel.index == components.size()) {
                     //  Consider rule priorities for disambiguation.
-                    if (reductions.count(enclosedKernel.lookahead) > 0) {
-                        //  Don't throw an exception; just print a warning.
-                        std::cerr << "WARNING: State " << stateNum << " has conflicting REDUCE/REDUCE actions."
-                                  << " You may encounter parsing bugs; the grammar needs to be disambiguated.\n";
-                    }
                     if (reductions.count(enclosedKernel.lookahead) == 0
                         || enclosedKernel.priority < reductionPriorities[enclosedKernel.lookahead]) {
                         reductions[enclosedKernel.lookahead] = enclosedKernel;
