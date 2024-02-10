@@ -10,6 +10,7 @@
 #include <string>
 #include <memory>
 #include <any>
+#include <type_traits>
 
 class Scope {
 public:
@@ -68,15 +69,6 @@ public:
     bool hasGlobalVariable(std::string variableID);
 
     /**
-     * @deprecated
-     * getVariable returns a pointer to the desired variable in the scope. If the variable does not exist in this scope,
-     * the parent scope will be scanned for the variable
-     * @param variableID - A string ID which the variable will be referenced by
-     * @return - A pointer to the specified data if it exists, otherwise a nullptr will return
-     */
-    int* getVariable(std::string variableID); //TODO: replace with below method
-
-    /**
      * getVariableAsType() returns data from the Scope. If the variable does not exist in this scope, the parent will
      * be scanned for the variable
      * @tparam T - The type to cast the desired data as (e.g. int, std::string, float, etc.)
@@ -84,16 +76,18 @@ public:
      * @return - A type T pointer to the specified data if it exists, otherwise a nullptr will return
      * @warning - The desired type must be identical to the stored type. If one wishes to retrieve an int as a float, for instance, they must first call getVariableAsType<int>() and cast the result.
      */
-     //TODO: if T == std::string...
     template <typename T>
-    T* getVariableAsType(std::string variableID) {
+    T* getVariable(std::string variableID) {
         if(!hasDataKey(variableID)) {
-            if(_parentScope != nullptr) { return _parentScope->getVariableAsType<T>(variableID); }
+            if(_parentScope != nullptr) { return _parentScope->getVariable<T>(variableID); }
             return nullptr;
         }
         decrementUses(variableID);
         try{
-            return std::any_cast<T>(_variableData[variableID].get()); //try to get the data as the requested type
+            if (typeid(T) == _variableData[variableID].get()->type()) {
+                return std::any_cast<T>(_variableData[variableID].get()); //try to get the data as the requested type if the actual type and expected type are identical
+            }
+            throw std::bad_any_cast(); //otherwise, throw an exception
         }
         catch(std::exception ex) {
             throw std::bad_any_cast(); //if we've failed, throw an exception

@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 
-// TODO: replace int data with a generic object
-
 class SymbolTableOrganizer {
 public:
     /**
@@ -45,7 +43,10 @@ public:
      * @param variableID - A string representing the variable's ID (e.g. cat)
      * @param data - An object which the variable should be associated with
      */
-    void addOrUpdateVariable(std::string variableID, int data);
+    template <typename T>
+    void addOrUpdateVariable(std::string variableID, T data) {
+        _symbolTables.back()->addOrUpdateVariable(variableID, data);
+    }
 
     /**
      * addOrUpdateVariable() will add the provided variable to the top of the stack (i.e. current scope)
@@ -56,7 +57,11 @@ public:
      * @param data - An object which the variable should associate with
      * @param occurrences - The number of times the variable is found in the Commander script - will not update if the parameter passed in is null
      */
-    void addOrUpdateVariable(std::string variableID, int data, unsigned int occurrences);
+    template <typename T>
+    void addOrUpdateVariable(std::string variableID, T data, unsigned int occurrences) {
+        _symbolTables.back()->addOrUpdateVariable(variableID, data);
+        _symbolTables.back()->setVariableOccurrences(variableID, occurrences);
+    }
 
     /**
      * freeVariableData() will attempt to remove the data associated with a string variableID.
@@ -109,23 +114,15 @@ public:
     bool isScopeGlobal();  // return TRUE if the current scope is a global scope
 
     /**
-     * getVariable() returns the data value of the requested item. This method will search the entire symbol table for
-     * the requested item
-     * @param variableID - A string representing the ID of a variable
-     * @return - data associated with the specified variable
-     */
-    int* getVariable(std::string variableID);
-
-    /**
-     * getVariableAsType() returns a Type pointer to the desired variable
+     * getVariable() returns a Type pointer to the desired variable
      * @tparam T - The expected type of the variable
      * @param variableID - A string ID which the variable is referenced by
      * @return - A Type pointer to the variable's data if it exists, otherwise a nullptr is returned
      * @warning - The desired type must be identical to the stored type. If one wishes to retrieve an int as a float, for instance, they must first call getVariableAsType<int>() and cast the result.
      */
     template <typename T>
-    T* getVariableAsType(std::string variableID) {
-        return _symbolTables.back()->getVariableAsType<T>(variableID);
+    T* getVariable(std::string variableID) {
+        return _symbolTables.back()->getVariable<T>(variableID);
     }
 
 private:
