@@ -39,15 +39,6 @@ void SymbolTableOrganizer::popSymbolTable() {
     _symbolTables.pop_back();
 }
 
-void SymbolTableOrganizer::addOrUpdateVariable(const std::string& variableID, int data) {
-    _symbolTables.back()->addOrUpdateVariable(variableID, data);
-}
-
-void SymbolTableOrganizer::addOrUpdateVariable(const std::string& variableID, int data, unsigned int occurrences) {
-    _symbolTables.back()->setVariableOccurrences(variableID, occurrences);
-    _symbolTables.back()->addOrUpdateVariable(variableID, data);
-}
-
 Scope* SymbolTableOrganizer::getScope() {
     if (_symbolTables.empty()) { return nullptr; }
     return _symbolTables.back();
@@ -59,10 +50,6 @@ bool SymbolTableOrganizer::varExistsInCurrentSymbolTable(const std::string& vari
 
 bool SymbolTableOrganizer::varExistsInScope(const std::string& variableID) {
     return _symbolTables.back()->hasGlobalVariable(variableID);
-}
-
-int* SymbolTableOrganizer::getVariable(const std::string& variableID) {
-    return _symbolTables.back()->getVariable(variableID);
 }
 
 bool SymbolTableOrganizer::isScopeGlobal() { return _symbolTables.size() <= 1; }

@@ -57,31 +57,6 @@ bool Scope::hasGlobalVariable(const std::string& variableID) {
     return _hasDataKey(variableID) || (_parentScope != nullptr && _parentScope->hasGlobalVariable(variableID));
 }
 
-int* Scope::getVariable(const std::string& variableID) {
-    if (!_hasDataKey(variableID)) {
-        if (_parentScope != nullptr) { return _parentScope->getVariable(variableID); }
-        return nullptr;
-    }
-    decrementUses(variableID);
-    return std::any_cast<int>(_variableData[variableID].get());
-}
-
-//template<typename T>
-//T* Scope::getVariableAsType(std::string variableID) {
-//    if(!hasDataKey(variableID)) {
-//        if(_parentScope != nullptr) { return _parentScope->getVariableAsType<T>(variableID); }
-//        return nullptr;
-//    }
-//    decrementUses(variableID);
-//    try{
-//        return std::any_cast<T>(_variableData[variableID].get()); //try to get the data as the requested type
-//    }
-//    catch(std::exception ex) {
-//        throw std::bad_any_cast().what(); //if we've failed, throw an exception
-//    }
-//}
-
-
 Scope* Scope::getParentScopePointer() { return _parentScope; }
 
 bool Scope::isGlobal() { return _parentScope == nullptr; }
