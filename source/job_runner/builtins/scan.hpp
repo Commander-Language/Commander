@@ -1,9 +1,8 @@
 /**
  * @file scan.hpp
- * @brief scan builtin 
+ * @brief Define the scan builtin
+ * @details scan builtin should read in user input
  */
-namespace Scan {
 
-    // TODO: implemenent
+// TODO: implemenent
     
-}  // namespace Scan

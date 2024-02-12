@@ -1,28 +1,36 @@
 /**
- * @file scan.hpp
- * @brief scan builtin header file
+ * @file print.cpp
+ * @brief Implements the print and println built-in commands
+ *
  */
-#include "print.hpp"
+
 #include "shared.hpp"
-#include <iostream>
+#include "print.hpp"
+#include <unistd.h>
 
-namespace Print {
-    ReturnInfo print(const List& args) {
-        if (args.size() == 1) { return {"", args[0] + ": No arguments given", FAIL}; }
+ReturnInfo print(const List &args, int in, int out) {
+    if (args.size() == 1) { return {"", "", SUCCESS}; }
 
-        std::string output;
-        if (args[0] == "print") {
-            for (int i = 1; i < args.size(); i++) { output.append(args[i]); }
-            std::cout << output;
+    std::string output;
+    if (args[0] == "print") {
+        for (int i = 1; i < args.size(); i++) { output.append(args[i]); }
 
-            return {output, "", SUCCESS};
-        }
-        if (args[0] == "println") {
-            for (int i = 1; i < args.size(); i++) { output.append(args[i]); }
-            std::cout << output << "\n";
-            return {output, "", SUCCESS};
+        if (write(out, output.c_str(), output.size()) < 0) {
+            // TODO: figure out error messages
+            return {"", "", ERROR};
         }
 
-        return {"", "", ERROR};
+        return {output, "", SUCCESS};
     }
-}  // namespace Print
+    if (args[0] == "println") {
+        for (int i = 1; i < args.size(); i++) { output.append(args[i]); }
+        output.append("\n");
+        if (write(out, output.c_str(), output.size()) < 0) {
+            // TODO: figure out error messages
+            return {"", "", ERROR};
+        }
+        return {output, "", SUCCESS};
+    }
+
+    return {"", "", ERROR};
+}

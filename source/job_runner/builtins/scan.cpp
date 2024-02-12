@@ -1,11 +1,6 @@
 /**
  * @file scan.cpp
- * @brief scan builtin implementation
+ * @brief Implements the scan builtin
  */
-#include "builtins.hpp"
-#include <iostream>
-namespace Scan {
-
-    // TODO: implemenent
-    
-}  // namespace Scan
+#include "scan.hpp"
+// TODO: implemenent
