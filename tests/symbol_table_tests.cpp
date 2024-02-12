@@ -351,14 +351,14 @@ TEST(SYMORG_TEST, multiScopeCopyTest) {
     copiedOrg.addOrUpdateVariable("cat", 16);
     copiedOrg.addOrUpdateVariable("dog", 32);
 
-    EXPECT_NE(*testOrg.getVariable<int>("cat"), *copiedOrg.getVariable("cat"));  // data checks
+    EXPECT_NE(*testOrg.getVariable<int>("cat"), *copiedOrg.getVariable<int>("cat"));  // data checks
     EXPECT_EQ(*copiedOrg.getVariable<int>("cat"), 16);
     EXPECT_EQ(*testOrg.getVariable<int>("cat"), 8);
-    EXPECT_NE(*testOrg.getVariable<int>("dog"), *copiedOrg.getVariable("dog"));
+    EXPECT_NE(*testOrg.getVariable<int>("dog"), *copiedOrg.getVariable<int>("dog"));
     EXPECT_EQ(*copiedOrg.getVariable<int>("dog"), 32);
     EXPECT_EQ(*testOrg.getVariable<int>("dog"), 16);
-    EXPECT_NE(testOrg.getVariable<int>("cat"), copiedOrg.getVariable("cat"));  // pointer checks
-    EXPECT_NE(testOrg.getVariable<int>("dog"), copiedOrg.getVariable("dog"));
+    EXPECT_NE(testOrg.getVariable<int>("cat"), copiedOrg.getVariable<int>("cat"));  // pointer checks
+    EXPECT_NE(testOrg.getVariable<int>("dog"), copiedOrg.getVariable<int>("dog"));
 }
 
 /**
@@ -573,12 +573,12 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
 }
 
 // GENERIC DATA TYPE TESTS
-//TODO: document
+// TODO: document
 TEST(ANY_DATA, scopeAlternateIntTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
 
-    EXPECT_NO_THROW(testScope.getVariable<int>("cat")); //Shouldn't throw an error here
+    EXPECT_NO_THROW(testScope.getVariable<int>("cat"));  // Shouldn't throw an error here
     EXPECT_EQ(*testScope.getVariable<int>("cat"), 8);
 }
 
@@ -605,7 +605,7 @@ TEST(ANY_DATA, scopeNoBadCastsTest) {
     testScope.addOrUpdateVariable("dog", 3.14f);
     testScope.addOrUpdateVariable("bird", true);
 
-    //Get the requested data and check if no exceptions throw
+    // Get the requested data and check if no exceptions throw
     EXPECT_NO_THROW(EXPECT_EQ(*testScope.getVariable<int>("cat"), 8));
     EXPECT_THROW(*testScope.getVariable<int>("dog"), std::bad_any_cast);
     EXPECT_THROW(*testScope.getVariable<int>("bird"), std::bad_any_cast);
@@ -627,18 +627,18 @@ TEST(ANY_DATA, scopeCastTest) {
     EXPECT_EQ(*testScope.getVariable<float>("dog"), 3.14f);
     EXPECT_EQ(*testScope.getVariable<bool>("bird"), true);
 
-    int dogAsInt = (int) *testScope.getVariable<float>("dog");
-    int birdAsInt = (int) *testScope.getVariable<bool>("bird");
+    int dogAsInt = (int)*testScope.getVariable<float>("dog");
+    int birdAsInt = (int)*testScope.getVariable<bool>("bird");
 
     EXPECT_EQ(*testScope.getVariable<int>("cat") + dogAsInt + birdAsInt, 8 + 3 + 1);
 
-    float catAsFloat = (float) *testScope.getVariable<int>("cat");
-    float birdAsFloat = (float) *testScope.getVariable<bool>("bird");
+    float catAsFloat = (float)*testScope.getVariable<int>("cat");
+    float birdAsFloat = (float)*testScope.getVariable<bool>("bird");
 
     EXPECT_EQ(*testScope.getVariable<float>("dog") + catAsFloat + birdAsFloat, 3.14f + 8.0f + 1.0f);
 
-    bool catAsBool = (bool) *testScope.getVariable<int>("cat");
-    bool dogAsBool = (bool) *testScope.getVariable<float>("dog");
+    bool catAsBool = (bool)*testScope.getVariable<int>("cat");
+    bool dogAsBool = (bool)*testScope.getVariable<float>("dog");
 
     EXPECT_TRUE(*testScope.getVariable<bool>("bird") + catAsBool + dogAsBool);
 }
@@ -655,11 +655,11 @@ TEST(ANY_DATA, scopeAddOrUpdateTest) {
     testScope.addOrUpdateVariable("cat", 8);
 
     EXPECT_EQ(*testScope.getVariable<int>("cat"), 8);
-    EXPECT_NE((float) *testScope.getVariable<int>("cat"), 3.14f);
+    EXPECT_NE((float)*testScope.getVariable<int>("cat"), 3.14f);
 
     testScope.addOrUpdateVariable("cat", 3.14f);
     EXPECT_EQ(*testScope.getVariable<float>("cat"), 3.14f);
-    EXPECT_NE((int) *testScope.getVariable<float>("cat"), 8);
+    EXPECT_NE((int)*testScope.getVariable<float>("cat"), 8);
 }
 
 TEST(ANY_DATA, symbolTableAlternateIntTest) {
@@ -686,18 +686,18 @@ TEST(ANY_DATA, symbolTableCastTest) {
     testOrg.pushSymbolTable();
     testOrg.addOrUpdateVariable("bird", true);
 
-    int dogAsInt = (int) *testOrg.getVariable<float>("dog");
-    int birdAsInt = (int) *testOrg.getVariable<bool>("bird");
+    int dogAsInt = (int)*testOrg.getVariable<float>("dog");
+    int birdAsInt = (int)*testOrg.getVariable<bool>("bird");
 
     EXPECT_EQ(*testOrg.getVariable<int>("cat") + dogAsInt + birdAsInt, 8 + 3 + 1);
 
-    float catAsFloat = (float) *testOrg.getVariable<int>("cat");
-    float birdAsFloat = (float) *testOrg.getVariable<bool>("bird");
+    float catAsFloat = (float)*testOrg.getVariable<int>("cat");
+    float birdAsFloat = (float)*testOrg.getVariable<bool>("bird");
 
     EXPECT_EQ(*testOrg.getVariable<float>("dog") + catAsFloat + birdAsFloat, 3.14f + 8.0f + 1.0f);
 
-    bool catAsBool = (bool) *testOrg.getVariable<int>("cat");
-    bool dogAsBool = (bool) *testOrg.getVariable<float>("dog");
+    bool catAsBool = (bool)*testOrg.getVariable<int>("cat");
+    bool dogAsBool = (bool)*testOrg.getVariable<float>("dog");
 
     EXPECT_TRUE(*testOrg.getVariable<bool>("bird") + catAsBool + dogAsBool);
 }

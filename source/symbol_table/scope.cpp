@@ -32,11 +32,13 @@ Scope::Scope(Scope& otherScope) {
     _variableUses = copyUses;
 }
 
-void Scope::addOrUpdateVariable(const std::string& variableID, std::any data) {
-    if (!updateVariable(variableID, data)) { _variableData.insert_or_assign(variableID, std::make_shared<std::any>(data)); }
+void Scope::addOrUpdateVariable(std::string variableID, std::any data) {
+    if (!updateVariable(variableID, data)) {
+        _variableData.insert_or_assign(variableID, std::make_shared<std::any>(data));
+    }
 }
 
-bool Scope::updateVariable(const std::string& variableID, std::any newData) {
+bool Scope::updateVariable(std::string variableID, std::any newData) {
     if (!_hasDataKey(variableID)) {
         if (_parentScope != nullptr) { return _parentScope->updateVariable(variableID, newData); }
         return false;
@@ -67,12 +69,12 @@ bool Scope::_hasUsesKey(const std::string& key) { return _variableUses.count(key
 
 // Garbage Collection methods
 
-void Scope::setVariableOccurrences(const std::string& variableID, unsigned int occurrences) {
+void Scope::setVariableOccurrences(std::string variableID, unsigned int occurrences) {
     // We won't deep search for the variable here - This method is intended for initialization rather than updating!
     _variableUses.insert_or_assign(variableID, occurrences);
 }
 
-bool Scope::freeVariableData(const std::string& variableID) {
+bool Scope::freeVariableData(std::string variableID) {
     // if a shared pointer is unique, resetting (allegedly) destructs the object
     if (!_hasDataKey(variableID)) {
         if (_parentScope != nullptr) { return _parentScope->freeVariableData(variableID); }
@@ -82,7 +84,7 @@ bool Scope::freeVariableData(const std::string& variableID) {
     return true;  // return true if we've freed space or have already freed space
 }
 
-void Scope::decrementUses(const std::string& variableID) {
+void Scope::decrementUses(std::string variableID) {
     if (!_tryGetUses(variableID)) {
         if (_parentScope != nullptr) { return _parentScope->decrementUses(variableID); }
     } else {
@@ -90,7 +92,7 @@ void Scope::decrementUses(const std::string& variableID) {
     }
 }
 
-bool Scope::hasExpired(const std::string& variableID) {
+bool Scope::hasExpired(std::string variableID) {
     if (!_hasUsesKey(variableID)) {
         if (_parentScope != nullptr) { return _parentScope->hasExpired(variableID); }
         return false;  // return false if nothing exists
