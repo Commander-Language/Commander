@@ -6,11 +6,11 @@
 
 #ifndef CPP_UTILITIES_SCOPE_HPP
 #define CPP_UTILITIES_SCOPE_HPP
+#include <any>
 #include <map>
 #include <memory>
 #include <string>
-
-// TODO: replace data with a generic object class (template class?)
+#include <type_traits>
 
 class Scope {
 public:
@@ -42,7 +42,7 @@ public:
      * @param data - An object which will be stored as data (e.g. 14, "dog", std::vector<int>, etc.)
      * @param occurences - The number of times the variable is used in the script (used for garbage collection)
      */
-    void addOrUpdateVariable(const std::string& variableID, int data);
+    void addOrUpdateVariable(std::string variableID, std::any data);
 
     /**
      * updateVariable() is similar to addOrUpdateVariable. This method will only update variables if they exist anywhere
@@ -51,7 +51,7 @@ public:
      * @param newData - The new data to associate with the variable
      * @return - TRUE if the variable was successfully updated, otherwise FALSE is returned
      */
-    bool updateVariable(const std::string& variableID, int newData);
+    bool updateVariable(std::string variableID, std::any newData);
 
     /**
      * hasLocalVariable returns a boolean value according to whether the specified variable exists in this scope.
@@ -70,12 +70,32 @@ public:
     bool hasGlobalVariable(const std::string& variableID);
 
     /**
-     * _getVariable returns a pointer to the desired variable in the scope. If the variable does not exist in this
-     * scope, the parent scope will be scanned for the variable
+     * getVariableAsType() returns data from the Scope. If the variable does not exist in this scope, the parent will
+     * be scanned for the variable
+     * @tparam T - The type to cast the desired data as (e.g. int, std::string, float, etc.)
      * @param variableID - A string ID which the variable will be referenced by
-     * @return - A pointer to the specified data if it exists, otherwise a nullptr will return
+     * @return - A type T pointer to the specified data if it exists, otherwise a nullptr will return
+     * @warning - The desired type must be identical to the stored type. If one wishes to retrieve an int as a float,
+     * for instance, they must first call getVariableAsType<int>() and cast the result.
      */
-    int* getVariable(const std::string& variableID);
+    template<typename T>
+    T* getVariable(std::string variableID) {
+        if (!_hasDataKey(variableID)) {
+            if (_parentScope != nullptr) { return _parentScope->getVariable<T>(variableID); }
+            return nullptr;
+        }
+        decrementUses(variableID);
+        try {
+            if (typeid(T) == _variableData[variableID].get()->type()) {
+                return std::any_cast<T>(
+                        _variableData[variableID].get());  // try to get the data as the requested type if the actual
+                                                           // type and expected type are identical
+            }
+            throw std::bad_any_cast();  // otherwise, throw an exception
+        } catch (std::exception ex) {
+            throw std::bad_any_cast();  // if we've failed, throw an exception
+        }
+    }
 
     /**
      * getParenScopePointer() returns a pointer to the parent of this scope
@@ -95,31 +115,31 @@ public:
      * setVariableOccurrences() adds a key, value pair for variable occurrences in the Commander script
      * @param occurrences - An unsigned int value which determines how many times a variable is used in a script
      */
-    void setVariableOccurrences(const std::string& variableID, unsigned int occurrences);
+    void setVariableOccurrences(std::string variableID, unsigned int occurrences);
 
     /**
      * freeVariableData() destructs the data used by a variable
      * @param variableID - A string variableID to free data from
      * @return - TRUE if the data was destructed (or already destructed), otherwise FALSE is returned
      */
-    bool freeVariableData(const std::string& variableID);
+    bool freeVariableData(std::string variableID);
 
     /**
      * decrementUses() subtracts the number of the variable's occurrences by 1. If the number of occurrences are 0, the
      * value will not update further
      * @param variableID - The variable one wishes to decrement
      */
-    void decrementUses(const std::string& variableID);
+    void decrementUses(std::string variableID);
 
     /**
      * hasExpired() returns a boolean value according to whether the number of occurrences of a variable is equal to 0
      * @param variableID - The variable to check the garbage collection status of
      * @return - TRUE if the variable has no more occurrences, otherwise FALSE is returned
      */
-    bool hasExpired(const std::string& variableID);
+    bool hasExpired(std::string variableID);
 
 private:
-    std::map<std::string, std::shared_ptr<int>>
+    std::map<std::string, std::shared_ptr<std::any>>
             _variableData {};                           // uses a Key variableName to find it's associated object
     std::map<std::string, unsigned int> _variableUses;  // uses a Key variableName to find usages left (unsigned int)
     Scope* _parentScope = nullptr;  // Pointer to the parent scope object (i.e. this scope exists within another scope)

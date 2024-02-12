@@ -31,9 +31,7 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
 int main(int argc, char** argv) {
     try {
         std::vector<std::string> arguments;
-        for (int i = 1; i < argc; i++) {
-            arguments.push_back(argv[i]);
-        }
+        for (int i = 1; i < argc; i++) { arguments.push_back(argv[i]); }
         clock_t const start = clock();
         Parser::Parser parser;
         clock_t const end = clock();
