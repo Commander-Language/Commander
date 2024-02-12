@@ -246,6 +246,35 @@ TEST(JobRunnerTests, RunSaveReturnJob6) {
     std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
     std::cout << "Return Code is:\n" << std::get<2>(info) << "\n";
 }
+/**
+ * @brief Test builtin in middle
+ * @details The println builtin doesn't take
+ *          the input from cat, but still outputs to wc.
+ *          (This behavior is similar to zsh)
+ */
+TEST(JobRunnerTests, RunSaveReturnJob7) {
+    Args arg1{"cat", testLocation + "testDirectory/cat2.txt"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, false);
+
+    Args arg2{"println", "abc"};
+    JobRunner::Process proc2(arg2, JobRunner::ProcessType::BUILTIN, false, false);
+
+    Args arg3{"wc"};
+    JobRunner::Process proc3(arg3, JobRunner::ProcessType::EXTERNAL, false, true);
+
+    std::vector<JobRunner::Process *> pipe;
+    pipe.push_back(&proc1);
+    pipe.push_back(&proc2);
+    pipe.push_back(&proc3);
+
+    JobRunner::Process pipeArgs(pipe);
+    JobRunner::JobRunner runner1(&pipeArgs);
+
+    JobRunner::JobInfo info = runner1.execProcess();
+    std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
+    std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
+    std::cout << "Return Code is:\n" << std::get<2>(info) << "\n";
+}
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
