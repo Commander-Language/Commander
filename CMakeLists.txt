@@ -137,11 +137,14 @@ include(GoogleTest)
 
 add_library(lexer source/lexer/lexer.cpp source/util/commander_exception.cpp)
 
-add_executable(parseTableGenerator source/parser/generator/generator.cpp
+add_executable(parseTableGenerator
+        source/parser/generator/generator.cpp
         source/parser/generator/grammar.cpp
+        source/parser/generator/kernel.cpp
+
         source/parser/ast_node.cpp
         source/parser/parser_action.cpp
-        source/util/combine_hashes.cpp
+
         source/type_checker/type.cpp
 )
 target_link_libraries(parseTableGenerator lexer)
@@ -157,7 +160,8 @@ add_library(parser source/parser/parser.cpp
         source/parser/parser_action.cpp
         source/parser/production_item.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/parse_table.cpp
-        source/util/combine_hashes.cpp
+
+        source/util/commander_exception.cpp
 )
 add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp)
 add_library(flow_controller source/flow_controller/flow_controller.cpp)

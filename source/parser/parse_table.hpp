@@ -13,9 +13,8 @@
 
 #include "source/lexer/lexer.hpp"
 
-#include <functional>
-#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace Parser {
 

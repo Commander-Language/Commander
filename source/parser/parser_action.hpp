@@ -10,6 +10,8 @@
 #include "ast_node.hpp"
 #include "production_item.hpp"
 
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <optional>
 
@@ -39,7 +41,7 @@ namespace Parser {
          * @details Whether to perform a shift or reduce action, or that we're done parsing,
          *     or that there was a syntax error.
          */
-        enum ActionType { SHIFT, REDUCE, ACCEPT, ERROR };
+        enum ActionType : uint8_t { SHIFT, REDUCE, ACCEPT, ERROR };
 
         /**
          * @brief Default constructor.

@@ -9,12 +9,12 @@
 #include "grammar.hpp"
 
 #include "source/lexer/lexer.hpp"
-#include "source/parser/parser_action.hpp"
+#include "source/parser/ast_node.hpp"
 
 #include <ostream>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
+#include <vector>
 
 namespace Parser {
 
@@ -33,19 +33,6 @@ namespace Parser {
          * @brief Each state has a unique integer ID.
          */
         using StateNum = unsigned int;
-
-        /**
-         * @brief Represents an entry in a grammar rule.
-         * @details Either a token type or an AST node type.
-         *     Every rule is made up of these.
-         */
-        using GrammarEntry = Grammar::GrammarEntry;
-
-        /**
-         * @brief Represents a single grammar rule.
-         * @details Made up of the resulting AST node type and a list of component `GrammarEntry`s.
-         */
-        using GrammarRule = Grammar::GrammarRule;
 
         /**
          * @brief Represents an initializer list for a `ParserAction`.
@@ -67,140 +54,6 @@ namespace Parser {
         void generateSource(std::ostream& output) const;
 
     private:
-        /**
-         * @brief A lookahead kernel for building the parse table.
-         * @details Consists of a grammar rule,
-         *     how far into the grammar rule we are,
-         *     and a lookahead token type.
-         */
-        struct Kernel {
-            /**
-             * @brief Hashing functor for `Kernel` objects.
-             */
-            struct Hash {
-                /**
-                 * @brief Hashes the given `Kernel`.
-                 *
-                 * @param kernel The kernel to hash.
-                 * @return The hash value of the given kernel.
-                 */
-                size_t operator()(const Kernel& kernel) const;
-            };
-
-            /**
-             * @brief Class constructor.
-             *
-             * @param rule The `GrammarRule` to which this kernel refers.
-             * @param priority The priority of the `GrammarRule`.
-             * @param index How far we are into the `GrammarRule`.
-             * @param lookahead The next lookahead token type.
-             */
-            Kernel(const GrammarRule& rule, size_t priority, size_t index, TokenType lookahead);
-
-            /**
-             * @brief Equality operator.
-             *
-             * @param other The other `Kernel` against which to compare.
-             * @return True if the two kernels are equal; false otherwise.
-             */
-            bool operator==(const Kernel& other) const;
-
-            /**
-             * @brief Inequality operator.
-             *
-             * @param other The other `Kernel` against which to compare.
-             * @return False if the two kernel are equal; true otherwise.
-             */
-            bool operator!=(const Kernel& other) const;
-
-            /**
-             * @brief The `GrammarRule` to which this kernel refers.
-             */
-            std::reference_wrapper<const GrammarRule> rule;
-
-            /**
-             * @brief The priority of the grammar rule.
-             */
-            size_t priority;
-
-            /**
-             * @brief The index into the grammar rule.
-             */
-            size_t index;
-
-            /**
-             * @brief The lookahead token.
-             */
-            TokenType lookahead;
-        };
-
-        /**
-         * @brief A set of `Kernel`s.
-         */
-        using KernelSet = std::unordered_set<Kernel, Kernel::Hash>;
-
-        /**
-         * @brief Represents a state in the parsing automaton.
-         */
-        struct State {
-            /**
-             * @brief Class constructor.
-             */
-            State();
-
-            /**
-             * @brief Class constructor.
-             *
-             * @param kernels All relevant kernels corresponding to this state.
-             * @param transitions All transitions from this state.
-             */
-            State(KernelSet kernels,
-                  const std::unordered_map<GrammarEntry, StateNum, Grammar::GrammarEntry::Hash>& transitions = {});
-
-            /**
-             * @brief All relevant kernels corresponding to this state.
-             */
-            KernelSet kernels;
-
-            /**
-             * @brief All transitions from this state.
-             */
-            std::unordered_map<GrammarEntry, StateNum, Grammar::GrammarEntry::Hash> transitions;
-        };
-
-        /**
-         * @brief Represents the closure of all reachable kernels from any single kernel.
-         */
-        class Closure {
-        public:
-            /**
-             * @brief Class constructor.
-             *
-             * @param grammar A reference to the grammar rules.
-             */
-            Closure(const std::vector<GrammarRule>& grammar);
-
-            /**
-             * @brief Gets the closure of all reachable kernels from the given set of kernels.
-             * @details Performs a calculation on the first query; saves results for subsequent queries.
-             *
-             * @param kernels The kernels for which to report the reachable kernels.
-             * @return The set of all possible reachable kernels from the given kernels.
-             */
-            KernelSet operator[](const KernelSet& kernels);
-
-        private:
-            /**
-             * @brief A mapping from one kernel to the set of all reachable kernels from it.
-             */
-            std::unordered_map<Kernel, KernelSet, Kernel::Hash> _closure;
-
-            /**
-             * @brief A reference to the grammar definition.
-             */
-            const std::vector<GrammarRule>& _grammar;
-        };
-
         /**
          * @brief Joins the given items into a string with the given delimiter.
          *
