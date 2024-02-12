@@ -148,6 +148,7 @@ namespace JobRunner {
          * @return The job information
          */
         JobInfo execProcess();
+
     private:
         /**
          * @details The process to execute
@@ -171,7 +172,7 @@ namespace JobRunner {
         void _execBuiltinNoReturn(Process *process, int in = STDIN_FILENO, int out = STDOUT_FILENO);
 
         /**
-         * @brief Exectute a builtin
+         * @brief Execute a builtin
          * @param in - The file descriptor to read from (default std in)
          * @param out - The file descriptor to write to (default std out)
          * @return The job information
@@ -214,17 +215,7 @@ namespace JobRunner {
          *                     (if it is, should call this at end of pipe)
          * @return The job information
          */
-        JobInfo _doSaveInfo(Process *process, bool partOfPipe, int* fds = nullptr, size_t count = 0);
-
-        /**
-         * @brief Executes a process and save information
-         * @details This executes a process while setting up file descriptors to read from
-         * @param process - The process to get the output from
-         * @param fdOut- The file descriptor (for std out) to read from
-         * @param fdErr - The file descriptor (for std err) to read from
-         * @return The job information
-         */
-        JobInfo _getOutputFromFD(Process *process);
+        JobInfo _doSaveInfo(Process *process, bool partOfPipe, int *fds = nullptr, size_t count = 0);
 
         /**
          * @brief Helper to resize a char array

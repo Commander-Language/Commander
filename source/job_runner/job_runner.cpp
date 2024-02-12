@@ -225,7 +225,6 @@ namespace JobRunner {
         size_t stdoutBufSize = 2048;
         size_t stderrBufSize = 2048;
 
-        // char* stderrOutput = new char[bufsize];
         auto stdoutOutput = std::make_unique<char[]>(stdoutBufSize);
         auto stderrOutput = std::make_unique<char[]>(stderrBufSize);
 
