@@ -159,8 +159,11 @@ namespace JobRunner {
          * @brief Executes a process
          * @details Executes a builtin or external process.
          *          This shouldn't return, so fork before calling if needed.
+         * @param process - the process to execute
+         * @param in - file descriptor to read from (for builtins)
+         * @param out - file descriptor to write to (for builtins)
          */
-        void _exec(Process *);
+        void _exec(Process *process);
 
         /**
          * @brief Exectue a builtin command without returning
