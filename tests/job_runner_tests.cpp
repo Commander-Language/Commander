@@ -14,262 +14,191 @@ std::string getFileContents(const std::string& filePath) {
     buf << file.rdbuf();
     return buf.str();
 }
+
+using Args = std::vector<std::string>;
+const std::string testLocation = "../tests/files/job_runner_tests/";
+
 /**
- * @brief Run a pipeline of more than one with a builtin command
+ * @brief Run the builtin println and print
  */
-TEST(JobRunnerTests, RunBuiltinInPipe) {
-    jobRunner::Command cmdPrintln("println", jobRunner::commandType::BUILT_IN);
-    cmdPrintln.addArg("cat and dog");
+TEST(JobRunnerTests, RunBuiltinPrint) {
+    Args arg1{"println", "Hello from println builtin"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::BUILTIN);
 
-    jobRunner::Command cmdGrep("grep", jobRunner::commandType::EXEC);
-    cmdGrep.addArg("cat");
+    JobRunner::JobRunner runner1(&proc1);
+    runner1.execProcess();
 
-    jobRunner::Command cmdWC("wc", jobRunner::commandType::EXEC);
-    cmdWC.addArg("-l");
+    Args arg2{"print", "Hello from print builtin"};
+    JobRunner::Process proc2(arg2, JobRunner::ProcessType::BUILTIN);
 
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdPrintln);
-    job.addCommandToPipeline(&cmdGrep);
-    job.addCommandToPipeline(&cmdWC);
-
-    job.runJob();
-    SUCCEED();
+    JobRunner::JobRunner runner2(&proc2);
+    runner2.execProcess();
 }
 /**
- * @brief Run the builtin println
- */
-TEST(JobRunnerTests, RunBuiltin3) {
-    jobRunner::Command cmdPrintln("println", jobRunner::commandType::BUILT_IN);
-    cmdPrintln.addArg("Hello, world!");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdPrintln);
-
-    job.runJob();
-    SUCCEED();
-}
-/**
- * @brief Run the builtin scan
- */
-TEST(JobRunnerTests, RunBuiltin2) {
-    std::streambuf* cinSave = std::cin.rdbuf();
-    std::istringstream const input("Cats");
-    std::cin.rdbuf(input.rdbuf());
-
-    jobRunner::Command cmdScan("scan", jobRunner::commandType::BUILT_IN);
-    cmdScan.addArg("Hello, what is your favorite animal? ");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdScan);
-    job.runJob();
-
-    std::cin.rdbuf(cinSave);
-}
-
-/**
- * @brief Run the builtin print
- */
-TEST(JobRunnerTests, RunBuiltin) {
-    jobRunner::Command cmdPrint("print", jobRunner::commandType::BUILT_IN);
-    cmdPrint.addArg("Hello, world!");
-    cmdPrint.addArg("Hello");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdPrint);
-
-    job.runJob();
-    SUCCEED();
-}
-/**
- * @brief Run a simple command
+ * @brief Run a simple external command
  */
 TEST(JobRunnerTests, RunSimpleJobCat) {
-    jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
-    cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdCat);
-
-    job.runJob();
-    SUCCEED();
+    Args arg1{"cat", testLocation + "testDirectory/cat.txt"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL);
+    JobRunner::JobRunner runner1(&proc1);
+    runner1.execProcess();
 }
 /**
- * @brief Run a simple command with more than one argument
- */
-TEST(JobRunnerTests, RunSimpleJobLS) {
-    jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
-    cmdLS.addArg("-Ggh");
-    cmdLS.addArg("--time-style=+");
-    cmdLS.addArg("../tests/files/job_runner_tests/testDirectory");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdLS);
-
-    job.runJob();
-    SUCCEED();
-}
-/**
- * Run a simple command with big output to terminal
+ * Run a simple external command with big output to terminal
  */
 TEST(JobRunnerTests, RunSimpleJobCat2) {
-    jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
-    cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdCat);
-
-    job.runJob();
-
-    SUCCEED();
+    Args arg1{"cat", testLocation + "testDirectory/cat2.txt"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL);
+    JobRunner::JobRunner runner1(&proc1);
+    runner1.execProcess();
 }
 /**
- * @brief Run a command in the background
+ * @brief Run a simple external command with more than one argument
+ */
+TEST(JobRunnerTests, RunSimpleJobLS) {
+    Args arg1{"ls", "-l", "-a"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL);
+    JobRunner::JobRunner runner1(&proc1);
+    runner1.execProcess();
+}
+/**
+ * @brief Run a external command in the background
  */
 TEST(JobRunnerTests, RunBackgroundJob) {
-    jobRunner::Command cmdSleep("sleep", jobRunner::commandType::EXEC);
-    cmdSleep.addArg("20s");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdSleep);
-
-    SUCCEED();
+    Args arg1{"sleep", "20s"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, true);
+    JobRunner::JobRunner runner1(&proc1);
+    runner1.execProcess();
 }
 /**
  * @brief Run a pipe of commands of size two
  */
 TEST(JobRunnerTests, RunPipeJob1) {
-    jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
-    cmdLS.addArg("-la");
-    cmdLS.addArg("../tests/files/job_runner_tests/testDirectory");
+    Args arg1{"ls", "-la"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL);
 
-    jobRunner::Command cmdWC("wc", jobRunner::commandType::EXEC);
-    cmdWC.addArg("-l");
+    Args arg2{"grep", "ninja"};
+    JobRunner::Process proc2(arg2, JobRunner::ProcessType::EXTERNAL);
 
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdLS);
-    job.addCommandToPipeline(&cmdWC);
+    std::vector<JobRunner::Process*> pipe;
+    pipe.push_back(&proc1);
+    pipe.push_back(&proc2);
 
-    job.runJob();
-    SUCCEED();
+    JobRunner::Process pipeArgs(pipe);
+    JobRunner::JobRunner runner(&pipeArgs);
+    runner.execProcess();
 }
 /**
  * @brief Run a pipe of commands of size three
  */
 TEST(JobRunnerTests, RunPipeJob2) {
-    jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
-    cmdLS.addArg("-Ggh");
-    cmdLS.addArg("-la");
-    cmdLS.addArg("../tests/files/job_runner_tests/testDirectory");
+    Args arg1{"ls", "-la"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL);
 
-    jobRunner::Command cmdGrep("grep", jobRunner::commandType::EXEC);
-    cmdGrep.addArg("cat");
+    Args arg2{"grep", "ninja"};
+    JobRunner::Process proc2(arg2, JobRunner::ProcessType::EXTERNAL);
 
-    jobRunner::Command cmdWC("wc", jobRunner::commandType::EXEC);
-    cmdWC.addArg("-l");
+    Args arg3{"wc"};
+    JobRunner::Process proc3(arg3, JobRunner::ProcessType::EXTERNAL);
 
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdLS);
-    job.addCommandToPipeline(&cmdGrep);
-    job.addCommandToPipeline(&cmdWC);
+    std::vector<JobRunner::Process*> pipe;
+    pipe.push_back(&proc1);
+    pipe.push_back(&proc2);
+    pipe.push_back(&proc3);
 
-    job.runJob();
-    SUCCEED();
+    JobRunner::Process pipeArgs(pipe);
+    JobRunner::JobRunner runner(&pipeArgs);
+    runner.execProcess();
+}
+/**
+ * @brief Run a pipeline with a builtin command
+ */
+TEST(JobRunnerTests, RunBuiltinInPipe) {
+    Args arg1{"print", "12345678"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::BUILTIN);
+
+    Args arg2{"wc"};
+    JobRunner::Process proc2(arg2, JobRunner::ProcessType::EXTERNAL);
+    std::vector<JobRunner::Process*> pipe;
+
+    pipe.push_back(&proc1);
+    pipe.push_back(&proc2);
+
+    JobRunner::Process pipeArgs(pipe);
+    JobRunner::JobRunner runner(&pipeArgs);
+    runner.execProcess();
 }
 /**
  * @brief Run a command job where we want to save return info
  */
 TEST(JobRunnerTests, RunSaveReturnJob) {
-    jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
-    cmdLS.addArg("-Ggh");
-    cmdLS.addArg("--time-style=+");
-    cmdLS.addArg("../tests/files/job_runner_tests/testDirectory");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdLS);
-    job.setJobToSave(true);
-
-    jobRunner::JobInfo returnInfo = job.runJob();
-    std::cout << "Standard Output:\n" << std::get<0>(returnInfo) << "\n";
-    std::cout << "Standard Error:\n" << std::get<1>(returnInfo) << "\n";
-    std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
-    SUCCEED();
+    Args arg1{"ls", "-l", "-a"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunner runner1(&proc1);
+    JobRunner::JobInfo info = runner1.execProcess();
+    std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
+    std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
+    std::cout << "Return Code is:\n" << std::get<2>(info) << "\n";
 }
 /**
  * @brief Run a command job where we want to save return info and big output
  */
 TEST(JobRunnerTests, RunSaveReturnJob2) {
-    jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
-    cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat.txt");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdCat);
-    job.setJobToSave(true);
-
-    jobRunner::JobInfo returnInfo = job.runJob();
-    std::cout << "Standard Output:\n" << std::get<0>(returnInfo) << "\n";
-    std::cout << "Standard Error:\n" << std::get<1>(returnInfo) << "\n";
-    std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
-    SUCCEED();
+    Args arg1{"cat", testLocation + "testDirectory/cat.txt"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunner runner1(&proc1);
+    JobRunner::JobInfo info = runner1.execProcess();
+    std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
+    std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
+    std::cout << "Return Code is:\n" << std::get<2>(info) << "\n";
 }
 /**
  * @brief Run a command job where we want to save return info, but
  *        the command returns an error code
  */
 TEST(JobRunnerTests, RunReturnJob3) {
-    jobRunner::Command cmdLS("ls", jobRunner::commandType::EXEC);
-    cmdLS.addArg("badDirectory/");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdLS);
-    job.setJobToSave(true);
-
-    jobRunner::JobInfo returnInfo = job.runJob();
-    std::cout << "Standard Output:\n" << std::get<0>(returnInfo) << "\n";
-    std::cout << "Standard Error:\n" << std::get<1>(returnInfo) << "\n";
-    std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
-    SUCCEED();
+    Args arg1{"cat", "-badarg"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunner runner1(&proc1);
+    JobRunner::JobInfo info = runner1.execProcess();
+    std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
+    std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
+    std::cout << "Return Code is:\n" << std::get<2>(info) << "\n";
 }
 /**
  * @brief Run a command job where we want to save return info and output bigger than
  *        buffer size
  */
 TEST(JobRunnerTests, RunSaveReturnJob4) {
-    // Need to save in a much bigger buffer for this cat
-    jobRunner::Command cmdCat("cat", jobRunner::commandType::EXEC);
-    cmdCat.addArg("../tests/files/job_runner_tests/testDirectory/cat2.txt");
-
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdCat);
-    job.setJobToSave(true);
-
-    jobRunner::JobInfo returnInfo = job.runJob();
-    std::cout << "Standard Output:\n" << std::get<0>(returnInfo) << "\n";
-    std::cout << "Standard Error:\n" << std::get<1>(returnInfo) << "\n";
-    std::cout << "Return Code: \n" << std::get<2>(returnInfo) << "\n";
-    SUCCEED();
+    Args arg1{"cat", testLocation + "testDirectory/cat2.txt"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunner runner1(&proc1);
+    JobRunner::JobInfo info = runner1.execProcess();
+    std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
+    std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
+    std::cout << "Return Code is:\n" << std::get<2>(info) << "\n";
 }
 /**
- * @brief Run a command job where we want to save return info and output bigger than
- *        buffer size
+ *  @brief
  */
-TEST(JobRunnerTests, RunMockedCommand) {
-    jobRunner::Command cmdLS("ls", jobRunner::EXEC);
-    cmdLS.addArg("-la");
-    cmdLS.addArg("-h");
+TEST(JobRunnerTests, RunSaveReturnJob5) {
+    Args arg1{"cat", testLocation + "testDirectory/cat2.txt"};
+    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, false);
 
-    jobRunner::Command cmdGrep("grep", jobRunner::EXEC);
-    cmdGrep.addArg("C");
+    Args arg2{"wc"};
+    JobRunner::Process proc2(arg2, JobRunner::ProcessType::EXTERNAL, false, true);
 
-    jobRunner::Command cmdWC("wc", jobRunner::EXEC);
-    cmdWC.addArg("-l");
+    std::vector<JobRunner::Process*> pipe;
+    pipe.push_back(&proc1);
+    pipe.push_back(&proc2);
 
-    jobRunner::Job job;
-    job.addCommandToPipeline(&cmdLS);
-    job.addCommandToPipeline(&cmdGrep);
-    job.addCommandToPipeline(&cmdWC);
-    job.setJobToMock(true);
+    JobRunner::Process pipeArgs(pipe);
+    JobRunner::JobRunner runner1(&pipeArgs);
 
-    job.runJob();
+    JobRunner::JobInfo info = runner1.execProcess();
+    std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
+    std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
+    std::cout << "Return Code is:\n" << std::get<2>(info) << "\n";
 }
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
