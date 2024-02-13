@@ -31,7 +31,6 @@ namespace Parser {
                     const std::vector<ProductionItem> poppedItems {productionStack.end() - (long)action.ruleSize,
                                                                    productionStack.end()};
                     productionStack.erase(productionStack.end() - (long)action.ruleSize, productionStack.end());
-
                     const auto newNode = action.nodeConstructor.value()(poppedItems);
                     productionStack.emplace_back(newNode);
                     stateStack.erase(stateStack.end() - (long)action.ruleSize, stateStack.end());
@@ -89,6 +88,7 @@ namespace Parser {
             case FOR_STMT:
             case WHILE_STMT:
             case DO_WHILE_STMT:
+            case FUNCTION_STMT:
             case RETURN_STMT:
             case SCOPE_STMT:
             case CMD_STMT:

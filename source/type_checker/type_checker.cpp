@@ -397,6 +397,16 @@ namespace TypeChecker {
                 }
                 return nullptr;
             }
+            case Parser::FUNCTION_STMT: {
+                Parser::FunctionStmtNodePtr const functionNode = std::static_pointer_cast<Parser::FunctionStmtNode>(astNode);
+                std::vector<TyPtr> bindings;
+                for (const Parser::BindingNodePtr& binding : functionNode->bindings) {
+                    bindings.push_back(typeCheck(binding));
+                }
+                // TODO: See if possible to check return type and return stmt match
+                TyPtr const returnType = typeCheck(functionNode->body);
+                return std::make_shared<FunctionTy>(bindings, returnType);
+            }
             case Parser::RETURN_STMT: {
                 // TODO: Typecheck that it matches the function's return type that it is in? (not sure how to or if
                 // possible)

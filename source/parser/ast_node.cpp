@@ -298,6 +298,8 @@ namespace Parser {
 
     ASTNodeType DoWhileStmtNode::nodeType() const { return ASTNodeType::DO_WHILE_STMT; }
 
+    ASTNodeType FunctionStmtNode::nodeType() const { return ASTNodeType::FUNCTION_STMT; }
+
     ASTNodeType ReturnStmtNode::nodeType() const { return ASTNodeType::RETURN_STMT; }
 
     ASTNodeType ScopeStmtNode::nodeType() const { return ASTNodeType::SCOPE_STMT; }
@@ -555,6 +557,21 @@ namespace Parser {
 
     std::string DoWhileStmtNode::sExpression() const {
         return "(DoWhileStmtNode " + condition->sExpression() + " " + body->sExpression() + ")";
+    }
+
+    FunctionStmtNode::FunctionStmtNode(const std::vector<BindingNodePtr>& bindings, Parser::StmtNodePtr body,
+                                   Parser::TypeNodePtr returnType)
+        : bindings(bindings), body(std::move(body)), returnType(std::move(returnType)) {}
+
+    std::string FunctionStmtNode::sExpression() const {
+        std::stringstream bindingsBuilder;
+        bool first = true;
+        for (const BindingNodePtr& binding : bindings) {
+            bindingsBuilder << (first ? "" : " ") << binding->sExpression();
+            first = false;
+        }
+        return "(FunctionStmtNode (" + bindingsBuilder.str() + ") " + returnType->sExpression() + " "
+             + body->sExpression() + ")";
     }
 
     ReturnStmtNode::ReturnStmtNode(Parser::ExprNodePtr retExpr) : retExpr(std::move(retExpr)) {}
