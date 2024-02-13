@@ -111,7 +111,7 @@ namespace TypeChecker {
             case Parser::ARRAY_EXPR: {
                 Parser::ArrayExprNodePtr const exprNode = std::static_pointer_cast<Parser::ArrayExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                std::shared_ptr<Ty> const type = exprNode->expressions.empty() ? nullptr
+                TyPtr const type = exprNode->expressions.empty() ? nullptr
                                                                                : typeCheck(exprNode->expressions[0]);
                 if (!exprNode->expressions.empty()) {
                     if (!type) {
@@ -143,7 +143,7 @@ namespace TypeChecker {
                         throw Util::CommanderException("Tried to index an array with a different type than an int");
                     }
                 }
-                std::shared_ptr<ArrayTy> const arrayTy = std::static_pointer_cast<ArrayTy>(arrayType);
+                ArrayTyPtr const arrayTy = std::static_pointer_cast<ArrayTy>(arrayType);
                 return (exprNode->type = arrayTy->baseType);
             }
             case Parser::TUPLE_EXPR: {
@@ -304,7 +304,7 @@ namespace TypeChecker {
                     // TODO: Improve Error
                     throw Util::CommanderException("Tried to call something that wasn't a function.");
                 }
-                std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(functionType);
+                FunctionTyPtr const functionTy = std::static_pointer_cast<FunctionTy>(functionType);
                 size_t const size = functionTy->parameters.size();
                 if (size != exprNode->args.size()) {
                     // TODO: Improve Error
@@ -478,7 +478,7 @@ namespace TypeChecker {
             case Parser::TUPLE_TYPE: {
                 Parser::TupleTypeNodePtr const tupleTypePtr = std::static_pointer_cast<Parser::TupleTypeNode>(astNode);
                 if (tupleTypePtr->type) { return tupleTypePtr->type; }
-                std::vector<std::shared_ptr<Ty>> types;
+                std::vector<TyPtr> types;
                 for (const Parser::TypeNodePtr& typeNodePtr : tupleTypePtr->subtypes) {
                     types.push_back(typeCheck(typeNodePtr));
                 }
@@ -488,7 +488,7 @@ namespace TypeChecker {
                 Parser::FunctionTypeNodePtr const functionTypePtr = std::static_pointer_cast<Parser::FunctionTypeNode>(
                         astNode);
                 if (functionTypePtr->type) { return functionTypePtr->type; }
-                std::vector<std::shared_ptr<Ty>> types;
+                std::vector<TyPtr> types;
                 for (const Parser::TypeNodePtr& typeNodePtr : functionTypePtr->params) {
                     types.push_back(typeCheck(typeNodePtr));
                 }

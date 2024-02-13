@@ -78,6 +78,10 @@ namespace TypeChecker {
          */
         [[nodiscard]] Type getType() const override;
     };
+    /**
+     * @brief Pointer to an int type
+     */
+    using IntTyPtr = std::shared_ptr<IntTy>;
 
     /**
      * @brief A class representing a Commander float type
@@ -91,6 +95,10 @@ namespace TypeChecker {
          */
         [[nodiscard]] Type getType() const override;
     };
+    /**
+     * @brief Pointer to an float type
+     */
+    using FloatTyPtr = std::shared_ptr<FloatTy>;
 
     /**
      * @brief A class representing a Commander bool type
@@ -104,6 +112,10 @@ namespace TypeChecker {
          */
         [[nodiscard]] Type getType() const override;
     };
+    /**
+     * @brief Pointer to an bool type
+     */
+    using BoolTyPtr = std::shared_ptr<BoolTy>;
 
     /**
      * @brief A class representing a Commander string type
@@ -117,6 +129,10 @@ namespace TypeChecker {
          */
         [[nodiscard]] Type getType() const override;
     };
+    /**
+     * @brief Pointer to an string type
+     */
+    using StringTyPtr = std::shared_ptr<StringTy>;
 
     /**
      * @brief A class representing a Commander tuple type
@@ -139,6 +155,10 @@ namespace TypeChecker {
          */
         std::vector<std::shared_ptr<Ty>> contentTypes;
     };
+    /**
+     * @brief Pointer to an tuple type
+     */
+    using TupleTyPtr = std::shared_ptr<TupleTy>;
 
     /**
      * @brief A class representing a Commander array type
@@ -161,6 +181,10 @@ namespace TypeChecker {
          */
         std::shared_ptr<Ty> baseType;
     };
+    /**
+     * @brief Pointer to an array type
+     */
+    using ArrayTyPtr = std::shared_ptr<ArrayTy>;
 
     /**
      * @brief A class representing a Commander function type
@@ -187,6 +211,10 @@ namespace TypeChecker {
          */
         std::shared_ptr<Ty> returnType;
     };
+    /**
+     * @brief Pointer to a function type
+     */
+    using FunctionTyPtr = std::shared_ptr<FunctionTy>;
 
 }  //  namespace TypeChecker
 
