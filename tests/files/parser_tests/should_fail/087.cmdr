@@ -1,2 +1,2 @@
 //Should not parse string interpolation due to statement instead of expression
-x = "${{ 6 }}";
+x = "${{ 6; }}";

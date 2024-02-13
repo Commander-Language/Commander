@@ -14,6 +14,12 @@ void expectOutputEqualsSExpressions(const Parser::ASTNodeList& nodes, const std:
     EXPECT_EQ(expectedOutput, builder.str());
 }
 
+void lexAndParse(const std::string& filePath) {
+    Lexer::TokenList tokens;
+    Lexer::tokenize(tokens, filePath);
+    parser.parse(tokens);
+}
+
 /**
  * Runs the parser tests from the tests/files/parser_tests/should_parse directory
  */
@@ -49,16 +55,7 @@ TEST_P(ParserParseTests, ShouldParseFileAndMatchExpectedExamples) {
 TEST_P(ParserFailTests, ShouldNotParseFile) {
     auto param = GetParam();
     const std::string filePath = "../tests/files/parser_tests/should_fail/" + param;
-    // Lex
-    Lexer::TokenList tokens;
-    try {
-        Lexer::tokenize(tokens, filePath);
-    } catch (const Util::CommanderException& e) {
-        std::cout << "Lexer Error: " << e.what() << "\n";
-        FAIL();
-    }
-    // Parse
-    ASSERT_THROW(parser.parse(tokens), Util::CommanderException);
+    ASSERT_THROW(lexAndParse(filePath), Util::CommanderException);
 }
 
 /**
