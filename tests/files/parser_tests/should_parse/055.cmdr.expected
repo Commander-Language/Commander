@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode utah) SET (BinOpExprNode (StringExpressionNode (StringNode "UT")) ADD (StringExpressionNode (StringNode "AH"))))))

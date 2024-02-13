@@ -529,6 +529,10 @@ namespace Lexer {
             throw Util::CommanderException("String wasn't terminated with " + std::string((isSingle ? "'" : "\"")),
                                            token.position);
         }
+        if (token.subTokens.empty()) {
+            const Token strToken = {"", STRINGLITERAL, currentStringPosition};
+            token.subTokens.push_back(std::make_shared<Token>(strToken));
+        }
         return std::make_shared<StringToken>(token);
     }
 
