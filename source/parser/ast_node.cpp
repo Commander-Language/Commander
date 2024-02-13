@@ -370,7 +370,7 @@ namespace Parser {
 
     AsyncCmdNode::AsyncCmdNode(Parser::CmdNodePtr cmd) : cmd(std::move(cmd)) {}
 
-    std::string AsyncCmdNode::sExpression() const { return "(AsyncCmdNode" + cmd->sExpression() + ")"; }
+    std::string AsyncCmdNode::sExpression() const { return "(AsyncCmdNode " + cmd->sExpression() + ")"; }
 
     PipeCmdNode::PipeCmdNode(Parser::CmdNodePtr leftCmd, Parser::CmdNodePtr rightCmd)
         : leftCmd(std::move(leftCmd)), rightCmd(std::move(rightCmd)) {}
