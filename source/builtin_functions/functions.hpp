@@ -93,4 +93,35 @@ bool parseBoolAsBool(bool value);
 
 bool parseStringAsBool(std::string string);
 
+/**
+ * parseAsType() allows the user to parse the specified data as a specified type.
+ * @tparam T - The type of the original data
+ * @tparam U - The type of the data to parse as
+ * @param originalVal - The unmodified data to parse as type U
+ * @return - The original data parsed as type U (e.g. parseAsType<int, bool>(36) will convert 36 from an int to a boolean value)
+ */
+template <typename T, typename U>
+U parseAsType(T originalVal) {
+    return (U) originalVal; //TODO: exceptions when string is passed in (or redirect to parseAsString / parseStringAsType)
+}
+
+template <typename T>
+std::string parseAsString(T originalVal) {
+    if(typeid(T) == typeid(bool)) {
+        if((int64_t) originalVal > 0) {
+            return "true";
+        }
+        return "false";
+    }
+    return std::to_string(originalVal);
+}
+
+template <typename U>
+U parseStringAsType(std::string originalValue) {
+    if(typeid(U) == typeid(bool)) {
+        //may need a regex for this, match any instance of "TRUE" or "FALSE", otherwise an exception throws?
+        //e.g. "TruE", "tRUe", etc. should yield true
+    }
+}
+
 #endif  // COMMANDER_FUNCTIONS_HPP
