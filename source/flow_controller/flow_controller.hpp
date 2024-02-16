@@ -8,6 +8,7 @@
 
 #include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
+#include "source/builtin_functions/functions.hpp"
 
 #include <any>
 #include <iostream>

@@ -10,12 +10,14 @@ namespace TypeChecker {
 
     // Default-Constructor
     TypeChecker::TypeChecker() {
-        _assignedTypes.insert(Function::functionTypes.begin(), Function::functionTypes.end());
+        for (auto pair : Function::functionTypes) {
+            setOrUpdateType(pair.first, pair.second);
+        }
     }
 
     // Copy-Constructor
     TypeChecker::TypeChecker(TypeChecker* otherTypeChecker) {
-        std::unordered_map<std::string, TyPtr> const data(otherTypeChecker->_assignedTypes);
+        std::unordered_map<std::string, std::vector<TyPtr>> const data(otherTypeChecker->_assignedTypes);
         _assignedTypes = data;
     }
 
@@ -502,7 +504,7 @@ namespace TypeChecker {
             case Parser::VARIABLE: {
                 Parser::IdentVariableNodePtr const variablePtr = std::static_pointer_cast<Parser::IdentVariableNode>(
                         astNode);
-                return getType(variablePtr->varName);
+                return getType(variablePtr->varName)[0];
             }
             default:
                 throw Util::CommanderException(
@@ -510,23 +512,33 @@ namespace TypeChecker {
         }
     }
 
-    TyPtr& TypeChecker::getType(const std::string& variableID) { return _assignedTypes[variableID]; }
+    std::vector<TyPtr>& TypeChecker::getType(const std::string& variableID) { return _assignedTypes[variableID]; }
 
     void TypeChecker::setOrUpdateType(const std::string& variableID, const TyPtr& type) {
-        _assignedTypes[variableID] = type;
+        if (hasVariable(variableID)) {
+            _assignedTypes[variableID].push_back(type);
+            return;
+        }
+        std::vector<TyPtr> types;
+        types.push_back(type);
+        _assignedTypes[variableID] = types;
     }
 
     bool TypeChecker::verifyType(const std::string& variableID, const TyPtr& expected) {
         if (!hasVariable(variableID)) return false;  // return false if the variable doesnt exist
-        if (areTypesEqual(_assignedTypes[variableID], expected))
-            return true;  // return true if the variable is equal to the expected value
-
+        for (TyPtr type : _assignedTypes[variableID]) {
+            if (areTypesEqual(type, expected))
+                return true;  // return true if the variable is equal to the expected value
+        }
         // if neither check was successful, check if expected is compatible with the variableID's type
-        return _isVariantOfExpected(_assignedTypes[variableID], expected);
+        for (TyPtr type : _assignedTypes[variableID]) {
+            if (_isVariantOfExpected(type, expected))
+                return true;  // return true if the variable is equal to the expected value
+        }
+        return false;
     }
 
-
-    bool TypeChecker::hasVariable(const std::string& variableID) { return getType(variableID) != nullptr; }
+    bool TypeChecker::hasVariable(const std::string& variableID) { return _assignedTypes.find(variableID) != _assignedTypes.end(); }
 
     bool TypeChecker::_isVariantOfExpected(const TyPtr& variableType, const TyPtr& expectedType) {
         // TODO: refactor and account for additional types (i.e. STRING and CHAR, etc.)

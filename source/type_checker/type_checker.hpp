@@ -49,7 +49,7 @@ namespace TypeChecker {
          * @param variableID - The desired variableID to obtain
          * @return - A string type if the variable exists, otherwise nullptr is returned
          */
-        TyPtr& getType(const std::string& variableID);  // Returns the type of a variable
+        std::vector<TyPtr>& getType(const std::string& variableID);  // Returns the type of a variable
 
         /**
          * setOrUpdateType() will attempt to assign a new variable to the current type_checker or update the current
@@ -57,8 +57,7 @@ namespace TypeChecker {
          * @param variableID - The desired variableID to update or add
          * @param type - A string Type to associate the variable with
          */
-        void setOrUpdateType(const std::string& variableID,
-                             const TyPtr& type);  // Sets or updates the type of a variable
+        void setOrUpdateType(const std::string& variableID, const TyPtr& type); // Sets or updates the type of a variable
 
         /**
          * verifyType() will return a boolean if the variableID type is compatable with the expected type. This occurs
@@ -83,7 +82,7 @@ namespace TypeChecker {
                 const std::string& variableID);  // returns a boolean according to whether a specified variable exists
 
     private:
-        std::unordered_map<std::string, TyPtr>
+        std::unordered_map<std::string, std::vector<TyPtr>>
                 _assignedTypes {};  // A dictionary which stores a string id and returns a string type
 
         /**
