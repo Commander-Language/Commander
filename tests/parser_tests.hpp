@@ -204,7 +204,7 @@ INSTANTIATE_TEST_SUITE_P(ParserTestFiles, ParserFailTests, ::testing::Values("00
                                                                              "074.cmdr", "085.cmdr", "086.cmdr", "087.cmdr", "088.cmdr", "089.cmdr",
                                                                              "090.cmdr", "091.cmdr", "092.cmdr", "093.cmdr", "094.cmdr", "095.cmdr",
                                                                              "096.cmdr", "097.cmdr", "098.cmdr", "099.cmdr", "100.cmdr", "101.cmdr",
-                                                                             "102.cmdr", "103.cmdr"));
+                                                                             "102.cmdr", "103.cmdr", "104.cmdr", "105.cmdr"));
 
 /**
  * @brief Takes in an ASTNodeList, and ensures they match what is contained in the expected output string

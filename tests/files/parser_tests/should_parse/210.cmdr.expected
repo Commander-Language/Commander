@@ -1,0 +1,2 @@
+(PrgmNode
+	(CmdStmtNode (CmdCmdNode (StringNode "echo") (StringNode "-f") (StringNode "-a") (StringNode "-b") (StringNode "-abc") (StringNode "--arg"))))

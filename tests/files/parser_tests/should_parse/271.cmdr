@@ -1,2 +1,2 @@
 //Should parse ternary expression
-x = x ? x : x;
+x = a ? b : c;
