@@ -8,6 +8,11 @@
 
 namespace TypeChecker {
 
+    // TODO: Default-Constructor: get it working
+    /*TypeChecker::TypeChecker() {
+        _assignedTypes.insert(Function::functionTypes.begin(), Function::functionTypes.end());
+    }*/
+
     void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
         for (const Parser::ASTNodePtr& node : astNodeList) { typeCheck(node); }
     }
