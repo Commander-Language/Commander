@@ -15,23 +15,6 @@
 
 namespace FlowController {
 
-    template<typename TType>
-    /**
-     * @brief A Commander array representation
-     */
-    using CommanderArray = std::vector<TType>;
-    /**
-     * @brief A Commander bool representation
-     */
-    using CommanderBool = bool;
-    /**
-     * @brief A Commander tuple representation
-     */
-    using CommanderTuple = std::vector<std::any>;
-    /**
-     * @brief A Commander int representation
-     */
-    using CommanderInt = int64_t;
     /**
      * @brief A commander lambda representation
      */
@@ -68,7 +51,7 @@ namespace FlowController {
         /**
          * @brief Get value of variable
          */
-        CommanderInt getVariableValue(std::string);
+        TypeChecker::CommanderInt getVariableValue(std::string);
 
     private:
         /**

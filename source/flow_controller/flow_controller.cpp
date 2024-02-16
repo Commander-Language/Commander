@@ -130,7 +130,7 @@ namespace FlowController {
             }
             case Parser::ARRAY_EXPR: {
                 auto arrExp = std::static_pointer_cast<Parser::ArrayExprNode>(node);
-                CommanderArray<std::any> array;
+                TypeChecker::CommanderArray<std::any> array;
                 for (auto& expr : arrExp->expressions) {
                     std::any const value = _expr(expr);
                     array.push_back(value);
@@ -141,22 +141,22 @@ namespace FlowController {
                 auto arrayIndexExpression = std::static_pointer_cast<Parser::ArrayIndexExprNode>(node);
                 auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrayIndexExpression->array);
                 // TODO: Update to generic array
-                auto array = std::any_cast<CommanderArray<CommanderInt>>(_getVariable(arrayVariable->varName));
+                auto array = std::any_cast<TypeChecker::CommanderArray<TypeChecker::CommanderInt>>(_getVariable(arrayVariable->varName));
 
                 // TODO: might be understanding this wrong? why list of indices?
-                auto index = std::any_cast<CommanderInt>(_expr(arrayIndexExpression->indexExprs[0]));
+                auto index = std::any_cast<TypeChecker::CommanderInt>(_expr(arrayIndexExpression->indexExprs[0]));
                 return array[index];
             }
             case Parser::TUPLE_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleExprNode>(node);
-                CommanderTuple tuple;
+                TypeChecker::CommanderTuple tuple;
                 for (auto& expr : tupleExp->expressions) { tuple.emplace_back(_expr(expr)); }
                 return tuple;
             }
             case Parser::TUPLE_INDEX_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleIndexExprNode>(node);
-                auto index = std::any_cast<CommanderInt>(_expr(tupleExp->index));
-                auto tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
+                auto index = std::any_cast<TypeChecker::CommanderInt>(_expr(tupleExp->index));
+                auto tuple = std::any_cast<TypeChecker::CommanderTuple>(_expr(tupleExp->tuple));
 
                 if (index >= tuple.size() || index < 0) {
                     throw Util::CommanderException("Index out of bounds: Index " + std::to_string(index)
@@ -260,7 +260,7 @@ namespace FlowController {
                 switch (expr->expression->type->getType()) {
                     case TypeChecker::INT:
                         // TODO: Implement method that stringifies a int
-                        std::cout << std::any_cast<CommanderInt>(value) << std::endl;
+                        std::cout << std::any_cast<TypeChecker::CommanderInt>(value) << std::endl;
                         break;
                     case TypeChecker::FLOAT:
                         // TODO: Implement method that stringifies a float
@@ -268,7 +268,7 @@ namespace FlowController {
                         break;
                     case TypeChecker::BOOL:
                         // TODO: Implement method that stringifies a bool
-                        std::cout << std::any_cast<CommanderBool>(value) << std::endl;
+                        std::cout << std::any_cast<TypeChecker::CommanderBool>(value) << std::endl;
                         break;
                     case TypeChecker::TUPLE:
                         // TODO: Implement method that stringifies a tuple and call it here
@@ -328,31 +328,31 @@ namespace FlowController {
     std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
-                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                auto expr = std::any_cast<TypeChecker::CommanderInt>(_expr(unOp->expr));
                 return -1 * expr;
             }
             case Parser::NOT: {
-                auto expr = std::any_cast<CommanderBool>(_expr(unOp->expr));
+                auto expr = std::any_cast<TypeChecker::CommanderBool>(_expr(unOp->expr));
                 return !expr;
             }
             case Parser::PRE_INCREMENT: {
                 // might have to update symbol table if variable
-                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                auto expr = std::any_cast<TypeChecker::CommanderInt>(_expr(unOp->expr));
                 return ++expr;
             }
             case Parser::POST_INCREMENT: {
                 // might have to update symbol table if variable
-                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                auto expr = std::any_cast<TypeChecker::CommanderInt>(_expr(unOp->expr));
                 return expr++;
             }
             case Parser::PRE_DECREMENT: {
                 // might have to update symbol table if variable
-                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                auto expr = std::any_cast<TypeChecker::CommanderInt>(_expr(unOp->expr));
                 return --expr;
             }
             case Parser::POST_DECREMENT: {
                 // might have to update symbol table if variable
-                auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
+                auto expr = std::any_cast<TypeChecker::CommanderInt>(_expr(unOp->expr));
                 return expr--;
             }
             default: {
@@ -363,16 +363,16 @@ namespace FlowController {
 
     std::any FlowController::_binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp) {
         // TODO: Make general to any type, for now assume just using int or bool
-        CommanderInt left;
-        CommanderInt right;
+        TypeChecker::CommanderInt left;
+        TypeChecker::CommanderInt right;
 
         std::string variableName;
-        if (binOp->leftExpr) { left = std::any_cast<CommanderInt>(_expr(binOp->leftExpr)); }
+        if (binOp->leftExpr) { left = std::any_cast<TypeChecker::CommanderInt>(_expr(binOp->leftExpr)); }
         if (binOp->leftVariable) {
             auto var = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
             variableName = var->varName;
         }
-        right = std::any_cast<CommanderInt>(_expr(binOp->rightExpr));
+        right = std::any_cast<TypeChecker::CommanderInt>(_expr(binOp->rightExpr));
 
         switch (binOp->opType) {
             case Parser::LESSER: {
@@ -404,13 +404,13 @@ namespace FlowController {
                 return left + right;
             }
             case Parser::EXPONENTIATE: {
-                return static_cast<CommanderInt>(std::pow(left, right));
+                return static_cast<TypeChecker::CommanderInt>(std::pow(left, right));
             }
             case Parser::AND: {
-                return std::any_cast<CommanderBool>(left) && std::any_cast<CommanderBool>(right);
+                return std::any_cast<TypeChecker::CommanderBool>(left) && std::any_cast<TypeChecker::CommanderBool>(right);
             }
             case Parser::OR: {
-                return std::any_cast<CommanderBool>(left) || std::any_cast<CommanderBool>(right);
+                return std::any_cast<TypeChecker::CommanderBool>(left) || std::any_cast<TypeChecker::CommanderBool>(right);
             }
             case Parser::SET: {
                 // auto variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
@@ -423,33 +423,33 @@ namespace FlowController {
                 return left != right;
             }
             case Parser::ADD_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) + right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) + right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::SUBTRACT_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) - right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) - right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MULTIPLY_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) * right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) * right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::DIVIDE_SET: {
                 if (right == 0) { throw Util::CommanderException("Divide by zero error encountered"); }
-                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) / right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) / right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MODULO_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) % right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) % right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::EXPONENTIATE_SET: {
-                CommanderInt const newValue = std::pow(*_symbolTable.getVariable<CommanderInt>(variableName), right);
+                TypeChecker::CommanderInt const newValue = std::pow(*_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName), right);
                 _setVariable(variableName, newValue);
                 return newValue;
             }
@@ -468,12 +468,12 @@ namespace FlowController {
 
     void FlowController::_setVariable(std::string name, std::any value) {
         // TODO: update when symbol table is generic
-        _symbolTable.addOrUpdateVariable(std::move(name), std::any_cast<CommanderInt>(value));
+        _symbolTable.addOrUpdateVariable(std::move(name), std::any_cast<TypeChecker::CommanderInt>(value));
     }
 
     std::any FlowController::_getVariable(const std::string& name) {
-        CommanderInt* value = _symbolTable.getVariable<CommanderInt>(name);
-        if (value != nullptr) { return static_cast<CommanderInt>(*value); }
+        TypeChecker::CommanderInt* value = _symbolTable.getVariable<TypeChecker::CommanderInt>(name);
+        if (value != nullptr) { return static_cast<TypeChecker::CommanderInt>(*value); }
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
@@ -485,7 +485,7 @@ namespace FlowController {
 
     bool FlowController::hasVariable(std::string name) { return _symbolTable.varExistsInScope(name); }
 
-    CommanderInt FlowController::getVariableValue(std::string name) {
-        return std::any_cast<CommanderInt>(_getVariable(name));
+    TypeChecker::CommanderInt FlowController::getVariableValue(std::string name) {
+        return std::any_cast<TypeChecker::CommanderInt>(_getVariable(name));
     }
 }  // namespace FlowController

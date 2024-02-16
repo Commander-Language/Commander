@@ -10,6 +10,7 @@
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/type_checker/type.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/builtin_functions/functions.hpp"
 #include "type.hpp"
 #include <string>
 #include <unordered_map>
@@ -21,7 +22,7 @@ namespace TypeChecker {
      */
     class TypeChecker {
     public:
-        TypeChecker() = default;   // Default Constructor
+        TypeChecker();   // Default Constructor
         ~TypeChecker() = default;  // Default Destructor
 
         /**

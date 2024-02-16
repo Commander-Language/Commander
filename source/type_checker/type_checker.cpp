@@ -8,6 +8,11 @@
 
 namespace TypeChecker {
 
+    // Default-Constructor
+    TypeChecker::TypeChecker() {
+        _assignedTypes.insert(Function::functionTypes.begin(), Function::functionTypes.end());
+    }
+
     // Copy-Constructor
     TypeChecker::TypeChecker(TypeChecker* otherTypeChecker) {
         std::unordered_map<std::string, TyPtr> const data(otherTypeChecker->_assignedTypes);

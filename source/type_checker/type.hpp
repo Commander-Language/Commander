@@ -7,12 +7,40 @@
 
 #ifndef COMMANDER_TYPE_H
 #define COMMANDER_TYPE_H
+#include <any>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace TypeChecker {
+
+    /**
+     * @brief A Commander int representation
+     */
+    using CommanderInt = int64_t;
+    /**
+     * @brief A Commander float representation
+     */
+    using CommanderFloat = double;
+    /**
+     * @brief A Commander bool representation
+     */
+    using CommanderBool = bool;
+    /**
+     * @brief A Commander string representation
+     */
+    using CommanderString = std::string;
+    template<typename TType>
+    /**
+     * @brief A Commander array representation
+     */
+    using CommanderArray = std::vector<TType>;
+    /**
+     * @brief A Commander tuple representation
+     */
+    using CommanderTuple = std::vector<std::any>;
+
 
     /**
      * @brief Enumeration of all possible (base) types in Commander
