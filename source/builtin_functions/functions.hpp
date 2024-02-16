@@ -10,6 +10,9 @@
 #include <vector>
 #include <string>
 #include "source/type_checker/type.hpp"
+#include <unordered_map>
+#include <functional>
+#include <map>
 
 namespace Function {
 
@@ -60,7 +63,8 @@ namespace Function {
             {"parseFloat", getFunctionTy(BOOL, FLOAT)}, {"parseFloat", getFunctionTy(STRING, FLOAT)},
             {"parseBool", getFunctionTy(INT, BOOL)},    {"parseBool", getFunctionTy(FLOAT, BOOL)},
             {"parseBool", getFunctionTy(BOOL, BOOL)},   {"parseBool", getFunctionTy(STRING, BOOL)},
-            {"print", getFunctionTy(STRING, VOID)}};
+            {"print", getFunctionTy(STRING, VOID)},     {"toString", getFunctionTy(INT, STRING)},
+            {"println", getFunctionTy(STRING, VOID)}};
 
     /* ========== Implementations ========== */
     std::vector<std::any> VOID_RETURN;
@@ -71,7 +75,7 @@ namespace Function {
 
     TypeChecker::CommanderInt parseBoolAsInt(TypeChecker::CommanderBool value);
 
-    TypeChecker::CommanderInt parseStringAsInt(std::string string);
+    TypeChecker::CommanderInt parseStringAsInt(TypeChecker::CommanderString string);
 
     TypeChecker::CommanderFloat parseIntAsFloat(TypeChecker::CommanderInt number);
 
@@ -79,7 +83,7 @@ namespace Function {
 
     TypeChecker::CommanderFloat parseBoolAsFloat(TypeChecker::CommanderBool value);
 
-    TypeChecker::CommanderFloat parseStringAsFloat(std::string string);
+    TypeChecker::CommanderFloat parseStringAsFloat(TypeChecker::CommanderString string);
 
     TypeChecker::CommanderBool parseIntAsBool(TypeChecker::CommanderInt number);
 
@@ -87,9 +91,18 @@ namespace Function {
 
     TypeChecker::CommanderBool parseBoolAsBool(TypeChecker::CommanderBool value);
 
-    TypeChecker::CommanderBool parseStringAsBool(std::string string);
+    TypeChecker::CommanderBool parseStringAsBool(TypeChecker::CommanderString string);
+
+    TypeChecker::CommanderTuple println(TypeChecker::CommanderString string);
 
     TypeChecker::CommanderTuple print(TypeChecker::CommanderString string);
+
+    TypeChecker::CommanderString toString(TypeChecker::CommanderInt value);
+
+    inline const std::unordered_map<std::string, std::function<void()>> functionImplementations {
+            {"println", println},       {"toString", toString},
+            {"print", print}
+    };
 
     /**
      * parseAsType() allows the user to parse the specified data as a specified type.
@@ -106,7 +119,7 @@ namespace Function {
     template<typename T>
     std::string parseAsString(T originalVal) {
         if (typeid(T) == typeid(bool)) {
-            if ((int64_t)originalVal > 0) { return "true"; }
+            if ((TypeChecker::CommanderInt)originalVal > 0) { return "true"; }
             return "false";
         }
         return std::to_string(originalVal);
