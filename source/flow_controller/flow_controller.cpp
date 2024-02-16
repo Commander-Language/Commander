@@ -182,7 +182,12 @@ namespace FlowController {
             }
             case Parser::CALL_EXPR: {
                 auto functionExpression = std::static_pointer_cast<Parser::CallExprNode>(node);
-                auto function = std::any_cast<CommanderLambda>(_expr(functionExpression->func));
+                if(functionExpression->nodeType() == Parser::VARIABLE) {
+                    auto function = std::any_cast<>(_expr(functionExpression->func));
+                }
+                else if(functionExpression->nodeType() == Parser::LAMBDA_EXPR) {
+                    auto function = std::any_cast<CommanderLambda>(_expr(functionExpression->func));
+                }
 
                 _symbolTable.pushSymbolTable();  // new scope for function
 
