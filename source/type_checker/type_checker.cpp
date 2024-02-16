@@ -10,7 +10,9 @@ namespace TypeChecker {
 
     // TODO: Default-Constructor: get it working
     /*TypeChecker::TypeChecker() {
-        _assignedTypes.insert(Function::functionTypes.begin(), Function::functionTypes.end());
+        for (auto pair : Function::functionTypes) {
+    setOrUpdateType(pair.first, pair.second);
+}
     }*/
 
     void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {

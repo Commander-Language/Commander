@@ -10,9 +10,7 @@
 #include <vector>
 #include <string>
 #include "source/type_checker/type.hpp"
-#include <unordered_map>
 #include <functional>
-#include <map>
 
 namespace Function {
 
@@ -29,11 +27,11 @@ namespace Function {
     }
 
     /**
- * Returns a function type with the first n - 1 arguments as param types and the return type as the nth argument type
- * @tparam Args The type of the param arguments (should be TyPtr); required for variadic functions
- * @param first The first argument
- * @param args The rest of the arguments
- * @return The function type
+     * Returns a function type with the first n - 1 arguments as param types and the return type as the nth argument type
+     * @tparam Args The type of the param arguments (should be TyPtr); required for variadic functions
+     * @param first The first argument
+     * @param args The rest of the arguments
+     * @return The function type
      */
     template<typename... Args>
     TypeChecker::FunctionTyPtr getFunctionTy(TypeChecker::TyPtr first, Args... args) {
@@ -56,7 +54,7 @@ namespace Function {
     /**
      * The built in function types
      */
-    const std::unordered_map<std::string, TypeChecker::FunctionTyPtr> functionTypes {
+    const std::vector<std::pair<std::string, TypeChecker::FunctionTyPtr>> functionTypes {
             {"parseInt", getFunctionTy(INT, INT)},      {"parseInt", getFunctionTy(FLOAT, INT)},
             {"parseInt", getFunctionTy(BOOL, INT)},     {"parseInt", getFunctionTy(STRING, INT)},
             {"parseFloat", getFunctionTy(INT, FLOAT)},  {"parseFloat", getFunctionTy(FLOAT, FLOAT)},
@@ -99,7 +97,22 @@ namespace Function {
 
     TypeChecker::CommanderString toString(TypeChecker::CommanderInt value);
 
-    inline const std::unordered_map<std::string, std::function<void()>> functionImplementations {
+    struct AnyCallable
+    {
+        AnyCallable() {}
+        template<typename F>
+        AnyCallable(F&& fun) : AnyCallable(std::function(std::forward<F>(fun))) {}
+        template<typename Ret, typename ... Args>
+        AnyCallable(std::function<Ret(Args...)> fun) : m_any(fun) {}
+        std::any m_any;
+    };
+
+    /**
+     * TODO: Not sure which way we should do this yet
+     * https://www.geeksforgeeks.org/passing-a-function-as-a-parameter-in-cpp/
+     * https://stackoverflow.com/questions/45715219/store-functions-with-different-signatures-in-a-map
+     */
+    inline const std::unordered_map<std::string, AnyCallable> functionImplementations {
             {"println", println},       {"toString", toString},
             {"print", print}
     };
