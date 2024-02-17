@@ -423,33 +423,33 @@ namespace FlowController {
                 return left != right;
             }
             case Parser::ADD_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable(variableName) + right;
+                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) + right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::SUBTRACT_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable(variableName) - right;
+                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) - right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MULTIPLY_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable(variableName) * right;
+                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) * right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::DIVIDE_SET: {
                 if (right == 0) { throw Util::CommanderException("Divide by zero error encountered"); }
-                CommanderInt const newValue = *_symbolTable.getVariable(variableName) / right;
+                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) / right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MODULO_SET: {
-                CommanderInt const newValue = *_symbolTable.getVariable(variableName) % right;
+                CommanderInt const newValue = *_symbolTable.getVariable<CommanderInt>(variableName) % right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::EXPONENTIATE_SET: {
-                CommanderInt const newValue = std::pow(*_symbolTable.getVariable(variableName), right);
+                CommanderInt const newValue = std::pow(*_symbolTable.getVariable<CommanderInt>(variableName), right);
                 _setVariable(variableName, newValue);
                 return newValue;
             }
@@ -472,7 +472,7 @@ namespace FlowController {
     }
 
     std::any FlowController::_getVariable(const std::string& name) {
-        int* value = _symbolTable.getVariable(name);
+        CommanderInt* value = _symbolTable.getVariable<CommanderInt>(name);
         if (value != nullptr) { return static_cast<CommanderInt>(*value); }
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
