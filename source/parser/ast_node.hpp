@@ -713,7 +713,7 @@ namespace Parser {
         /**
          * @brief Reports the type of this command node.
          *
-         * @return `CMD` always.
+         * @return `CMD_CMD` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
     };

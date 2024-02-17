@@ -94,7 +94,7 @@ namespace FlowController {
     //  ==========================
     void FlowController::_binding(const Parser::BindingNodePtr &node) {
         // TODO: Find better default value for each type
-        _setVariable(node->variable, 0);
+        _setVariable(node->variable, nullptr);
     }
 
     void FlowController::_bindings(const Parser::BindingsNodePtr &node) {
@@ -102,7 +102,20 @@ namespace FlowController {
     }
 
     void FlowController::_cmd(const Parser::CmdNodePtr &node) {
-        // TODO: Implement
+        switch (node->nodeType()) {
+            case Parser::CMD_CMD: {
+                auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+            }
+            case Parser::PIPE_CMD: {
+                auto pipeCmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+            }
+            case Parser::ASYNC_CMD: {
+                auto asyncCmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+            }
+            default:
+                // TODO: Better error
+                throw Util::CommanderException("Not a command");
+        }
     }
 
     CommanderTypePtr FlowController::_expr(const Parser::ExprNodePtr &node) {
@@ -236,8 +249,8 @@ namespace FlowController {
                 break;
             }
             case Parser::CMD_STMT: {
-                // TODO: Implement
-                break;
+                auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
+                _cmd(cmd->command);
             }
                 //Util::println(std::to_string(std::any_cast<TypeChecker::CommanderBool>(value)));
             case Parser::EXPR_STMT: {
