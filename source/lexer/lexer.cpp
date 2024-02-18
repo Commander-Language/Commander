@@ -257,7 +257,13 @@ namespace Lexer {
         TokenPtr token;
         if (!isCommand) {
             token = lexTokenLiteral(file, position);
-            if (token) return token;
+            if (token) {
+                if (!isFirst || token->type != DOT) {
+                    return token;
+                }
+                position.index--;
+                position.column--;
+            }
         }
         token = lexCommandTokenLiteral(file, position);
         if (token) return token;
@@ -448,10 +454,6 @@ namespace Lexer {
                     currentString << '}';
                     continue;
                 }
-                if (secondCharacter == '\\') {
-                    currentString << '\\';
-                    continue;
-                }
                 if (secondCharacter == '\n' || secondCharacter == '\r') {
                     if (secondCharacter == '\r' && position.index < file.length() && file[position.index] == '\n') {
                         position.index++;
@@ -462,15 +464,18 @@ namespace Lexer {
                 }
                 if (isSingle) {
                     if (secondCharacter == '\'') {
-                        currentString << '\'';
-                    } else {
-                        throw Util::CommanderException(
-                                "Unknown escape sequence \\" + std::string(1, secondCharacter),
-                                {position.fileName, position.line, position.index - 2, position.index - 2});
+                        currentString << secondCharacter;
+                        continue;
                     }
+                    position.index--;
+                    position.column--;
+                    currentString << character;
                     continue;
                 }
                 switch (secondCharacter) {
+                    case '\\':
+                        currentString << '\\';
+                        break;
                     case '"':
                         currentString << '"';
                         break;

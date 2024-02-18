@@ -32,14 +32,8 @@ int main(int argc, char** argv) {
     try {
         std::vector<std::string> arguments;
         for (int i = 1; i < argc; i++) { arguments.push_back(argv[i]); }
-        clock_t const start = clock();
         Parser::Parser parser;
-        clock_t const end = clock();
-        std::cout << "Parse Table Initialization Time: " << ((double)(end - start) / CLOCKS_PER_SEC) << " seconds"
-                  << '\n';
         TypeChecker::TypeChecker typeChecker;
-        std::cout << "Commander Language Version Alpha" << '\n';
-        std::cout << "Basic REPL for Commander scripting language." << '\n';
         auto fileIterator = std::find(arguments.begin(), arguments.end(), "-f");
         if (fileIterator++ != arguments.end()) {
             if (fileIterator == arguments.end()) { throw Util::CommanderException("No file name provided."); }
@@ -47,6 +41,8 @@ int main(int argc, char** argv) {
             interpretFile(file, arguments, parser, typeChecker);
             return 0;
         }
+        std::cout << "Commander Language Version Beta" << '\n';
+        std::cout << "Basic REPL for Commander scripting language." << '\n';
         while (true) {
             try {
                 std::cout << ">> ";

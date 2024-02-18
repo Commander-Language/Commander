@@ -1,2 +1,2 @@
-// Lexer should throw an error when encountering an unknown escape (single quote)
-a = 'This is an unknown escape: \y ';
+// Lexer should throw an error due to unterminated string (caused by escape character)
+a = 'This is an escape: \';

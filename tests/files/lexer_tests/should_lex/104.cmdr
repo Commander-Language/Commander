@@ -1,0 +1,16 @@
+//Test different escape sequences lex correctly
+$'\\{';
+$"\\}";
+$'\\}';
+$"\\t";
+$'\\t';
+$"\\n";
+$'\\n';
+$"a\
+b";
+$'a\
+b';
+$"a\\
+b";
+$'a\\
+b';
