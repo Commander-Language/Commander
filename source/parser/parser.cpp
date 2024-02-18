@@ -66,6 +66,7 @@ namespace Parser {
             case CMD_CMD:
             case PIPE_CMD:
             case ASYNC_CMD:
+            case TIMEOUT_CMD:
                 return CMD;
             case EXPR:
             case INT_EXPR:
@@ -81,6 +82,7 @@ namespace Parser {
             case UNOP_EXPR:
             case BINOP_EXPR:
             case CALL_EXPR:
+            case API_CALL_EXPR:
             case LAMBDA_EXPR:
             case CMD_EXPR:
                 return EXPR;
@@ -94,6 +96,14 @@ namespace Parser {
             case CMD_STMT:
             case EXPR_STMT:
             case ALIAS_STMT:
+            case IMPORT_STMT:
+            case PRINT_STMT:
+            case PRINTLN_STMT:
+            case SCAN_STMT:
+            case READ_STMT:
+            case WRITE_STMT:
+            case TYPE_STMT:
+            case FUNCTION_STMT:
                 return STMT;
             case TYPE:
             case INT_TYPE:

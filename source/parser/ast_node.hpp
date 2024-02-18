@@ -27,6 +27,7 @@ namespace Parser {
         CMD_CMD,
         PIPE_CMD,
         ASYNC_CMD,
+        TIMEOUT_CMD,
         INT_EXPR,
         FLOAT_EXPR,
         STRING_EXPR,
@@ -40,6 +41,7 @@ namespace Parser {
         UNOP_EXPR,
         BINOP_EXPR,
         CALL_EXPR,
+        API_CALL_EXPR,
         LAMBDA_EXPR,
         CMD_EXPR,
         EXPR,
@@ -54,6 +56,14 @@ namespace Parser {
         CMD_STMT,
         EXPR_STMT,
         ALIAS_STMT,
+        IMPORT_STMT,
+        PRINT_STMT,
+        PRINTLN_STMT,
+        SCAN_STMT,
+        READ_STMT,
+        WRITE_STMT,
+        TYPE_STMT,
+        FUNCTION_STMT,
         STMT,
         STMTS,
         STRING,
@@ -610,6 +620,50 @@ namespace Parser {
      *
      */
     using AsyncCmdNodePtr = std::shared_ptr<AsyncCmdNode>;
+
+    /**
+     * @brief A timeout command AST node.
+     *
+     */
+    class TimeoutCmdNode : public CmdNode {
+    public:
+        /**
+         * @brief Timeout in milliseconds
+         */
+        int64_t timeout;
+
+        /**
+         * @brief The command to run
+         */
+        CmdNodePtr cmd;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param timeout Timeout in milliseconds
+         * @param cmd The command to run
+         */
+        TimeoutCmdNode(int64_t timeout, CmdNodePtr cmd);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `TIMEOUT_CMD` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a timeout command node.
+     *
+     */
+    using TimeoutCmdNodePtr = std::shared_ptr<TimeoutCmdNode>;
 
     /**
      * @brief A pipe between two command nodes.
@@ -1215,6 +1269,50 @@ namespace Parser {
     using CallExprNodePtr = std::shared_ptr<CallExprNode>;
 
     /**
+     * @brief An api-call expression node.
+     *
+     */
+    class ApiCallExprNode : public ExprNode {
+    public:
+        /**
+         * @brief The expression being called on
+         */
+        ExprNodePtr expression;
+
+        /**
+         * @brief The api function called
+         */
+        CallExprNodePtr function;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expression The expression being called on
+         * @param function The api function called
+         */
+        ApiCallExprNode(ExprNodePtr expression, CallExprNodePtr function);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `API_CALL_EXPR` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an api call expression node.
+     *
+     */
+    using ApiCallExprNodePtr = std::shared_ptr<ApiCallExprNode>;
+
+    /**
      * @brief A lambda expression node.
      *
      */
@@ -1704,6 +1802,341 @@ namespace Parser {
      *
      */
     using AliasStmtNodePtr = std::shared_ptr<AliasStmtNode>;
+
+    /**
+     * @brief An `import` statement node.
+     *
+     */
+    class ImportStmtNode : public StmtNode {
+    public:
+        /**
+         * The expression that evaluates to a string file path
+         */
+        ExprNodePtr filePath;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param filePath The string expression that evaluates to a file path
+         */
+        ImportStmtNode(ExprNodePtr filePath);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `IMPORT_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an import statement node.
+     *
+     */
+    using ImportStmtNodePtr = std::shared_ptr<ImportStmtNode>;
+
+    /**
+     * @brief An `print` statement node.
+     *
+     */
+    class PrintStmtNode : public StmtNode {
+    public:
+        /**
+         * The expression that gets printed out
+         */
+        ExprNodePtr expression;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expression The expression that gets printed out
+         */
+        PrintStmtNode(ExprNodePtr expression);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `PRINT_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an print statement node.
+     *
+     */
+    using PrintStmtNodePtr = std::shared_ptr<PrintStmtNode>;
+
+    /**
+     * @brief An `println` statement node.
+     *
+     */
+    class PrintlnStmtNode : public StmtNode {
+    public:
+        /**
+         * The expression that gets printed out
+         */
+        ExprNodePtr expression;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expression The expression that gets printed out
+         */
+        PrintlnStmtNode(ExprNodePtr expression);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `PRINTLN_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an println statement node.
+     *
+     */
+    using PrintlnStmtNodePtr = std::shared_ptr<PrintlnStmtNode>;
+
+    /**
+     * @brief An `scan` statement node.
+     *
+     */
+    class ScanStmtNode : public StmtNode {
+    public:
+        /**
+         * The string expression that evaluates to a prompt for the user
+         */
+        ExprNodePtr prompt;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expression The string expression that evaluates to a prompt for the user
+         */
+        ScanStmtNode(ExprNodePtr prompt);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `SCAN_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an scan statement node.
+     *
+     */
+    using ScanStmtNodePtr = std::shared_ptr<ScanStmtNode>;
+
+    /**
+     * @brief An `read` statement node.
+     *
+     */
+    class ReadStmtNode : public StmtNode {
+    public:
+        /**
+         * The expression that evaluates to a string file path
+         */
+        ExprNodePtr filePath;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param filePath The string expression that evaluates to a file path
+         */
+        ReadStmtNode(ExprNodePtr filePath);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `READ_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an read statement node.
+     *
+     */
+    using ReadStmtNodePtr = std::shared_ptr<ReadStmtNode>;
+
+    /**
+     * @brief An `write` statement node.
+     *
+     */
+    class WriteStmtNode : public StmtNode {
+    public:
+        /**
+         * The expression that gets written to the file
+         */
+        ExprNodePtr fileData;
+
+        /**
+         * The expression that evaluates to a string file path
+         */
+        ExprNodePtr filePath;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param fileData The expression that gets written to the file
+         * @param filePath The expression that evaluates to a string file path
+         */
+        WriteStmtNode(ExprNodePtr fileData, ExprNodePtr filePath);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `WRITE_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an write statement node.
+     *
+     */
+    using WriteStmtNodePtr = std::shared_ptr<WriteStmtNode>;
+
+    /**
+     * @brief A `type` statement node.
+     *
+     */
+    class TypeStmtNode : public StmtNode {
+    public:
+        /**
+         * The type alias name
+         */
+        std::string alias;
+
+        /**
+         * The type
+         */
+        TypeNodePtr type;
+
+        /**
+         * Class constructor.
+         *
+         * @param alias The type alias name
+         * @param type The type
+         */
+        TypeStmtNode(const std::string& alias, TypeNodePtr type);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `TYPE_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a type statement node.
+     *
+     */
+    using TypeStmtNodePtr = std::shared_ptr<TypeStmtNode>;
+
+    /**
+     * @brief A function statement node.
+     *
+     */
+    class FunctionStmtNode : public ExprNode {
+    public:
+        /**
+         * The function name
+         */
+        std::string name;
+
+        /**
+         * The bindings representing the arguments of the function
+         */
+        std::vector<BindingNodePtr> bindings;
+
+        /**
+         * The body of the function
+         */
+        StmtNodePtr body;
+
+        /**
+         * The (optional) return type of the function
+         */
+        TypeNodePtr returnType;
+
+        /**
+         * @brief Class constructor with a statement body (the default).
+         *
+         * @param name The name of the function
+         * @param bindings The bindings (arguments) of the function.
+         * @param body The body of the function.
+         * @param returnType The return type of the function.
+         */
+        FunctionStmtNode(const std::string& name, const std::vector<BindingNodePtr>& bindings, StmtNodePtr body,
+                         TypeNodePtr returnType = nullptr);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `FUNCTION_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a function statement node.
+     *
+     */
+    using FunctionStmtNodePtr = std::shared_ptr<FunctionStmtNode>;
 
     //  ==============
     //  ||  Types:  ||
