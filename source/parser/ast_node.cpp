@@ -24,6 +24,8 @@ namespace Parser {
                 return "PIPE_CMD";
             case ASYNC_CMD:
                 return "ASYNC_CMD";
+            case TIMEOUT_CMD:
+                return "TIMEOUT_CMD";
             case INT_EXPR:
                 return "INT_EXPR";
             case FLOAT_EXPR:
@@ -50,6 +52,8 @@ namespace Parser {
                 return "BINOP_EXPR";
             case CALL_EXPR:
                 return "CALL_EXPR";
+            case API_CALL_EXPR:
+                return "API_CALL_EXPR";
             case LAMBDA_EXPR:
                 return "LAMBDA_EXPR";
             case CMD_EXPR:
@@ -78,6 +82,22 @@ namespace Parser {
                 return "EXPR_STMT";
             case ALIAS_STMT:
                 return "ALIAS_STMT";
+            case IMPORT_STMT:
+                return "IMPORT_STMT";
+            case PRINT_STMT:
+                return "PRINT_STMT";
+            case PRINTLN_STMT:
+                return "PRINTLN_STMT";
+            case SCAN_STMT:
+                return "SCAN_STMT";
+            case READ_STMT:
+                return "READ_STMT";
+            case WRITE_STMT:
+                return "WRITE_STMT";
+            case TYPE_STMT:
+                return "TYPE_STMT";
+            case FUNCTION_STMT:
+                return "FUNCTION_STMT";
             case STMT:
                 return "STMT";
             case STMTS:
@@ -245,6 +265,8 @@ namespace Parser {
 
     ASTNodeType AsyncCmdNode::nodeType() const { return ASTNodeType::ASYNC_CMD; }
 
+    ASTNodeType TimeoutCmdNode::nodeType() const { return ASTNodeType::TIMEOUT_CMD; }
+
     ASTNodeType IntExprNode::nodeType() const { return ASTNodeType::INT_EXPR; }
 
     ASTNodeType FloatExprNode::nodeType() const { return ASTNodeType::FLOAT_EXPR; }
@@ -270,6 +292,8 @@ namespace Parser {
     ASTNodeType BinOpExprNode::nodeType() const { return ASTNodeType::BINOP_EXPR; }
 
     ASTNodeType CallExprNode::nodeType() const { return ASTNodeType::CALL_EXPR; }
+
+    ASTNodeType ApiCallExprNode::nodeType() const { return ASTNodeType::API_CALL_EXPR; }
 
     ASTNodeType LambdaExprNode::nodeType() const { return ASTNodeType::LAMBDA_EXPR; }
 
@@ -307,6 +331,22 @@ namespace Parser {
     ASTNodeType ExprStmtNode::nodeType() const { return ASTNodeType::EXPR_STMT; }
 
     ASTNodeType AliasStmtNode::nodeType() const { return ASTNodeType::ALIAS_STMT; }
+
+    ASTNodeType ImportStmtNode::nodeType() const { return ASTNodeType::IMPORT_STMT; }
+
+    ASTNodeType PrintStmtNode::nodeType() const { return ASTNodeType::PRINT_STMT; }
+
+    ASTNodeType PrintlnStmtNode::nodeType() const { return ASTNodeType::PRINTLN_STMT; }
+
+    ASTNodeType ScanStmtNode::nodeType() const { return ASTNodeType::SCAN_STMT; }
+
+    ASTNodeType ReadStmtNode::nodeType() const { return ASTNodeType::READ_STMT; }
+
+    ASTNodeType WriteStmtNode::nodeType() const { return ASTNodeType::WRITE_STMT; }
+
+    ASTNodeType TypeStmtNode::nodeType() const { return ASTNodeType::TYPE_STMT; }
+
+    ASTNodeType FunctionStmtNode::nodeType() const { return ASTNodeType::FUNCTION_STMT; }
 
     StmtsNode::StmtsNode(Parser::StmtNodePtr stmt) : stmts({std::move(stmt)}) {}
 
@@ -370,7 +410,11 @@ namespace Parser {
 
     AsyncCmdNode::AsyncCmdNode(Parser::CmdNodePtr cmd) : cmd(std::move(cmd)) {}
 
-    std::string AsyncCmdNode::sExpression() const { return "(AsyncCmdNode" + cmd->sExpression() + ")"; }
+    std::string AsyncCmdNode::sExpression() const { return "(AsyncCmdNode " + cmd->sExpression() + ")"; }
+
+    TimeoutCmdNode::TimeoutCmdNode(int64_t timeout, Parser::CmdNodePtr cmd) : timeout(timeout), cmd(std::move(cmd)) {}
+
+    std::string TimeoutCmdNode::sExpression() const { return "(TimeoutCmdNode " + cmd->sExpression() + ")"; }
 
     PipeCmdNode::PipeCmdNode(Parser::CmdNodePtr leftCmd, Parser::CmdNodePtr rightCmd)
         : leftCmd(std::move(leftCmd)), rightCmd(std::move(rightCmd)) {}
@@ -486,7 +530,14 @@ namespace Parser {
     std::string CallExprNode::sExpression() const {
         std::stringstream builder;
         for (const ExprNodePtr& arg : args) { builder << " " << arg->sExpression(); }
-        return "(CallExprNode " + func->sExpression() + builder.str() + ")";
+        return "(CallExprNode " + func->sExpression() + builder.str() + getTypeString() + ")";
+    }
+
+    ApiCallExprNode::ApiCallExprNode(ExprNodePtr expression, CallExprNodePtr function)
+        : expression(expression), function(function) {}
+
+    std::string ApiCallExprNode::sExpression() const {
+        return "(ApiCallExprNode " + expression->sExpression() + " " + function->sExpression() + getTypeString() + ")";
     }
 
     LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, Parser::ExprNodePtr body,
@@ -582,6 +633,53 @@ namespace Parser {
 
     std::string AliasStmtNode::sExpression() const {
         return "(AliasStmtNode " + alias + " " + command->sExpression() + ")";
+    }
+
+    ImportStmtNode::ImportStmtNode(ExprNodePtr filePath) : filePath(std::move(filePath)) {}
+
+    std::string ImportStmtNode::sExpression() const { return "(ImportStmtNode " + filePath->sExpression() + ")"; }
+
+    PrintStmtNode::PrintStmtNode(ExprNodePtr expression) : expression(std::move(expression)) {}
+
+    std::string PrintStmtNode::sExpression() const { return "(PrintStmtNode " + expression->sExpression() + ")"; }
+
+    PrintlnStmtNode::PrintlnStmtNode(ExprNodePtr expression) : expression(std::move(expression)) {}
+
+    std::string PrintlnStmtNode::sExpression() const { return "(PrintlnStmtNode " + expression->sExpression() + ")"; }
+
+    ScanStmtNode::ScanStmtNode(ExprNodePtr prompt) : prompt(std::move(prompt)) {}
+
+    std::string ScanStmtNode::sExpression() const { return "(ScanStmtNode " + prompt->sExpression() + ")"; }
+
+    ReadStmtNode::ReadStmtNode(ExprNodePtr filePath) : filePath(std::move(filePath)) {}
+
+    std::string ReadStmtNode::sExpression() const { return "(ReadStmtNode " + filePath->sExpression() + ")"; }
+
+    WriteStmtNode::WriteStmtNode(ExprNodePtr fileData, ExprNodePtr filePath)
+        : fileData(std::move(fileData)), filePath(std::move(filePath)) {}
+
+    std::string WriteStmtNode::sExpression() const {
+        return "(WriteStmtNode " + fileData->sExpression() + " " + filePath->sExpression() + ")";
+    }
+
+    TypeStmtNode::TypeStmtNode(const std::string& alias, TypeNodePtr type)
+        : alias(std::move(alias)), type(std::move(type)) {}
+
+    std::string TypeStmtNode::sExpression() const { return "(TypeStmtNode " + alias + " " + type->sExpression() + ")"; }
+
+    FunctionStmtNode::FunctionStmtNode(const std::string& name, const std::vector<BindingNodePtr>& bindings,
+                                       Parser::StmtNodePtr body, Parser::TypeNodePtr returnType)
+        : name(name), bindings(bindings), body(std::move(body)), returnType(std::move(returnType)) {}
+
+    std::string FunctionStmtNode::sExpression() const {
+        std::stringstream bindingsBuilder;
+        bool first = true;
+        for (const BindingNodePtr& binding : bindings) {
+            bindingsBuilder << (first ? "" : " ") << binding->sExpression();
+            first = false;
+        }
+        return "(FunctionStmtNode " + name + " (" + bindingsBuilder.str() + ") " + returnType->sExpression() + " "
+             + body->sExpression() + ")";
     }
 
     std::string IntTypeNode::sExpression() const { return "(IntTypeNode" + getTypeString() + ")"; }
