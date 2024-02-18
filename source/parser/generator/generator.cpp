@@ -272,8 +272,6 @@ namespace Parser {
                 }
             }
         }
-
-        std::cout << states.size() << "\n";
     }
 
     void Generator::generateSource(std::ostream& output) const {
