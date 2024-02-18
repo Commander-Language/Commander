@@ -150,12 +150,16 @@ namespace Parser {
                  makeNode("CmdCmd", {makeNode("String", {tokenContents(0)})})},
                 //  (CMD) -> (STRING)
                 {{ASTNodeType::CMD, {ASTNodeType::STRING}}, makeNode("CmdCmd", {castNode("String", 0)})},
+                //  (CMD) -> [VARIABLE]
+                //  TODO: This.
                 //  (CMD) -> (CMD) [CMDSTRINGVAL]
                 {{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::CMDSTRINGVAL}},
                  makeNode("CmdCmd", {castNode("Cmd", 0), makeNode("String", {tokenContents(1)})})},
                 //  (CMD) -> (CMD) (STRING)
                 {{ASTNodeType::CMD, {ASTNodeType::CMD, ASTNodeType::STRING}},
                  makeNode("CmdCmd", {castNode("Cmd", 0), castNode("String", 1)})},
+                //  (CMD) -> (CMD) [VARIABLE]
+                //  TODO: This.
 
 
                 //  ====================
@@ -240,22 +244,22 @@ namespace Parser {
 
                 //  Variable set:
                 //  -------------
-                //  (EXPR) -> (VARIABLE) [EXPONENTIATE_SET] (EXPR)
+                //  (EXPR) -> (VARIABLE) [EXPONENTIATE_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::EXPONENTIATE_SET", castNode("Expr", 2)})},
-                //  (EXPR) -> (VARIABLE) [MULTIPLY_SET] (EXPR)
+                //  (EXPR) -> (VARIABLE) [MULTIPLY_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MULTIPLY_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MULTIPLY_SET", castNode("Expr", 2)})},
-                //  (EXPR) -> (VARIABLE) [DIVIDE_SET] (EXPR)
+                //  (EXPR) -> (VARIABLE) [DIVIDE_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::DIVIDE_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::DIVIDE_SET", castNode("Expr", 2)})},
-                //  (EXPR) -> (VARIABLE) [MODULO_SET] (EXPR)
+                //  (EXPR) -> (VARIABLE) [MODULO_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MODULO_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MODULO_SET", castNode("Expr", 2)})},
-                //  (EXPR) -> (VARIABLE) [ADD_SET] (EXPR)
+                //  (EXPR) -> (VARIABLE) [ADD_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::ADD_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::ADD_SET", castNode("Expr", 2)})},
-                //  (EXPR) -> (VARIABLE) [MINUS_SET] (EXPR)
+                //  (EXPR) -> (VARIABLE) [MINUS_EQUALS] (EXPR)
                 {{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MINUS_EQUALS, ASTNodeType::EXPR}},
                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::SUBTRACT_SET", castNode("Expr", 2)})},
                 //  (EXPR) -> (VARIABLE) [EQUALS] (EXPR)
@@ -285,6 +289,18 @@ namespace Parser {
                 //  (STMTS) -> (STMTS) (STMT)
                 {{ASTNodeType::STMTS, {ASTNodeType::STMTS, ASTNodeType::STMT}},
                  makeNode("Stmts", {castNode("Stmts", 0) + "->stmts", castNode("Stmt", 1)})},
+
+                //  (STMT) -> [IMPORT] (STRING)
+                //  TODO: This.
+
+                //  (STMT) -> [PRINT] (STRING)
+                //  TODO: This.
+                //  (STMT) -> [PRINT] [LPAREN] (STRING) [RPAREN]
+                //  TODO: This.
+                //  (STMT) -> [PRINTLN] (STRING)
+                //  TODO: This.
+                //  (STMT) -> [PRINTLN] [LPAREN] (STRING) [RPAREN]
+                //  TODO: This.
 
                 //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
                 {{ASTNodeType::STMT,

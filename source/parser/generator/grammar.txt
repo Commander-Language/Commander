@@ -70,9 +70,10 @@
 (EXPR) -> (VARIABLE) [MINUS_EQUALS] (EXPR)
 (EXPR) -> (VARIABLE) [EQUALS] (EXPR)
 
-(EXPR) -> [LPAREN] EXPR [RPAREN]
+(EXPR) -> [LPAREN] (EXPR) [RPAREN]
 
-(EXPR) -> VARIABLE
+(EXPR) -> (VARIABLE)
+(EXPR) -> (STRING)
 
 
 //  ===================
