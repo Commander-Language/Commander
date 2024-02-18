@@ -258,9 +258,7 @@ namespace Lexer {
         if (!isCommand) {
             token = lexTokenLiteral(file, position);
             if (token) {
-                if (!isFirst || token->type != DOT) {
-                    return token;
-                }
+                if (!isFirst || token->type != DOT) { return token; }
                 position.index--;
                 position.column--;
             }
@@ -523,7 +521,7 @@ namespace Lexer {
                     token.subTokens.push_back(std::make_shared<Token>(strToken));
                     currentString.str("");
                 }
-                lexExpression(token.subTokens, file, position, RCURLY);
+                lexExpression(token.subTokens, file, position, LCURLY, RCURLY);
                 token.subTokens.pop_back();
                 currentStringPosition = position;
                 continue;
@@ -709,7 +707,7 @@ namespace Lexer {
             if (token->type == FOR && isFirst && !isCommand) {
                 tokens.push_back(expectToken(LPAREN, file, position, isCommand));
                 lexStatement(tokens, file, position, SEMICOLON);
-                lexExpression(tokens, file, position, SEMICOLON);
+                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON);
                 lexStatement(tokens, file, position, RPAREN);
             }
             skipWhitespace(file, position);
@@ -728,12 +726,13 @@ namespace Lexer {
                 "Statement was not terminated with " + tokenTypeToString(terminatingToken) + " token", startPosition);
     }
 
-    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position,
+    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const tokenType& startToken,
                        const tokenType& terminatingToken) {
         const FilePosition startPosition = position;
         bool isCommand = false;
         FilePosition commandPosition;
         skipWhitespace(file, position);
+        int stackptr = 0;
         while (position.index < file.length()) {
             const TokenPtr token = lexToken(file, position, isCommand, false);
             if (token->type == BACKTICK) {
@@ -745,8 +744,15 @@ namespace Lexer {
                 }
             }
             tokens.push_back(token);
-            if (token->type == terminatingToken && isCommand) { break; }
-            if (token->type == terminatingToken) { return; }
+            if (token->type == startToken) {
+                stackptr += 1;
+            } else if (token->type == terminatingToken && isCommand) {
+                break;
+            } else if (token->type == terminatingToken && stackptr > 0) {
+                stackptr -= 1;
+            } else if (token->type == terminatingToken) {
+                return;
+            }
             skipWhitespace(file, position);
         }
         if (isCommand) {
