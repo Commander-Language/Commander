@@ -6,6 +6,8 @@
 
 #include "ast_node.hpp"
 #include "source/type_checker/type.hpp"
+
+#include <sstream>
 #include <utility>
 
 namespace Parser {
@@ -512,7 +514,7 @@ namespace Parser {
     }
 
     BinOpExprNode::BinOpExprNode(Parser::ExprNodePtr leftExpr, Parser::BinOpType opType, Parser::ExprNodePtr rightExpr)
-        : leftExpr(std::move(leftExpr)), opType(opType), rightExpr(std::move(rightExpr)) {}
+        : opType(opType), leftExpr(std::move(leftExpr)), rightExpr(std::move(rightExpr)) {}
 
     BinOpExprNode::BinOpExprNode(Parser::VariableNodePtr leftVariable, Parser::BinOpType opType,
                                  Parser::ExprNodePtr rightExpr)

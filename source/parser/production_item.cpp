@@ -3,7 +3,10 @@
  * @brief Implements the `ProductionItem` class.
  */
 
+#include "ast_node.hpp"
 #include "production_item.hpp"
+
+#include <utility>
 
 namespace Parser {
 
