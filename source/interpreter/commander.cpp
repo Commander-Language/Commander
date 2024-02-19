@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
                     }
                     break;
                 case KEY_RIGHT:
-                    if (getcurx(stdscr) < getmaxx(stdscr)) {
+                    if (getcurx(stdscr) - 3 < currentLine.size()) {
                         move(getcury(stdscr), getcurx(stdscr) + 1);
                         i++;
                     }
