@@ -5,23 +5,29 @@
 
 #include "grammar.hpp"
 
+#include "source/parser/ast_node.hpp"
 #include "source/util/combine_hashes.hpp"
 
+#include <cstddef>
+#include <functional>
 #include <ostream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
 
+//  ReSharper disable CppRedundantQualifier
+
 namespace Parser {
 
-    GrammarEntry::GrammarEntry(Grammar::TokenType tokenType)
+    GrammarEntry::GrammarEntry(const Grammar::TokenType tokenType)
         : grammarEntryType(TOKEN_TYPE), tokenType(tokenType), nodeType() {}
 
-    GrammarEntry::GrammarEntry(ASTNodeType nodeType) : grammarEntryType(NODE_TYPE), tokenType(), nodeType(nodeType) {}
+    GrammarEntry::GrammarEntry(const ASTNodeType nodeType)
+        : grammarEntryType(NODE_TYPE), tokenType(), nodeType(nodeType) {}
 
     bool GrammarEntry::operator==(const GrammarEntry& other) const {
-        const std::hash<GrammarEntry> hash;
+        constexpr std::hash<GrammarEntry> hash;
         return hash(*this) == hash(other);
     }
 
@@ -29,7 +35,7 @@ namespace Parser {
 
     std::ostream& operator<<(std::ostream& stream, const GrammarEntry& grammarEntry) {
         if (grammarEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
-            stream << "[" << Lexer::tokenTypeToString(grammarEntry.tokenType) << "]";
+            stream << "[" << tokenTypeToString(grammarEntry.tokenType) << "]";
         } else {
             stream << "(" << nodeTypeToString(grammarEntry.nodeType) << ")";
         }
@@ -41,7 +47,7 @@ namespace Parser {
 
         if (this->components.size() != other.components.size()) return false;
 
-        for (size_t ind = 0; ind < this->components.size(); ++ind) {
+        for (std::size_t ind = 0; ind < this->components.size(); ++ind) {
             if (this->components[ind] != other.components[ind]) return false;
         }
 
@@ -68,13 +74,13 @@ namespace Parser {
     Grammar::Grammar() : Grammar(_defineGrammar()) {}
 
     Grammar::Grammar(const std::vector<std::tuple<GrammarRule, NodeConstructor>>& grammarDefinitions)
-        : rules([&]() {
+        : rules([&] {
               std::vector<GrammarRule> result(grammarDefinitions.size());
-              size_t index = 0;
+              std::size_t index = 0;
               for (const auto& item : grammarDefinitions) result[index++] = std::get<0>(item);
               return result;
           }()),
-          reductions([&]() {
+          reductions([&] {
               std::unordered_map<GrammarRule, NodeConstructor> result;
               for (const auto& item : grammarDefinitions) result[std::get<0>(item)] = std::get<1>(item);
               return result;
@@ -87,7 +93,7 @@ namespace Parser {
             if (strings.empty()) return "";
             const std::string delim = ", ";
             std::string result;
-            for (size_t index = 0; index < strings.size() - 1; ++index) result += strings[index] + delim;
+            for (std::size_t index = 0; index < strings.size() - 1; ++index) result += strings[index] + delim;
             result += strings[strings.size() - 1];
             return result;
         };
@@ -97,13 +103,13 @@ namespace Parser {
         const auto makeNode = [&](const std::string& nodeType, const std::vector<std::string>& args) -> std::string {
             return callFunc("std::make_shared<" + nodeType + "Node>", args);
         };
-        const auto castNode = [&](const std::string& nodeType, size_t index) -> std::string {
+        const auto castNode = [&](const std::string& nodeType, const std::size_t index) -> std::string {
             return callFunc("cast" + nodeType, {"productionList[" + std::to_string(index) + "].node"});
         };
-        const auto tokenContents = [](size_t index) -> std::string {
+        const auto tokenContents = [](const std::size_t index) -> std::string {
             return "productionList[" + std::to_string(index) + "].token->contents";
         };
-        const auto stringTokenContents = [&](size_t index) -> std::string {
+        const auto stringTokenContents = [&](const std::size_t index) -> std::string {
             //  FIXME: Doesn't support string interpolation.
             return callFunc("std::reinterpret_pointer_cast<Lexer::StringToken>",
                             {"productionList[" + std::to_string(index) + "].token"})
@@ -124,14 +130,14 @@ namespace Parser {
                 //  =================
 
                 //  (BINDINGS) -> (BINDING)
-                //  TODO
+                //  TODO (Cayden)
                 //  (BINDINGS) -> (BINDINGS) [COMMA] (BINDING)
-                //  TODO
+                //  TODO (Cayden)
 
                 //  (BINDING) -> [VARIABLE]
-                //  TODO
+                //  TODO (Cayden)
                 //  (BINDING) -> [VARIABLE] [COLON] (TYPE)
-                //  TODO
+                //  TODO (Cayden)
 
 
                 //  =================
@@ -151,7 +157,7 @@ namespace Parser {
                 //  (CMD) -> (STRING)
                 {{ASTNodeType::CMD, {ASTNodeType::STRING}}, makeNode("CmdCmd", {castNode("String", 0)})},
                 //  (CMD) -> [VARIABLE]
-                //  TODO: This.
+                //  TODO (Cayden): This.
                 //  (CMD) -> (CMD) [CMDSTRINGVAL]
                 {{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::CMDSTRINGVAL}},
                  makeNode("CmdCmd", {castNode("Cmd", 0), makeNode("String", {tokenContents(1)})})},
@@ -159,7 +165,7 @@ namespace Parser {
                 {{ASTNodeType::CMD, {ASTNodeType::CMD, ASTNodeType::STRING}},
                  makeNode("CmdCmd", {castNode("Cmd", 0), castNode("String", 1)})},
                 //  (CMD) -> (CMD) [VARIABLE]
-                //  TODO: This.
+                //  TODO (Cayden): This.
 
 
                 //  ====================
@@ -167,9 +173,9 @@ namespace Parser {
                 //  ====================
 
                 //  (EXPRS) -> (EXPR)
-                //  TODO
+                //  TODO (Cayden)
                 //  (EXPRS) -> (EXPRS) [COMMA] (EXPR)
-                //  TODO
+                //  TODO (Cayden)
 
                 //  Literals:
                 //  ---------
@@ -291,16 +297,16 @@ namespace Parser {
                  makeNode("Stmts", {castNode("Stmts", 0) + "->stmts", castNode("Stmt", 1)})},
 
                 //  (STMT) -> [IMPORT] (STRING)
-                //  TODO: This.
+                //  TODO (Cayden): This.
 
                 //  (STMT) -> [PRINT] (STRING)
-                //  TODO: This.
+                //  TODO (Cayden): This.
                 //  (STMT) -> [PRINT] [LPAREN] (STRING) [RPAREN]
-                //  TODO: This.
+                //  TODO (Cayden): This.
                 //  (STMT) -> [PRINTLN] (STRING)
-                //  TODO: This.
+                //  TODO (Cayden): This.
                 //  (STMT) -> [PRINTLN] [LPAREN] (STRING) [RPAREN]
-                //  TODO: This.
+                //  TODO (Cayden): This.
 
                 //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
                 {{ASTNodeType::STMT,
@@ -308,20 +314,20 @@ namespace Parser {
                  makeNode("AliasStmt", {tokenContents(1), castNode("Cmd", 3)})},
 
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
-                //  TODO
+                //  TODO (Cayden)
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
-                //  TODO
+                //  TODO (Cayden)
 
                 //  (STMT) -> [FOR] [LPAREN] (STMT) [SEMICOLON] (EXPR) [SEMICOLON] (STMT) [RPAREN] (STMT)
-                //  TODO
+                //  TODO (Cayden)
 
                 //  (STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
-                //  TODO
+                //  TODO (Cayden)
                 //  (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN]
-                //  TODO
+                //  TODO (Cayden)
 
                 //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
-                //  TODO
+                //  TODO (Cayden)
 
                 //  (STMT) -> (CMD) [SEMICOLON]
                 {{ASTNodeType::STMT, {ASTNodeType::CMD, TokenType::SEMICOLON}},
@@ -344,9 +350,9 @@ namespace Parser {
                 //  ==============
 
                 //  (TYPE) -> [INT]
-                //  TODO
+                //  TODO (Cayden)
                 //  (TYPE) -> [FLOAT]
-                //  TODO
+                //  TODO (Cayden)
 
 
                 //  ==================
@@ -363,17 +369,17 @@ namespace Parser {
 
 namespace std {
 
-    size_t hash<Parser::GrammarEntry>::operator()(const Parser::GrammarEntry& grammarEntry) const {
+    std::size_t hash<Parser::GrammarEntry>::operator()(const Parser::GrammarEntry& grammarEntry) const {
         if (grammarEntry.grammarEntryType == Parser::GrammarEntry::TOKEN_TYPE) {
             return Util::combineHashes(grammarEntry.grammarEntryType, grammarEntry.tokenType);
         }
         return Util::combineHashes(grammarEntry.grammarEntryType, grammarEntry.nodeType);
     }
 
-    size_t hash<Parser::GrammarRule>::operator()(const Parser::GrammarRule& grammarRule) const {
-        const hash<Parser::GrammarEntry> hashEntry;
-        vector<size_t> hashVals(grammarRule.components.size() + 1);
-        for (size_t ind = 0; ind < grammarRule.components.size(); ++ind) {
+    std::size_t hash<Parser::GrammarRule>::operator()(const Parser::GrammarRule& grammarRule) const {
+        constexpr hash<Parser::GrammarEntry> hashEntry;
+        vector<std::size_t> hashVals(grammarRule.components.size() + 1);
+        for (std::size_t ind = 0; ind < grammarRule.components.size(); ++ind) {
             hashVals[ind] = hashEntry(grammarRule.components[ind]);
         }
         hashVals.back() = hashEntry(grammarRule.result);

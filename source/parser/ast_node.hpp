@@ -10,7 +10,6 @@
 #include "source/type_checker/type.hpp"
 #include <cstdint>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
 
