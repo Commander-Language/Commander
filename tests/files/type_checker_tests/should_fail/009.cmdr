@@ -1,0 +1,2 @@
+//Should fail when doing not on something that is not boolean
+x = !2.0;

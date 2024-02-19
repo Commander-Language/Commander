@@ -2,25 +2,20 @@
  * @file flow_controller_tests.cpp
  * @brief Tests for the flow controller
  */
-#include "source/flow_controller/flow_controller.hpp"
-#include "source/lexer/lexer.hpp"
-#include "source/parser/parser.hpp"
-#include "source/util/commander_exception.hpp"
-#include <fstream>
-#include <gtest/gtest.h>
 
-// Global Parser
-Parser::Parser parser;
+#include "flow_controller_tests.hpp"
 
-std::string getFileContents(const std::string& filePath) {
-    std::ifstream file(filePath);
-    if (!file.is_open()) throw Util::CommanderException("Flow Controller Tests: Can't find file");
-    std::stringstream buf;
-    buf << file.rdbuf();
-    return buf.str();
+void runFile(const std::string& filePath) {
+    Lexer::TokenList tokens;
+    Lexer::tokenize(tokens, filePath);
+    Parser::ASTNodeList nodes = parser.parse(tokens);
+    typeChecker.typeCheck(nodes);
+    FlowController::FlowController controller(nodes);
+    controller.runtime();
 }
+
 /**
- * @brief
+ * @brief Test that check if saving expressions to variables works
  */
 TEST(FlowControllerTests, SaveIntToVariable) {
     Lexer::TokenList tokens;
@@ -45,6 +40,76 @@ TEST(FlowControllerTests, SaveIntToVariable) {
     EXPECT_EQ(controller.getVariableValue("eight_one"), 81);
     EXPECT_EQ(controller.getVariableValue("mod5_2"), 1);
 }
+
+/**
+ * Runs the flow controller tests from the tests/files/flow_controller_tests/should_run directory
+ */
+TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
+    auto params = GetParam();
+
+    const std::string filePath = "../tests/files/flow_controller_tests/should_run/" + std::get<0>(params);
+    const std::string expectedFilePath = "../tests/files/flow_controller_tests/should_run/" + std::get<1>(params);
+
+    // Lex
+    Lexer::TokenList tokens;
+    try {
+        Lexer::tokenize(tokens, filePath);
+    } catch (const Util::CommanderException& e) {
+        std::cout << "Lexer Error: " << e.what() << "\n";
+        FAIL();
+    }
+
+    // Parse
+    Parser::ASTNodeList nodes;
+    try {
+        nodes = parser.parse(tokens);
+    } catch (const Util::CommanderException& e) {
+        std::cout << "Parser Error: " << e.what() << "\n";
+        FAIL();
+    }
+
+    // Type Check
+    try {
+        typeChecker.typeCheck(nodes);
+    } catch (const Util::CommanderException& e) {
+        std::cout << "Type Checker Error: " << e.what() << "\n";
+        FAIL();
+    }
+
+    // Set up std out to a stream
+    initscr();
+    std::stringstream output;
+    FILE* oldStdout = stdout;
+    stdout = fopen("/dev/null", "w");
+    if (!stdout) {
+        endwin();
+        std::cout << "Test Error: Unable to set up output stream for test.\n";
+        FAIL();
+    }
+
+    // Run
+    FlowController::FlowController controller(nodes);
+    controller.runtime();
+
+    // Get output
+    std::string capturedOutput = output.str();
+    fclose(stdout);
+    stdout = oldStdout;
+    endwin();
+
+    // Check that output is equal to expected
+    EXPECT_EQ(Lexer::readFile(expectedFilePath), capturedOutput);
+}
+
+/**
+ * Runs the flow controller tests from the tests/files/flow_controller_tests/should_fail directory
+ */
+TEST_P(FlowControllerFailTests, ShouldFailRun) {
+    auto param = GetParam();
+    const std::string filePath = "../tests/files/flow_controller_tests/should_fail/" + param;
+    ASSERT_THROW(runFile(filePath), Util::CommanderException);
+}
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

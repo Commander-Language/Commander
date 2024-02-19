@@ -1,0 +1,2 @@
+//Should fail when multiplying incompatible types
+x = 3 * false;

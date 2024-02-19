@@ -1,0 +1,2 @@
+//Should fail since array has multiple types
+x = [1, 3, 2.1, 4];

@@ -5,12 +5,13 @@
  *          number of items before validating
  */
 
-#include "source/type_checker/type_checker.hpp"
-#include "gtest/gtest.h"
+#include "type_checker_tests.hpp"
 
-template<typename TType>
-std::shared_ptr<TType> makeType() {
-    return std::make_shared<TType>();
+void lexParseAndTypeCheck(const std::string& filePath) {
+    Lexer::TokenList tokens;
+    Lexer::tokenize(tokens, filePath);
+    Parser::ASTNodeList nodes = parser.parse(tokens);
+    typeChecker.typeCheck(nodes);
 }
 
 /**
@@ -119,6 +120,53 @@ TEST(STRESSTESTS, stressTest100000) {
         EXPECT_TRUE(testChecker.hasVariable(std::to_string(currentVariable)));
         EXPECT_EQ(TypeChecker::INT, testChecker.getType(std::to_string(currentVariable))->getType());
     }
+}
+
+/**
+ * Runs the type checker tests from the tests/files/type_checker_tests/should_type_check directory
+ */
+TEST_P(TypeCheckerPassTests, ShouldTypeCheckFileAndMatchExpectedExamples) {
+    auto params = GetParam();
+
+    const std::string filePath = "../tests/files/type_checker_tests/should_type_check/" + std::get<0>(params);
+    const std::string expectedFilePath = "../tests/files/type_checker_tests/should_type_check/" + std::get<1>(params);
+
+    // Lex
+    Lexer::TokenList tokens;
+    try {
+        Lexer::tokenize(tokens, filePath);
+    } catch (const Util::CommanderException& e) {
+        std::cout << "Lexer Error: " << e.what() << "\n";
+        FAIL();
+    }
+
+    // Parse
+    Parser::ASTNodeList nodes;
+    try {
+        nodes = parser.parse(tokens);
+    } catch (const Util::CommanderException& e) {
+        std::cout << "Parser Error: " << e.what() << "\n";
+        FAIL();
+    }
+
+    // Type Check
+    try {
+        typeChecker.typeCheck(nodes);
+        const std::string expectedOutput = Lexer::readFile(expectedFilePath);
+        expectOutputEqualsSExpressions(nodes, expectedOutput);
+    } catch (const Util::CommanderException& e) {
+        std::cout << "Type Checker Error: " << e.what() << "\n";
+        FAIL();
+    }
+}
+
+/**
+ * Runs the type checker tests from the tests/files/type_checker_tests/should_fail directory
+ */
+TEST_P(TypeCheckerFailTests, ShouldNotTypeCheckFile) {
+    auto param = GetParam();
+    const std::string filePath = "../tests/files/type_checker_tests/should_fail/" + param;
+    ASSERT_THROW(lexParseAndTypeCheck(filePath), Util::CommanderException);
 }
 
 int main(int argc, char** argv) {

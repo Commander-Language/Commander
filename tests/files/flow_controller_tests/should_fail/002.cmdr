@@ -1,0 +1,3 @@
+//Should fail on tuple index out of bounds
+x = (1, 3.0, "hi");
+y = x[-1];

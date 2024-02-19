@@ -1,0 +1,2 @@
+//Should fail when pre incrementing something that isn't a variable
+x = ++2;

@@ -1,0 +1,2 @@
+//Should fail when doing minus on something that isn't a float or int
+x = -true;

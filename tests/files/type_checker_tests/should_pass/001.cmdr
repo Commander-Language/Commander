@@ -1,0 +1,5 @@
+//Should allow redefining functions as variables
+add(x, y) {
+	return x + y;
+}
+add = 3;

@@ -1,0 +1,2 @@
+//Should fail not after boolean
+x = true!;

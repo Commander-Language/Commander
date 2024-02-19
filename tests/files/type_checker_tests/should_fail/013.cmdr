@@ -1,0 +1,3 @@
+//Should fail when doing post decrement on something that isn't a float or int
+a = true;
+x = a--;

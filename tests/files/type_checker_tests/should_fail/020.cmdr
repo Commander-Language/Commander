@@ -1,0 +1,2 @@
+//Should fail on add set when left side is not a variable
+5 += 3;

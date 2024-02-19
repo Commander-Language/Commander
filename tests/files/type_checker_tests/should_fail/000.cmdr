@@ -1,0 +1,4 @@
+//Should fail since if condition is not boolean
+if ("true") {
+	echo "HI";
+}

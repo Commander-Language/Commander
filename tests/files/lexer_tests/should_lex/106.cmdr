@@ -1,0 +1,3 @@
+//Should lex interpolation $ correctly
+x = $"Hi ${"there"}!";
+x = "Hi ${"there"}!";

@@ -1,0 +1,2 @@
+//Should fail on divide by 0.0
+x = 1.0 % 0.0;

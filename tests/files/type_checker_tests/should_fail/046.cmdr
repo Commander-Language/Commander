@@ -1,0 +1,3 @@
+//Should fail when trying to call something that isn't a function
+x = 3;
+y = x(2, 3);

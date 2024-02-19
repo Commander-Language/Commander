@@ -1,0 +1,5 @@
+//Test simple variable assignment with bools
+x = true;
+y = x;
+print x;
+print y;

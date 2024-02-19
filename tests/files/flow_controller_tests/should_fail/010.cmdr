@@ -1,0 +1,5 @@
+//Should fail due to stack overflow from infinite recursion
+recurse(x) {
+	return recurse(x + 1);
+}
+recurse(0);

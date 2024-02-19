@@ -1,0 +1,3 @@
+//Should fail when subtract setting incompatible types
+x = 3;
+x -= true;

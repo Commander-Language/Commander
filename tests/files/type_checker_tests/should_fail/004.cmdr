@@ -1,0 +1,3 @@
+//Should fail trying to index a non-arrray type
+x = 3;
+y = x[0];

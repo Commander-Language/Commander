@@ -1,0 +1,6 @@
+//Should fail since else if condition is not boolean
+if (true) {
+	echo "HI";
+} else if ("false") {
+	echo "HELLO";
+}
