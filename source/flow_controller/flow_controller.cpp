@@ -17,7 +17,6 @@
 #include "flow_controller.hpp"
 #include "source/job_runner/job_runner.hpp"
 #include "source/util/commander_exception.hpp"
-#include <cmath>
 
 namespace FlowController {
 
@@ -260,15 +259,15 @@ namespace FlowController {
                 switch (expr->expression->type->getType()) {
                     case TypeChecker::INT:
                         // TODO: Implement method that stringifies a int
-                        std::cout << std::any_cast<CommanderInt>(value) << std::endl;
+                        printw("%ld\n", std::any_cast<CommanderInt>(value));
                         break;
                     case TypeChecker::FLOAT:
                         // TODO: Implement method that stringifies a float
-                        std::cout << std::any_cast<double_t>(value) << std::endl;
+                        printw("%f\n", std::any_cast<double_t>(value));
                         break;
                     case TypeChecker::BOOL:
                         // TODO: Implement method that stringifies a bool
-                        std::cout << std::any_cast<CommanderBool>(value) << std::endl;
+                        printw("%s\n", std::any_cast<CommanderBool>(value) ? "true" : "false");
                         break;
                     case TypeChecker::TUPLE:
                         // TODO: Implement method that stringifies a tuple and call it here
