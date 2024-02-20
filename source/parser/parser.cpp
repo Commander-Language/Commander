@@ -4,8 +4,8 @@
  *
  */
 
-#include "ast_node.hpp"
 #include "parser.hpp"
+#include "ast_node.hpp"
 #include "parser_action.hpp"
 #include "production_item.hpp"
 
@@ -92,6 +92,8 @@ namespace Parser {
             case API_CALL_EXPR:
             case LAMBDA_EXPR:
             case CMD_EXPR:
+            case SCAN_EXPR:
+            case READ_EXPR:
                 return EXPR;
             case STMT:
             case IF_STMT:
@@ -106,8 +108,6 @@ namespace Parser {
             case IMPORT_STMT:
             case PRINT_STMT:
             case PRINTLN_STMT:
-            case SCAN_STMT:
-            case READ_STMT:
             case WRITE_STMT:
             case TYPE_STMT:
             case FUNCTION_STMT:
