@@ -59,7 +59,7 @@ namespace Parser {
         /**
          * @brief Class constructor for an AST node type.
          *
-         * @param tokenType The AST node type of this `GrammarEntry`.
+         * @param nodeType The AST node type of this `GrammarEntry`.
          */
         GrammarEntry(ASTNodeType nodeType);
 
@@ -104,6 +104,11 @@ namespace Parser {
         std::vector<GrammarEntry> components;
 
         /**
+         * @brief The priority of this grammar rule.
+         */
+        std::size_t precedence;
+
+        /**
          * @brief Equality operator.
          *
          * @param other The other `GrammarRule` against which to compare.
@@ -144,7 +149,7 @@ namespace std {
          * @param grammarEntry The grammar entry to hash.
          * @return The hash value of the given grammar entry.
          */
-        size_t operator()(const Parser::GrammarEntry& grammarEntry) const;
+        size_t operator()(const Parser::GrammarEntry& grammarEntry) const noexcept;
     };
 
 
@@ -159,7 +164,7 @@ namespace std {
          * @param grammarRule The grammar rule to hash.
          * @return The hash value of the given grammar rule.
          */
-        size_t operator()(const Parser::GrammarRule& grammarRule) const;
+        size_t operator()(const Parser::GrammarRule& grammarRule) const noexcept;
     };
 
 }  //  namespace std
@@ -210,7 +215,7 @@ namespace Parser {
          * @brief Class constructor with an explicit grammar passed to it.
          * @param grammarDefinitions The grammar definitions from which to build this `Grammar` object.
          */
-        Grammar(const std::vector<std::tuple<GrammarRule, NodeConstructor>>& grammarDefinitions);
+        explicit Grammar(const std::vector<std::tuple<GrammarRule, NodeConstructor>>& grammarDefinitions);
 
         /**
          * @brief Returns the grammar definition as a vector of tuples.
