@@ -1,2 +1,2 @@
 //Test precedence
-x = (a < b) < (c < d);
+x = (a < b) && (c < d);

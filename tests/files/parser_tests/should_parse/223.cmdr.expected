@@ -1,0 +1,2 @@
+(PrgmNode
+	(CmdStmtNode (AsyncCmdNode (CmdCmdNode (StringNode "echo") (StringNode "hi")))))

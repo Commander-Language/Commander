@@ -1,0 +1,5 @@
+//Test simple variable assignment with strings
+x = 'hi';
+y = x;
+print x;
+print y;

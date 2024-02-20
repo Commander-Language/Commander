@@ -1,0 +1,5 @@
+//Should fail when trying to call something with incorrect types of parameters
+add(x: int, y: int) {
+	return x + y;
+}
+z = add(1, true);

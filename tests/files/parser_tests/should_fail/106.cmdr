@@ -1,0 +1,4 @@
+//Should not parse else statement by itself
+else {
+	x = 3;
+}

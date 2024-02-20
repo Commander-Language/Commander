@@ -1,0 +1,2 @@
+//Should not lex string interpolation (not terminated interpolation)
+$'{{{}}';

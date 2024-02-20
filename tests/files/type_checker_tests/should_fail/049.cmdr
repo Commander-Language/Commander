@@ -1,0 +1,4 @@
+//Should fail since for condition is not boolean
+for (i = 0; "hello"; i++) {
+	echo "hi";
+}

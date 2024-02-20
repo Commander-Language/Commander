@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode bigNumber) SET (FloatExprNode 1.000000))))

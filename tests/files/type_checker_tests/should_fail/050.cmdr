@@ -1,0 +1,4 @@
+//Should fail since while condition is not boolean
+while ("hello") {
+	echo "hi";
+}

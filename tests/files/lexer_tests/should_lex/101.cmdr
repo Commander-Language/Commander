@@ -1,0 +1,2 @@
+//Test unknown escape characters are interpreted literally (single quote strings)
+'x\yz';

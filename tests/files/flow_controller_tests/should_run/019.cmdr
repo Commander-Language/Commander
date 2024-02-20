@@ -1,0 +1,5 @@
+//Test exponentiate with ints
+x = 2 ** 10;
+print x;
+x **= 2;
+print x;

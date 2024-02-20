@@ -1,0 +1,2 @@
+//Test quotes inside quotes in format are parsed as strings (single quotes)
+x = $'{''}';

@@ -1,0 +1,2 @@
+//Should fail when dividing incompatible types
+x = 3 / false;

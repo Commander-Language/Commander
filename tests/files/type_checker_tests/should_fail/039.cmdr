@@ -1,0 +1,2 @@
+//Should fail when exponentiating incompatible types
+x = 3 ** false;

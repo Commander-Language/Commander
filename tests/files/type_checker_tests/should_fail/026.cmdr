@@ -1,0 +1,2 @@
+//Should fail on lesser when types are incompatible
+x = 3 < "3";

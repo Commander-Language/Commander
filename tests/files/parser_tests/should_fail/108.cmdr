@@ -1,0 +1,8 @@
+//Should not parse else if statement following if-else
+if (true) {
+	x = 3;
+} else {
+	x = 4;
+} else if (true) {
+	x = 5;
+}

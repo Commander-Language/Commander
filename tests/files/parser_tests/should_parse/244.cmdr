@@ -1,4 +1,2 @@
-//Should parse alias commands
-alias all = ls -a;
-alias allGrep = all | grep myDir &;
-allGrep;
+//Test precedence
+x = a >= b > c <= d < e;

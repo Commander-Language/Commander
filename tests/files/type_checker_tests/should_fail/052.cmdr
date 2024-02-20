@@ -1,0 +1,2 @@
+//Should fail due to interpolated expression not evaluating to a string
+x = $"My cool {true} string";

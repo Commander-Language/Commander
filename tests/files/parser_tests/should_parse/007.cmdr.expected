@@ -1,3 +1,3 @@
 (PrgmNode
-	(CmdCmdNode echo (StringNode 'Hello, world!
-'"\')))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode isString) SET (StringExpressionNode (StringNode "Hello, world!
+	'"\")))))

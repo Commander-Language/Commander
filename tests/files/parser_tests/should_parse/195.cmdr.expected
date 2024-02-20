@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (BinOpExprNode (BinOpExprNode (BinOpExprNode (VarExprNode (IdentVariableNode a)) AND (VarExprNode (IdentVariableNode b))) AND (VarExprNode (IdentVariableNode c))) AND (VarExprNode (IdentVariableNode d))))))

@@ -1,2 +1,2 @@
 //Test precedence
-x = (-c * a)[1] < ((b+c)[d < e] >= f)[1]
+x = (-c * a)[1] < ((b+c)[d < e] >= f)[1];

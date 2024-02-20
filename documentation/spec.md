@@ -114,7 +114,8 @@ Operator precedence is define as follows, from highest precedence to lowest prec
 - Exponential operator ```**```.
 - Multiplicative binary operators ```*```, ```/```, and ```%```
 - Additive binary operators ```+``` and ```-```
-- Binary comparisons ```<```, ```>```, ```<=```, ```>=```, ```==```, ```!=```
+- Inequality comparisons ```<```, ```>```, ```<=```, ```>=```
+- Equality comparisons ```==```, ```!=```
 - Boolean binary operator ```&&```
 - Boolean binary operator ```||```
 

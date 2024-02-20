@@ -1,0 +1,2 @@
+//Should fail on or when types are incompatible
+x = true || 1;

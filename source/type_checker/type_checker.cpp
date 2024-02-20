@@ -211,6 +211,11 @@ namespace TypeChecker {
                     // TODO: Improve error
                     throw Util::CommanderException("Expected int or float in unop expression.");
                 }
+                if (exprNode->opType != Parser::NOT && exprNode->opType != Parser::NEGATE
+                    && exprNode->nodeType() != Parser::VARIABLE) {
+                    // TODO: Improve error
+                    throw Util::CommanderException("Expected variable in decrement or increment operation.");
+                }
                 return (exprNode->type = expressionType);
             }
             case Parser::BINOP_EXPR: {
@@ -268,17 +273,23 @@ namespace TypeChecker {
                         if (areIntFloat || areEqual) { return (exprNode->type = std::make_shared<BoolTy>()); }
                         // TODO: Improve error
                         throw Util::CommanderException("Equality operation has incompatible types.");
-                    case Parser::ADD:
                     case Parser::ADD_SET:
-                    case Parser::MODULO:
-                    case Parser::DIVIDE:
-                    case Parser::MULTIPLY:
-                    case Parser::SUBTRACT:
                     case Parser::SUBTRACT_SET:
                     case Parser::MULTIPLY_SET:
                     case Parser::DIVIDE_SET:
                     case Parser::MODULO_SET:
                     case Parser::EXPONENTIATE_SET:
+                        if (!isVariable) {
+                            // TODO: Improve error
+                            throw Util::CommanderException(
+                                    "Invalid set expression; must have variable on left side of '='");
+                        }
+                        // NO break here! Should continue to the next lines of code that handle add, subtract, etc.
+                    case Parser::ADD:
+                    case Parser::MODULO:
+                    case Parser::DIVIDE:
+                    case Parser::MULTIPLY:
+                    case Parser::SUBTRACT:
                     case Parser::EXPONENTIATE:
                         // Int/float | float/float --> float
                         // Int/int --> int

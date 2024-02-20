@@ -1,0 +1,2 @@
+//Should fail minus after number
+x = 1-;

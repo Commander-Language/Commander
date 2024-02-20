@@ -1,0 +1,2 @@
+//Should fail when not closing curly braces in interpolation
+$"\\{";

@@ -1,0 +1,2 @@
+// Should correctly lex empty strings
+x = '' + '' + '';

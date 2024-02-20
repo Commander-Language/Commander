@@ -1,0 +1,4 @@
+//Should fail due to modulo by 0 with a variable holding 0.0
+x = 3.5;
+y = 0.0;
+z = x % y;

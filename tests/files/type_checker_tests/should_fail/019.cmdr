@@ -1,0 +1,2 @@
+//Should fail on set when left side is not a variable
+true = 3;

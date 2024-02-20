@@ -203,7 +203,8 @@ INSTANTIATE_TEST_SUITE_P(
                           "077.cmdr", "078.cmdr", "079.cmdr", "080.cmdr", "081.cmdr", "082.cmdr", "083.cmdr",
                           "074.cmdr", "085.cmdr", "086.cmdr", "087.cmdr", "088.cmdr", "089.cmdr", "090.cmdr",
                           "091.cmdr", "092.cmdr", "093.cmdr", "094.cmdr", "095.cmdr", "096.cmdr", "097.cmdr",
-                          "098.cmdr", "099.cmdr", "100.cmdr", "101.cmdr", "102.cmdr", "103.cmdr"));
+                          "098.cmdr", "099.cmdr", "100.cmdr", "101.cmdr", "102.cmdr", "103.cmdr", "104.cmdr",
+                          "105.cmdr", "106.cmdr", "107.cmdr", "108.cmdr", "109.cmdr", "110.cmdr", "111.cmdr"));
 
 /**
  * @brief Takes in an ASTNodeList, and ensures they match what is contained in the expected output string
@@ -212,5 +213,11 @@ INSTANTIATE_TEST_SUITE_P(
  * @param expectedOutput The string containing the expected S-Expression output
  */
 void expectOutputEqualsSExpressions(const Parser::ASTNodeList& nodes, const std::string& expectedOutput);
+
+/**
+ * @brief Takes in a file path, and goes through lexing and parsing it
+ * @param filePath The file path
+ */
+void lexAndParse(const std::string& filePath);
 
 #endif  // COMMANDER_PARSER_TESTS_HPP

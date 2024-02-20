@@ -10,7 +10,9 @@
 #include "source/symbol_table/symbol_table_organizer.hpp"
 
 #include <any>
+#include <cmath>
 #include <iostream>
+#include <ncurses.h>
 #include <tuple>
 
 namespace FlowController {

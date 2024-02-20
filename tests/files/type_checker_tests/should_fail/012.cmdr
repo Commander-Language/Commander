@@ -1,0 +1,3 @@
+//Should fail when doing pre increment on something that isn't a float or int
+a = true;
+x = ++a;

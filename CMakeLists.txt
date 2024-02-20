@@ -170,7 +170,7 @@ add_library(job_runner source/job_runner/job_runner.cpp)
 
 add_executable(commander source/interpreter/commander.cpp)
 
-target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner)
+target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner ncurses)
 
 #  Test configurations:
 #  --------------------
@@ -184,7 +184,7 @@ target_link_libraries(parserTests lexer parser type_checker GTest::gtest_main)
 gtest_discover_tests(parserTests)
 
 add_executable(typeCheckerTests tests/type_checker_tests.cpp)
-target_link_libraries(typeCheckerTests lexer type_checker GTest::gtest_main)
+target_link_libraries(typeCheckerTests lexer parser type_checker GTest::gtest_main)
 gtest_discover_tests(typeCheckerTests)
 
 add_executable(symbolTableTests tests/symbol_table_tests.cpp)
@@ -192,7 +192,7 @@ target_link_libraries(symbolTableTests symbol_table GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
 
 add_executable(flowControllerTests tests/flow_controller_tests.cpp)
-target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table GTest::gtest_main)
+target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table GTest::gtest_main ncurses)
 gtest_discover_tests(flowControllerTests)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)

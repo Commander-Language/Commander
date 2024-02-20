@@ -436,9 +436,10 @@ namespace Lexer {
      * @param tokens The vector that will hold all the tokens
      * @param file The file being lexed
      * @param position The current position in the file
+     * @param startToken The token that begins the expression
      * @param terminatingToken The token to look for to stop lexing the expression
      */
-    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position,
+    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const tokenType& startToken,
                        const tokenType& terminatingToken);
 
 }  // namespace Lexer

@@ -1,0 +1,2 @@
+//Should fail on modulo set when left side is not a variable
+5 %= 3;

@@ -1,0 +1,5 @@
+//Test add with strings
+x = "My" + ' name ' + " is " + "bob";
+print x;
+x += ".";
+print x;

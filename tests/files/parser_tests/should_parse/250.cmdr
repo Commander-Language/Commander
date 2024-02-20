@@ -1,2 +1,2 @@
-//Should parse multiple statements on single line
-x = 3; x *= 2; echo "hello"; function add(a:int, b) {return a + b;}
+//Test precedence
+x = a * b / c % d;
