@@ -296,17 +296,22 @@ namespace Parser {
                 {{ASTNodeType::STMTS, {ASTNodeType::STMTS, ASTNodeType::STMT}},
                  makeNode("Stmts", {castNode("Stmts", 0) + "->stmts", castNode("Stmt", 1)})},
 
-                //  (STMT) -> [IMPORT] (STRING)
-                //  TODO (Cayden): This.
+                //  (STMT) -> [IMPORT] (EXPR)
+                {{ASTNodeType::STMT, {TokenType::IMPORT, ASTNodeType::EXPR}},
+                 makeNode("ImportStmt", {castNode("Expr", 1)})},
 
-                //  (STMT) -> [PRINT] (STRING)
-                //  TODO (Cayden): This.
-                //  (STMT) -> [PRINT] [LPAREN] (STRING) [RPAREN]
-                //  TODO (Cayden): This.
-                //  (STMT) -> [PRINTLN] (STRING)
-                //  TODO (Cayden): This.
-                //  (STMT) -> [PRINTLN] [LPAREN] (STRING) [RPAREN]
-                //  TODO (Cayden): This.
+                //  (STMT) -> [PRINT] (EXPR)
+                {{ASTNodeType::STMT, {TokenType::PRINT, ASTNodeType::EXPR}},
+                 makeNode("PrintStmt", {castNode("Expr", 1)})},
+                //  (STMT) -> [PRINT] [LPAREN] (EXPR) [RPAREN]
+                {{ASTNodeType::STMT, {TokenType::PRINT, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
+                 makeNode("PrintStmt", {castNode("Expr", 2)})},
+                //  (STMT) -> [PRINTLN] (EXPR)
+                {{ASTNodeType::STMT, {TokenType::PRINTLN, ASTNodeType::EXPR}},
+                 makeNode("PrintlnStmt", {castNode("Expr", 1)})},
+                //  (STMT) -> [PRINTLN] [LPAREN] (EXPR) [RPAREN]
+                {{ASTNodeType::STMT, {TokenType::PRINTLN, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
+                 makeNode("PrintlnStmt", {castNode("Expr", 2)})},
 
                 //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
                 {{ASTNodeType::STMT,
@@ -319,12 +324,21 @@ namespace Parser {
                 //  TODO (Cayden)
 
                 //  (STMT) -> [FOR] [LPAREN] (STMT) [SEMICOLON] (EXPR) [SEMICOLON] (STMT) [RPAREN] (STMT)
-                //  TODO (Cayden)
+                {{ASTNodeType::STMT,
+                  {TokenType::FOR, TokenType::LPAREN, ASTNodeType::STMT, TokenType::SEMICOLON, ASTNodeType::EXPR,
+                   TokenType::SEMICOLON, ASTNodeType::STMT, TokenType::RPAREN, ASTNodeType::STMT}},
+                 makeNode("ForStmt",
+                          {castNode("Stmt", 2), castNode("Expr", 4), castNode("Stmt", 6), castNode("Stmt", 8)})},
 
                 //  (STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
-                //  TODO (Cayden)
+                {{ASTNodeType::STMT,
+                  {TokenType::WHILE, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
+                 makeNode("WhileStmt", {castNode("Expr", 2), castNode("Stmt", 4)})},
                 //  (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN]
-                //  TODO (Cayden)
+                {{ASTNodeType::STMT,
+                  {TokenType::DO, ASTNodeType::STMT, TokenType::WHILE, TokenType::LPAREN, ASTNodeType::EXPR,
+                   TokenType::RPAREN}},
+                 makeNode("DoWhileStmt", {castNode("Expr", 4), castNode("Stmt", 1)})},
 
                 //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
                 //  TODO (Cayden)
