@@ -1,25 +1,44 @@
 /**
- * @file scan.hpp
- * @brief scan builtin header file
- * @details Still needs work just a quick implementation of some builtins
+ * @file builtins.hpp
+ * @brief Organize built-ins to call on later.
+ * @details Save builtins in a map to be able to call on when needed.
+ *          If it doesn't find the builtin, throw a commander error.
+ *
+ *          Builtins should take three parameters:
+ *              1) List of string arguments
+ *              2) input file descriptor
+ *              3) output file descriptor
+ *
+ *          Notes:
+ *              The first argument of the builtin command should be the name.
+ *              The file descriptors are to be used when reading or writing (used for piping/redirection/save)
+ *
  */
 #ifndef COMMANDER_BUILTIN_HPP
 #define COMMANDER_BUILTIN_HPP
+
+#include "shared.hpp"
+#include "../../util/commander_exception.hpp"
+#include "print.hpp"
 #include <string>
-#include <vector>
+#include <unordered_map>
+
 namespace Builtins {
-
     /**
-     * @brief Print something to the terminal
-     * @param args List of arguments
+     * @breif structure of builtins
      */
-    void print(std::vector<std::string> args);
+    using Function = ReturnInfo (*)(const List&, int, int);
 
-    /**
-     * @brief Scan for user input
-     * @param args List of arguments
-     * @return A string from user input
-     */
-    std::string scan(std::vector<std::string> args);
+    std::unordered_map<std::string, Function> builtins = {
+            {"print", print},
+            {"println", print},
+    };
+
+    Function getBuiltinFunction(const std::string& name){
+        if(builtins.find(name) == builtins.end())
+            throw Util::CommanderException("Builtin Error: Unknown builtin " + name);
+
+        return builtins[name];
+    }
 }  // namespace Builtins
 #endif

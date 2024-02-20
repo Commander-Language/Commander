@@ -1,25 +1,36 @@
 /**
- * @file scan.hpp
- * @brief scan builtin header file
+ * @file print.cpp
+ * @brief Implements the print and println built-in commands
+ *
  */
-#include "builtins.hpp"
-#include <cstdlib>
-#include <iostream>
 
-namespace Builtins {
-    void print(std::vector<std::string> args) {
-        if (args.size() <= 1) {
-            std::cout << args[0] << ": no argument given\n";
-            exit(1);
+#include "shared.hpp"
+#include "print.hpp"
+#include <unistd.h>
+
+ReturnInfo print(const List &args, int in, int out) {
+    if (args.size() == 1) { return {"", "", SUCCESS}; }
+
+    std::string output;
+    if (args[0] == "print") {
+        for (int i = 1; i < args.size(); i++) { output.append(args[i]); }
+
+        if (write(out, output.c_str(), output.size()) < 0) {
+            // TODO: figure out error messages
+            return {"", "", ERROR};
         }
-        if (args[0] == "print") {
-            for (int i = 1; i < args.size(); i++) { std::cout << args[i]; }
-        }
-        if (args[0] == "println") {
-            for (int i = 1; i < args.size(); i++) { std::cout << args[i]; }
-            std::cout << "\n";
-        }
-        // only works with non-thread safe exit
-        exit(0);
+
+        return {output, "", SUCCESS};
     }
-}  // namespace Builtins
+    if (args[0] == "println") {
+        for (int i = 1; i < args.size(); i++) { output.append(args[i]); }
+        output.append("\n");
+        if (write(out, output.c_str(), output.size()) < 0) {
+            // TODO: figure out error messages
+            return {"", "", ERROR};
+        }
+        return {output, "", SUCCESS};
+    }
+
+    return {"", "", ERROR};
+}

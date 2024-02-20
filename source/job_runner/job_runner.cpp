@@ -1,282 +1,291 @@
 /**
  * @file job_runner.hpp
- * @brief Job Runner Implementation
+ * @brief Implements the classes Process and JobRunner
  */
 #include "job_runner.hpp"
 #include "builtins/builtins.hpp"
 #include "source/util/commander_exception.hpp"
 #include <cstdlib>
 #include <cstring>
+
 /* Unix/Mac specific includes */
 #include <fcntl.h>
+#include <memory>
 #include <sys/wait.h>
 #include <unistd.h>
 /* Windows specific includes */
 // #include <Windows.h>
 
-namespace jobRunner {
-    /*
-     * CommandArgs Class
-     */
-    void CommandArgs::addArg(const std::string& arg) { _args.emplace_back(arg); }
+namespace JobRunner {
+    //  ==========================
+    //  ||   Process Struct     ||
+    //  ==========================
 
-    char** CommandArgs::getCArgs() {
-        _cargs.reserve(_args.size() + 1);
-        for (auto& arg : _args) _cargs.emplace_back(arg.data());
+    ProcessType Process::getType() const { return type; }
 
-        // execvp expects a null terminated array
-        _cargs.emplace_back(nullptr);
-        return _cargs.data();
+    const char *Process::getName() const { return processName.c_str(); }
+
+    Process::Process(std::vector<Process *> processes) : pipe(processes[1]), pipeSize(processes.size()), isFirst(true) {
+        // first in pipe is this process
+        Process *start = processes[0];
+        type = start->type;
+        processName = start->processName;
+        args = start->args;
+        background = start->background;
+        saveInfo = start->saveInfo;
+
+        // connect the pipeline
+        for (int i = 2; i < processes.size(); i++) { processes[i - 1]->pipe = processes[i]; }
+
+        processes.back()->isLast = true;
     }
 
-    std::vector<std::string> CommandArgs::getArgs() {
-        std::vector<std::string> result;
-        for (auto& arg : _args) { result.emplace_back(arg); }
-        return result;
-    }
+    Process::Process(std::vector<std::string> args, ProcessType type, bool isBackground, bool isSave)
+            : args(args), type(type), processName(args[0].c_str()), background(isBackground), saveInfo(isSave) {}
 
-    /*
-     * Command Class
-     */
-    Command::Command(std::string name, commandType type) : _name(std::move(name)), _type(type) { addArg(_name); }
+    //  ==========================
+    //  ||   JobRunner Class    ||
+    //  ==========================
 
-    void Command::addArg(const std::string& arg) { _args.addArg(arg); }
+    JobRunner::JobRunner(Process *process) : _process(process) {}
 
-    void Command::runCommand() {
-        switch (_type) {
-            case commandType::EXEC: {
-                _execCommand();  // shouldn't return
-                break;
-            }
-            case commandType::BACKGROUND: {
-                // we double fork here, letting system deal with lifetime of process
-                int const pid = forkCheckErrors();
-                if (pid == 0) { _execCommand(); }
-                break;
-            }
-            case commandType::BUILT_IN: {
-                _execBuiltin();
-                break;
-            }
-        }
-    }
-
-    void Command::_execBuiltin() {
-        // for right now use if statements
-        // find a better way
-        std::string const name = _args.getArgs()[0];
-        if (name == "scan") {
-            Builtins::scan(_args.getArgs());
-        } else if (name == "print" || name == "println") {
-            Builtins::print(_args.getArgs());
-        }
-    }
-
-    void Command::_execCommand() {
-        execvp(_name.c_str(), _args.getCArgs());
-        throw Util::CommanderException("Job Runner: error trying to exec command");
-    }
-
-    JobInfo Command::runCommandSave() {
-        // create two pipes; one for stdout and another for stderr
-        int stdoutPipe[2];
-        int stderrPipe[2];
-        pipe2(stdoutPipe, O_CLOEXEC);
-        pipe2(stderrPipe, O_CLOEXEC);
-
-        int const processID = forkCheckErrors();
-        if (processID == 0) {
-            close(stdoutPipe[0]);
-            close(stderrPipe[0]);
-
-            dup2(stdoutPipe[1], STDOUT_FILENO);
-            dup2(stderrPipe[1], STDERR_FILENO);
-
-            close(stdoutPipe[1]);
-            close(stderrPipe[1]);
-
-            _execCommand();
-        }
-
-        // close write end of pipes since we won't need them
-        close(stdoutPipe[1]);
-        close(stderrPipe[1]);
-
-        // bufferSizeOut
-        int bufferSizeOut = bufferSize;
-        int bufferSizeErr = bufferSize;
-
-        // we will save output here
-        char* stdoutBuffer = new char[bufferSizeOut];
-        char* stderrBuffer = new char[bufferSizeErr];
-
-        bool stillReading = true;
-
-        // size of our buffers so far
-        size_t stderrSize = 0;
-        size_t stdoutSize = 0;
-        // count how many bytes read from read() call
-        size_t stderrRead;
-        size_t stdoutRead;
-
-        while (stillReading) {
-            stdoutRead = read(stdoutPipe[0], &stdoutBuffer[stdoutSize], bufferSizeOut - stdoutSize);
-            stderrRead = read(stderrPipe[0], &stderrBuffer[stderrSize], bufferSizeErr - stderrSize);
-
-            if (stdoutRead == 0 && stderrRead == 0) stillReading = false;
-
-            stderrSize += stderrRead;
-            stdoutSize += stdoutRead;
-
-            if (stdoutSize >= bufferSizeOut) {
-                resizeArrayHelper(&stdoutBuffer, bufferSizeOut);
-                bufferSizeOut *= 2;
-            }
-            if (stderrSize >= bufferSizeErr) {
-                resizeArrayHelper(&stderrBuffer, bufferSizeErr);
-                bufferSizeErr *= 2;
-            }
-        }
-
-        // we are done reading, so close read end of pipes
-        close(stdoutPipe[0]);
-        close(stderrPipe[0]);
-
-        // null terminate our char arrays
-        if (stderrSize >= bufferSizeErr) resizeArrayHelper(&stderrBuffer, stderrSize);
-        stderrBuffer[stderrSize] = '\0';
-
-        if (stdoutSize >= bufferSizeOut) resizeArrayHelper(&stdoutBuffer, stdoutSize);
-        stdoutBuffer[stdoutSize] = '\0';
-
-        // we want stats process
-        int stat;
-        waitpid(processID, &stat, 0);
-
-        std::string const stdoutString(stdoutBuffer);
-        std::string const stderrString(stderrBuffer);
-
-        return {stdoutString, stderrString, WEXITSTATUS(stat)};
-    }
-
-    CommandArgs Command::getArgs() { return _args; }
-
-    /*
-     * PipeCommands Class
-     */
-    JobInfo PipeCommands::_runPipeHelper() {
-        JobInfo result;
-
-        size_t const numOfCommands = _pipeline.size();
-        size_t const numOfFileDescriptors = (numOfCommands - 1) * 2;
-
-        // an array of pipes for the pipeline
-        int pipes[numOfFileDescriptors];
-
-        // keep track of indices of previous/current pipes
-        int prevPipeIndices[2] = {0, 1};
-        int currPipeIndices[2] = {0, 1};
-
-        // initialize our pipes
-        for (int i = 0; i < numOfFileDescriptors; i += 2) pipe2(&pipes[i], O_CLOEXEC);
-
-        for (int i = 0; i < numOfCommands; i++) {
-            int const pid = forkCheckErrors();
-            if (pid == 0) {
-                if (i == 0) {
-                    // dup just write end for first command
-                    dup2(pipes[currPipeIndices[1]], STDOUT_FILENO);
-                } else if (i == (numOfCommands - 1)) {
-                    // dup just read end for last command
-                    dup2(pipes[prevPipeIndices[0]], STDIN_FILENO);
-                } else {
-                    // read from prevPipe and write to current pipe
-                    dup2(pipes[prevPipeIndices[0]], STDIN_FILENO);
-                    dup2(pipes[currPipeIndices[1]], STDOUT_FILENO);
+    JobInfo JobRunner::execProcess() {
+        switch (_process->getType()) {
+            case ProcessType::BUILTIN: {
+                if (_process->pipe != nullptr) { return _doPiping(_process); }
+                if (_process->background) {
+                    _doBackground(_process);
+                    return {};
                 }
-
-                // close open pipes
-                for (int j = 0; j < numOfFileDescriptors; j++) close(pipes[j]);
-
-                _pipeline[i]->runCommand();  // shouldn't run a background process here
+                if (_process->saveInfo) { return _doSaveInfo(_process, false); }
+                return _execBuiltin(_process);
             }
+            case ProcessType::EXTERNAL: {
+                if (_process->pipe != nullptr) { return _doPiping(_process); }
+                if (_process->background) {
+                    _doBackground(_process);
+                    return {};
+                }
+                if (_process->saveInfo) { return _doSaveInfo(_process, false); }
+                return _execFork(_process);
+            }
+            default:
+                return {};
+        }
+    }
 
-            // set previous pipe indices and increment current pipe indices
-            prevPipeIndices[0] = currPipeIndices[0];
-            prevPipeIndices[1] = currPipeIndices[1];
-            currPipeIndices[0] += 2;
-            currPipeIndices[1] += 2;
+    JobInfo JobRunner::_execBuiltin(Process *process, int in, int out) {
+        // get the function so we can call it!
+        auto builtin = Builtins::getBuiltinFunction(process->getName());
+        return builtin(process->args, in, out);
+    }
 
-        }  // for
+    void JobRunner::_execBuiltinNoReturn(Process *process, int in, int out) {
+        // get the function so we can call it!
+        auto builtin = Builtins::getBuiltinFunction(process->getName());
+        builtin(process->args, in, out);
+        _Exit(0);
+    }
 
-        // close open pipes in parent
-        for (int j = 0; j < numOfFileDescriptors; j++) close(pipes[j]);
-        // wait for all processes
-        for (int i = 0; i < numOfCommands; i++) wait(nullptr);
+    void JobRunner::_execNoFork(Process *process) {
+        // convert to c style array
+        std::vector<char *> cargs;
+        cargs.reserve(process->args.size() + 1);
+        for (auto &arg: process->args) { cargs.emplace_back(arg.data()); }
+        // make sure to null terminate!
+        cargs.emplace_back(nullptr);
+
+        execvp(process->getName(), cargs.data());
+        throw Util::CommanderException("Job Runner: Bad exec");
+    }
+
+    JobInfo JobRunner::_execFork(Process *process) {
+        int pid = _fork();
+        if (pid == 0) {
+            // convert to c style array
+            std::vector<char *> cargs;
+            cargs.reserve(process->args.size() + 1);
+            for (auto &arg: process->args) { cargs.emplace_back(arg.data()); }
+            // make sure to null terminate!
+            cargs.emplace_back(nullptr);
+
+            execvp(process->getName(), cargs.data());
+            throw Util::CommanderException("Job Runner: Bad exec");
+        }
+        wait(nullptr);
+
+        return {"", "", SUCCESS};
+    }
+
+    void JobRunner::_exec(Process *process) {
+        switch (process->getType()) {
+            case ProcessType::EXTERNAL: {
+                _execNoFork(process);
+            }
+            case ProcessType::BUILTIN: {
+                _execBuiltinNoReturn(process);
+            }
+        }
+    }
+
+    JobInfo JobRunner::_doPiping(Process *process) {
+        JobInfo result{};
+
+        size_t fdCount = (process->pipeSize - 1) * 2;
+        int pipes[fdCount];
+        for (int i = 0; i < fdCount; i += 2) { pipe2(&pipes[i], O_CLOEXEC); }
+
+        int rIndex = 0;
+        int wIndex = 1;
+        Process *current = process;
+
+        while (current != nullptr) {
+            if (current->isFirst) {
+                int pid = _fork();
+                if (pid == 0) {
+                    dup2(pipes[wIndex], STDOUT_FILENO);
+                    for (int i = 0; i < fdCount; i++) { close(pipes[i]); }
+                    _exec(current);
+                }
+                wIndex += 2;
+            } else if (current->isLast) {
+                if (current->saveInfo) {
+                    result = _doSaveInfo(current, true, pipes, fdCount);
+                } else {
+                    int pid = _fork();
+                    if (pid == 0) {
+                        dup2(pipes[rIndex], STDIN_FILENO);
+                        for (int i = 0; i < fdCount; i++) { close(pipes[i]); }
+                        _exec(current);
+                    }
+                }
+            } else {
+                int pid = _fork();
+                if (pid == 0) {
+                    dup2(pipes[rIndex], STDIN_FILENO);
+                    dup2(pipes[wIndex], STDOUT_FILENO);
+                    for (int i = 0; i < fdCount; i++) { close(pipes[i]); }
+                    _exec(current);
+                }
+                rIndex += 2;
+                wIndex += 2;
+            }
+            current = current->pipe;
+        }
+
+        for (int i = 0; i < fdCount; i++) { close(pipes[i]); }
+        for (int i = 0; i < process->pipeSize; i++) { wait(nullptr); }
 
         return result;
     }
 
-    void PipeCommands::addCommand(Command* command) { _pipeline.emplace_back(command); }
-
-    JobInfo PipeCommands::runPipeLine(bool save) {
-        if (save) {
-            if (_pipeline.size() == 1) return _pipeline[0]->runCommandSave();
-            return {};
+    void JobRunner::_doBackground(Process *process) {
+        int pid = _fork();
+        if (pid == 0) {
+            int pid2 = _fork();
+            if (pid2 == 0) { _exec(process); }
+            _Exit(0);
         }
-
-        if (_pipeline.size() == 1) {
-            int const pid = forkCheckErrors();
-            if (pid == 0) _pipeline[0]->runCommand();
-            wait(nullptr);
-            return {};
-        }
-        // pipeline is greater than one so run the helper
-        return _runPipeHelper();
+        waitpid(pid, nullptr, 0);
     }
 
-    JobInfo PipeCommands::runPipeLineMocked() {
-        std::string command;
-        for (int i = 0; i < _pipeline.size(); i++) {
-            for (auto& arg : _pipeline[i]->getArgs().getArgs()) {
-                command.append(arg);
-                command.append(" ");
+    JobInfo JobRunner::_doSaveInfo(Process *process, bool partOfPipe, int *fds, size_t count) {
+        int pipeOut[2];
+        int pipeErr[2];
+        pipe2(pipeOut, O_CLOEXEC);
+        pipe2(pipeErr, O_CLOEXEC);
+
+        int pid = _fork();
+        if (pid == 0) {
+            // if part of pipe set up the last pipe here
+            if (partOfPipe) {
+                dup2(fds[count - 2], STDIN_FILENO);
+                for (int i = 0; i < count; i++) { close(fds[i]); }
             }
-            if (i != (_pipeline.size() - 1)) { command.append("| "); }
+            dup2(pipeOut[1], STDOUT_FILENO);
+            dup2(pipeErr[1], STDERR_FILENO);
+
+            close(pipeOut[0]);
+            close(pipeOut[1]);
+            close(pipeErr[0]);
+            close(pipeErr[1]);
+
+            _exec(process);
         }
 
-        int const returnCode = system(command.data());
+        // don't forget to close pipes
+        if (partOfPipe)
+            for (int i = 0; i < count; i++) { close(fds[i]); }
 
-        return {"", "", returnCode};
+        // close write ends
+        close(pipeOut[1]);
+        close(pipeErr[1]);
+
+        // size of buffer
+        size_t stdoutBufSize = 2048;
+        size_t stderrBufSize = 2048;
+
+        auto stdoutOutput = std::make_unique<char[]>(stdoutBufSize);
+        auto stderrOutput = std::make_unique<char[]>(stderrBufSize);
+
+        // size of output
+        size_t stdoutSize = 0;
+        size_t stderrSize = 0;
+        // number of bytes read
+        size_t stdoutRead = 0;
+        size_t stderrRead = 0;
+
+        bool reading = true;
+        while (reading) {
+            stdoutRead = read(pipeOut[0], &stdoutOutput[stdoutSize], stdoutBufSize - stdoutSize);
+            stderrRead = read(pipeErr[0], &stderrOutput[stderrSize], stderrBufSize - stderrSize);
+
+            if (stdoutRead == 0 && stderrRead == 0) reading = false;
+
+            stdoutSize += stdoutRead;
+            stderrSize += stderrRead;
+
+            if (stdoutSize >= stdoutBufSize) {
+                _resize(stdoutOutput, stdoutBufSize);
+                stdoutBufSize *= 2;
+            }
+            if (stderrSize >= stderrBufSize) {
+                _resize(stderrOutput, stderrBufSize);
+                stderrBufSize *= 2;
+            }
+        }
+        close(pipeOut[0]);
+        close(pipeErr[0]);
+
+        if (stdoutSize >= stdoutBufSize) _resize(stdoutOutput, stdoutBufSize);
+        stdoutOutput[stdoutSize] = '\0';
+        if (stderrSize >= stderrBufSize) _resize(stderrOutput, stderrBufSize);
+        stderrOutput[stderrSize] = '\0';
+
+        int stat;
+        waitpid(pid, &stat, 0);
+
+        std::string out(stdoutOutput.get());
+        std::string err(stderrOutput.get());
+
+        return {out, err, WEXITSTATUS(stat)};
     }
 
-    /*
-     * Job Class
-     */
-    JobInfo Job::runJob() { return _mock ? runJobMocked() : _pipeline.runPipeLine(_save); }
+    //  ==========================
+    //  ||    Helper Methods    ||
+    //  ==========================
+    void JobRunner::_resize(std::unique_ptr<char[]> &arr, size_t size) {
+        auto newArray = std::make_unique<char[]>(size * 2);
+        memcpy(newArray.get(), arr.get(), size);
 
-    JobInfo Job::runJobMocked() { return _pipeline.runPipeLineMocked(); }
-
-    void Job::addCommandToPipeline(Command* command) { _pipeline.addCommand(command); }
-
-    void Job::setJobToSave(bool save) { _save = save; }
-
-    void Job::setJobToMock(bool mock) { _mock = mock; }
-
-    /*
-     * Helper Methods
-     */
-    int forkCheckErrors() {
-        int const processID = fork();
-        if (processID < 0) { throw Util::CommanderException("Job Runner: error trying to fork"); }
-        return processID;
+        arr = std::move(newArray);
     }
 
-    void resizeArrayHelper(char** arr, size_t currentSize) {
-        char* newArr = new char[currentSize * 2];
-        memcpy(newArr, *arr, currentSize * sizeof(char));
-        delete[] * arr;
-        *arr = newArr;
+    int JobRunner::_fork() {
+        int pid = fork();
+        if (pid < 0) {
+            throw Util::CommanderException("Job Runner: Error forking");
+        }
+        return pid;
     }
-
-}  // namespace jobRunner
+}  // namespace JobRunner

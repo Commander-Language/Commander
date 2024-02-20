@@ -1,6 +1,6 @@
 /**
  * @file job_runner.hpp
- * @brief Job Runner header
+ * @brief Definitions for job runner classes: Process and JobRunner
  * @details A job could be one command or a pipeline of commands.
  *          Examples of a job could be:
  *              1) ls -la
@@ -8,244 +8,233 @@
  *              3) `ls -la`
  *              4) cat text.txt &
  *
- *          Missing features/Known Bugs TODO:
- *              1) Backtick for pipeline bigger than one Ex. `ls -la | grep *.txt | head`
- *              2) Background job for pipeline bigger than one Ex. ls -la | grep *.txt | head &
- *              4) Need to gracefully exit pipeline if process fails in middle of pipeline
  */
 
 #ifndef JOBRUNNER_HPP
 #define JOBRUNNER_HPP
 
+#include <memory>
 #include <string>
 #include <tuple>
+#include <unistd.h>
 #include <vector>
 
-namespace jobRunner {
-
-    const int bufferSize = 4096;
-
+namespace JobRunner {
+    /**
+     * @brief Structure of job information
+     * @details A tuple containing the std output,
+     *          std error, and return code, in that order
+     */
     using JobInfo = std::tuple<std::string, std::string, int>;
-
     /**
-     * @brief Enum of types of commands
+     * @brief Types of processes
+     * @details External processes call programs in the system.
+     *          Builtins are called within (see builtins folder)
      */
-    enum commandType {
-        BACKGROUND,
-        BUILT_IN,
-        EXEC,
+    enum ProcessType : u_int8_t {
+        EXTERNAL,
+        BUILTIN,
     };
 
+    //  ==========================
+    //  ||   Process Struct     ||
+    //  ==========================
+
     /**
-     * @brief Helper class for a command struct.
-     * @details C functions like exec, use old style strings and string arrays, so use this class to easily use new c++
-     * strings/arrays and convert to old style C when needed
+     * @brief Represents a process to execute
      */
-    class CommandArgs {
-    private:
+    struct Process {
         /**
-         * @brief Vector to hold arguments to a string
+         * @brief Constructor for a pipeline of processes
+         * @param processes - A list of processes to link
+         * @details This links up the pipeline in the order given.
+         *          Use other constructor to create these processes.
          */
-        std::vector<std::string> _args;
-        /**
-         * @brief Vector to hold arguments to a string
-         * @details Like _cargs, but holds pointers of char
-         *          to be able to use in C functions
-         */
-        std::vector<char*> _cargs;
-
-    public:
-        /**
-         * @brief Add an arg
-         * @param  arg Argument of command to add to list of arguments
-         */
-        void addArg(const std::string& arg);
+        Process(std::vector<Process *> processes);
 
         /**
-         * @brief Get the list of arguments as C style array
+         * @brief Constructor
+         * @param isBackground - Sets if we run the process in the background (default to false)
+         * @param isSave - Sets if we save the output to a tuple (default to false)
          */
-        char** getCArgs();
+        Process(std::vector<std::string> args, ProcessType type, bool isBackground = false, bool isSave = false);
 
         /**
-         * @brief Get the list of arguments as C++ style vector
+         * @brief Destructor
          */
-        std::vector<std::string> getArgs();
+        ~Process() = default;
+
+        /**
+         * @brief Get the type of process
+         * @return Type of process this is
+         */
+        [[nodiscard]] ProcessType getType() const;
+
+        /**
+         * @brief Get the name of the process
+         * @return The name as a const char*
+         */
+        [[nodiscard]] const char *getName() const;
+
+        /**
+         * @brief The arguments for this process
+         * @details The first argument should be the name of the process.
+         */
+        std::vector<std::string> args;
+
+        /**
+         * @brief The type of this process
+         */
+        ProcessType type;
+
+        /**
+         * @brief The name of this process
+         */
+        std::string processName;
+
+        /**
+         * @brief Is a background process or not
+         */
+        bool background;
+
+        /**
+         * @brief Save return information or not
+         */
+        bool saveInfo;
+
+        /**
+         * @brief A linked-list of processes, that represents a pipe.
+         * @details Order of the linked-list is the order to execute and link pipes.
+         */
+        Process *pipe = nullptr;
+
+        /**
+         * @brief The size of the pipeline
+         */
+        size_t pipeSize = 1;
+
+        /**
+         * @brief Is this process at the start of the pipeline
+         */
+        bool isFirst = false;
+
+        /**
+         * @brief Is this process at the end of the pipeline
+         */
+        bool isLast = false;
     };
 
+    //  ==========================
+    //  ||   JobRunner Class    ||
+    //  ==========================
+
     /**
-     * @brief Represents a command
+     * @brief Holds a process and determines how to execute it
      */
-    class Command {
-    private:
-        /**
-         * @brief Helper method to execute a command
-         * @details Should be called in a fork
-         */
-        void _execCommand();
-
-        /**
-         * @brief Helper method to execute a builtin
-         * @details Should be called in a fork
-         */
-        void _execBuiltin();
-
-        /**
-         * @brief Type of command
-         */
-        const commandType _type;
-
-        /**
-         * @brief Arguments to a command
-         */
-        CommandArgs _args;
-
-        /**
-         * @brief Name of command
-         */
-        std::string _name;
-
+    class JobRunner {
     public:
         /**
          * @brief Constructor
-         * @param name The name of the command
-         * @param type Type of command
-         * @details Pushes the name of the command to the arguments,
-         *          since by convention the program name is the first argument
+         * @param process - The process being set to run
          */
-        Command(std::string name, commandType type);
+        JobRunner(Process *process);
 
         /**
-         * @brief Run this command
-         * @details Currently this should be run in a fork, but
-         *          might have to reconsider as we add more builtins
+         * @brief Destructor
          */
-        void runCommand();
+        ~JobRunner() = default;
 
         /**
-         * @brief Run this command, but return command information
-         * @details Should be called in the main parent process this function will deal with fork
+         * @return The job information
          */
-        JobInfo runCommandSave();
+        JobInfo execProcess();
 
-        /**
-         * @brief Add an argument to the command
-         * @param arg Argument of command to add
-         */
-        void addArg(const std::string& arg);
-
-        /**
-         * @brief Get args of command
-         * @details Just for mock (demo day)
-         */
-        CommandArgs getArgs();
-    };
-
-    /**
-     * @brief Represents a pipeline of commands
-     * @details A pipeline of commands can be of size one or more
-     */
-    class PipeCommands {
     private:
         /**
-         * @brief Vector of command pointers
+         * @details The process to execute
          */
-        std::vector<Command*> _pipeline;
+        Process *_process;
 
         /**
-         * @brief Helper for running a pipeline of size bigger than one
+         * @brief Executes a process
+         * @details Executes a builtin or external process.
+         *          This shouldn't return, so fork before calling if needed.
+         * @param process - the process to execute
+         * @param in - file descriptor to read from (for builtins)
+         * @param out - file descriptor to write to (for builtins)
          */
-        JobInfo _runPipeHelper();
-
-    public:
-        /**
-         * @brief Add a command to the pipeline
-         * @param command The command to be added
-         */
-        void addCommand(Command* command);
+        void _exec(Process *process);
 
         /**
-         * @brief Run the pipeline
-         * @param save Determine to save job information or not
+         * @brief Exectue a builtin command without returning
+         * @details Shouldn't return, so fork before calling if needed.
+         * @param process - The process to execute
+         * @param in - The file descriptor to read from (default std in)
+         * @param out - The file descriptor to write to (default std out)
          */
-        JobInfo runPipeLine(bool save);
+        void _execBuiltinNoReturn(Process *process, int in = STDIN_FILENO, int out = STDOUT_FILENO);
 
         /**
-         * @brief Run the pipeline mocked
-         * @details Just for mock (demo day)
+         * @brief Execute a builtin
+         * @param in - The file descriptor to read from (default std in)
+         * @param out - The file descriptor to write to (default std out)
+         * @return The job information
          */
-        JobInfo runPipeLineMocked();
+        JobInfo _execBuiltin(Process *, int in = STDIN_FILENO, int out = STDOUT_FILENO);
+
+        /**
+         * @brief Execute an external program without forking
+         * @details This shouldn't return, so fork before calling if needed.
+         * @param process - The process to execute
+         */
+        void _execNoFork(Process *process);
+
+        /**
+         * @brief Execute a external program with a fork
+         * @param process - The process to execute
+         * @return The job information
+         */
+        JobInfo _execFork(Process *process);
+
+        /**
+         * @brief Does piping of processes
+         * @details Should work with any order of builtin and external types.
+         *          Don't call a background process in here.
+         * @param process - The start process of the pipeline
+         * @return The job information of the last process if set to save
+         */
+        JobInfo _doPiping(Process *process);
+
+        /**
+         * @brief Execute a process in the background
+         * @param process - The process to execute
+         */
+        void _doBackground(Process *process);
+
+        /**
+         * @brief Set up process to be able to save return information from
+         * @param process - The process to execute
+         * @param partOfPipe - Is the process part of a pipe
+         *                     (if it is, should call this at end of pipe)
+         * @return The job information
+         */
+        JobInfo _doSaveInfo(Process *process, bool partOfPipe, int *fds = nullptr, size_t count = 0);
+
+        /**
+         * @brief Helper to resize a char array
+         * @details Create a new array of double size, copy contents
+         *          of old array and then set old array to new array
+         * @param array - The array to resize
+         * @param size - The current size of the array
+         */
+        void _resize(std::unique_ptr<char[]> &array, size_t size);
+
+        /**
+         * @brief A helper to do a fork with error checking
+         * @return The process ID of the forked child
+         */
+        int _fork();
     };
 
-    /**
-     * @brief Represents a job
-     * @details A job is a pipeline of commands and determines if we need to save
-     *          the returned information or not
-     */
-    class Job {
-    private:
-        /**
-         * @brief The pipeline of commands
-         */
-        PipeCommands _pipeline;
-
-        /**
-         * @brief Determine if we want to redirect job return information
-         */
-        bool _save = false;
-
-        /**
-         * @brief Determine if we want to mock the job
-         * @details Just for mock (demo day)
-         */
-        bool _mock = false;
-
-        /**
-         * @brief Run the job mocked
-         * @return Job Information (just return value in mock)
-         * @details Just for mock (demo day)
-         */
-        JobInfo runJobMocked();
-
-    public:
-        /**
-         * @brief Run the job
-         * @return Job Information of the job (empty if not set to save)
-         */
-        JobInfo runJob();
-
-        /**
-         * @brief Add a command to the pipeline
-         * @param command Command to add to pipeline
-         */
-        void addCommandToPipeline(Command* command);
-
-        /**
-         * @brief Set if job should return job information
-         * @param save Set true or false to save job info
-         */
-        void setJobToSave(bool save);
-
-        /**
-         * @brief Set to mock a job instead of doing it ourselves
-         * @param mock A bool determining to mock the job or not
-         * @details Just for mock (demo day)
-         */
-        void setJobToMock(bool mock);
-    };
-
-    /**
-     * @brief fork() with error handling
-     */
-    int forkCheckErrors();
-
-    /**
-     * @brief Resize the given array
-     * @param arr Array to be resized
-     * @param currentSize Number of elements in the array
-     * @details Creates a new array of double size, then copies old array data to it.
-     *          Then set the old array to this new array.
-     */
-    void resizeArrayHelper(char** arr, size_t currentSize);
-
-}  // namespace jobRunner
+}  // namespace JobRunner
 #endif
