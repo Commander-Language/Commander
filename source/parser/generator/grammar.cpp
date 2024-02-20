@@ -300,7 +300,18 @@ namespace Parser {
                 {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE}}, makeNode("VarExpr", {castNode("Variable", 0)})}},
                 //  (EXPR) -> (STRING)
                 {{{ASTNodeType::EXPR, {ASTNodeType::STRING}}, makeNode("StringExpr", {castNode("String", 0)})}},
-
+                //  (EXPR) -> [SCAN] (EXPR)
+                {{ASTNodeType::EXPR, {TokenType::SCAN, ASTNodeType::EXPR}},
+                 makeNode("ScanExpr", {castNode("Expr", 1)})},
+                //  (EXPR) -> [SCAN] [LPAREN] (EXPR) [RPAREN]
+                {{ASTNodeType::EXPR, {TokenType::SCAN, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
+                 makeNode("ScanExpr", {castNode("Expr", 2)})},
+                //  (EXPR) -> [READ] (EXPR)
+                {{ASTNodeType::EXPR, {TokenType::READ, ASTNodeType::EXPR}},
+                 makeNode("ReadExpr", {castNode("Expr", 1)})},
+                //  (EXPR) -> [READ] [LPAREN] (EXPR) [RPAREN]
+                {{ASTNodeType::EXPR, {TokenType::READ, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
+                 makeNode("ReadExpr", {castNode("Expr", 2)})},
 
                 //  ===================
                 //  ||  Statements:  ||
@@ -330,6 +341,15 @@ namespace Parser {
                 {{{ASTNodeType::STMT,
                    {TokenType::PRINTLN, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, TokenType::SEMICOLON}},
                   makeNode("PrintlnStmt", {castNode("Expr", 2)})}},
+                //  (STMT) -> [WRITE] (EXPR) [TO] (EXPR) [SEMICOLON]
+                {{ASTNodeType::STMT,
+                  {TokenType::WRITE, ASTNodeType::EXPR, TokenType::TO, ASTNodeType::EXPR, TokenType::SEMICOLON}},
+                 makeNode("WriteStmt", {castNode("Expr", 1), castNode("Expr", 3)})},
+                //  (STMT) -> [WRITE] [LPAREN] (EXPR) [COMMA] (EXPR) [RPAREN] [SEMICOLON]
+                {{ASTNodeType::STMT,
+                  {TokenType::READ, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::COMMA, ASTNodeType::EXPR,
+                   TokenType::RPAREN, TokenType::SEMICOLON}},
+                 makeNode("WriteStmt", {castNode("Expr", 2), castNode("Expr", 4)})},
 
                 //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT,
