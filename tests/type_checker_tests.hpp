@@ -7,7 +7,6 @@
 #ifndef COMMANDER_TYPE_CHECKER_TESTS_HPP
 #define COMMANDER_TYPE_CHECKER_TESTS_HPP
 
-#include "parser_tests.hpp"
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type_checker.hpp"
 #include <gtest/gtest.h>
@@ -21,6 +20,11 @@ template<typename TType>
 std::shared_ptr<TType> makeType() {
     return std::make_shared<TType>();
 }
+
+/**
+ * Parser used in the tests (initialized here to prevent initializing it for every test)
+ */
+Parser::Parser parser;
 
 /**
  * Type checker used in the tests (initialized here to prevent initializing it for every test)
@@ -68,5 +72,13 @@ INSTANTIATE_TEST_SUITE_P(TypeCheckerTestFiles, TypeCheckerFailTests,
  * @param filePath The file path
  */
 void lexParseAndTypeCheck(const std::string& filePath);
+
+/**
+ * @brief Takes in an ASTNodeList, and ensures they match what is contained in the expected output string
+ *
+ * @param nodes The ASTNodeList
+ * @param expectedOutput The string containing the expected S-Expression output
+ */
+void expectOutputEqualsSExpressions(const Parser::ASTNodeList& nodes, const std::string& expectedOutput);
 
 #endif  // COMMANDER_TYPE_CHECKER_TESTS_HPP

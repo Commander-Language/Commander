@@ -184,7 +184,7 @@ target_link_libraries(parserTests lexer parser type_checker GTest::gtest_main)
 gtest_discover_tests(parserTests)
 
 add_executable(typeCheckerTests tests/type_checker_tests.cpp)
-target_link_libraries(typeCheckerTests lexer type_checker GTest::gtest_main)
+target_link_libraries(typeCheckerTests lexer parser type_checker GTest::gtest_main)
 gtest_discover_tests(typeCheckerTests)
 
 add_executable(symbolTableTests tests/symbol_table_tests.cpp)

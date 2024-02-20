@@ -7,6 +7,13 @@
 
 #include "type_checker_tests.hpp"
 
+void expectOutputEqualsSExpressions(const Parser::ASTNodeList& nodes, const std::string& expectedOutput) {
+    // TODO: Add test util class that include all test helpers
+    std::ostringstream builder;
+    for (const Parser::ASTNodePtr& node : nodes) builder << node->sExpression() << "\n";
+    EXPECT_EQ(expectedOutput, builder.str());
+}
+
 void lexParseAndTypeCheck(const std::string& filePath) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, filePath);
