@@ -11,6 +11,7 @@
 #include <string>
 #include "source/type_checker/type.hpp"
 #include <functional>
+#include <math.h>
 
 namespace Function {
 
@@ -62,7 +63,7 @@ namespace Function {
             {"parseBool", getFunctionTy(INT, BOOL)},    {"parseBool", getFunctionTy(FLOAT, BOOL)},
             {"parseBool", getFunctionTy(BOOL, BOOL)},   {"parseBool", getFunctionTy(STRING, BOOL)},
             {"print", getFunctionTy(STRING, VOID)},     {"toString", getFunctionTy(INT, STRING)},
-            {"println", getFunctionTy(STRING, VOID)}};
+            {"println", getFunctionTy(STRING, VOID)}}; //TODO: methods which use same name but different type?
 
     /* ========== Implementations ========== */
     std::vector<std::any> VOID_RETURN;
@@ -96,6 +97,138 @@ namespace Function {
     TypeChecker::CommanderTuple print(TypeChecker::CommanderString string);
 
     TypeChecker::CommanderString toString(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat sqrt(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat sqrt(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat ln(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat ln(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat log(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat log(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderInt abs(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat abs(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderInt floor(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderInt floor(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderInt ceil(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderInt ceil(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderInt round(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderInt round(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat sin(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat sin(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat cos(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat cos(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat tan(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat tan(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat csc(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat csc(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat sec(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat sec(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat cot(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat cot(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat sinh(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat sinh(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat cosh(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat cosh(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat tanh(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat tanh(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat csch(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat csch(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat sech(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat sech(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat coth(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat coth(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arcsin(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arcsin(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arccos(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arccos(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arctan(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arctan(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arccsc(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arccsc(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arcsec(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arcsec(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arccot(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arccot(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arcsinh(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arcsinh(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arccosh(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arccosh(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arctanh(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arctanh(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arccsch(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arccsch(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arcsech(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arcsech(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat arccoth(TypeChecker::CommanderInt value);
+
+    TypeChecker::CommanderFloat arccoth(TypeChecker::CommanderFloat value);
+
+    TypeChecker::CommanderFloat random();
+
+    TypeChecker::CommanderInt time();
+
+    TypeChecker::CommanderTuple date();
+
+    void sleep(TypeChecker::CommanderInt timeToSleep);
 
     struct AnyCallable
     {
