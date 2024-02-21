@@ -12,6 +12,7 @@
 #include "source/type_checker/type.hpp"
 #include <functional>
 #include <math.h>
+#include <chrono>
 
 namespace Function {
 
