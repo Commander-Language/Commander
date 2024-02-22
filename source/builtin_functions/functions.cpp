@@ -31,7 +31,7 @@ TypeChecker::CommanderInt Function::parseBoolAsInt(TypeChecker::CommanderBool va
 }
 
 TypeChecker::CommanderInt Function::parseStringAsInt(TypeChecker::CommanderString string) {
-    return -1; //TODO
+    return (TypeChecker::CommanderInt) stoi(string);
 }
 
 TypeChecker::CommanderFloat Function::parseIntAsFloat(TypeChecker::CommanderInt number) {
@@ -47,7 +47,7 @@ TypeChecker::CommanderFloat Function::parseBoolAsFloat(TypeChecker::CommanderBoo
 }
 
 TypeChecker::CommanderFloat Function::parseStringAsFloat(TypeChecker::CommanderString string) {
-    return -1.0; //TODO
+    return (TypeChecker::CommanderFloat) stod(string);
 }
 
 TypeChecker::CommanderBool Function::parseIntAsBool(TypeChecker::CommanderInt number) {
@@ -326,11 +326,23 @@ TypeChecker::CommanderFloat Function::random() {
 }
 
 TypeChecker::CommanderInt Function::time() {
-    //TODO
+    std::chrono::system_clock::time_point timeMethodCalled = std::chrono::system_clock::now();
+    std::chrono::system_clock::duration epochTime = timeMethodCalled.time_since_epoch();
+    return epochTime.count() * std::chrono::system_clock::period::num / std::chrono::system_clock::period::den; //returns seconds since epoch time
 }
 
 TypeChecker::CommanderTuple Function::date() {
-    //TODO
+    TypeChecker::CommanderTuple dataToReturn;
+
+    std::chrono::system_clock::time_point timeMethodCalled = std::chrono::system_clock::now();
+    std::time_t end_time = std::chrono::system_clock::to_time_t(timeMethodCalled);
+    std::string timeAndDate = std::ctime(&end_time);
+
+    //string r = s1.substr(3, 2);
+    dataToReturn.push_back(std::make_any<TypeChecker::CommanderString>(timeAndDate.substr(0, 3))); //should be the current day (e.g. Mon)
+    dataToReturn.push_back(std::make_any<TypeChecker::CommanderString>(timeAndDate.substr(4, 3))); //should be the month (e.g. Nov)
+    dataToReturn.push_back(std::make_any<TypeChecker::CommanderInt>(stoi(timeAndDate.substr(8, 2)))); //should be the date (e.g. 30)
+    dataToReturn.push_back(std::make_any<TypeChecker::CommanderInt>(stoi(timeAndDate.substr(20, 4)))); //should be the year (e.g. 2024)
 }
 
 void Function::sleep(TypeChecker::CommanderInt timeToSleep) {
