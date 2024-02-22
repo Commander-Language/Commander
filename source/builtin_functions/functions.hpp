@@ -52,6 +52,7 @@ namespace Function {
     const TypeChecker::FloatTyPtr FLOAT = std::make_shared<TypeChecker::FloatTy>();
     const TypeChecker::BoolTyPtr BOOL = std::make_shared<TypeChecker::BoolTy>();
     const TypeChecker::StringTyPtr STRING = std::make_shared<TypeChecker::StringTy>();
+    const TypeChecker::TupleTyPtr TUPLE = std::make_shared<TypeChecker::TupleTy>(std::vector<TypeChecker::TyPtr> {}); //TODO: Types may be incorrect
 
     /**
      * The built in function types
@@ -64,7 +65,41 @@ namespace Function {
             {"parseBool", getFunctionTy(INT, BOOL)},    {"parseBool", getFunctionTy(FLOAT, BOOL)},
             {"parseBool", getFunctionTy(BOOL, BOOL)},   {"parseBool", getFunctionTy(STRING, BOOL)},
             {"print", getFunctionTy(STRING, VOID)},     {"toString", getFunctionTy(INT, STRING)},
-            {"println", getFunctionTy(STRING, VOID)}}; //TODO: methods which use same name but different type?
+            {"println", getFunctionTy(STRING, VOID)},   {"sqrt", getFunctionTy(INT, FLOAT)},
+            {"sqrt", getFunctionTy(FLOAT, FLOAT)},      {"ln", getFunctionTy(INT, FLOAT)},
+            {"ln", getFunctionTy(FLOAT, FLOAT)},        {"log", getFunctionTy(INT, FLOAT)},
+            {"log", getFunctionTy(FLOAT, FLOAT)},       {"abs", getFunctionTy(INT, INT)},
+            {"abs", getFunctionTy(FLOAT, FLOAT)},       {"floor", getFunctionTy(INT, INT)},
+            {"floor", getFunctionTy(FLOAT, INT)},       {"ceil", getFunctionTy(INT, INT)},
+            {"ceil", getFunctionTy(FLOAT, INT)},        {"round", getFunctionTy(INT, INT)},
+            {"round", getFunctionTy(FLOAT, INT)},       {"sin", getFunctionTy(INT, FLOAT)},
+            {"sin", getFunctionTy(FLOAT, FLOAT)},       {"cos", getFunctionTy(INT, FLOAT)},
+            {"cos", getFunctionTy(FLOAT, FLOAT)},       {"tan", getFunctionTy(INT, FLOAT)},
+            {"tan", getFunctionTy(FLOAT, FLOAT)},       {"csc", getFunctionTy(INT, FLOAT)},
+            {"csc", getFunctionTy(FLOAT, FLOAT)},       {"sec", getFunctionTy(INT, FLOAT)},
+            {"sec", getFunctionTy(FLOAT, FLOAT)},       {"cot", getFunctionTy(INT, FLOAT)},
+            {"cot", getFunctionTy(FLOAT, FLOAT)},       {"sinh", getFunctionTy(INT, FLOAT)},
+            {"sinh", getFunctionTy(FLOAT, FLOAT)},      {"cosh", getFunctionTy(INT, FLOAT)},
+            {"cosh", getFunctionTy(FLOAT, FLOAT)},      {"tanh", getFunctionTy(INT, FLOAT)},
+            {"tanh", getFunctionTy(FLOAT, FLOAT)},      {"csch", getFunctionTy(INT, FLOAT)},
+            {"csch", getFunctionTy(FLOAT, FLOAT)},      {"sech", getFunctionTy(INT, FLOAT)},
+            {"sech", getFunctionTy(FLOAT, FLOAT)},      {"coth", getFunctionTy(INT, FLOAT)},
+            {"coth", getFunctionTy(FLOAT, FLOAT)},      {"arcsin", getFunctionTy(INT, FLOAT)},
+            {"arcsin", getFunctionTy(FLOAT, FLOAT)},    {"arccos", getFunctionTy(INT, FLOAT)},
+            {"arccos", getFunctionTy(FLOAT, FLOAT)},    {"arctan", getFunctionTy(INT, FLOAT)},
+            {"arctan", getFunctionTy(FLOAT, FLOAT)},    {"arccsc", getFunctionTy(INT, FLOAT)},
+            {"arccsc", getFunctionTy(FLOAT, FLOAT)},    {"arcsec", getFunctionTy(INT, FLOAT)},
+            {"arcsec", getFunctionTy(FLOAT, FLOAT)},    {"arccot", getFunctionTy(INT, FLOAT)},
+            {"arccot", getFunctionTy(FLOAT, FLOAT)},    {"arcsinh", getFunctionTy(INT, FLOAT)},
+            {"arcsinh", getFunctionTy(FLOAT, FLOAT)},   {"arccosh", getFunctionTy(INT, FLOAT)},
+            {"arccosh", getFunctionTy(FLOAT, FLOAT)},   {"arctanh", getFunctionTy(INT, FLOAT)},
+            {"arctanh", getFunctionTy(FLOAT, FLOAT)},   {"arccsch", getFunctionTy(INT, FLOAT)},
+            {"arccsch", getFunctionTy(FLOAT, FLOAT)},   {"arcsech", getFunctionTy(INT, FLOAT)},
+            {"arcsech", getFunctionTy(FLOAT, FLOAT)},   {"arccoth", getFunctionTy(INT, FLOAT)},
+            {"arccoth", getFunctionTy(FLOAT, FLOAT)},   {"random", getFunctionTy(VOID, FLOAT)},
+            {"time", getFunctionTy(VOID, INT)},         {"date", getFunctionTy(VOID, TUPLE)},
+            {"sleep", getFunctionTy(INT, VOID)}
+        };
 
     /* ========== Implementations ========== */
     std::vector<std::any> VOID_RETURN;
