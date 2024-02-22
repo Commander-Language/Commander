@@ -9,6 +9,7 @@
 #include "source/builtin_functions/functions.hpp"
 #include "source/parser/parser.hpp"
 #include "source/flow_controller/types.hpp"
+#include "source/job_runner/job_runner.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/util/print.hpp"
 #include "source/type_checker/type.hpp"
@@ -67,7 +68,8 @@ namespace FlowController {
         /**
          * @brief Run a command
          */
-        void _runCommand();
+        JobRunner::JobInfo
+        _runCommand(JobRunner::Process* process);
 
         /**
          * @brief Helper to interpret binding nodes

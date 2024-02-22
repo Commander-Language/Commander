@@ -16,6 +16,7 @@
 
 #include "flow_controller.hpp"
 #include "source/job_runner/job_runner.hpp"
+#include "source/parser/ast_node.hpp"
 #include "source/util/commander_exception.hpp"
 #include "source/flow_controller/types.hpp"
 
@@ -102,15 +103,46 @@ namespace FlowController {
     }
 
     void FlowController::_cmd(const Parser::CmdNodePtr &node) {
+        std::vector<std::string> args;
+
         switch (node->nodeType()) {
             case Parser::CMD_CMD: {
                 auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+                // Parse the arguments
+                for (auto &arg: cmd->arguments) {
+                    if (arg->nodeType() == Parser::ASTNodeType::VAR_EXPR) {
+                        auto var = std::static_pointer_cast<Parser::VarExprNode>(arg);
+                        args.emplace_back(_expr(var)->getStringRepresentation());
+                    } else if (arg->nodeType() == Parser::ASTNodeType::STRING) {
+                        auto string = std::static_pointer_cast<Parser::StringNode>(arg);
+                        args.emplace_back(_string(string));
+                    }
+                }
+                // Run the command
+                JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, false, false);
+                _runCommand(&job);
             }
             case Parser::PIPE_CMD: {
-                auto pipeCmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+                auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(node);
+                std::vector<std::vector<std::string>> pipeArgs;
+
             }
             case Parser::ASYNC_CMD: {
-                auto asyncCmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+                auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
+                auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(asyncCmd->cmd);
+                // Parse the arguments
+                for (auto &arg: cmd->arguments) {
+                    if (arg->nodeType() == Parser::ASTNodeType::VAR_EXPR) {
+                        auto var = std::static_pointer_cast<Parser::VarExprNode>(arg);
+                        args.emplace_back(_expr(var)->getStringRepresentation());
+                    } else if (arg->nodeType() == Parser::ASTNodeType::STRING) {
+                        auto string = std::static_pointer_cast<Parser::StringNode>(arg);
+                        args.emplace_back(_string(string));
+                    }
+                }
+                // Run the command
+                JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, true, false);
+                _runCommand(&job);
             }
             default:
                 // TODO: Better error
@@ -1034,8 +1066,10 @@ namespace FlowController {
     //  ==========================
     //  ||   Helper Methods     ||
     //  ==========================
-    void FlowController::_runCommand() {
-        // TODO: Implement
+    JobRunner::JobInfo
+    FlowController::_runCommand(JobRunner::Process *process) {
+        JobRunner::JobRunner runner(process);
+        return runner.execProcess();
     }
 
     void FlowController::_setVariable(const std::string &name, const CommanderTypePtr &value) {
