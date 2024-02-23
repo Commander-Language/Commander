@@ -164,7 +164,7 @@ add_library(parser source/parser/parser.cpp
         source/util/commander_exception.cpp
 )
 add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp)
-add_library(flow_controller source/flow_controller/flow_controller.cpp)
+add_library(flow_controller source/flow_controller/flow_controller.cpp source/util/print.cpp)
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 add_library(job_runner source/job_runner/job_runner.cpp)
 

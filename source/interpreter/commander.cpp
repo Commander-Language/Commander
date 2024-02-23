@@ -3,6 +3,7 @@
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type_checker.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/util/print.hpp"
 #include <fstream>
 #include <iostream>
 #include <ncurses.h>
@@ -12,17 +13,17 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, fileName);
     if (std::find(arguments.begin(), arguments.end(), "-l") != arguments.end()) {
-        for (const Lexer::TokenPtr& token : tokens) printw("%s\n", token->toString().c_str());
+        for (const Lexer::TokenPtr& token : tokens) Util::println(token->toString());
         return;
     }
     Parser::ASTNodeList nodes = parser.parse(tokens);
     if (std::find(arguments.begin(), arguments.end(), "-p") != arguments.end()) {
-        for (const Parser::ASTNodePtr& node : nodes) printw("%s\n", node->sExpression().c_str());
+        for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
     typeChecker.typeCheck(nodes);
     if (std::find(arguments.begin(), arguments.end(), "-t") != arguments.end()) {
-        for (const Parser::ASTNodePtr& node : nodes) printw("%s\n", node->sExpression().c_str());
+        for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
     FlowController::FlowController controller(nodes);
@@ -30,15 +31,6 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
 }
 
 int main(int argc, char** argv) {
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
-    curs_set(2);
-    printw("Commander Language Version Beta\n");
-    printw("Basic REPL for Commander scripting language\n");
-    printw(">> ");
-    refresh();
     std::vector<std::string> arguments;
     for (int i = 1; i < argc; i++) { arguments.push_back(argv[i]); }
     try {
@@ -51,6 +43,16 @@ int main(int argc, char** argv) {
             interpretFile(file, arguments, parser, typeChecker);
             return 0;
         }
+        Util::usingNCurses = true;
+        initscr();
+        cbreak();
+        noecho();
+        keypad(stdscr, TRUE);
+        curs_set(2);
+        Util::println("Commander Language Version Beta");
+        Util::println("Basic REPL for Commander scripting language");
+        Util::print(">> ");
+        refresh();
         std::string currentLine;
         std::vector<std::string> lines;
         int line = 0;
@@ -61,7 +63,7 @@ int main(int argc, char** argv) {
                 case KEY_ENTER:
                 case '\n':
                     move(getcury(stdscr), 3);
-                    printw("%s\n", currentLine.c_str());
+                    Util::println(currentLine);
                     if (currentLine == "exit") {
                         endwin();
                         return 0;
@@ -77,10 +79,10 @@ int main(int argc, char** argv) {
                             tmp.close();  // close file here to save changes
                             interpretFile(tmpFileName, arguments, parser, typeChecker);
                             std::remove(tmpFileName.c_str());
-                        } catch (const Util::CommanderException& err) { printw("%s\n", err.what()); }
+                        } catch (const Util::CommanderException& err) { Util::println(err.what()); }
                     }
                     i = 0;
-                    printw(">> ");
+                    Util::print(">> ");
                     if (lines.size() == 0 || lines.back() != currentLine) { lines.push_back(currentLine); }
                     line = lines.size();
                     currentLine.clear();
@@ -97,7 +99,7 @@ int main(int argc, char** argv) {
                     currentLine = lines[--line];
                     move(getcury(stdscr), 3);
                     clrtoeol();
-                    printw("%s", currentLine.c_str());
+                    Util::print(currentLine);
                     i = currentLine.size();
                     break;
                 case KEY_DOWN:
@@ -109,7 +111,7 @@ int main(int argc, char** argv) {
                     }
                     move(getcury(stdscr), 3);
                     clrtoeol();
-                    printw("%s", currentLine.c_str());
+                    Util::print(currentLine);
                     i = currentLine.size();
                     break;
                 case KEY_LEFT:

@@ -259,15 +259,15 @@ namespace FlowController {
                 switch (expr->expression->type->getType()) {
                     case TypeChecker::INT:
                         // TODO: Implement method that stringifies a int
-                        printw("%ld\n", std::any_cast<CommanderInt>(value));
+                        Util::println(std::to_string(std::any_cast<CommanderInt>(value)));
                         break;
                     case TypeChecker::FLOAT:
                         // TODO: Implement method that stringifies a float
-                        printw("%f\n", std::any_cast<double_t>(value));
+                        Util::println(std::to_string(std::any_cast<double_t>(value)));
                         break;
                     case TypeChecker::BOOL:
                         // TODO: Implement method that stringifies a bool
-                        printw("%s\n", std::any_cast<CommanderBool>(value) ? "true" : "false");
+                        Util::println(std::to_string(std::any_cast<CommanderBool>(value)));
                         break;
                     case TypeChecker::TUPLE:
                         // TODO: Implement method that stringifies a tuple and call it here

@@ -1,6 +1,6 @@
 /**
- * @file commander_exception.cpp
- * @brief Contains implementation for functions in commander_exception.hpp
+ * @file commander_exception.hpp
+ * @brief Contains commander exception
  *
  */
 
