@@ -330,9 +330,9 @@ namespace Parser {
                 {{{ASTNodeType::STMTS, {ASTNodeType::STMTS, ASTNodeType::STMT}},
                   makeNode("Stmts", {castNode("Stmts", 0) + "->stmts", castNode("Stmt", 1)})}},
 
-                //  (STMT) -> [IMPORT] (EXPR) [SEMICOLON]
-                {{{ASTNodeType::STMT, {TokenType::IMPORT, ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                  makeNode("ImportStmt", {castNode("Expr", 1)})}},
+                //  (STMT) -> [IMPORT] (STRING) [SEMICOLON]
+                {{{ASTNodeType::STMT, {TokenType::IMPORT, ASTNodeType::STRING, TokenType::SEMICOLON}},
+                  makeNode("ImportStmt", {castNode("String", 1)})}},
 
                 //  (STMT) -> [PRINT] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::PRINT, ASTNodeType::EXPR, TokenType::SEMICOLON}},

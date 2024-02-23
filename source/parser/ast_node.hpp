@@ -1887,14 +1887,14 @@ namespace Parser {
         /**
          * The expression that evaluates to a string file path
          */
-        ExprNodePtr filePath;
+        StringNodePtr filePath;
 
         /**
          * @brief Class constructor.
          *
-         * @param filePath The string expression that evaluates to a file path
+         * @param filePath The string that evaluates to a file path
          */
-        ImportStmtNode(ExprNodePtr filePath);
+        ImportStmtNode(StringNodePtr filePath);
 
         /**
          * @brief Gets the string representation of the node as an s-expression

@@ -648,7 +648,7 @@ namespace Parser {
         return "(AliasStmtNode " + alias + " " + command->sExpression() + ")";
     }
 
-    ImportStmtNode::ImportStmtNode(ExprNodePtr filePath) : filePath(std::move(filePath)) {}
+    ImportStmtNode::ImportStmtNode(StringNodePtr filePath) : filePath(std::move(filePath)) {}
 
     std::string ImportStmtNode::sExpression() const { return "(ImportStmtNode " + filePath->sExpression() + ")"; }
 
