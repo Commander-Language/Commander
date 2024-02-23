@@ -2,251 +2,134 @@
 //  ||  Program:  ||
 //  ================
 
-//  (PRGM) -> (STMTS)
+(PRGM) -> (STMTS)
 
 
 //  =================
 //  ||  Bindings:  ||
 //  =================
 
-//  (BINDINGS) -> (BINDING)
-//  (BINDINGS) -> (BINDINGS) [COMMA] (BINDING)
+(BINDINGS) -> (BINDING)
+(BINDINGS) -> (BINDINGS) [COMMA] (BINDING)
 
-//  (BINDING) -> [VARIABLE]
-//  (BINDING) -> [VARIABLE] [COLON] (TYPE)
+(BINDING) -> [VARIABLE]
+(BINDING) -> [VARIABLE] [COLON] (TYPE)
 
 
 //  =================
 //  ||  Commands:  ||
 //  =================
 
-//  (CMD) -> (CMD) [AMPERSAND]
-//  (CMD) -> (CMD) [PIPE] (CMD)
+(CMD) -> (CMD) [AMPERSAND]
+(CMD) -> (CMD) [PIPE] (CMD)
 
-//  (CMD) -> [CMDSTRINGVAL]
-//  (CMD) -> (STRING)
-//  (CMD) -> (VARIABLE)
-//  (CMD) -> (CMD) [CMDSTRINGVAL]
-//  (CMD) -> (CMD) (STRING)
-//  (CMD) -> (CMD) (VARIABLE)
+(CMD) -> [CMDSTRINGVAL]
+(CMD) -> (STRING)
+(CMD) -> (VARIABLE)
+(CMD) -> (CMD) [CMDSTRINGVAL]
+(CMD) -> (CMD) (STRING)
+(CMD) -> (CMD) (VARIABLE)
 
 
 //  ====================
 //  ||  Expressions:  ||
 //  ====================
 
-//  (EXPRS) -> (EXPR)
-//  (EXPRS) -> (EXPRS) [COMMA] (EXPR)
+(EXPRS) -> (EXPR)
+(EXPRS) -> (EXPRS) [COMMA] (EXPR)
 
-//  (EXPR) -> [INTVAL]
-//  (EXPR) -> [FLOATVAL]
-//  (EXPR) -> [TRUE]
-//  (EXPR) -> [FALSE]
+(EXPR) -> [INTVAL]
+(EXPR) -> [FLOATVAL]
+(EXPR) -> [TRUE]
+(EXPR) -> [FALSE]
 
-//  (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
-//  (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
-//  (EXPR) -> (EXPR) [DIVIDE] (EXPR)
-//  (EXPR) -> (EXPR) [MODULO] (EXPR)
-//  (EXPR) -> (EXPR) [ADD] (EXPR)
-//  (EXPR) -> (EXPR) [MINUS] (EXPR)
+(EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
+(EXPR) -> (EXPR) [MULTIPLY] (EXPR)
+(EXPR) -> (EXPR) [DIVIDE] (EXPR)
+(EXPR) -> (EXPR) [MODULO] (EXPR)
+(EXPR) -> (EXPR) [ADD] (EXPR)
+(EXPR) -> (EXPR) [MINUS] (EXPR)
 
-//  (EXPR) -> (EXPR) [LESSER] (EXPR)
-//  (EXPR) -> (EXPR) [LESSER_EQUAL] (EXPR)
-//  (EXPR) -> (EXPR) [GREATER] (EXPR)
-//  (EXPR) -> (EXPR) [GREATER_EQUAL] (EXPR)
-//  (EXPR) -> (EXPR) [DOUBLE_EQUALS] (EXPR)
-//  (EXPR) -> (EXPR) [NOT_EQUALS] (EXPR)
+(EXPR) -> (EXPR) [LESSER] (EXPR)
+(EXPR) -> (EXPR) [LESSER_EQUAL] (EXPR)
+(EXPR) -> (EXPR) [GREATER] (EXPR)
+(EXPR) -> (EXPR) [GREATER_EQUAL] (EXPR)
+(EXPR) -> (EXPR) [DOUBLE_EQUALS] (EXPR)
+(EXPR) -> (EXPR) [NOT_EQUALS] (EXPR)
 
-//  (EXPR) -> (EXPR) [AND] (EXPR)
-//  (EXPR) -> (EXPR) [OR] (EXPR)
+(EXPR) -> (EXPR) [AND] (EXPR)
+(EXPR) -> (EXPR) [OR] (EXPR)
 
-//  (EXPR) -> (EXPR) [QUESTION] (EXPR) [COLON] (EXPR)
+(EXPR) -> (EXPR) [QUESTION] (EXPR) [COLON] (EXPR)
 
-//  (EXPR) -> (VARIABLE) [EXPONENTIATE_EQUALS] (EXPR)
-//  (EXPR) -> (VARIABLE) [MULTIPLY_EQUALS] (EXPR)
-//  (EXPR) -> (VARIABLE) [DIVIDE_EQUALS] (EXPR)
-//  (EXPR) -> (VARIABLE) [MODULO_EQUALS] (EXPR)
-//  (EXPR) -> (VARIABLE) [ADD_EQUALS] (EXPR)
-//  (EXPR) -> (VARIABLE) [MINUS_EQUALS] (EXPR)
-//  (EXPR) -> (VARIABLE) [EQUALS] (EXPR)
+(EXPR) -> (VARIABLE) [EXPONENTIATE_EQUALS] (EXPR)
+(EXPR) -> (VARIABLE) [MULTIPLY_EQUALS] (EXPR)
+(EXPR) -> (VARIABLE) [DIVIDE_EQUALS] (EXPR)
+(EXPR) -> (VARIABLE) [MODULO_EQUALS] (EXPR)
+(EXPR) -> (VARIABLE) [ADD_EQUALS] (EXPR)
+(EXPR) -> (VARIABLE) [MINUS_EQUALS] (EXPR)
+(EXPR) -> (VARIABLE) [EQUALS] (EXPR)
 
-//  (EXPR) -> [LPAREN] EXPR [RPAREN]
+(EXPR) -> [LPAREN] (EXPR) [RPAREN]
 
-//  (EXPR) -> VARIABLE
+(EXPR) -> (VARIABLE)
+(EXPR) -> (STRING)
+(EXPR) -> [SCAN] (EXPR)
+(EXPR) -> [SCAN] [LPAREN] (EXPR) [RPAREN]
+(EXPR) -> [READ] (EXPR)
+(EXPR) -> [READ] [LPAREN] (EXPR) [RPAREN]
 
 
 //  ===================
 //  ||  Statements:  ||
 //  ===================
 
-//  (STMTS) -> (STMT)
-//  (STMTS) -> (STMTS) (STMT)
+(STMTS) -> (STMT)
+(STMTS) -> (STMTS) (STMT)
 
-//  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
+(STMT) -> [IMPORT] (EXPR)
 
-//  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
-//  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
+(STMT) -> [PRINT] (EXPR) [SEMICOLON]
+(STMT) -> [PRINT] [LPAREN] (EXPR) [RPAREN] [SEMICOLON]
+(STMT) -> [PRINTLN] (EXPR) [SEMICOLON]
+(STMT) -> [PRINTLN] [LPAREN] (EXPR) [RPAREN] [SEMICOLON]
 
-//  (STMT) -> [FOR] [LPAREN] (STMT) [SEMICOLON] (EXPR) [SEMICOLON] (STMT) [RPAREN] (STMT)
+(STMT) -> [WRITE] (EXPR) [TO] (EXPR) [SEMICOLON]
+(STMT) -> [WRITE] [LPAREN] (EXPR) [COMMA] (EXPR) [RPAREN] [SEMICOLON]
 
-//  (STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
-//  (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN]
+(STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
 
-//  (STMT) -> [LCURLY] (STMTS) [RCURLY]
+(STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
+(STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
 
-//  (STMT) -> (CMD) [SEMICOLON]
-//  (STMT) -> (EXPR) [SEMICOLON]
+(STMT) -> [FOR] [LPAREN] (STMT) [SEMICOLON] (EXPR) [SEMICOLON] (STMT) [RPAREN] (STMT)
+
+(STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
+(STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN]
+
+(STMT) -> [LCURLY] (STMTS) [RCURLY]
+
+(STMT) -> (CMD) [SEMICOLON]
+(STMT) -> (EXPR) [SEMICOLON]
 
 
 //  ================
 //  ||  Strings:  ||
 //  ================
 
-//  (STRING) -> [STRINGVAL]
+(STRING) -> [STRINGVAL]
 
 
 //  ==============
 //  ||  Types:  ||
 //  ==============
 
-//  (TYPE) -> [INT]
-//  (TYPE) -> [FLOAT]
+(TYPE) -> [INT]
+(TYPE) -> [FLOAT]
 
 
 //  ==================
 //  ||  Variables:  ||
 //  ==================
 
-//  (VARIABLE) -> [VARIABLE]
-
-
-
-
-
-
-
-
-
-
-#  ============
-#  ||  Old:  ||
-#  ============
-
-# Meta:
-# -----
-
-PRGM -> STMTS .
-
-BINDINGS -> BINDING .
-BINDINGS -> BINDINGS "[COMMA]" BINDING .
-
-EXPRS -> EXPR .
-EXPRS -> EXPRS "[COMMA]" EXPR .
-
-STMTS -> STMT .
-STMTS -> STMTS STMT .
-
-STRING -> "[STRINGVAL]" .
-
-
-# Bindings:
-# ---------
-
-BINDING -> "[VARIABLE]" .
-BINDING -> "[VARIABLE]" "[COLON]" TYPE .
-
-
-# Expressions:
-# ------------
-
-EXPR -> "[INTVAL]" .
-EXPR -> "[FLOATVAL]" .
-EXPR -> "[TRUE]" .
-EXPR -> "[FALSE]" .
-
-EXPR -> STRING .
-
-EXPR -> "[LSQUARE]" EXPRS "[RSQUARE]" .
-EXPR -> "[LPAREN]" EXPRS "[RPAREN]" .
-
-EXPR -> EXPR "[QUESTION]" EXPR "[COLON]" EXPR .
-
-EXPR -> "[BACKTICK]" CMD "[BACKTICK]" .
-
-EXPR -> "[LPAREN]" BINDINGS "[RPAREN]" "[COLON]" TYPE STMT .
-
-EXPR -> "[LPAREN]" BINDINGS "[RPAREN]" STMT .
-
-#  EXPR -> "[LPAREN]" BINDINGS "[RPAREN]" "[COLON]" TYPE EXPR .
-
-#  EXPR -> "[LPAREN]" BINDINGS "[RPAREN]" EXPR .
-
-EXPR -> EXPR "[INCREMENT]" .
-EXPR -> EXPR "[DECREMENT]" .
-
-EXPR -> "[NOT]" EXPR .
-EXPR -> "[INCREMENT]" EXPR .
-EXPR -> "[DECREMENT]" EXPR .
-
-EXPR -> EXPR "[EXPONENTIATE]" EXPR .
-EXPR -> EXPR "[MULTIPLY]" EXPR .
-EXPR -> EXPR "[DIVIDE]" EXPR .
-EXPR -> EXPR "[MODULO]" EXPR .
-EXPR -> EXPR "[ADD]" EXPR .
-EXPR -> EXPR "[MINUS]" EXPR .
-EXPR -> EXPR "[LESSER]" EXPR .
-EXPR -> EXPR "[LESSER_EQUAL]" EXPR .
-EXPR -> EXPR "[GREATER]" EXPR .
-EXPR -> EXPR "[GREATER_EQUAL]" EXPR .
-EXPR -> EXPR "[DOUBLE_EQUALS]" EXPR .
-EXPR -> EXPR "[NOT_EQUALS]" EXPR .
-EXPR -> EXPR "[AND]" EXPR .
-EXPR -> EXPR "[OR]" EXPR .
-EXPR -> VARIABLE "[EXPONENTIATE_EQUALS]" EXPR .
-EXPR -> VARIABLE "[MULTIPLY_EQUALS]" EXPR .
-EXPR -> VARIABLE "[DIVIDE_EQUALS]" EXPR .
-EXPR -> VARIABLE "[MODULO_EQUALS]" EXPR .
-EXPR -> VARIABLE "[ADD_EQUALS]" EXPR .
-EXPR -> VARIABLE "[MINUS_EQUALS]" EXPR .
-EXPR -> VARIABLE "[EQUALS]" EXPR .
-
-
-# Commands:
-# ---------
-
-CMD -> "[CMDSTRINGVAL]" .
-CMD -> STRING .
-CMD -> VARIABLE .
-CMD -> CMD "[CMDSTRINGVAL]" .
-CMD -> CMD STRING .
-CMD -> CMD VARIABLE .
-CMD -> CMD "[AMPERSAND]" .
-CMD -> CMD "[PIPE]" CMD .
-
-
-#  Statements:
-#  -----------
-
-STMT -> "[ALIAS]" "[VARIABLE]" "[EQUALS]" CMD "[SEMICOLON]" .
-STMT -> "[IF]" "[LPAREN]" EXPR "[RPAREN]" STMT "[ELSE]" STMT .
-STMT -> "[IF]" "[LPAREN]" EXPR "[RPAREN]" STMT .
-STMT -> "[FOR]" "[LPAREN]" STMT "[SEMICOLON]" EXPR "[SEMICOLON]" STMT "[RPAREN]" STMT .
-STMT -> "[WHILE]" "[LPAREN]" EXPR "[RPAREN]" STMT .
-STMT -> "[DO]" STMT "[WHILE]" "[LPAREN]" EXPR "[RPAREN]" .
-STMT -> "[LCURLY]" STMTS "[RCURLY]" .
-
-STMT -> CMD "[SEMICOLON]" .
-STMT -> EXPR .
-
-
-# Types:
-# ------
-
-TYPE -> "[INT]" .
-TYPE -> "[FLOAT]" .
-
-
-# Variables:
-# ----------
-
-VARIABLE -> "[VARIABLE]" .
+(VARIABLE) -> [VARIABLE]

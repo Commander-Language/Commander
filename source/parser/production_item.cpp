@@ -4,6 +4,9 @@
  */
 
 #include "production_item.hpp"
+#include "ast_node.hpp"
+
+#include <utility>
 
 namespace Parser {
 

@@ -7,9 +7,11 @@
 #include "grammar.hpp"
 #include "kernel.hpp"
 
+#include "source/parser/ast_node.hpp"
 #include "source/util/combine_hashes.hpp"
 #include "source/util/generated_map.hpp"
 
+#include <cstddef>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -38,10 +40,10 @@ namespace Parser {
         //  A `KernelSet` simply represents an ordered set of kernels.
         using KernelSet = std::set<Kernel>;
         struct HashKernelSet {
-            size_t operator()(const KernelSet& kernelSet) const {
-                const std::hash<Kernel> hash;
-                std::vector<size_t> hashes(kernelSet.size());
-                size_t index = 0;
+            std::size_t operator()(const KernelSet& kernelSet) const {
+                constexpr std::hash<Kernel> hash;
+                std::vector<std::size_t> hashes(kernelSet.size());
+                std::size_t index = 0;
                 for (const Kernel& kernel : kernelSet) hashes[index++] = hash(kernel);
                 return Util::combineHashes(hashes);
             }
@@ -53,7 +55,7 @@ namespace Parser {
         Util::GeneratedMap<ASTNodeType, KernelSet> nodeGenerators {[&](const ASTNodeType& nodeType) {
             KernelSet generators;
 
-            for (size_t ruleInd = 0; ruleInd < grammar.rules.size(); ++ruleInd) {
+            for (std::size_t ruleInd = 0; ruleInd < grammar.rules.size(); ++ruleInd) {
                 //  If this rule generates the given `nodeType`, then make a `Kernel` for that rule.
                 if (grammar.rules[ruleInd].result == nodeType) {
                     //  The kernel is made of the rule, the rule's priority,
@@ -77,16 +79,16 @@ namespace Parser {
                     visitedNodeTypes.insert(item.nodeType);
 
                     for (const auto& kernel : nodeGenerators[item.nodeType]) {
-                        const auto& first = kernel.rule.components[0];
+                        const auto& firstItem = kernel.rule.components[0];
 
-                        if (first.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
-                            tokenSet.insert(first.tokenType);
+                        if (firstItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
+                            tokenSet.insert(firstItem.tokenType);
                             continue;
                         }
 
-                        if (visitedNodeTypes.count(first.nodeType) == 0) {
-                            visitedNodeTypes.insert(first.nodeType);
-                            getFirstRec(first);
+                        if (visitedNodeTypes.count(firstItem.nodeType) == 0) {
+                            visitedNodeTypes.insert(firstItem.nodeType);
+                            getFirstRec(firstItem);
                         }
                     }
                 }
@@ -117,13 +119,13 @@ namespace Parser {
         //      (EXPR) ->   |  (EXPR) [*] (EXPR)   <-- (Index 0)
         Util::GeneratedMap<Kernel, KernelSet> singleClosure {[&](const Kernel& kernel) {
             KernelSet usedKernels {kernel};
-            std::vector<Kernel> kernelVec {kernel};
+            std::vector kernelVec {kernel};
 
-            for (size_t index = 0; index < kernelVec.size(); ++index) {
+            for (std::size_t index = 0; index < kernelVec.size(); ++index) {
                 const Kernel& currentKernel = kernelVec[index];
                 if (currentKernel.index == currentKernel.rule.components.size()) continue;
                 const std::vector<GrammarEntry> remaining {currentKernel.rule.components.begin()
-                                                                   + (long)currentKernel.index,
+                                                                   + static_cast<long>(currentKernel.index),
                                                            currentKernel.rule.components.end()};
                 const GrammarEntry& currentItem = currentKernel.rule.components[currentKernel.index];
                 if (currentItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
@@ -161,7 +163,7 @@ namespace Parser {
         std::vector<KernelSet> states {{{initialKernel}}};
 
         //  This is a mapping from a set of kernels to the `StateNum` ID of that state.
-        Util::GeneratedMap<KernelSet, size_t, HashKernelSet> stateNums {[&](const KernelSet& kernelSet) {
+        Util::GeneratedMap<KernelSet, std::size_t, HashKernelSet> stateNums {[&](const KernelSet& kernelSet) {
             states.push_back(kernelSet);
             return states.size() - 1;
         }};
@@ -177,14 +179,14 @@ namespace Parser {
             //  This is a record of all `Kernel`s that we can reach after shifting.
             std::unordered_map<TokenType, KernelSet> shifts;
             //  Record the rule priorities for disambiguation.
-            std::unordered_map<TokenType, size_t> shiftPriorities;
+            std::unordered_map<TokenType, std::size_t> shiftPriorities;
 
             //  From this state, upon encountering a certain `TokenType`,
             //  we may be able to reduce the top items on the stack into a new AST node.
             //  This is a record of all `Kernel`s that we can reach after reducing.
             std::unordered_map<TokenType, Kernel> reductions;
             //  Record the rule priorities for disambiguation.
-            std::unordered_map<TokenType, size_t> reductionPriorities;
+            std::unordered_map<TokenType, std::size_t> reductionPriorities;
 
             //  From this state, after reducing a certain `ASTNodeType`,
             //  we should move to a different state.
@@ -230,32 +232,21 @@ namespace Parser {
 
             //  At this point, we know the set of kernels reachable for every possible action from this state.
             //  Set the transitions in this `Generator`'s fields.
-            for (const auto& shift : shifts) {
-                //  Upon encountering this token type from this state, we do a shift.
-                const auto& tokenType = shift.first;
-                //  The set of kernels that we can reach after performing our shift action.
-                const auto& nextKernels = shift.second;
-
+            for (const auto& [tokenType, nextKernels] : shifts) {
                 //  Make a new `SHIFT` action to the state ID of the next state.
-                _nextAction[stateNum][tokenType] = _pair("ParserAction::ActionType::SHIFT", stateNums[nextKernels]);
+                _nextAction[stateNum][tokenType] = _pair("ParserAction::ActionType::SHIFT",
+                                                         std::to_string(stateNums[nextKernels]));
             }
 
             //  For each node type after doing a reduction action, add that to the `_nextState` table.
-            for (const auto& nextState : nextStates) {
-                const auto& nodeType = nextState.first;
-                const auto& nextKernels = nextState.second;
-
+            for (const auto& [nodeType, nextKernels] : nextStates) {
                 _nextState[stateNum][nodeType] = stateNums[nextKernels];
             }
 
             //  Finally, add the reduction actions.
-            for (const auto& reduction : reductions) {
-                //  Upon encountering this token type from this state, we do a reduction.
-                const auto& tokenType = reduction.first;
-                //  The relevant kernel with the grammar rule to apply.
-                const auto& kernel = reduction.second;
+            for (const auto& [tokenType, kernel] : reductions) {
                 //  The priority of this reduction.
-                const auto& priority = reductionPriorities[reduction.first];
+                const auto& priority = reductionPriorities[tokenType];
 
                 //  If this kernel was actually the goal rule, then accept. This was a successful parse.
                 if (kernel.rule == goalRule) {
@@ -272,8 +263,6 @@ namespace Parser {
                 }
             }
         }
-
-        std::cout << states.size() << "\n";
     }
 
     void Generator::generateSource(std::ostream& output) const {
@@ -338,15 +327,11 @@ namespace Parser {
         // clang-format on
 
         std::vector<std::string> allNextActions(_nextAction.size());
-        for (const auto& statePair : _nextAction) {
-            const size_t allActionsIndex = statePair.first;
-            const std::unordered_map<TokenType, ParserActionInitializer> statesNextActions = statePair.second;
+        for (const auto& [allActionsIndex, statesNextActions] : _nextAction) {
             std::vector<std::string> statesNextActionStrings(statesNextActions.size());
-            size_t statesNextActionIndex = 0;
-            for (const auto& tokenPair : statesNextActions) {
-                const TokenType tokenType = tokenPair.first;
-                const ParserActionInitializer& action = tokenPair.second;
-                const std::string tokenTypeString = "Lexer::tokenType::" + Lexer::tokenTypeToString(tokenType);
+            std::size_t statesNextActionIndex = 0;
+            for (const auto& [tokenType, action] : statesNextActions) {
+                const std::string tokenTypeString = "Lexer::tokenType::" + tokenTypeToString(tokenType);
                 statesNextActionStrings[statesNextActionIndex++] = _pair(tokenTypeString, action);
             }
             allNextActions[allActionsIndex] = _wrap(_join(", ", statesNextActionStrings));
@@ -354,19 +339,17 @@ namespace Parser {
 
         std::vector<std::string> allNextStates(_nextState.size());
         {
-            size_t allStatesIndex = 0;
-            for (const auto& statePair : _nextState) {
-                const StateNum state = statePair.first;
-                const std::unordered_map<ASTNodeType, StateNum> statesNextStates = statePair.second;
+            std::size_t allStatesIndex = 0;
+            for (const auto& [state, statesNextStates] : _nextState) {
                 std::vector<std::string> statesNextStatesStrings(statesNextStates.size());
-                size_t statesNextActionIndex = 0;
-                for (const auto& nodePair : statesNextStates) {
-                    const ASTNodeType nodeType = nodePair.first;
-                    const StateNum nextState = nodePair.second;
+                std::size_t statesNextActionIndex = 0;
+                for (const auto& [nodeType, nextState] : statesNextStates) {
                     const std::string tokenTypeString = "ASTNodeType::" + nodeTypeToString(nodeType);
-                    statesNextStatesStrings[statesNextActionIndex++] = _pair(tokenTypeString, nextState);
+                    statesNextStatesStrings[statesNextActionIndex++] = _pair(tokenTypeString,
+                                                                             std::to_string(nextState));
                 }
-                allNextStates[allStatesIndex++] = _pair(state, _wrap(_join(", ", statesNextStatesStrings)));
+                allNextStates[allStatesIndex++] = _pair(std::to_string(state),
+                                                        _wrap(_join(", ", statesNextStatesStrings)));
             }
         }
 
@@ -394,13 +377,8 @@ namespace Parser {
 
     std::string Generator::_wrap(const std::string& contents) { return "{" + contents + "}"; }
 
-    template<typename LeftType, typename RightType>
-    std::string Generator::_pair(const LeftType& left, const RightType& right) {
-        std::stringstream leftStream;
-        leftStream << left;
-        std::stringstream rightStream;
-        rightStream << right;
-        return _wrap(_join(", ", {leftStream.str(), rightStream.str()}));
+    std::string Generator::_pair(const std::string& left, const std::string& right) {
+        return _wrap(_join(", ", {left, right}));
     }
 
 }  //  namespace Parser

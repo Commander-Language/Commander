@@ -6,14 +6,17 @@
 
 #include "parser_action.hpp"
 
+#include <cstddef>
+#include <utility>
+
 namespace Parser {
 
     ParserAction::ParserAction() : actionType(ERROR) {}
 
-    ParserAction::ParserAction(Parser::ParserAction::ActionType actionType, Parser::ParserAction::StateNum nextState)
+    ParserAction::ParserAction(const ActionType actionType, const StateNum nextState)
         : actionType(actionType), nextState(nextState) {}
 
-    ParserAction::ParserAction(size_t ruleSize, Parser::ParserAction::NodeConstructor nodeConstructor)
+    ParserAction::ParserAction(const std::size_t ruleSize, NodeConstructor nodeConstructor)
         : actionType(REDUCE), ruleSize(ruleSize), nodeConstructor(std::move(nodeConstructor)) {}
 
 }  //  namespace Parser

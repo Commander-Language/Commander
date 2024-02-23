@@ -7,21 +7,24 @@
 
 #include "grammar.hpp"
 
+#include "source/parser/ast_node.hpp"
 #include "source/util/combine_hashes.hpp"
 
+#include <cstddef>
+#include <functional>
 #include <ostream>
 #include <utility>
 #include <vector>
 
 namespace Parser {
 
-    Kernel::Kernel() : priority(), index(), lookahead() {}
+    Kernel::Kernel() : rule(), priority(), index(), lookahead() {}
 
-    Kernel::Kernel(GrammarRule rule, size_t priority, size_t index, TokenType lookahead)
+    Kernel::Kernel(GrammarRule rule, const std::size_t priority, const std::size_t index, const TokenType lookahead)
         : rule(std::move(rule)), priority(priority), index(index), lookahead(lookahead) {}
 
     bool Kernel::operator==(const Kernel& other) const {
-        const std::hash<Kernel> hash;
+        constexpr std::hash<Kernel> hash;
         return hash(*this) == hash(other);
     }
 
@@ -35,12 +38,12 @@ namespace Parser {
 
     std::ostream& operator<<(std::ostream& stream, const Kernel& kernel) {
         stream << "{" << kernel.priority << ": (" << nodeTypeToString(kernel.rule.result) << ") -> ";
-        for (size_t ind = 0; ind < kernel.rule.components.size(); ++ind) {
+        for (std::size_t ind = 0; ind < kernel.rule.components.size(); ++ind) {
             if (ind == kernel.index) stream << "* ";
             stream << kernel.rule.components[ind] << " ";
         }
         if (kernel.index == kernel.rule.components.size()) stream << "* ";
-        stream << ":: [" << Lexer::tokenTypeToString(kernel.lookahead) << "]}";
+        stream << ":: [" << tokenTypeToString(kernel.lookahead) << "]}";
 
         return stream;
     }
@@ -50,7 +53,7 @@ namespace Parser {
 
 namespace std {
 
-    size_t hash<Parser::Kernel>::operator()(const Parser::Kernel& kernel) const {
+    std::size_t hash<Parser::Kernel>::operator()(const Parser::Kernel& kernel) const {
         return Util::combineHashes(kernel.priority, kernel.index, kernel.lookahead, kernel.rule);
     }
 

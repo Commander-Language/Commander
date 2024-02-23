@@ -6,6 +6,8 @@
 
 #include "ast_node.hpp"
 #include "source/type_checker/type.hpp"
+
+#include <sstream>
 #include <utility>
 
 namespace Parser {
@@ -24,6 +26,8 @@ namespace Parser {
                 return "PIPE_CMD";
             case ASYNC_CMD:
                 return "ASYNC_CMD";
+            case TIMEOUT_CMD:
+                return "TIMEOUT_CMD";
             case INT_EXPR:
                 return "INT_EXPR";
             case FLOAT_EXPR:
@@ -50,10 +54,16 @@ namespace Parser {
                 return "BINOP_EXPR";
             case CALL_EXPR:
                 return "CALL_EXPR";
+            case API_CALL_EXPR:
+                return "API_CALL_EXPR";
             case LAMBDA_EXPR:
                 return "LAMBDA_EXPR";
             case CMD_EXPR:
                 return "CMD_EXPR";
+            case SCAN_EXPR:
+                return "SCAN_EXPR";
+            case READ_EXPR:
+                return "READ_EXPR";
             case EXPR:
                 return "EXPR";
             case EXPRS:
@@ -78,6 +88,18 @@ namespace Parser {
                 return "EXPR_STMT";
             case ALIAS_STMT:
                 return "ALIAS_STMT";
+            case IMPORT_STMT:
+                return "IMPORT_STMT";
+            case PRINT_STMT:
+                return "PRINT_STMT";
+            case PRINTLN_STMT:
+                return "PRINTLN_STMT";
+            case WRITE_STMT:
+                return "WRITE_STMT";
+            case TYPE_STMT:
+                return "TYPE_STMT";
+            case FUNCTION_STMT:
+                return "FUNCTION_STMT";
             case STMT:
                 return "STMT";
             case STMTS:
@@ -213,7 +235,7 @@ namespace Parser {
 
     std::string TypeNode::getTypeString() const { return TypeChecker::getTypeString(type); }
 
-    BindingNode::BindingNode(std::string variable, Parser::TypeNodePtr type)
+    BindingNode::BindingNode(std::string variable, TypeNodePtr type)
         : variable(std::move(variable)), type(std::move(type)) {}
 
     ASTNodeType BindingNode::nodeType() const { return ASTNodeType::BINDING; }
@@ -245,6 +267,8 @@ namespace Parser {
 
     ASTNodeType AsyncCmdNode::nodeType() const { return ASTNodeType::ASYNC_CMD; }
 
+    ASTNodeType TimeoutCmdNode::nodeType() const { return ASTNodeType::TIMEOUT_CMD; }
+
     ASTNodeType IntExprNode::nodeType() const { return ASTNodeType::INT_EXPR; }
 
     ASTNodeType FloatExprNode::nodeType() const { return ASTNodeType::FLOAT_EXPR; }
@@ -271,9 +295,15 @@ namespace Parser {
 
     ASTNodeType CallExprNode::nodeType() const { return ASTNodeType::CALL_EXPR; }
 
+    ASTNodeType ApiCallExprNode::nodeType() const { return ASTNodeType::API_CALL_EXPR; }
+
     ASTNodeType LambdaExprNode::nodeType() const { return ASTNodeType::LAMBDA_EXPR; }
 
     ASTNodeType CmdExprNode::nodeType() const { return ASTNodeType::CMD_EXPR; }
+
+    ASTNodeType ScanExprNode::nodeType() const { return ASTNodeType::SCAN_EXPR; }
+
+    ASTNodeType ReadExprNode::nodeType() const { return ASTNodeType::READ_EXPR; }
 
     ExprsNode::ExprsNode(ExprNodePtr expr) : exprs({std::move(expr)}) {}
 
@@ -308,9 +338,21 @@ namespace Parser {
 
     ASTNodeType AliasStmtNode::nodeType() const { return ASTNodeType::ALIAS_STMT; }
 
-    StmtsNode::StmtsNode(Parser::StmtNodePtr stmt) : stmts({std::move(stmt)}) {}
+    ASTNodeType ImportStmtNode::nodeType() const { return ASTNodeType::IMPORT_STMT; }
 
-    StmtsNode::StmtsNode(const std::vector<StmtNodePtr>& stmts, Parser::StmtNodePtr stmt)
+    ASTNodeType PrintStmtNode::nodeType() const { return ASTNodeType::PRINT_STMT; }
+
+    ASTNodeType PrintlnStmtNode::nodeType() const { return ASTNodeType::PRINTLN_STMT; }
+
+    ASTNodeType WriteStmtNode::nodeType() const { return ASTNodeType::WRITE_STMT; }
+
+    ASTNodeType TypeStmtNode::nodeType() const { return ASTNodeType::TYPE_STMT; }
+
+    ASTNodeType FunctionStmtNode::nodeType() const { return ASTNodeType::FUNCTION_STMT; }
+
+    StmtsNode::StmtsNode(StmtNodePtr stmt) : stmts({std::move(stmt)}) {}
+
+    StmtsNode::StmtsNode(const std::vector<StmtNodePtr>& stmts, StmtNodePtr stmt)
         : stmts(concat(stmts, std::move(stmt))) {}
 
     ASTNodeType StmtsNode::nodeType() const { return ASTNodeType::STMTS; }
@@ -352,9 +394,9 @@ namespace Parser {
     //  ||  Commands:  ||
     //  =================
 
-    CmdCmdNode::CmdCmdNode(Parser::ASTNodePtr argument) : arguments({std::move(argument)}) {}
+    CmdCmdNode::CmdCmdNode(ASTNodePtr argument) : arguments({std::move(argument)}) {}
 
-    CmdCmdNode::CmdCmdNode(Parser::CmdNodePtr command, Parser::ASTNodePtr argument)
+    CmdCmdNode::CmdCmdNode(CmdNodePtr command, ASTNodePtr argument)
         : arguments([&]() {
               //  FIXME: assumes the command is a `CmdCmd`.
               std::vector<ASTNodePtr> result = std::reinterpret_pointer_cast<CmdCmdNode>(command)->arguments;
@@ -368,11 +410,18 @@ namespace Parser {
         return "(CmdCmdNode" + builder.str() + ")";
     }
 
-    AsyncCmdNode::AsyncCmdNode(Parser::CmdNodePtr cmd) : cmd(std::move(cmd)) {}
+    AsyncCmdNode::AsyncCmdNode(CmdNodePtr cmd) : cmd(std::move(cmd)) {}
 
     std::string AsyncCmdNode::sExpression() const { return "(AsyncCmdNode " + cmd->sExpression() + ")"; }
 
-    PipeCmdNode::PipeCmdNode(Parser::CmdNodePtr leftCmd, Parser::CmdNodePtr rightCmd)
+    TimeoutCmdNode::TimeoutCmdNode(ExprNodePtr timeout, CmdNodePtr cmd)
+        : timeout(std::move(timeout)), cmd(std::move(cmd)) {}
+
+    std::string TimeoutCmdNode::sExpression() const {
+        return "(TimeoutCmdNode " + timeout->sExpression() + cmd->sExpression() + ")";
+    }
+
+    PipeCmdNode::PipeCmdNode(CmdNodePtr leftCmd, CmdNodePtr rightCmd)
         : leftCmd(std::move(leftCmd)), rightCmd(std::move(rightCmd)) {}
 
     std::string PipeCmdNode::sExpression() const {
@@ -396,7 +445,7 @@ namespace Parser {
         return "(FloatExprNode " + std::to_string(value) + getTypeString() + ")";
     }
 
-    StringExprNode::StringExprNode(Parser::StringNodePtr stringNode) : stringNode(std::move(stringNode)) {}
+    StringExprNode::StringExprNode(StringNodePtr stringNode) : stringNode(std::move(stringNode)) {}
 
     std::string StringExprNode::sExpression() const {
         return "(StringExpressionNode " + stringNode->sExpression() + getTypeString() + ")";
@@ -409,7 +458,7 @@ namespace Parser {
         return "(BoolExprNode " + val + getTypeString() + ")";
     }
 
-    VarExprNode::VarExprNode(Parser::VariableNodePtr variable) : variable(std::move(variable)) {}
+    VarExprNode::VarExprNode(VariableNodePtr variable) : variable(std::move(variable)) {}
 
     std::string VarExprNode::sExpression() const {
         return "(VarExprNode " + variable->sExpression() + getTypeString() + ")";
@@ -424,7 +473,7 @@ namespace Parser {
         return builder.str() + getTypeString() + ")";
     }
 
-    ArrayIndexExprNode::ArrayIndexExprNode(Parser::ExprNodePtr array, const std::vector<ExprNodePtr>& indexExprs)
+    ArrayIndexExprNode::ArrayIndexExprNode(ExprNodePtr array, const std::vector<ExprNodePtr>& indexExprs)
         : array(std::move(array)), indexExprs(indexExprs) {}
 
     std::string ArrayIndexExprNode::sExpression() const {
@@ -444,15 +493,14 @@ namespace Parser {
         return builder.str() + getTypeString() + ")";
     }
 
-    TupleIndexExprNode::TupleIndexExprNode(Parser::ExprNodePtr tuple, Parser::ExprNodePtr index)
+    TupleIndexExprNode::TupleIndexExprNode(ExprNodePtr tuple, ExprNodePtr index)
         : tuple(std::move(tuple)), index(std::move(index)) {}
 
     std::string TupleIndexExprNode::sExpression() const {
         return "(TupleIndexExprNode " + tuple->sExpression() + " " + index->sExpression() + getTypeString() + ")";
     }
 
-    TernaryExprNode::TernaryExprNode(Parser::ExprNodePtr condition, Parser::ExprNodePtr trueExpr,
-                                     Parser::ExprNodePtr falseExpr)
+    TernaryExprNode::TernaryExprNode(ExprNodePtr condition, ExprNodePtr trueExpr, ExprNodePtr falseExpr)
         : condition(std::move(condition)), trueExpr(std::move(trueExpr)), falseExpr(std::move(falseExpr)) {}
 
     std::string TernaryExprNode::sExpression() const {
@@ -460,18 +508,16 @@ namespace Parser {
              + falseExpr->sExpression() + getTypeString() + ")";
     }
 
-    UnOpExprNode::UnOpExprNode(Parser::UnOpType opType, Parser::ExprNodePtr expr)
-        : opType(opType), expr(std::move(expr)) {}
+    UnOpExprNode::UnOpExprNode(UnOpType opType, ExprNodePtr expr) : opType(opType), expr(std::move(expr)) {}
 
     std::string UnOpExprNode::sExpression() const {
         return "(UnOpExprNode " + unOpToString(opType) + " " + expr->sExpression() + getTypeString() + ")";
     }
 
-    BinOpExprNode::BinOpExprNode(Parser::ExprNodePtr leftExpr, Parser::BinOpType opType, Parser::ExprNodePtr rightExpr)
-        : leftExpr(std::move(leftExpr)), opType(opType), rightExpr(std::move(rightExpr)) {}
+    BinOpExprNode::BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr)
+        : opType(opType), leftExpr(std::move(leftExpr)), rightExpr(std::move(rightExpr)) {}
 
-    BinOpExprNode::BinOpExprNode(Parser::VariableNodePtr leftVariable, Parser::BinOpType opType,
-                                 Parser::ExprNodePtr rightExpr)
+    BinOpExprNode::BinOpExprNode(VariableNodePtr leftVariable, BinOpType opType, ExprNodePtr rightExpr)
         : leftVariable(std::move(leftVariable)), opType(opType), rightExpr(std::move(rightExpr)) {}
 
     std::string BinOpExprNode::sExpression() const {
@@ -480,22 +526,29 @@ namespace Parser {
              + binOpToString(opType) + " " + rightExpr->sExpression() + getTypeString() + ")";
     }
 
-    CallExprNode::CallExprNode(Parser::ExprNodePtr func, const std::vector<ExprNodePtr>& args)
+    CallExprNode::CallExprNode(ExprNodePtr func, const std::vector<ExprNodePtr>& args)
         : func(std::move(func)), args(args) {}
 
     std::string CallExprNode::sExpression() const {
         std::stringstream builder;
         for (const ExprNodePtr& arg : args) { builder << " " << arg->sExpression(); }
-        return "(CallExprNode " + func->sExpression() + builder.str() + ")";
+        return "(CallExprNode " + func->sExpression() + builder.str() + getTypeString() + ")";
     }
 
-    LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, Parser::ExprNodePtr body,
-                                   Parser::TypeNodePtr returnType)
+    ApiCallExprNode::ApiCallExprNode(ExprNodePtr expression, CallExprNodePtr function)
+        : expression(std::move(expression)), function(std::move(function)) {}
+
+    std::string ApiCallExprNode::sExpression() const {
+        return "(ApiCallExprNode " + expression->sExpression() + " " + function->sExpression() + getTypeString() + ")";
+    }
+
+    LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, ExprNodePtr body,
+                                   TypeNodePtr returnType)
         : bindings(bindings), body(std::make_shared<ReturnStmtNode>(std::move(body))),
           returnType(std::move(returnType)) {}
 
-    LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, Parser::StmtNodePtr body,
-                                   Parser::TypeNodePtr returnType)
+    LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, StmtNodePtr body,
+                                   TypeNodePtr returnType)
         : bindings(bindings), body(std::move(body)), returnType(std::move(returnType)) {}
 
     std::string LambdaExprNode::sExpression() const {
@@ -509,10 +562,22 @@ namespace Parser {
              + body->sExpression() + getTypeString() + ")";
     }
 
-    CmdExprNode::CmdExprNode(Parser::CmdNodePtr cmd) : cmd(std::move(cmd)) {}
+    CmdExprNode::CmdExprNode(CmdNodePtr cmd) : cmd(std::move(cmd)) {}
 
     std::string CmdExprNode::sExpression() const {
         return "(CmdExprNode " + cmd->sExpression() + getTypeString() + ")";
+    }
+
+    ScanExprNode::ScanExprNode(ExprNodePtr prompt) : prompt(std::move(prompt)) {}
+
+    std::string ScanExprNode::sExpression() const {
+        return "(ScanExprNode " + prompt->sExpression() + getTypeString() + ")";
+    }
+
+    ReadExprNode::ReadExprNode(ExprNodePtr filePath) : filePath(std::move(filePath)) {}
+
+    std::string ReadExprNode::sExpression() const {
+        return "(ReadExprNode " + filePath->sExpression() + getTypeString() + ")";
     }
 
 
@@ -521,7 +586,7 @@ namespace Parser {
     //  ===================
 
     IfStmtNode::IfStmtNode(const std::vector<ExprNodePtr>& conditions, std::vector<StmtNodePtr> trueStmts,
-                           Parser::StmtNodePtr falseStmt)
+                           StmtNodePtr falseStmt)
         : conditions(conditions), trueStmts(std::move(trueStmts)), falseStmt(std::move(falseStmt)) {}
 
     std::string IfStmtNode::sExpression() const {
@@ -533,8 +598,7 @@ namespace Parser {
         return "(IfStmtNode" + builder.str() + " " + falseStmt->sExpression() + ")";
     }
 
-    ForStmtNode::ForStmtNode(Parser::StmtNodePtr initial, Parser::ExprNodePtr condition, Parser::StmtNodePtr update,
-                             Parser::StmtNodePtr body)
+    ForStmtNode::ForStmtNode(StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update, StmtNodePtr body)
         : initial(std::move(initial)), condition(std::move(condition)), update(std::move(update)),
           body(std::move(body)) {}
 
@@ -543,21 +607,21 @@ namespace Parser {
              + " " + body->sExpression() + ")";
     }
 
-    WhileStmtNode::WhileStmtNode(Parser::ExprNodePtr condition, Parser::StmtNodePtr body)
+    WhileStmtNode::WhileStmtNode(ExprNodePtr condition, StmtNodePtr body)
         : condition(std::move(condition)), body(std::move(body)) {}
 
     std::string WhileStmtNode::sExpression() const {
         return "(WhileStmtNode " + condition->sExpression() + " " + body->sExpression() + ")";
     }
 
-    DoWhileStmtNode::DoWhileStmtNode(Parser::ExprNodePtr condition, Parser::StmtNodePtr body)
+    DoWhileStmtNode::DoWhileStmtNode(ExprNodePtr condition, StmtNodePtr body)
         : condition(std::move(condition)), body(std::move(body)) {}
 
     std::string DoWhileStmtNode::sExpression() const {
         return "(DoWhileStmtNode " + condition->sExpression() + " " + body->sExpression() + ")";
     }
 
-    ReturnStmtNode::ReturnStmtNode(Parser::ExprNodePtr retExpr) : retExpr(std::move(retExpr)) {}
+    ReturnStmtNode::ReturnStmtNode(ExprNodePtr retExpr) : retExpr(std::move(retExpr)) {}
 
     std::string ReturnStmtNode::sExpression() const { return "(ReturnStmtNode " + retExpr->sExpression() + ")"; }
 
@@ -569,19 +633,57 @@ namespace Parser {
         return "(ScopeStmtNode " + builder.str() + ")";
     }
 
-    CmdStmtNode::CmdStmtNode(Parser::CmdNodePtr command) : command(std::move(command)) {}
+    CmdStmtNode::CmdStmtNode(CmdNodePtr command) : command(std::move(command)) {}
 
     std::string CmdStmtNode::sExpression() const { return "(CmdStmtNode " + command->sExpression() + ")"; }
 
-    ExprStmtNode::ExprStmtNode(Parser::ExprNodePtr expression) : expression(std::move(expression)) {}
+    ExprStmtNode::ExprStmtNode(ExprNodePtr expression) : expression(std::move(expression)) {}
 
     std::string ExprStmtNode::sExpression() const { return "(ExprStmtNode " + expression->sExpression() + ")"; }
 
-    AliasStmtNode::AliasStmtNode(std::string alias, Parser::CmdNodePtr command)
+    AliasStmtNode::AliasStmtNode(std::string alias, CmdNodePtr command)
         : alias(std::move(alias)), command(std::move(command)) {}
 
     std::string AliasStmtNode::sExpression() const {
         return "(AliasStmtNode " + alias + " " + command->sExpression() + ")";
+    }
+
+    ImportStmtNode::ImportStmtNode(ExprNodePtr filePath) : filePath(std::move(filePath)) {}
+
+    std::string ImportStmtNode::sExpression() const { return "(ImportStmtNode " + filePath->sExpression() + ")"; }
+
+    PrintStmtNode::PrintStmtNode(ExprNodePtr expression) : expression(std::move(expression)) {}
+
+    std::string PrintStmtNode::sExpression() const { return "(PrintStmtNode " + expression->sExpression() + ")"; }
+
+    PrintlnStmtNode::PrintlnStmtNode(ExprNodePtr expression) : expression(std::move(expression)) {}
+
+    std::string PrintlnStmtNode::sExpression() const { return "(PrintlnStmtNode " + expression->sExpression() + ")"; }
+
+    WriteStmtNode::WriteStmtNode(ExprNodePtr fileData, ExprNodePtr filePath)
+        : fileData(std::move(fileData)), filePath(std::move(filePath)) {}
+
+    std::string WriteStmtNode::sExpression() const {
+        return "(WriteStmtNode " + fileData->sExpression() + " " + filePath->sExpression() + ")";
+    }
+
+    TypeStmtNode::TypeStmtNode(std::string alias, TypeNodePtr type) : alias(std::move(alias)), type(std::move(type)) {}
+
+    std::string TypeStmtNode::sExpression() const { return "(TypeStmtNode " + alias + " " + type->sExpression() + ")"; }
+
+    FunctionStmtNode::FunctionStmtNode(std::string name, const std::vector<BindingNodePtr>& bindings, StmtNodePtr body,
+                                       TypeNodePtr returnType)
+        : name(std::move(name)), bindings(bindings), body(std::move(body)), returnType(std::move(returnType)) {}
+
+    std::string FunctionStmtNode::sExpression() const {
+        std::stringstream bindingsBuilder;
+        bool first = true;
+        for (const BindingNodePtr& binding : bindings) {
+            bindingsBuilder << (first ? "" : " ") << binding->sExpression();
+            first = false;
+        }
+        return "(FunctionStmtNode " + name + " (" + bindingsBuilder.str() + ") " + returnType->sExpression() + " "
+             + body->sExpression() + ")";
     }
 
     std::string IntTypeNode::sExpression() const { return "(IntTypeNode" + getTypeString() + ")"; }
@@ -592,7 +694,7 @@ namespace Parser {
 
     std::string StringTypeNode::sExpression() const { return "(StringTypeNode" + getTypeString() + ")"; }
 
-    ArrayTypeNode::ArrayTypeNode(Parser::TypeNodePtr subtype) : subtype(std::move(subtype)) {}
+    ArrayTypeNode::ArrayTypeNode(TypeNodePtr subtype) : subtype(std::move(subtype)) {}
 
     std::string ArrayTypeNode::sExpression() const {
         return "(ArrayTypeNode " + subtype->sExpression() + getTypeString() + ")";

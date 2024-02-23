@@ -72,7 +72,17 @@ namespace TypeChecker {
             }
             case Parser::ASYNC_CMD: {
                 Parser::AsyncCmdNodePtr const asyncCommand = std::static_pointer_cast<Parser::AsyncCmdNode>(astNode);
-                return typeCheck(asyncCommand);
+                return typeCheck(asyncCommand->cmd);
+            }
+            case Parser::TIMEOUT_CMD: {
+                Parser::TimeoutCmdNodePtr const timeoutCommand = std::static_pointer_cast<Parser::TimeoutCmdNode>(
+                        astNode);
+                TyPtr const timeoutType = typeCheck(timeoutCommand->timeout);
+                if (!timeoutType || timeoutType->getType() != Type::INT) {
+                    // TODO: Improve error
+                    throw Util::CommanderException("Timeout should be an integer.");
+                }
+                return typeCheck(timeoutCommand->cmd);
             }
             case Parser::INT_EXPR: {
                 Parser::IntExprNodePtr const exprNode = std::static_pointer_cast<Parser::IntExprNode>(astNode);
@@ -331,6 +341,12 @@ namespace TypeChecker {
                 }
                 return (exprNode->type = functionTy->returnType);
             }
+            case Parser::API_CALL_EXPR: {
+                Parser::ApiCallExprNodePtr const exprNode = std::static_pointer_cast<Parser::ApiCallExprNode>(astNode);
+                if (exprNode->type) { return exprNode->type; }
+                exprNode->function->args.insert(exprNode->function->args.begin(), exprNode);
+                return (exprNode->type = typeCheck(exprNode->function));
+            }
             case Parser::LAMBDA_EXPR: {
                 Parser::LambdaExprNodePtr const exprNode = std::static_pointer_cast<Parser::LambdaExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
@@ -338,8 +354,8 @@ namespace TypeChecker {
                 for (const Parser::BindingNodePtr& binding : exprNode->bindings) {
                     bindings.push_back(typeCheck(binding));
                 }
-                // TODO: See if possible to check return type and return stmt match
-                TyPtr const returnType = typeCheck(exprNode->body);
+                TyPtr returnType = typeCheck(exprNode->returnType);
+                if (!returnType) { returnType = typeCheck(exprNode->body); }
                 return (exprNode->type = std::make_shared<FunctionTy>(bindings, returnType));
             }
             case Parser::CMD_EXPR: {
@@ -351,6 +367,28 @@ namespace TypeChecker {
                 contentTypes.push_back(std::make_shared<StringTy>());
                 contentTypes.push_back(std::make_shared<IntTy>());
                 return (exprNode->type = std::make_shared<TupleTy>(contentTypes));
+            }
+            case Parser::SCAN_EXPR: {
+                Parser::ScanExprNodePtr const exprNode = std::static_pointer_cast<Parser::ScanExprNode>(astNode);
+                if (exprNode->type) { return exprNode->type; }
+                TyPtr const promptType = typeCheck(exprNode->prompt);
+                if (!promptType || promptType->getType() != Type::STRING) {
+                    // TODO: Improve error
+                    throw Util::CommanderException(
+                            "Expected a string prompt for scan expression, but got something else.");
+                }
+                return (exprNode->type = std::make_shared<StringTy>());
+            }
+            case Parser::READ_EXPR: {
+                Parser::ReadExprNodePtr const exprNode = std::static_pointer_cast<Parser::ReadExprNode>(astNode);
+                if (exprNode->type) { return exprNode->type; }
+                TyPtr const pathType = typeCheck(exprNode->filePath);
+                if (!pathType || pathType->getType() != Type::STRING) {
+                    // TODO: Improve error
+                    throw Util::CommanderException(
+                            "Expected a string file path for read expression, but got something else.");
+                }
+                return (exprNode->type = std::make_shared<StringTy>());
             }
             case Parser::EXPRS: {
                 Parser::ExprsNodePtr const exprsPtr = std::static_pointer_cast<Parser::ExprsNode>(astNode);
@@ -409,8 +447,6 @@ namespace TypeChecker {
                 return nullptr;
             }
             case Parser::RETURN_STMT: {
-                // TODO: Typecheck that it matches the function's return type that it is in? (not sure how to or if
-                // possible)
                 Parser::ReturnStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ReturnStmtNode>(astNode);
                 return typeCheck(stmtNode->retExpr);
             }
@@ -419,7 +455,10 @@ namespace TypeChecker {
                 // TODO: Figure out scopes (not only for this, but for functions, loops, etc.; types for variables only
                 // exist within scopes)
                 for (const Parser::StmtNodePtr& stmtPtr : stmtNode->stmts) { typeCheck(stmtPtr); }
-                return nullptr;
+                TyPtr returnType = nullptr;
+                Parser::StmtNodePtr const lastStmt = stmtNode->stmts.back();
+                if (lastStmt->nodeType() == Parser::RETURN_STMT) { returnType = typeCheck(lastStmt); }
+                return returnType;
             }
             case Parser::CMD_STMT: {
                 Parser::CmdStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::CmdStmtNode>(astNode);
@@ -432,6 +471,69 @@ namespace TypeChecker {
             case Parser::ALIAS_STMT: {
                 Parser::AliasStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::AliasStmtNode>(astNode);
                 // TODO: Implement
+                return nullptr;
+            }
+            case Parser::IMPORT_STMT: {
+                Parser::ImportStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ImportStmtNode>(astNode);
+                TyPtr const pathType = typeCheck(stmtNode->filePath);
+                if (!pathType || pathType->getType() != Type::STRING) {
+                    // TODO: Improve error
+                    throw Util::CommanderException(
+                            "Expected a string file path for import statement, but got something else.");
+                }
+                return nullptr;
+            }
+            case Parser::PRINT_STMT: {
+                Parser::PrintStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::PrintStmtNode>(astNode);
+                TyPtr const exprType = typeCheck(stmtNode->expression);
+                if (!exprType || exprType->getType() != Type::STRING) {
+                    // TODO: Improve error
+                    throw Util::CommanderException(
+                            "Expected a string expression for print statement, but got something else.");
+                }
+                return nullptr;
+            }
+            case Parser::PRINTLN_STMT: {
+                Parser::PrintlnStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::PrintlnStmtNode>(astNode);
+                TyPtr const exprType = typeCheck(stmtNode->expression);
+                if (!exprType || exprType->getType() != Type::STRING) {
+                    // TODO: Improve error
+                    throw Util::CommanderException(
+                            "Expected a string expression for println statement, but got something else.");
+                }
+                return nullptr;
+            }
+            case Parser::WRITE_STMT: {
+                Parser::WriteStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::WriteStmtNode>(astNode);
+                TyPtr const dataType = typeCheck(stmtNode->fileData);
+                if (!dataType || dataType->getType() != Type::STRING) {
+                    // TODO: Improve error
+                    throw Util::CommanderException(
+                            "Expected a string data for write statement, but got something else.");
+                }
+                TyPtr const pathType = typeCheck(stmtNode->filePath);
+                if (!pathType || pathType->getType() != Type::STRING) {
+                    // TODO: Improve error
+                    throw Util::CommanderException(
+                            "Expected a string file path for write statement, but got something else.");
+                }
+                return nullptr;
+            }
+            case Parser::TYPE_STMT: {
+                Parser::TypeStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::TypeStmtNode>(astNode);
+                setOrUpdateType(stmtNode->alias, typeCheck(stmtNode->type));
+                return nullptr;
+            }
+            case Parser::FUNCTION_STMT: {
+                Parser::FunctionStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::FunctionStmtNode>(
+                        astNode);
+                std::vector<TyPtr> bindings;
+                for (const Parser::BindingNodePtr& binding : stmtNode->bindings) {
+                    bindings.push_back(typeCheck(binding));
+                }
+                TyPtr returnType = typeCheck(stmtNode->returnType);
+                if (!returnType) { returnType = typeCheck(stmtNode->body); }
+                setOrUpdateType(stmtNode->name, std::make_shared<FunctionTy>(bindings, returnType));
                 return nullptr;
             }
             case Parser::STMTS: {
