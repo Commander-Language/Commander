@@ -249,27 +249,27 @@ TypeChecker::CommanderFloat Function::arctan(TypeChecker::CommanderFloat value) 
 }
 
 TypeChecker::CommanderFloat Function::arccsc(TypeChecker::CommanderInt value) {
-    return -1; //TODO
+    return std::asin(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arccsc(TypeChecker::CommanderFloat value) {
-    return -1; //TODO
+    return std::asin(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arcsec(TypeChecker::CommanderInt value) {
-    return -1; //TODO
+    return std::acos(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arcsec(TypeChecker::CommanderFloat value) {
-    return -1; //TODO
+    return std::acos( 1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arccot(TypeChecker::CommanderInt value) {
-    return -1; //TODO
+    return std::atan(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arccot(TypeChecker::CommanderFloat value) {
-    return -1; //TODO
+    return std::atan(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arcsinh(TypeChecker::CommanderInt value) {
@@ -297,27 +297,27 @@ TypeChecker::CommanderFloat Function::arctanh(TypeChecker::CommanderFloat value)
 }
 
 TypeChecker::CommanderFloat Function::arccsch(TypeChecker::CommanderInt value) {
-    return -1; //TODO
+    return std::asinh(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arccsch(TypeChecker::CommanderFloat value) {
-    return -1; //TODO
+    return std::asinh(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arcsech(TypeChecker::CommanderInt value) {
-    return -1; //TODO
+    return std::acosh(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arcsech(TypeChecker::CommanderFloat value) {
-    return -1; //TODO
+    return std::acosh(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arccoth(TypeChecker::CommanderInt value) {
-    return -1; //TODO
+    return std::atanh(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::arccoth(TypeChecker::CommanderFloat value) {
-    return -1; //TODO
+    return std::atanh(1 / value);
 }
 
 TypeChecker::CommanderFloat Function::random() {
@@ -346,5 +346,5 @@ TypeChecker::CommanderTuple Function::date() {
 }
 
 void Function::sleep(TypeChecker::CommanderInt timeToSleep) {
-    //TODO
+    std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleep));
 }

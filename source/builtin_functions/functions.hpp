@@ -11,8 +11,9 @@
 #include <string>
 #include "source/type_checker/type.hpp"
 #include <functional>
-#include <math.h>
+#include <cmath>
 #include <chrono>
+#include <thread>
 
 namespace Function {
 
