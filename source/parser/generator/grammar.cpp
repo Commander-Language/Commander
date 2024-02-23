@@ -136,19 +136,21 @@ namespace Parser {
 
                 //  (PRGM) -> (STMTS)
                 {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0) + "->stmts"})}},
+
+
                 //  =================
                 //  ||  Bindings:  ||
                 //  =================
 
                 //  (BINDINGS) -> (BINDING)
-                //  TODO (Cayden)
+                //  TODO
                 //  (BINDINGS) -> (BINDINGS) [COMMA] (BINDING)
-                //  TODO (Cayden)
+                //  TODO
 
                 //  (BINDING) -> [VARIABLE]
-                //  TODO (Cayden)
+                //  TODO
                 //  (BINDING) -> [VARIABLE] [COLON] (TYPE)
-                //  TODO (Cayden)
+                //  TODO
 
 
                 //  =================
@@ -168,7 +170,7 @@ namespace Parser {
                 //  (CMD) -> (STRING)
                 {{{ASTNodeType::CMD, {ASTNodeType::STRING}}, makeNode("CmdCmd", {castNode("String", 0)})}},
                 //  (CMD) -> [VARIABLE]
-                //  TODO (Cayden): This.
+                //  TODO
                 //  (CMD) -> (CMD) [CMDSTRINGVAL]
                 {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::CMDSTRINGVAL}},
                   makeNode("CmdCmd", {castNode("Cmd", 0), makeNode("String", {tokenContents(1)})})}},
@@ -176,7 +178,7 @@ namespace Parser {
                 {{{ASTNodeType::CMD, {ASTNodeType::CMD, ASTNodeType::STRING}},
                   makeNode("CmdCmd", {castNode("Cmd", 0), castNode("String", 1)})}},
                 //  (CMD) -> (CMD) [VARIABLE]
-                //  TODO (Cayden): This.
+                //  TODO
 
 
                 //  ====================
@@ -184,9 +186,9 @@ namespace Parser {
                 //  ====================
 
                 //  (EXPRS) -> (EXPR)
-                //  TODO (Cayden)
+                //  TODO
                 //  (EXPRS) -> (EXPRS) [COMMA] (EXPR)
-                //  TODO (Cayden)
+                //  TODO
 
                 //  Literals:
                 //  ---------
@@ -201,12 +203,13 @@ namespace Parser {
                 //  (EXPR) -> [FALSE]
                 {{{ASTNodeType::EXPR, {TokenType::FALSE}}, makeNode("BoolExpr", {"false"})}},
 
-                //  Number operations:
+                //  Binary operations:
                 //  ------------------
                 //  (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EXPONENTIATE", castNode("Expr", 2)})}},
 
+                //  (Shared precedence)
                 {//  (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MULTIPLY", castNode("Expr", 2)})},
@@ -217,6 +220,7 @@ namespace Parser {
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MODULO, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MODULO", castNode("Expr", 2)})}},
 
+                //  (Shared precedence)
                 //  (EXPR) -> (EXPR) [ADD] (EXPR)
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::ADD, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::ADD", castNode("Expr", 2)})},
@@ -293,7 +297,7 @@ namespace Parser {
                   "productionList[1].node"}},
 
                 //  Other:
-                //  ----------
+                //  ------
                 //  (EXPR) -> (VARIABLE)
                 {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE}}, makeNode("VarExpr", {castNode("Variable", 0)})}},
                 //  (EXPR) -> (STRING)
@@ -310,6 +314,11 @@ namespace Parser {
                 //  (EXPR) -> [READ] [LPAREN] (EXPR) [RPAREN]
                 {{{ASTNodeType::EXPR, {TokenType::READ, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
                   makeNode("ReadExpr", {castNode("Expr", 2)})}},
+
+                //  Functions:
+                //  ----------
+                //  (EXPR) -> (EXPR) (LPAREN) (EXPRS) (RPAREN)
+                //  TODO
 
                 //  ===================
                 //  ||  Statements:  ||
@@ -355,9 +364,9 @@ namespace Parser {
                   makeNode("AliasStmt", {tokenContents(1), castNode("Cmd", 3)})}},
 
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
-                //  TODO (Cayden)
+                //  TODO
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
-                //  TODO (Cayden)
+                //  TODO
 
                 //  (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
@@ -377,7 +386,14 @@ namespace Parser {
                   makeNode("DoWhileStmt", {castNode("Expr", 4), castNode("Stmt", 1)})}},
 
                 //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
-                //  TODO (Cayden)
+                //  TODO
+
+                //  Functions:
+                //  ----------
+                //  (STMT) -> (VARIABLE) [LPAREN] (BINDINGS) [RPAREN] [LCURLY] (STMTS) [RCURLY]
+                //  TODO
+                //  (STMT) -> (VARIABLE) [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) [LCURLY] (STMTS) [RCURLY]
+                //  TODO
 
                 //  (STMT) -> (CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT, {ASTNodeType::CMD, TokenType::SEMICOLON}},
@@ -400,9 +416,9 @@ namespace Parser {
                 //  ==============
 
                 //  (TYPE) -> [INT]
-                //  TODO (Cayden)
+                //  TODO
                 //  (TYPE) -> [FLOAT]
-                //  TODO (Cayden)
+                //  TODO
 
 
                 //  ==================
