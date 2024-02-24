@@ -307,8 +307,8 @@ namespace Parser {
 
     ExprsNode::ExprsNode(ExprNodePtr expr) : exprs({std::move(expr)}) {}
 
-    ExprsNode::ExprsNode(const std::vector<ExprNodePtr>& exprs, ExprNodePtr expr)
-        : exprs(concat(exprs, std::move(expr))) {}
+    ExprsNode::ExprsNode(std::shared_ptr<ExprsNode> exprs, ExprNodePtr expr)
+        : exprs(concat(exprs->exprs, std::move(expr))) {}
 
     ASTNodeType ExprsNode::nodeType() const { return ASTNodeType::EXPRS; }
 
@@ -352,8 +352,8 @@ namespace Parser {
 
     StmtsNode::StmtsNode(StmtNodePtr stmt) : stmts({std::move(stmt)}) {}
 
-    StmtsNode::StmtsNode(const std::vector<StmtNodePtr>& stmts, StmtNodePtr stmt)
-        : stmts(concat(stmts, std::move(stmt))) {}
+    StmtsNode::StmtsNode(std::shared_ptr<StmtsNode> stmts, StmtNodePtr stmt)
+        : stmts(concat(stmts->stmts, std::move(stmt))) {}
 
     ASTNodeType StmtsNode::nodeType() const { return ASTNodeType::STMTS; }
 
@@ -378,13 +378,13 @@ namespace Parser {
         return "(StringNode" + builder.str() + ")";
     }
 
-    PrgmNode::PrgmNode(const std::vector<StmtNodePtr>& stmts) : stmts(stmts) {}
+    PrgmNode::PrgmNode(StmtsNodePtr stmts) : stmts(std::move(stmts)) {}
 
     ASTNodeType PrgmNode::nodeType() const { return PRGM; }
 
     std::string PrgmNode::sExpression() const {
         std::stringstream builder;
-        for (const StmtNodePtr& stmt : stmts) { builder << "\n\t" << stmt->sExpression(); }
+        for (const StmtNodePtr& stmt : stmts->stmts) { builder << "\n\t" << stmt->sExpression(); }
         return "(PrgmNode" + builder.str() + ")";
     }
 
@@ -526,20 +526,23 @@ namespace Parser {
              + binOpToString(opType) + " " + rightExpr->sExpression() + getTypeString() + ")";
     }
 
-    CallExprNode::CallExprNode(ExprNodePtr func, const std::vector<ExprNodePtr>& args)
-        : func(std::move(func)), args(args) {}
+    CallExprNode::CallExprNode(ExprNodePtr func) : func(std::move(func)), args(std::make_shared<ExprsNode>()) {}
+
+    CallExprNode::CallExprNode(ExprNodePtr func, ExprsNodePtr args) : func(std::move(func)), args(std::move(args)) {}
 
     std::string CallExprNode::sExpression() const {
-        std::stringstream builder;
-        for (const ExprNodePtr& arg : args) { builder << " " << arg->sExpression(); }
-        return "(CallExprNode " + func->sExpression() + builder.str() + getTypeString() + ")";
+        return "(CallExprNode " + func->sExpression() + " " + args->sExpression() + getTypeString() + ")";
     }
 
-    ApiCallExprNode::ApiCallExprNode(ExprNodePtr expression, CallExprNodePtr function)
-        : expression(std::move(expression)), function(std::move(function)) {}
+    ApiCallExprNode::ApiCallExprNode(ExprNodePtr expression, VariableNodePtr func)
+        : expression(std::move(expression)), func(std::move(func)), args(std::make_shared<ExprsNode>()) {}
+
+    ApiCallExprNode::ApiCallExprNode(ExprNodePtr expression, VariableNodePtr func, ExprsNodePtr args)
+        : expression(std::move(expression)), func(std::move(func)), args(std::move(args)) {}
 
     std::string ApiCallExprNode::sExpression() const {
-        return "(ApiCallExprNode " + expression->sExpression() + " " + function->sExpression() + getTypeString() + ")";
+        return "(ApiCallExprNode " + expression->sExpression() + " " + func->sExpression() + " " + args->sExpression()
+             + getTypeString() + ")";
     }
 
     LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, ExprNodePtr body,

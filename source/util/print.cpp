@@ -1,7 +1,7 @@
 /**
-* @file print.cpp
-* @brief Contains the implementation of print.hpp
-*
+ * @file print.cpp
+ * @brief Contains the implementation of print.hpp
+ *
  */
 
 #include "print.hpp"

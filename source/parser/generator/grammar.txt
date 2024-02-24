@@ -79,6 +79,13 @@
 (EXPR) -> [READ] (EXPR)
 (EXPR) -> [READ] [LPAREN] (EXPR) [RPAREN]
 
+(EXPR) -> (EXPR) [LPAREN] [RPAREN]
+(EXPR) -> (EXPR) [LPAREN] (EXPRS) [RPAREN]
+(EXPR) -> (EXPR) [DOT] (VARIABLE) [LPAREN] [RPAREN]
+(EXPR) -> (EXPR) [DOT] (VARIABLE) [LPAREN] (EXPRS) [RPAREN]
+
+(EXPR) -> [BACKTICK] (CMD) [BACKTICK]
+
 
 //  ===================
 //  ||  Statements:  ||

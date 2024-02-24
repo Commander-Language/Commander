@@ -1,15 +1,15 @@
 /**
-* @file print.hpp
-* @brief Contains print helpers
-*
-*/
+ * @file print.hpp
+ * @brief Contains print helpers
+ *
+ */
 
 #ifndef PRINT_HPP
 #define PRINT_HPP
 
-#include <string>
-#include <ncurses.h>
 #include <iostream>
+#include <ncurses.h>
+#include <string>
 
 namespace Util {
 

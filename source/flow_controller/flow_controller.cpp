@@ -186,7 +186,7 @@ namespace FlowController {
                 _symbolTable.pushSymbolTable();  // new scope for function
 
                 int bindingIndex = 0;
-                for (auto& arg : functionExpression->args) {
+                for (auto& arg : functionExpression->args->exprs) {
                     // args and bindings should be lined up 1 to 1
                     std::any const argValue = _expr(arg);
                     std::string const name = function.bindings[bindingIndex]->variable;
@@ -220,7 +220,7 @@ namespace FlowController {
     }
 
     void FlowController::_prgm(const std::shared_ptr<Parser::PrgmNode>& node) {
-        for (auto& stmt : node->stmts) { _stmt(stmt); }
+        for (auto& stmt : node->stmts->stmts) { _stmt(stmt); }
     }
 
     std::any FlowController::_stmt(const Parser::StmtNodePtr& node) {

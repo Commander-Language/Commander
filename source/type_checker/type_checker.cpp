@@ -327,13 +327,13 @@ namespace TypeChecker {
                 }
                 std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(functionType);
                 size_t const size = functionTy->parameters.size();
-                if (size != exprNode->args.size()) {
+                if (size != exprNode->args->exprs.size()) {
                     // TODO: Improve Error
                     throw Util::CommanderException(
                             "Function being called doesn't match number of parameters in call expression.");
                 }
                 for (int i = 0; i < size; i++) {
-                    if (!areTypesEqual(functionTy->parameters[i], typeCheck(exprNode->args[i]))) {
+                    if (!areTypesEqual(functionTy->parameters[i], typeCheck(exprNode->args->exprs[i]))) {
                         // TODO: Improve Error
                         throw Util::CommanderException(
                                 "Parameter expression types in call expression don't match function signature.");
@@ -344,8 +344,28 @@ namespace TypeChecker {
             case Parser::API_CALL_EXPR: {
                 Parser::ApiCallExprNodePtr const exprNode = std::static_pointer_cast<Parser::ApiCallExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                exprNode->function->args.insert(exprNode->function->args.begin(), exprNode);
-                return (exprNode->type = typeCheck(exprNode->function));
+                exprNode->args->exprs.insert(exprNode->args->exprs.begin(), exprNode);
+                // TODO: Everything after this is the same as call expr, so perhaps put this code into it's own method
+                TyPtr const functionType = typeCheck(exprNode->func);
+                if (!functionType || functionType->getType() != Type::FUNCTION) {
+                    // TODO: Improve Error
+                    throw Util::CommanderException("Tried to call something that wasn't a function.");
+                }
+                std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(functionType);
+                size_t const size = functionTy->parameters.size();
+                if (size != exprNode->args->exprs.size()) {
+                    // TODO: Improve Error
+                    throw Util::CommanderException(
+                            "Function being called doesn't match number of parameters in call expression.");
+                }
+                for (int i = 0; i < size; i++) {
+                    if (!areTypesEqual(functionTy->parameters[i], typeCheck(exprNode->args->exprs[i]))) {
+                        // TODO: Improve Error
+                        throw Util::CommanderException(
+                                "Parameter expression types in call expression don't match function signature.");
+                    }
+                }
+                return (exprNode->type = functionTy->returnType);
             }
             case Parser::LAMBDA_EXPR: {
                 Parser::LambdaExprNodePtr const exprNode = std::static_pointer_cast<Parser::LambdaExprNode>(astNode);
@@ -397,8 +417,7 @@ namespace TypeChecker {
             }
             case Parser::PRGM: {
                 Parser::PrgmNodePtr const program = std::static_pointer_cast<Parser::PrgmNode>(astNode);
-                for (const Parser::StmtNodePtr& currentStatement : program->stmts) { typeCheck(currentStatement); }
-                return nullptr;
+                return typeCheck(program->stmts);
             }
             case Parser::IF_STMT: {
                 Parser::IfStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(astNode);

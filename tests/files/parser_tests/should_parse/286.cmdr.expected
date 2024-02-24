@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (ApiCallExprNode (StringExpressionNode (StringNode "My string")) (IdentVariableNode charAt) (ExprsNode (IntExprNode 1))))))

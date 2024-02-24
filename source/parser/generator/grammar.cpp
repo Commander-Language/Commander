@@ -135,7 +135,7 @@ namespace Parser {
                 //  ================
 
                 //  (PRGM) -> (STMTS)
-                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0) + "->stmts"})}},
+                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0)})}},
 
 
                 //  =================
@@ -186,9 +186,11 @@ namespace Parser {
                 //  ====================
 
                 //  (EXPRS) -> (EXPR)
-                //  TODO
+                {{{ASTNodeType::EXPRS, {ASTNodeType::EXPR}}, makeNode("Exprs", {castNode("Expr", 0)})}},
                 //  (EXPRS) -> (EXPRS) [COMMA] (EXPR)
-                //  TODO
+                {{{ASTNodeType::EXPRS, {ASTNodeType::EXPRS, TokenType::COMMA, ASTNodeType::EXPR}},
+                  makeNode("Exprs", {castNode("Exprs", 0), castNode("Expr", 2)})}},
+
 
                 //  Literals:
                 //  ---------
@@ -317,8 +319,26 @@ namespace Parser {
 
                 //  Functions:
                 //  ----------
-                //  (EXPR) -> (EXPR) (LPAREN) (EXPRS) (RPAREN)
-                //  TODO
+                // (EXPR) -> (EXPR) [LPAREN] [RPAREN]
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LPAREN, TokenType::RPAREN}},
+                  makeNode("CallExpr", {castNode("Expr", 0)})}},
+                // (EXPR) -> (EXPR) [LPAREN] (EXPRS) [RPAREN]
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::RPAREN}},
+                  makeNode("CallExpr", {castNode("Expr", 0), castNode("Exprs", 2)})}},
+                // (EXPR) -> (EXPR) [DOT] (VARIABLE) [LPAREN] [RPAREN]
+                {{{ASTNodeType::EXPR,
+                   {ASTNodeType::EXPR, TokenType::DOT, ASTNodeType::VARIABLE, TokenType::LPAREN, TokenType::RPAREN}},
+                  makeNode("ApiCallExpr", {castNode("Expr", 0), castNode("Variable", 2)})}},
+                // (EXPR) -> (EXPR) [DOT] (VARIABLE) [LPAREN] (EXPRS) [RPAREN]
+                {{{ASTNodeType::EXPR,
+                   {ASTNodeType::EXPR, TokenType::DOT, ASTNodeType::VARIABLE, TokenType::LPAREN, ASTNodeType::EXPRS,
+                    TokenType::RPAREN}},
+                  makeNode("ApiCallExpr", {castNode("Expr", 0), castNode("Variable", 2), castNode("Exprs", 4)})}},
+
+                //  Commands:
+                // (EXPR) -> [BACKTICK] (CMD) [BACKTICK]
+                {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::CMD, TokenType::BACKTICK}},
+                  makeNode("CmdExpr", {castNode("Cmd", 1)})}},
 
                 //  ===================
                 //  ||  Statements:  ||
@@ -328,7 +348,7 @@ namespace Parser {
                 {{{ASTNodeType::STMTS, {ASTNodeType::STMT}}, makeNode("Stmts", {castNode("Stmt", 0)})}},
                 //  (STMTS) -> (STMTS) (STMT)
                 {{{ASTNodeType::STMTS, {ASTNodeType::STMTS, ASTNodeType::STMT}},
-                  makeNode("Stmts", {castNode("Stmts", 0) + "->stmts", castNode("Stmt", 1)})}},
+                  makeNode("Stmts", {castNode("Stmts", 0), castNode("Stmt", 1)})}},
 
                 //  (STMT) -> [IMPORT] (STRING) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::IMPORT, ASTNodeType::STRING, TokenType::SEMICOLON}},

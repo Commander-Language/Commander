@@ -335,6 +335,11 @@ namespace Parser {
     class ExprsNode : public ASTNode {
     public:
         /**
+         * @brief Default constructor
+         */
+        ExprsNode() = default;
+
+        /**
          * @brief Class constructor from a single expression.
          *
          * @param expr The single expression node that makes up this AST node.
@@ -347,7 +352,7 @@ namespace Parser {
          * @param exprs The list of expression nodes that makes up this AST node.
          * @param expr The expression to add to the end of the list of expressions.
          */
-        ExprsNode(const std::vector<ExprNodePtr>& exprs, ExprNodePtr expr);
+        ExprsNode(std::shared_ptr<ExprsNode> exprs, ExprNodePtr expr);
 
         /**
          * @brief Reports the type of this expression-list node.
@@ -395,6 +400,11 @@ namespace Parser {
     class StmtsNode : public ASTNode {
     public:
         /**
+         * @brief Default constructor.
+         */
+        StmtsNode() = default;
+
+        /**
          * @brief Class constructor from a single statement.
          *
          * @param stmt The single statement node that makes up this AST node.
@@ -407,7 +417,7 @@ namespace Parser {
          * @param stmts The list of statement nodes that makes up this AST node.
          * @param stmt The statement to add to the end of the list of statements.
          */
-        StmtsNode(const std::vector<StmtNodePtr>& stmts, StmtNodePtr stmt);
+        StmtsNode(std::shared_ptr<StmtsNode> stmts, StmtNodePtr stmt);
 
         /**
          * @brief Reports the type of this expression-list node.
@@ -492,14 +502,14 @@ namespace Parser {
         /**
          * @brief All the statements in the program
          */
-        std::vector<StmtNodePtr> stmts;
+        StmtsNodePtr stmts;
 
         /**
          * @brief Class constructor.
          *
          * @param stmts The statements that make up the program.
          */
-        PrgmNode(const std::vector<StmtNodePtr>& stmts);
+        PrgmNode(StmtsNodePtr stmts);
 
         /**
          * @brief Reports the type of this program node.
@@ -1237,7 +1247,14 @@ namespace Parser {
         /**
          * @brief The arguments to pass into the function
          */
-        std::vector<ExprNodePtr> args;
+        ExprsNodePtr args;
+
+        /**
+         * @brief Class constructor for function with no arguments
+         *
+         * @param func The function to call (usually just a variable name).
+         */
+        CallExprNode(ExprNodePtr func);
 
         /**
          * @brief Class constructor.
@@ -1245,7 +1262,7 @@ namespace Parser {
          * @param func The function to call (usually just a variable name).
          * @param args The arguments for the function call.
          */
-        CallExprNode(ExprNodePtr func, const std::vector<ExprNodePtr>& args);
+        CallExprNode(ExprNodePtr func, ExprsNodePtr args);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1279,17 +1296,31 @@ namespace Parser {
         ExprNodePtr expression;
 
         /**
-         * @brief The api function called
+         * @brief The function to call
          */
-        CallExprNodePtr function;
+        VariableNodePtr func;
+
+        /**
+         * @brief The arguments to pass into the function
+         */
+        ExprsNodePtr args;
+
+        /**
+         * @brief Class constructor for api function with no arguments
+         *
+         * @param expression The expression being called on
+         * @param func The function to call
+         */
+        ApiCallExprNode(ExprNodePtr expression, VariableNodePtr func);
 
         /**
          * @brief Class constructor.
          *
          * @param expression The expression being called on
-         * @param function The api function called
+         * @param func The function to call
+         * @param args The arguments for the function call.
          */
-        ApiCallExprNode(ExprNodePtr expression, CallExprNodePtr function);
+        ApiCallExprNode(ExprNodePtr expression, VariableNodePtr func, ExprsNodePtr args);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
