@@ -136,32 +136,15 @@ namespace FlowController {
                 }
                 return array;
             }
-            case Parser::ARRAY_INDEX_EXPR: {
-                auto arrayIndexExpression = std::static_pointer_cast<Parser::ArrayIndexExprNode>(node);
-                auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrayIndexExpression->array);
-                // TODO: Update to generic array
-                auto array = std::any_cast<CommanderArray<CommanderInt>>(_getVariable(arrayVariable->varName));
-
-                // TODO: might be understanding this wrong? why list of indices?
-                auto index = std::any_cast<CommanderInt>(_expr(arrayIndexExpression->indexExprs[0]));
-                return array[index];
+            case Parser::INDEX_EXPR: {
+                // TODO: Index expressions
+                return nullptr;
             }
             case Parser::TUPLE_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleExprNode>(node);
                 CommanderTuple tuple;
                 for (auto& expr : tupleExp->expressions) { tuple.emplace_back(_expr(expr)); }
                 return tuple;
-            }
-            case Parser::TUPLE_INDEX_EXPR: {
-                auto tupleExp = std::static_pointer_cast<Parser::TupleIndexExprNode>(node);
-                auto index = std::any_cast<CommanderInt>(_expr(tupleExp->index));
-                auto tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
-
-                if (index >= tuple.size() || index < 0) {
-                    throw Util::CommanderException("Index out of bounds: Index " + std::to_string(index)
-                                                   + "out of bounds for tuple of size " + std::to_string(tuple.size()));
-                }
-                return tuple[index];
             }
             case Parser::TERNARY_EXPR: {
                 auto ternaryExpression = std::static_pointer_cast<Parser::TernaryExprNode>(node);

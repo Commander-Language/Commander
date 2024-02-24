@@ -40,12 +40,10 @@ namespace Parser {
                 return "VAR_EXPR";
             case ARRAY_EXPR:
                 return "ARRAY_EXPR";
-            case ARRAY_INDEX_EXPR:
-                return "ARRAY_INDEX_EXPR";
+            case INDEX_EXPR:
+                return "INDEX_EXPR";
             case TUPLE_EXPR:
                 return "TUPLE_EXPR";
-            case TUPLE_INDEX_EXPR:
-                return "TUPLE_INDEX_EXPR";
             case TERNARY_EXPR:
                 return "TERNARY_EXPR";
             case UNOP_EXPR:
@@ -281,11 +279,9 @@ namespace Parser {
 
     ASTNodeType ArrayExprNode::nodeType() const { return ASTNodeType::ARRAY_EXPR; }
 
-    ASTNodeType ArrayIndexExprNode::nodeType() const { return ASTNodeType::ARRAY_INDEX_EXPR; }
+    ASTNodeType IndexExprNode::nodeType() const { return ASTNodeType::INDEX_EXPR; }
 
     ASTNodeType TupleExprNode::nodeType() const { return ASTNodeType::TUPLE_EXPR; }
-
-    ASTNodeType TupleIndexExprNode::nodeType() const { return ASTNodeType::TUPLE_INDEX_EXPR; }
 
     ASTNodeType TernaryExprNode::nodeType() const { return ASTNodeType::TERNARY_EXPR; }
 
@@ -466,40 +462,27 @@ namespace Parser {
         return "(VarExprNode " + variable->sExpression() + getTypeString() + ")";
     }
 
-    ArrayExprNode::ArrayExprNode(const std::vector<ExprNodePtr>& expressions) : expressions(expressions) {}
+    ArrayExprNode::ArrayExprNode() : expressions(std::make_shared<ExprsNode>()) {}
+
+    ArrayExprNode::ArrayExprNode(ExprsNodePtr expressions) : expressions(std::move(expressions)) {}
 
     std::string ArrayExprNode::sExpression() const {
-        std::stringstream builder;
-        builder << "(ArrayExprNode";
-        for (const ExprNodePtr& expr : expressions) { builder << " " << expr->sExpression(); }
-        return builder.str() + getTypeString() + ")";
+        return "(ArrayExprNode " + expressions->sExpression() + getTypeString() + ")";
     }
 
-    ArrayIndexExprNode::ArrayIndexExprNode(ExprNodePtr array, const std::vector<ExprNodePtr>& indexExprs)
-        : array(std::move(array)), indexExprs(indexExprs) {}
+    IndexExprNode::IndexExprNode(ExprNodePtr expr, ExprNodePtr index)
+        : expr(std::move(expr)), index(std::move(index)) {}
 
-    std::string ArrayIndexExprNode::sExpression() const {
-        std::stringstream builder;
-        builder << "(ArrayIndexExprNode " << array->sExpression();
-        for (const ExprNodePtr& indexExpr : indexExprs) { builder << " " << indexExpr->sExpression(); }
-        builder << getTypeString() + ")";
-        return builder.str();
+    std::string IndexExprNode::sExpression() const {
+        return "(IndexExprNode " + expr->sExpression() + " " + index->sExpression() + getTypeString() + ")";
     }
 
-    TupleExprNode::TupleExprNode(const std::vector<ExprNodePtr>& expressions) : expressions(expressions) {}
+    TupleExprNode::TupleExprNode() : expressions(std::make_shared<ExprsNode>()) {}
+
+    TupleExprNode::TupleExprNode(ExprsNodePtr expressions) : expressions(std::move(expressions)) {}
 
     std::string TupleExprNode::sExpression() const {
-        std::stringstream builder;
-        builder << "(TupleExprNode";
-        for (const ExprNodePtr& expr : expressions) { builder << " " << expr->sExpression(); }
-        return builder.str() + getTypeString() + ")";
-    }
-
-    TupleIndexExprNode::TupleIndexExprNode(ExprNodePtr tuple, ExprNodePtr index)
-        : tuple(std::move(tuple)), index(std::move(index)) {}
-
-    std::string TupleIndexExprNode::sExpression() const {
-        return "(TupleIndexExprNode " + tuple->sExpression() + " " + index->sExpression() + getTypeString() + ")";
+        return "(TupleExprNode " + expressions->sExpression() + getTypeString() + ")";
     }
 
     TernaryExprNode::TernaryExprNode(ExprNodePtr condition, ExprNodePtr trueExpr, ExprNodePtr falseExpr)

@@ -137,24 +137,26 @@ namespace TypeChecker {
                 }
                 return (exprNode->type = std::make_shared<ArrayTy>(type));
             }
-            case Parser::ARRAY_INDEX_EXPR: {
-                Parser::ArrayIndexExprNodePtr const exprNode = std::static_pointer_cast<Parser::ArrayIndexExprNode>(
-                        astNode);
+            case Parser::INDEX_EXPR: {
+                Parser::IndexExprNodePtr const exprNode = std::static_pointer_cast<Parser::IndexExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr const arrayType = typeCheck(exprNode->array);
-                if (!arrayType || arrayType->getType() != Type::ARRAY) {
+                TyPtr const exprType = typeCheck(exprNode->expr);
+                if (!exprType || exprType->getType() != Type::ARRAY || exprType->getType() != Type::TUPLE) {
                     // TODO: Improve error
-                    throw Util::CommanderException("Tried to index a type that isn't an array");
+                    throw Util::CommanderException("Tried to index a type that isn't an array or tuple");
                 }
-                for (const Parser::ExprNodePtr& exprNodePtr : exprNode->indexExprs) {
-                    TyPtr const indexType = typeCheck(exprNodePtr);
-                    if (!indexType || indexType->getType() != Type::INT) {
-                        // TODO: Improve error (not just position, but what type; same for the other errors)
-                        throw Util::CommanderException("Tried to index an array with a different type than an int");
-                    }
+                TyPtr const indexType = typeCheck(exprNode->index);
+                if (!indexType || indexType->getType() != Type::INT) {
+                    // TODO: Improve error (not just position, but what type; same for the other errors)
+                    throw Util::CommanderException(
+                            "Tried to index an array or tuple with a different type than an int");
                 }
-                std::shared_ptr<ArrayTy> const arrayTy = std::static_pointer_cast<ArrayTy>(arrayType);
-                return (exprNode->type = arrayTy->baseType);
+                if (exprType->getType() == Type::TUPLE) {
+                    return (exprNode->type = nullptr);
+                } else {
+                    std::shared_ptr<ArrayTy> const arrayTy = std::static_pointer_cast<ArrayTy>(exprType);
+                    return (exprNode->type = arrayTy->baseType);
+                }
             }
             case Parser::TUPLE_EXPR: {
                 Parser::TupleExprNodePtr const exprNode = std::static_pointer_cast<Parser::TupleExprNode>(astNode);
@@ -169,24 +171,6 @@ namespace TypeChecker {
                     expressionTypes.push_back(exprType);
                 }
                 return (exprNode->type = std::make_shared<TupleTy>(expressionTypes));
-            }
-            case Parser::TUPLE_INDEX_EXPR: {
-                Parser::TupleIndexExprNodePtr const exprNode = std::static_pointer_cast<Parser::TupleIndexExprNode>(
-                        astNode);
-                if (exprNode->type) { return exprNode->type; }
-                TyPtr const tupleType = typeCheck(exprNode->tuple);
-                if (!tupleType || tupleType->getType() != Type::TUPLE) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Tried to index a type that isn't an tuple");
-                }
-                TyPtr const indexType = typeCheck(exprNode->index);
-                if (!indexType || indexType->getType() != Type::INT) {
-                    // TODO: Improve error (not just position, but what type; same for the other errors)
-                    throw Util::CommanderException("Tried to index a tuple with a different type than an int");
-                }
-                // Impossible to know the type of this, especially if the index expression is a variable, so just return
-                // nullptr.
-                return nullptr;
             }
             case Parser::TERNARY_EXPR: {
                 Parser::TernaryExprNodePtr const exprNode = std::static_pointer_cast<Parser::TernaryExprNode>(astNode);

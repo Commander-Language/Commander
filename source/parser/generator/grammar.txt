@@ -44,6 +44,8 @@
 (EXPR) -> [TRUE]
 (EXPR) -> [FALSE]
 
+(EXPR) -> (EXPR) [LSQUARE] (EXPR) [RSQUARE]
+
 (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
 (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
 (EXPR) -> (EXPR) [DIVIDE] (EXPR)
@@ -86,6 +88,9 @@
 (EXPR) -> (EXPR) [DOT] (VARIABLE) [LPAREN] (EXPRS) [RPAREN]
 
 (EXPR) -> [BACKTICK] (CMD) [BACKTICK]
+
+(EXPR) -> [LSQUARE] (EXPRS) [RSQUARE]
+(EXPR) -> [LPAREN] (EXPRS) [RPAREN]
 
 
 //  ===================

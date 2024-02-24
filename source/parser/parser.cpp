@@ -82,9 +82,8 @@ namespace Parser {
             case BOOL_EXPR:
             case VAR_EXPR:
             case ARRAY_EXPR:
-            case ARRAY_INDEX_EXPR:
+            case INDEX_EXPR:
             case TUPLE_EXPR:
-            case TUPLE_INDEX_EXPR:
             case TERNARY_EXPR:
             case UNOP_EXPR:
             case BINOP_EXPR:

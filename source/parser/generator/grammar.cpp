@@ -208,6 +208,11 @@ namespace Parser {
                 //  (EXPR) -> [FALSE]
                 {{{ASTNodeType::EXPR, {TokenType::FALSE}}, makeNode("BoolExpr", {"false"})}},
 
+                //  Indexing:
+                //  (EXPR) -> (EXPR) [LSQUARE] (EXPR) [RSQUARE]
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LSQUARE, ASTNodeType::EXPR, TokenType::RSQUARE}},
+                  makeNode("IndexExpr", {castNode("Expr", 0), castNode("Expr", 2)})}},
+
                 //  Binary operations:
                 //  ------------------
                 //  (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
@@ -343,6 +348,16 @@ namespace Parser {
                 {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::CMD, TokenType::BACKTICK}},
                   makeNode("CmdExpr", {castNode("Cmd", 1)})}},
 
+                //  Arrays:
+                //  (EXPR) -> [LSQUARE] (EXPRS) [RSQUARE]
+                {{{ASTNodeType::EXPR, {TokenType::LSQUARE, ASTNodeType::EXPRS, TokenType::RSQUARE}},
+                  makeNode("ArrayExpr", {castNode("Exprs", 1)})}},
+
+                //  Tuples:
+                //  (EXPR) -> [LPAREN] (EXPRS) [RPAREN]
+                {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::RPAREN}},
+                  makeNode("TupleExpr", {castNode("Exprs", 1)})}},
+
                 //  ===================
                 //  ||  Statements:  ||
                 //  ===================
@@ -391,6 +406,7 @@ namespace Parser {
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
                 //  TODO
 
+                //  TODO: Add cases for when no expression is provided
                 //  (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, ASTNodeType::EXPR,

@@ -33,9 +33,8 @@ namespace Parser {
         BOOL_EXPR,
         VAR_EXPR,
         ARRAY_EXPR,
-        ARRAY_INDEX_EXPR,
+        INDEX_EXPR,
         TUPLE_EXPR,
-        TUPLE_INDEX_EXPR,
         TERNARY_EXPR,
         UNOP_EXPR,
         BINOP_EXPR,
@@ -925,14 +924,19 @@ namespace Parser {
         /**
          * The expressions that make up the array's values
          */
-        std::vector<ExprNodePtr> expressions;
+        ExprsNodePtr expressions;
+
+        /**
+         * @brief Default constructor.
+         */
+        ArrayExprNode();
 
         /**
          * @brief Class constructor.
          *
          * @param expressions The elements that go inside the array.
          */
-        ArrayExprNode(const std::vector<ExprNodePtr>& expressions);
+        ArrayExprNode(ExprsNodePtr expressions);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -955,28 +959,28 @@ namespace Parser {
     using ArrayExprNodePtr = std::shared_ptr<ArrayExprNode>;
 
     /**
-     * @brief An array index expression node.
+     * @brief An index expression node.
      *
      */
-    class ArrayIndexExprNode : public ExprNode {
+    class IndexExprNode : public ExprNode {
     public:
         /**
          * The expression being indexed
          */
-        ExprNodePtr array;
+        ExprNodePtr expr;
 
         /**
-         * The expressions that make up the array indices
+         * The expression that make up the array index
          */
-        std::vector<ExprNodePtr> indexExprs;
+        ExprNodePtr index;
 
         /**
          * @brief Class constructor.
          *
-         * @param array The array into which we're indexing.
-         * @param expressions The indices inside the square brackets.
+         * @param expr The expression into which we're indexing.
+         * @param index The index inside the square brackets.
          */
-        ArrayIndexExprNode(ExprNodePtr array, const std::vector<ExprNodePtr>& indexExprs);
+        IndexExprNode(ExprNodePtr expr, ExprNodePtr index);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -988,15 +992,15 @@ namespace Parser {
         /**
          * @brief Reports the type of this command node.
          *
-         * @return `ARRAY_INDEX_EXPR` always.
+         * @return `INDEX_EXPR` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
     };
     /**
-     * @brief A pointer to an array index expression node.
+     * @brief A pointer to an index expression node.
      *
      */
-    using ArrayIndexExprNodePtr = std::shared_ptr<ArrayIndexExprNode>;
+    using IndexExprNodePtr = std::shared_ptr<IndexExprNode>;
 
     /**
      * @brief A tuple literal expression node.
@@ -1007,14 +1011,19 @@ namespace Parser {
         /**
          * The expressions that make up the tuple's values
          */
-        std::vector<ExprNodePtr> expressions;
+        ExprsNodePtr expressions;
+
+        /**
+         * @brief Default constructor.
+         */
+        TupleExprNode();
 
         /**
          * @brief Class constructor.
          *
          * @param expressions The elements that go inside the tuple.
          */
-        TupleExprNode(const std::vector<ExprNodePtr>& expressions);
+        TupleExprNode(ExprsNodePtr expressions);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1035,50 +1044,6 @@ namespace Parser {
      *
      */
     using TupleExprNodePtr = std::shared_ptr<TupleExprNode>;
-
-    /**
-     * @brief An tuple index expression node.
-     *
-     */
-    class TupleIndexExprNode : public ExprNode {
-    public:
-        /**
-         * The expression being indexed
-         */
-        ExprNodePtr tuple;
-
-        /**
-         * The expression for the tuple index
-         */
-        ExprNodePtr index;
-
-        /**
-         * @brief Class constructor.
-         *
-         * @param tuple The tuple being indexed.
-         * @param index The index into the tuple.
-         */
-        TupleIndexExprNode(ExprNodePtr tuple, ExprNodePtr index);
-
-        /**
-         * @brief Gets the string representation of the node as an s-expression
-         *
-         * @return The s-expression string of the node
-         */
-        [[nodiscard]] std::string sExpression() const override;
-
-        /**
-         * @brief Reports the type of this command node.
-         *
-         * @return `TUPLE_INDEX_EXPR` always.
-         */
-        [[nodiscard]] ASTNodeType nodeType() const override;
-    };
-    /**
-     * @brief A pointer to a tuple index expression node.
-     *
-     */
-    using TupleIndexExprNodePtr = std::shared_ptr<TupleIndexExprNode>;
 
     /**
      * @brief A ternary expression node.
