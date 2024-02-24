@@ -473,11 +473,7 @@ namespace TypeChecker {
                 Parser::ScopeStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(astNode);
                 // TODO: Figure out scopes (not only for this, but for functions, loops, etc.; types for variables only
                 // exist within scopes)
-                for (const Parser::StmtNodePtr& stmtPtr : stmtNode->stmts) { typeCheck(stmtPtr); }
-                TyPtr returnType = nullptr;
-                Parser::StmtNodePtr const lastStmt = stmtNode->stmts.back();
-                if (lastStmt->nodeType() == Parser::RETURN_STMT) { returnType = typeCheck(lastStmt); }
-                return returnType;
+                return typeCheck(stmtNode->stmts);
             }
             case Parser::CMD_STMT: {
                 Parser::CmdStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::CmdStmtNode>(astNode);
@@ -558,7 +554,10 @@ namespace TypeChecker {
             case Parser::STMTS: {
                 Parser::StmtsNodePtr const stmtsPtr = std::static_pointer_cast<Parser::StmtsNode>(astNode);
                 for (const Parser::StmtNodePtr& stmtPtr : stmtsPtr->stmts) { typeCheck(stmtPtr); }
-                return nullptr;
+                TyPtr returnType = nullptr;
+                Parser::StmtNodePtr const lastStmt = stmtsPtr->stmts.back();
+                if (lastStmt->nodeType() == Parser::RETURN_STMT) { returnType = typeCheck(lastStmt); }
+                return returnType;
             }
             case Parser::STRING: {
                 Parser::StringNodePtr const stringPtr = std::static_pointer_cast<Parser::StringNode>(astNode);

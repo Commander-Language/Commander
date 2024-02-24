@@ -2,7 +2,8 @@
 //  ||  Program:  ||
 //  ================
 
-(PRGM) -> (STMTS)
+(PRGM) -> [END_OF_FILE]
+(PRGM) -> (STMTS) [END_OF_FILE]
 
 
 //  =================
@@ -109,11 +110,11 @@
 (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
 (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
 
-(STMT) -> [FOR] [LPAREN] (STMT) [SEMICOLON] (EXPR) [SEMICOLON] (STMT) [RPAREN] (STMT)
-
+(STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
 (STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
 (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN]
 
+(STMT) -> [LCURLY] [RCURLY]
 (STMT) -> [LCURLY] (STMTS) [RCURLY]
 
 (STMT) -> (CMD) [SEMICOLON]

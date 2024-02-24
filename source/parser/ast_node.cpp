@@ -360,7 +360,7 @@ namespace Parser {
     std::string StmtsNode::sExpression() const {
         std::stringstream result;
         result << "(StmtsNode";
-        for (const auto& stmt : stmts) { result << " " << stmt->sExpression(); }
+        for (const auto& stmt : stmts) { result << "\n\t" << stmt->sExpression(); }
         result << ")";
         return result.str();
     }
@@ -377,6 +377,8 @@ namespace Parser {
         }
         return "(StringNode" + builder.str() + ")";
     }
+
+    PrgmNode::PrgmNode() : stmts(std::make_shared<StmtsNode>()) {}
 
     PrgmNode::PrgmNode(StmtsNodePtr stmts) : stmts(std::move(stmts)) {}
 
@@ -628,13 +630,11 @@ namespace Parser {
 
     std::string ReturnStmtNode::sExpression() const { return "(ReturnStmtNode " + retExpr->sExpression() + ")"; }
 
-    ScopeStmtNode::ScopeStmtNode(const std::vector<StmtNodePtr>& stmts) : stmts(stmts) {}
+    ScopeStmtNode::ScopeStmtNode() : stmts(std::make_shared<StmtsNode>()) {}
 
-    std::string ScopeStmtNode::sExpression() const {
-        std::stringstream builder;
-        for (const StmtNodePtr& stmt : stmts) { builder << "\n\t" << stmt->sExpression(); }
-        return "(ScopeStmtNode " + builder.str() + ")";
-    }
+    ScopeStmtNode::ScopeStmtNode(StmtsNodePtr stmts) : stmts(std::move(stmts)) {}
+
+    std::string ScopeStmtNode::sExpression() const { return "(ScopeStmtNode " + stmts->sExpression() + ")"; }
 
     CmdStmtNode::CmdStmtNode(CmdNodePtr command) : command(std::move(command)) {}
 

@@ -13,7 +13,9 @@
  */
 void expectOutputEqualsTokens(const Lexer::TokenList& tokens, const std::string& expectedOutput) {
     std::ostringstream builder;
-    for (const Lexer::TokenPtr& token : tokens) builder << token->toString() << "\n";
+    for (int i = 0; i < tokens.size() - 1; i++) {
+        builder << tokens[i]->toString() << "\n";
+    }
     EXPECT_EQ(expectedOutput, builder.str());
 }
 

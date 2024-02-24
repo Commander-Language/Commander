@@ -43,6 +43,7 @@ namespace Lexer {
         DOT,
         DOUBLE_EQUALS,
         ELSE,
+        END,
         END_OF_FILE,
         EXPONENTIATE,
         EXPONENTIATE_EQUALS,

@@ -54,6 +54,8 @@ namespace Lexer {
                 return "DOUBLE_EQUALS";
             case ELSE:
                 return "ELSE";
+            case END:
+                return "END";
             case END_OF_FILE:
                 return "END_OF_FILE";
             case EXPONENTIATE:
@@ -171,6 +173,7 @@ namespace Lexer {
         : contents(std::move(contents)), type(type), position(std::move(position)) {}
 
     std::string Token::toString() const {
+        if (type == END) { return ""; }
         return (type != END_OF_FILE ? tokenTypeToString(type) + " '" + contents + "'" : tokenTypeToString(type)) + " "
              + std::to_string(position.line) + ":" + std::to_string(position.column);
     }
@@ -200,6 +203,8 @@ namespace Lexer {
         const char endOfFile = (char)5;
         const Token eofToken = {std::string(1, endOfFile), END_OF_FILE, position};
         tokens.push_back(std::make_shared<Token>(eofToken));
+        const Token endToken = {"", END, position};
+        tokens.push_back(std::make_shared<Token>(endToken));
     }
 
     void skipWhitespace(const std::string& file, FilePosition& position) {
@@ -706,9 +711,9 @@ namespace Lexer {
             // Look ahead for for-loop
             if (token->type == FOR && isFirst && !isCommand) {
                 tokens.push_back(expectToken(LPAREN, file, position, isCommand));
-                lexStatement(tokens, file, position, SEMICOLON);
                 lexExpression(tokens, file, position, UNKNOWN, SEMICOLON);
-                lexStatement(tokens, file, position, RPAREN);
+                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON);
+                lexExpression(tokens, file, position, UNKNOWN, RPAREN);
             }
             skipWhitespace(file, position);
             if ((token->type == ALIAS || token->type == TIMEOUT) && isFirst) { commandPosition = position; }

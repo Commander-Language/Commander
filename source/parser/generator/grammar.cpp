@@ -134,8 +134,11 @@ namespace Parser {
                 //  ||  Program:  ||
                 //  ================
 
-                //  (PRGM) -> (STMTS)
-                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0)})}},
+                //  (PRGM) -> [END_OF_FILE]
+                {{{ASTNodeType::PRGM, {TokenType::END_OF_FILE}}, makeNode("Prgm", {})}},
+                //  (PRGM) -> (STMTS) [END_OF_FILE]
+                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS, TokenType::END_OF_FILE}},
+                  makeNode("Prgm", {castNode("Stmts", 0)})}},
 
 
                 //  =================
@@ -405,8 +408,11 @@ namespace Parser {
                     TokenType::RPAREN}},
                   makeNode("DoWhileStmt", {castNode("Expr", 4), castNode("Stmt", 1)})}},
 
+                //  (STMT) -> [LCURLY] [RCURLY]
+                {{{ASTNodeType::STMT, {TokenType::LCURLY, TokenType::RCURLY}}, makeNode("ScopeStmt", {})}},
                 //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
-                //  TODO
+                {{{ASTNodeType::STMT, {TokenType::LCURLY, ASTNodeType::STMTS, TokenType::RCURLY}},
+                  makeNode("ScopeStmt", {castNode("Stmts", 1)})}},
 
                 //  Functions:
                 //  ----------

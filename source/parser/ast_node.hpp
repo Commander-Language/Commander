@@ -509,6 +509,13 @@ namespace Parser {
          *
          * @param stmts The statements that make up the program.
          */
+        PrgmNode();
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param stmts The statements that make up the program.
+         */
         PrgmNode(StmtsNodePtr stmts);
 
         /**
@@ -1761,14 +1768,19 @@ namespace Parser {
         /**
          * The statements contained within the scope
          */
-        std::vector<StmtNodePtr> stmts;
+        StmtsNodePtr stmts;
+
+        /**
+         * @brief Default constructor.
+         */
+        ScopeStmtNode();
 
         /**
          * @brief Class constructor.
          *
          * @param stmts The body of the scope.
          */
-        ScopeStmtNode(const std::vector<StmtNodePtr>& stmts);
+        ScopeStmtNode(StmtsNodePtr stmts);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
