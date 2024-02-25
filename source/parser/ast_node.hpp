@@ -1111,12 +1111,25 @@ namespace Parser {
         ExprNodePtr expr;
 
         /**
+         * @brief The variable being operated on.
+         */
+        VariableNodePtr variable;
+
+        /**
          * @brief Class constructor for a unary operation on an expression.
          *
          * @param opType The unary operation type being performed.
          * @param expr The expression on which the unary operation is being performed.
          */
         UnOpExprNode(UnOpType opType, ExprNodePtr expr);
+
+        /**
+         * @brief Class constructor for a unary operation on an expression.
+         *
+         * @param opType The unary operation type being performed.
+         * @param variable The variable on which the unary operation is being performed.
+         */
+        UnOpExprNode(UnOpType opType, VariableNodePtr variable);
 
         /**
          * @brief Gets the string representation of the node as an s-expression

@@ -495,8 +495,12 @@ namespace Parser {
 
     UnOpExprNode::UnOpExprNode(UnOpType opType, ExprNodePtr expr) : opType(opType), expr(std::move(expr)) {}
 
+    UnOpExprNode::UnOpExprNode(UnOpType opType, VariableNodePtr variable)
+        : opType(opType), variable(std::move(variable)) {}
+
     std::string UnOpExprNode::sExpression() const {
-        return "(UnOpExprNode " + unOpToString(opType) + " " + expr->sExpression() + getTypeString() + ")";
+        return "(UnOpExprNode " + (expr == nullptr ? (ASTNodePtr)variable : (ASTNodePtr)expr)->sExpression() + " "
+             + unOpToString(opType) + getTypeString() + ")";
     }
 
     BinOpExprNode::BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr)

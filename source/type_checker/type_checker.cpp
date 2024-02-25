@@ -121,9 +121,10 @@ namespace TypeChecker {
             case Parser::ARRAY_EXPR: {
                 Parser::ArrayExprNodePtr const exprNode = std::static_pointer_cast<Parser::ArrayExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                std::shared_ptr<Ty> const type = exprNode->expressions.empty() ? nullptr
-                                                                               : typeCheck(exprNode->expressions[0]);
-                if (!exprNode->expressions.empty()) {
+                std::shared_ptr<Ty> const type = exprNode->expressions->exprs.empty()
+                                                       ? nullptr
+                                                       : typeCheck(exprNode->expressions[0]);
+                if (!exprNode->expressions->exprs.empty()) {
                     if (!type) {
                         // TODO: Improve error
                         throw Util::CommanderException("Array has an unknown type.");
@@ -162,7 +163,7 @@ namespace TypeChecker {
                 Parser::TupleExprNodePtr const exprNode = std::static_pointer_cast<Parser::TupleExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 std::vector<TyPtr> expressionTypes;
-                for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions) {
+                for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
                     TyPtr const exprType = typeCheck(exprNodePtr);
                     if (!exprType) {
                         // TODO: Improve error
@@ -191,24 +192,29 @@ namespace TypeChecker {
             case Parser::UNOP_EXPR: {
                 Parser::UnOpExprNodePtr const exprNode = std::static_pointer_cast<Parser::UnOpExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr const expressionType = typeCheck(exprNode->expr);
+                bool const isVariable = exprNode->variable != nullptr;
+                TyPtr const expressionType = isVariable ? typeCheck(exprNode->variable) : typeCheck(exprNode->expr);
                 if (!expressionType) {
                     // TODO: Improve error
                     throw Util::CommanderException("Unknown type in unop expression.");
                 }
                 Type const type = expressionType->getType();
-                if (exprNode->opType == Parser::NOT && type != Type::BOOL) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Expected boolean in not expression.");
-                }
-                if (exprNode->opType != Parser::NOT && type != Type::INT && type != Type::FLOAT) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Expected int or float in unop expression.");
-                }
-                if (exprNode->opType != Parser::NOT && exprNode->opType != Parser::NEGATE
-                    && exprNode->nodeType() != Parser::VARIABLE) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Expected variable in decrement or increment operation.");
+                switch (exprNode->opType) {
+                    case Parser::NOT:
+                        if (type != Type::BOOL) { throw Util::CommanderException("Expected a bool in not operation."); }
+                        break;
+                    case Parser::NEGATE:
+                    case Parser::PRE_INCREMENT:
+                    case Parser::POST_INCREMENT:
+                    case Parser::PRE_DECREMENT:
+                    case Parser::POST_DECREMENT:
+                        if (type != Type::INT && type != Type::FLOAT) {
+                            throw Util::CommanderException("Expected int or float in unop expression.");
+                        }
+                        if (exprNode->opType != Parser::NEGATE && !isVariable) {
+                            throw Util::CommanderException("Expected variable in decrement or increment operation.");
+                        }
+                        break;
                 }
                 return (exprNode->type = expressionType);
             }

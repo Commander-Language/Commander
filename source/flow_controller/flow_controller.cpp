@@ -130,7 +130,7 @@ namespace FlowController {
             case Parser::ARRAY_EXPR: {
                 auto arrExp = std::static_pointer_cast<Parser::ArrayExprNode>(node);
                 CommanderArray<std::any> array;
-                for (auto& expr : arrExp->expressions) {
+                for (auto& expr : arrExp->expressions->exprs) {
                     std::any const value = _expr(expr);
                     array.push_back(value);
                 }
@@ -143,7 +143,7 @@ namespace FlowController {
             case Parser::TUPLE_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleExprNode>(node);
                 CommanderTuple tuple;
-                for (auto& expr : tupleExp->expressions) { tuple.emplace_back(_expr(expr)); }
+                for (auto& expr : tupleExp->expressions->exprs) { tuple.emplace_back(_expr(expr)); }
                 return tuple;
             }
             case Parser::TERNARY_EXPR: {
@@ -317,6 +317,7 @@ namespace FlowController {
                 auto expr = std::any_cast<CommanderBool>(_expr(unOp->expr));
                 return !expr;
             }
+            // TODO: Fix increment and decrement to work on variable, not expr
             case Parser::PRE_INCREMENT: {
                 // might have to update symbol table if variable
                 auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
