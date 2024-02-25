@@ -540,7 +540,14 @@ namespace Parser {
     /**
      * @brief A variable AST node.
      */
-    class VariableNode : public ASTNode {};
+    class VariableNode : public ASTNode {
+    public:
+        /**
+         * Tells whether the variable is constant or not (default is false)
+         */
+        bool constant;
+        VariableNode(bool constant = false);
+    };
     /**
      * @brief A pointer to a variable node.
      *
@@ -2400,7 +2407,7 @@ namespace Parser {
          *
          * @param varName The name of the variable.
          */
-        IdentVariableNode(std::string varName);
+        IdentVariableNode(std::string varName, bool constant = false);
 
         /**
          * @brief Reports the type of this program node.

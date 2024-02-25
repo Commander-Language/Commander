@@ -386,6 +386,8 @@ namespace Parser {
         return "(PrgmNode" + builder.str() + ")";
     }
 
+    VariableNode::VariableNode(bool constant) : constant(constant) {}
+
     ASTNodeType IdentVariableNode::nodeType() const { return ASTNodeType::VARIABLE; }
 
     //  =================
@@ -580,8 +582,8 @@ namespace Parser {
         : condition(std::move(condition)), trueStmt(std::move(trueStmt)), falseStmt(std::move(falseStmt)) {}
 
     std::string IfStmtNode::sExpression() const {
-        return "(IfStmtNode " + condition->sExpression() + " " + trueStmt->sExpression() + (falseStmt ? " "
-             + falseStmt->sExpression() : "") + ")";
+        return "(IfStmtNode " + condition->sExpression() + " " + trueStmt->sExpression()
+             + (falseStmt ? " " + falseStmt->sExpression() : "") + ")";
     }
 
     ForStmtNode::ForStmtNode(StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update, StmtNodePtr body)
@@ -700,7 +702,8 @@ namespace Parser {
         return "(FunctionTypeNode" + builder.str() + getTypeString() + ")";
     }
 
-    IdentVariableNode::IdentVariableNode(std::string varName) : varName(std::move(varName)) {}
+    IdentVariableNode::IdentVariableNode(std::string varName, bool constant)
+        : VariableNode(constant), varName(std::move(varName)) {}
 
     std::string IdentVariableNode::sExpression() const { return "(IdentVariableNode " + varName + ")"; }
 

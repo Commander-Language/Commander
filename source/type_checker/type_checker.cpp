@@ -196,7 +196,10 @@ namespace TypeChecker {
                 Type const type = expressionType->getType();
                 switch (exprNode->opType) {
                     case Parser::NOT:
-                        if (type != Type::BOOL) { throw Util::CommanderException("Expected a bool in not operation."); }
+                        if (type != Type::BOOL) {
+                            // TODO: Improve error
+                            throw Util::CommanderException("Expected a bool in not operation.");
+                        }
                         break;
                     case Parser::NEGATE:
                     case Parser::PRE_INCREMENT:
@@ -204,10 +207,16 @@ namespace TypeChecker {
                     case Parser::PRE_DECREMENT:
                     case Parser::POST_DECREMENT:
                         if (type != Type::INT && type != Type::FLOAT) {
+                            // TODO: Improve error
                             throw Util::CommanderException("Expected int or float in unop expression.");
                         }
                         if (exprNode->opType != Parser::NEGATE && !isVariable) {
+                            // TODO: Improve error
                             throw Util::CommanderException("Expected variable in decrement or increment operation.");
+                        }
+                        if (exprNode->opType != Parser::NEGATE && exprNode->variable->constant) {
+                            // TODO: Improve error
+                            throw Util::CommanderException("Unable to increment or decrement constant variable.");
                         }
                         break;
                 }
@@ -279,6 +288,10 @@ namespace TypeChecker {
                             throw Util::CommanderException(
                                     "Invalid set expression; must have variable on left side of '='");
                         }
+                        if (exprNode->leftVariable->constant && leftTy) {
+                            // TODO: Improve error
+                            throw Util::CommanderException("Unable to update constant variable.");
+                        }
                         // NO break here! Should continue to the next lines of code that handle add, subtract, etc.
                     case Parser::ADD:
                     case Parser::MODULO:
@@ -300,7 +313,8 @@ namespace TypeChecker {
                         // TODO: Improve error
                         throw Util::CommanderException("Binary operation has incompatible types.");
                 }
-                return nullptr;
+                // All cases are dealt with in switch statement, so it shouldn't ever get here
+                throw Util::CommanderException("Unexpected error occurred with parsing binary expression");
             }
             case Parser::CALL_EXPR: {
                 Parser::CallExprNodePtr const exprNode = std::static_pointer_cast<Parser::CallExprNode>(astNode);

@@ -502,6 +502,9 @@ namespace Parser {
                 //  ||  Variables:  ||
                 //  ==================
 
+                //  (VARIABLE) -> [CONST] [VARIABLE]
+                {{{ASTNodeType::VARIABLE, {TokenType::CONST, TokenType::VARIABLE}},
+                  makeNode("IdentVariable", {tokenContents(1), "true"})}},
                 //  (VARIABLE) -> [VARIABLE]
                 {{{ASTNodeType::VARIABLE, {TokenType::VARIABLE}}, makeNode("IdentVariable", {tokenContents(0)})}},
         });
