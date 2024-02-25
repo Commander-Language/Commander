@@ -118,13 +118,13 @@ namespace TypeChecker {
                 if (exprNode->type) { return exprNode->type; }
                 std::shared_ptr<Ty> const type = exprNode->expressions->exprs.empty()
                                                        ? nullptr
-                                                       : typeCheck(exprNode->expressions[0]);
+                                                       : typeCheck(exprNode->expressions->exprs[0]);
                 if (!exprNode->expressions->exprs.empty()) {
                     if (!type) {
                         // TODO: Improve error
                         throw Util::CommanderException("Array has an unknown type.");
                     }
-                    for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions) {
+                    for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
                         if (!areTypesEqual(type, typeCheck(exprNodePtr))) {
                             // TODO: Improve error
                             throw Util::CommanderException("Array contains multiple different types.");
@@ -412,7 +412,7 @@ namespace TypeChecker {
                     throw Util::CommanderException("The condition does not evaluate to a bool type.");
                 }
                 typeCheck(stmtNode->trueStmt);
-                typeCheck(stmtNode->falseStmt);
+                if (stmtNode->falseStmt) { typeCheck(stmtNode->falseStmt); }
                 return nullptr;
             }
             case Parser::FOR_STMT: {

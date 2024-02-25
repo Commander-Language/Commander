@@ -580,8 +580,8 @@ namespace Parser {
         : condition(std::move(condition)), trueStmt(std::move(trueStmt)), falseStmt(std::move(falseStmt)) {}
 
     std::string IfStmtNode::sExpression() const {
-        return "(IfStmtNode " + condition->sExpression() + " " + trueStmt->sExpression() + " "
-             + falseStmt->sExpression() + ")";
+        return "(IfStmtNode " + condition->sExpression() + " " + trueStmt->sExpression() + (falseStmt ? " "
+             + falseStmt->sExpression() : "") + ")";
     }
 
     ForStmtNode::ForStmtNode(StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update, StmtNodePtr body)

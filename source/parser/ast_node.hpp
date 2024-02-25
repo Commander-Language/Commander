@@ -1506,7 +1506,7 @@ namespace Parser {
     //  ===================
 
     /**
-     * @brief An `if` statement node.
+     * @brief An `if` statement node
      *
      */
     class IfStmtNode : public StmtNode {
@@ -1522,7 +1522,7 @@ namespace Parser {
         StmtNodePtr trueStmt;
 
         /**
-         * The statements that are evaluated when all the condition is false
+         * The statements that are evaluated when all the condition is false (default is nullptr)
          */
         StmtNodePtr falseStmt;
 
@@ -1533,7 +1533,7 @@ namespace Parser {
          * @param trueStmt The statements to evaluate if true.
          * @param falseStmt The statement to evaluate if false.
          */
-        IfStmtNode(ExprNodePtr condition, StmtNodePtr trueStmt, StmtNodePtr falseStmt);
+        IfStmtNode(ExprNodePtr condition, StmtNodePtr trueStmt, StmtNodePtr falseStmt = nullptr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression

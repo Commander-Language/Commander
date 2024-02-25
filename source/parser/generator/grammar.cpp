@@ -175,16 +175,18 @@ namespace Parser {
                   makeNode("CmdCmd", {makeNode("String", {tokenContents(0)})})}},
                 //  (CMD) -> (STRING)
                 {{{ASTNodeType::CMD, {ASTNodeType::STRING}}, makeNode("CmdCmd", {castNode("String", 0)})}},
-                //  (CMD) -> [VARIABLE]
-                //  TODO
+                //  (CMD) -> [CMDVARIABLE]
+                {{{ASTNodeType::CMD, {TokenType::CMDVARIABLE}},
+                  makeNode("CmdCmd", {makeNode("IdentVariable", {tokenContents(0)})})}},
                 //  (CMD) -> (CMD) [CMDSTRINGVAL]
                 {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::CMDSTRINGVAL}},
                   makeNode("CmdCmd", {castNode("Cmd", 0), makeNode("String", {tokenContents(1)})})}},
                 //  (CMD) -> (CMD) (STRING)
                 {{{ASTNodeType::CMD, {ASTNodeType::CMD, ASTNodeType::STRING}},
                   makeNode("CmdCmd", {castNode("Cmd", 0), castNode("String", 1)})}},
-                //  (CMD) -> (CMD) [VARIABLE]
-                //  TODO
+                //  (CMD) -> (CMD) [CMDVARIABLE]
+                {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::CMDVARIABLE}},
+                  makeNode("CmdCmd", {castNode("Cmd", 0), makeNode("IdentVariable", {tokenContents(1)})})}},
 
 
                 //  ====================

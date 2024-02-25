@@ -32,6 +32,8 @@ namespace Lexer {
                 return "BREAK";
             case CMDSTRINGVAL:
                 return "CMDSTRINGVAL";
+            case CMDVARIABLE:
+                return "CMDVARIABLE";
             case COLON:
                 return "COLON";
             case COMMA:
@@ -285,11 +287,11 @@ namespace Lexer {
         }
         token = lexCommandVariable(file, position);
         if (token) {
-            if (isFirst && token->type == VARIABLE) isCommand = true;
+            if (isFirst && token->type == CMDVARIABLE) isCommand = true;
             return token;
         }
         if (!isCommand) {
-            token = lexVariable(file, position);
+            token = lexVariable(file, position, false);
             if (token) return token;
         }
         token = lexCommandString(file, position);
@@ -509,7 +511,7 @@ namespace Lexer {
                     token.subTokens.push_back(std::make_shared<Token>(strToken));
                     currentString.str("");
                 }
-                token.subTokens.push_back(lexVariable(file, position));
+                token.subTokens.push_back(lexVariable(file, position, false));
                 currentStringPosition = position;
                 continue;
             }
@@ -551,10 +553,10 @@ namespace Lexer {
         if (position.index + 1 >= file.length() || !isFirstVariableCharacter(file[position.index + 1])) { return {}; }
         position.index++;
         position.column++;
-        return lexVariable(file, position);
+        return lexVariable(file, position, true);
     }
 
-    TokenPtr lexVariable(const std::string& file, FilePosition& position) {
+    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand) {
         // First character of variable must be a letter or an underscore
         if (!isFirstVariableCharacter(file[position.index])) { return {}; }
         // Token is definitely a variable, so determine length/contents
@@ -564,7 +566,7 @@ namespace Lexer {
             builder << file[position.index++];
             position.column++;
         }
-        const Token token = {std::string(builder.str()), VARIABLE, startPosition};
+        const Token token = {std::string(builder.str()), isCommand ? CMDVARIABLE : VARIABLE, startPosition};
         return std::make_shared<Token>(token);
     }
 

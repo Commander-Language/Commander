@@ -27,10 +27,10 @@
 
 (CMD) -> [CMDSTRINGVAL]
 (CMD) -> (STRING)
-(CMD) -> (VARIABLE)
+(CMD) -> (CMDVARIABLE)
 (CMD) -> (CMD) [CMDSTRINGVAL]
 (CMD) -> (CMD) (STRING)
-(CMD) -> (CMD) (VARIABLE)
+(CMD) -> (CMD) (CMDVARIABLE)
 
 
 //  ====================
