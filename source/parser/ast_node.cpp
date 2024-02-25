@@ -412,11 +412,10 @@ namespace Parser {
 
     std::string AsyncCmdNode::sExpression() const { return "(AsyncCmdNode " + cmd->sExpression() + ")"; }
 
-    TimeoutCmdNode::TimeoutCmdNode(ExprNodePtr timeout, CmdNodePtr cmd)
-        : timeout(std::move(timeout)), cmd(std::move(cmd)) {}
+    TimeoutCmdNode::TimeoutCmdNode(int64_t timeout, CmdNodePtr cmd) : timeout(timeout), cmd(std::move(cmd)) {}
 
     std::string TimeoutCmdNode::sExpression() const {
-        return "(TimeoutCmdNode " + timeout->sExpression() + cmd->sExpression() + ")";
+        return "(TimeoutCmdNode " + std::to_string(timeout) + " " + cmd->sExpression() + ")";
     }
 
     PipeCmdNode::PipeCmdNode(CmdNodePtr leftCmd, CmdNodePtr rightCmd)

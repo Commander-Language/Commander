@@ -23,6 +23,7 @@
 
 (CMD) -> (CMD) [AMPERSAND]
 (CMD) -> (CMD) [PIPE] (CMD)
+(CMD) -> [TIMEOUT] [INTVAL] (CMD)
 
 (CMD) -> [CMDSTRINGVAL]
 (CMD) -> (STRING)

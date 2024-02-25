@@ -77,11 +77,6 @@ namespace TypeChecker {
             case Parser::TIMEOUT_CMD: {
                 Parser::TimeoutCmdNodePtr const timeoutCommand = std::static_pointer_cast<Parser::TimeoutCmdNode>(
                         astNode);
-                TyPtr const timeoutType = typeCheck(timeoutCommand->timeout);
-                if (!timeoutType || timeoutType->getType() != Type::INT) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Timeout should be an integer.");
-                }
                 return typeCheck(timeoutCommand->cmd);
             }
             case Parser::INT_EXPR: {

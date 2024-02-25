@@ -166,6 +166,9 @@ namespace Parser {
                 //  (CMD) -> (CMD) [PIPE] (CMD)
                 {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::PIPE, ASTNodeType::CMD}},
                   makeNode("PipeCmd", {castNode("Cmd", 0), castNode("Cmd", 2)})}},
+                //  (CMD) -> [TIMEOUT] [INTVAL] (CMD)
+                {{{ASTNodeType::CMD, {TokenType::TIMEOUT, TokenType::INTVAL, ASTNodeType::CMD}},
+                  makeNode("TimeoutCmd", {callFunc("std::stoll", {tokenContents(1)}), castNode("Cmd", 2)})}},
 
                 //  (CMD) -> [CMDSTRINGVAL]
                 {{{ASTNodeType::CMD, {TokenType::CMDSTRINGVAL}},

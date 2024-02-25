@@ -645,7 +645,7 @@ namespace Parser {
         /**
          * @brief Timeout in milliseconds
          */
-        ExprNodePtr timeout;
+        int64_t timeout;
 
         /**
          * @brief The command to run
@@ -658,7 +658,7 @@ namespace Parser {
          * @param timeout Timeout in milliseconds
          * @param cmd The command to run
          */
-        TimeoutCmdNode(ExprNodePtr timeout, CmdNodePtr cmd);
+        TimeoutCmdNode(int64_t timeout, CmdNodePtr cmd);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
