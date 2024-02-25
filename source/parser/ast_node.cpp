@@ -576,17 +576,12 @@ namespace Parser {
     //  ||  Statements:  ||
     //  ===================
 
-    IfStmtNode::IfStmtNode(const std::vector<ExprNodePtr>& conditions, std::vector<StmtNodePtr> trueStmts,
-                           StmtNodePtr falseStmt)
-        : conditions(conditions), trueStmts(std::move(trueStmts)), falseStmt(std::move(falseStmt)) {}
+    IfStmtNode::IfStmtNode(ExprNodePtr condition, StmtNodePtr trueStmt, StmtNodePtr falseStmt)
+        : condition(std::move(condition)), trueStmt(std::move(trueStmt)), falseStmt(std::move(falseStmt)) {}
 
     std::string IfStmtNode::sExpression() const {
-        std::stringstream builder;
-        for (int i = 0; i < (int)conditions.size(); i++) {
-            builder << " " << conditions[i]->sExpression();
-            builder << " " << trueStmts[i]->sExpression();
-        }
-        return "(IfStmtNode" + builder.str() + " " + falseStmt->sExpression() + ")";
+        return "(IfStmtNode " + condition->sExpression() + " " + trueStmt->sExpression() + " "
+             + falseStmt->sExpression() + ")";
     }
 
     ForStmtNode::ForStmtNode(StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update, StmtNodePtr body)

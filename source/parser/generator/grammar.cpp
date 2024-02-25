@@ -376,16 +376,6 @@ namespace Parser {
                 {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::CMD, TokenType::BACKTICK}},
                   makeNode("CmdExpr", {castNode("Cmd", 1)})}},
 
-                //  Arrays:
-                //  (EXPR) -> [LSQUARE] (EXPRS) [RSQUARE]
-                {{{ASTNodeType::EXPR, {TokenType::LSQUARE, ASTNodeType::EXPRS, TokenType::RSQUARE}},
-                  makeNode("ArrayExpr", {castNode("Exprs", 1)})}},
-
-                //  Tuples:
-                //  (EXPR) -> [LPAREN] (EXPRS) [RPAREN]
-                {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::RPAREN}},
-                  makeNode("TupleExpr", {castNode("Exprs", 1)})}},
-
                 //  ===================
                 //  ||  Statements:  ||
                 //  ===================
@@ -430,9 +420,14 @@ namespace Parser {
                   makeNode("AliasStmt", {tokenContents(1), castNode("Cmd", 3)})}},
 
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
-                //  TODO
+                {{{ASTNodeType::STMT,
+                   {TokenType::IF, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT,
+                    TokenType::ELSE, ASTNodeType::STMT}},
+                  makeNode("IfStmt", {castNode("Expr", 2), castNode("Stmt", 4), castNode("Stmt", 6)})}},
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
-                //  TODO
+                {{{ASTNodeType::STMT,
+                   {TokenType::IF, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
+                  makeNode("IfStmt", {castNode("Expr", 2), castNode("Stmt", 4)})}},
 
                 //  TODO: Add cases for when no expression is provided
                 //  (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
@@ -457,6 +452,16 @@ namespace Parser {
                 //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
                 {{{ASTNodeType::STMT, {TokenType::LCURLY, ASTNodeType::STMTS, TokenType::RCURLY}},
                   makeNode("ScopeStmt", {castNode("Stmts", 1)})}},
+
+                //  Arrays:
+                //  (EXPR) -> [LSQUARE] (EXPRS) [RSQUARE]
+                {{{ASTNodeType::EXPR, {TokenType::LSQUARE, ASTNodeType::EXPRS, TokenType::RSQUARE}},
+                  makeNode("ArrayExpr", {castNode("Exprs", 1)})}},
+
+                //  Tuples:
+                //  (EXPR) -> [LPAREN] (EXPRS) [RPAREN]
+                {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::RPAREN}},
+                  makeNode("TupleExpr", {castNode("Exprs", 1)})}},
 
                 //  Functions:
                 //  ----------

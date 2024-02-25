@@ -406,15 +406,12 @@ namespace TypeChecker {
             }
             case Parser::IF_STMT: {
                 Parser::IfStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(astNode);
-                for (const Parser::ExprNodePtr& condition : stmtNode->conditions) {
-                    // TODO: Put the following lines of code into a helper method since it is repeated
-                    TyPtr const conditionType = typeCheck(condition);
-                    if (!conditionType || conditionType->getType() != Type::BOOL) {
-                        // TODO: Improve error
-                        throw Util::CommanderException("The condition does not evaluate to a bool type.");
-                    }
+                TyPtr const conditionType = typeCheck(stmtNode->condition);
+                if (!conditionType || conditionType->getType() != Type::BOOL) {
+                    // TODO: Improve error
+                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
                 }
-                for (const Parser::StmtNodePtr& currentStatement : stmtNode->trueStmts) { typeCheck(currentStatement); }
+                typeCheck(stmtNode->trueStmt);
                 typeCheck(stmtNode->falseStmt);
                 return nullptr;
             }

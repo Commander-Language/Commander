@@ -1512,29 +1512,28 @@ namespace Parser {
     class IfStmtNode : public StmtNode {
     public:
         /**
-         * The expressions representing the boolean conditions
+         * The boolean condition expression
          */
-        std::vector<ExprNodePtr> conditions;
+        ExprNodePtr condition;
 
         /**
-         * The statements that are evaluated when the conditions are true
+         * The statements that are evaluated when all the condition is true
          */
-        std::vector<StmtNodePtr> trueStmts;
+        StmtNodePtr trueStmt;
 
         /**
-         * The statements that are evaluated when all the conditions are false
+         * The statements that are evaluated when all the condition is false
          */
         StmtNodePtr falseStmt;
 
         /**
          * @brief Class constructor.
          *
-         * @param conditions The conditions to test.
-         * @param trueStmts The statements to evaluate if true.
-         * @param falseStmt The statement to evaluate if false. (Defaults to `nullptr`).
+         * @param condition The condition to test.
+         * @param trueStmt The statements to evaluate if true.
+         * @param falseStmt The statement to evaluate if false.
          */
-        IfStmtNode(const std::vector<ExprNodePtr>& conditions, std::vector<StmtNodePtr> trueStmts,
-                   StmtNodePtr falseStmt = nullptr);
+        IfStmtNode(ExprNodePtr condition, StmtNodePtr trueStmt, StmtNodePtr falseStmt);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
