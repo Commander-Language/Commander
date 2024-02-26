@@ -146,14 +146,22 @@ namespace Parser {
                 //  =================
 
                 //  (BINDINGS) -> (BINDING)
-                //  TODO
+                {{{ASTNodeType::BINDINGS, {ASTNodeType::BINDING}}, makeNode("Bindings", {castNode("Binding", 0)})}},
                 //  (BINDINGS) -> (BINDINGS) [COMMA] (BINDING)
-                //  TODO
+                {{{ASTNodeType::BINDINGS, {ASTNodeType::BINDINGS, TokenType::COMMA, ASTNodeType::BINDING}},
+                  makeNode("Bindings", {castNode("Bindings", 0), castNode("Binding", 2)})}},
 
+                //  (BINDING) -> [CONST] [VARIABLE]
+                {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE}},
+                  makeNode("Binding", {tokenContents(1), "true"})}},
                 //  (BINDING) -> [VARIABLE]
-                //  TODO
+                {{{ASTNodeType::BINDING, {TokenType::VARIABLE}}, makeNode("Binding", {tokenContents(0)})}},
+                //  (BINDING) -> [CONST] [VARIABLE] [COLON] (TYPE)
+                {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE, TokenType::COLON, TokenType::TYPE}},
+                  makeNode("Binding", {tokenContents(1), "true", castNode("Type", 3)})}},
                 //  (BINDING) -> [VARIABLE] [COLON] (TYPE)
-                //  TODO
+                {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE, TokenType::COLON, TokenType::TYPE}},
+                  makeNode("Binding", {tokenContents(0), "false", castNode("Type", 2)})}},
 
 
                 //  =================
@@ -326,9 +334,9 @@ namespace Parser {
                 //  (EXPR) -> (VARIABLE) [MINUS_EQUALS] (EXPR)
                 {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MINUS_EQUALS, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::SUBTRACT_SET", castNode("Expr", 2)})}},
-                //  (EXPR) -> (VARIABLE) [EQUALS] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EQUALS, ASTNodeType::EXPR}},
-                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::SET", castNode("Expr", 2)})}},
+                //  (EXPR) -> (BINDING) [EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::BINDING, TokenType::EQUALS, ASTNodeType::EXPR}},
+                  makeNode("BinOpExpr", {castNode("Binding", 0), "BinOpType::SET", castNode("Expr", 2)})}},
 
                 //  Parentheses:
                 //  ------------
@@ -492,19 +500,41 @@ namespace Parser {
                 //  ||  Types:  ||
                 //  ==============
 
-                //  (TYPE) -> [INT]
-                //  TODO
-                //  (TYPE) -> [FLOAT]
-                //  TODO
+                //  (TYPES) -> (TYPE)
+                {{{ASTNodeType::TYPES, {ASTNodeType::TYPE}}, makeNode("Types", {castNode("Type", 0)})}},
 
+                //  (TYPES) -> (TYPES) [COMMA] (TYPE)
+                {{{ASTNodeType::TYPES, {ASTNodeType::TYPES, TokenType::COMMA, ASTNodeType::EXPR}},
+                  makeNode("Types", {castNode("Types", 0), castNode("Type", 2)})}},
+
+                //  (TYPE) -> [INT]
+                {{{ASTNodeType::TYPE, {TokenType::INT}}, makeNode("IntType", {})}},
+                //  (TYPE) -> [FLOAT]
+                {{{ASTNodeType::TYPE, {TokenType::FLOAT}}, makeNode("FloatType", {})}},
+                //  (TYPE) -> [BOOL]
+                {{{ASTNodeType::TYPE, {TokenType::BOOL}}, makeNode("BoolType", {})}},
+                //  (TYPE) -> [STRING]
+                {{{ASTNodeType::TYPE, {TokenType::STRING}}, makeNode("StringType", {})}},
+                //  (TYPE) -> [VOID]
+                {{{ASTNodeType::TYPE, {TokenType::VOID}}, makeNode("TupleType", {makeNode("Types", {})})}},
+                //  (TYPE) -> (TYPE) [LAMBDA] (TYPE)
+                {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LAMBDA, ASTNodeType::TYPE}},
+                  makeNode("FunctionType", {makeNode("Types", {castNode("Type", 0)}), castNode("Type", 2)})}},
+                //  (TYPE) -> [LPAREN] (TYPES) [RPAREN] [LAMBDA] (TYPE)
+                {{{ASTNodeType::TYPE,
+                   {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::TYPE}},
+                  makeNode("FunctionType", {castNode("Types", 0), castNode("Type", 2)})}},
+                //  (TYPE) -> (TYPE) [LSQUARE] [RSQUARE]
+                {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LSQUARE, TokenType::RSQUARE}},
+                  makeNode("ArrayType", {castNode("Type", 0)})}},
+                //  (TYPE) -> [LPAREN] (TYPES) [RPAREN]
+                {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN}},
+                  makeNode("TupleType", {castNode("Types", 0)})}},
 
                 //  ==================
                 //  ||  Variables:  ||
                 //  ==================
 
-                //  (VARIABLE) -> [CONST] [VARIABLE]
-                {{{ASTNodeType::VARIABLE, {TokenType::CONST, TokenType::VARIABLE}},
-                  makeNode("IdentVariable", {tokenContents(1), "true"})}},
                 //  (VARIABLE) -> [VARIABLE]
                 {{{ASTNodeType::VARIABLE, {TokenType::VARIABLE}}, makeNode("IdentVariable", {tokenContents(0)})}},
         });

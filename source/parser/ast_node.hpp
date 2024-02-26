@@ -73,6 +73,7 @@ namespace Parser {
         TUPLE_TYPE,
         FUNCTION_TYPE,
         TYPE,
+        TYPES,
         VARIABLE
     };
 
@@ -200,28 +201,87 @@ namespace Parser {
     using TypeNodePtr = std::shared_ptr<TypeNode>;
 
     /**
+     * @brief A list of type nodes.
+     * @details Zero or more.
+     *
+     */
+    class TypesNode : public ASTNode {
+    public:
+        /**
+         * @brief Default constructor
+         */
+        TypesNode() = default;
+
+        /**
+         * @brief Class constructor from a single expression.
+         *
+         * @param type The single type node that makes up this AST node.
+         */
+        TypesNode(TypeNodePtr type);
+
+        /**
+         * @brief Class constructor from a list of types, plus one more type.
+         *
+         * @param types The list of type nodes that makes up this AST node.
+         * @param type The type to add to the end of the list of expressions.
+         */
+        TypesNode(std::shared_ptr<TypesNode> types, TypeNodePtr type);
+
+        /**
+         * @brief Reports the type of this expression-list node.
+         *
+         * @return `TYPES` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression.
+         *
+         * @return The s-expression string of the node.
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief The list of type nodes that makes up this AST node.
+         *
+         */
+        std::vector<TypeNodePtr> types;
+    };
+    /**
+     * @brief A pointer to an type-list node.
+     *
+     */
+    using TypesNodePtr = std::shared_ptr<TypesNode>;
+
+    /**
      * @brief A binding AST node.
      *
      */
     class BindingNode : public ASTNode {
     public:
         /**
-         * @brief Class constructor.
-         *
-         * @param variable The name of the bound variable.
-         * @param type The type of the bound variable. (Defaults to `nullptr`.)
-         */
-        BindingNode(std::string variable, TypeNodePtr type = nullptr);
-
-        /**
          * The variable name of the associated binding
          */
         std::string variable;
 
         /**
+         * Tells whether the variable is constant or not (default is false)
+         */
+        bool constant;
+
+        /**
          * The (optional) type of the associated binding
          */
         TypeNodePtr type;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param variable The name of the bound variable.
+         * @param constant Tells whether the variable is constant or not (default is false)
+         * @param type The type of the bound variable. (Defaults to `nullptr`.)
+         */
+        BindingNode(std::string variable, bool constant = false, TypeNodePtr type = nullptr);
 
         /**
          * @brief Reports the type of this binding node.
@@ -263,7 +323,7 @@ namespace Parser {
          * @param bindings The list of binding nodes at the beginning.
          * @param binding The binding node at the end.
          */
-        BindingsNode(const std::vector<BindingNodePtr>& bindings, BindingNodePtr binding);
+        BindingsNode(std::shared_ptr<BindingsNode> bindings, BindingNodePtr binding);
 
         /**
          * @brief Reports the type of this binding-list node.
@@ -540,14 +600,7 @@ namespace Parser {
     /**
      * @brief A variable AST node.
      */
-    class VariableNode : public ASTNode {
-    public:
-        /**
-         * Tells whether the variable is constant or not (default is false)
-         */
-        bool constant;
-        VariableNode(bool constant = false);
-    };
+    class VariableNode : public ASTNode {};
     /**
      * @brief A pointer to a variable node.
      *
@@ -1169,6 +1222,17 @@ namespace Parser {
         BinOpType opType;
 
         /**
+         * @brief Tells whether the left variable is a constant if setting a variable with a binding
+         */
+        bool leftConstant;
+
+        /**
+         * @brief The type on the left-hand side of the operator,
+         *     for expressions that set a variable with a binding.
+         */
+        TypeNodePtr leftType;
+
+        /**
          * @brief The expression on the left-hand side of the operator,
          *     for expressions that don't set a variable.
          */
@@ -1184,6 +1248,16 @@ namespace Parser {
          * @brief The expression on the right-hand side of the operator.
          */
         ExprNodePtr rightExpr;
+
+        /**
+         * @brief Class constructor.
+         * @details For binary operations set a variable.
+         *
+         * @param leftBinding The binding on the left-hand side of the operator.
+         * @param opType The type of operation being done.
+         * @param rightExpr The expression on the right-hand side of the operator.
+         */
+        BinOpExprNode(BindingNodePtr leftBinding, BinOpType opType, ExprNodePtr rightExpr);
 
         /**
          * @brief Class constructor.
@@ -2175,6 +2249,11 @@ namespace Parser {
     class IntTypeNode : public TypeNode {
     public:
         /**
+         * @brief Default Constructor
+         */
+        IntTypeNode() = default;
+
+        /**
          * @brief Gets the string representation of the node as an s-expression
          *
          * @return The s-expression string of the node
@@ -2200,6 +2279,11 @@ namespace Parser {
      */
     class FloatTypeNode : public TypeNode {
     public:
+        /**
+         * @brief Default Constructor
+         */
+        FloatTypeNode() = default;
+
         /**
          * @brief Gets the string representation of the node as an s-expression
          *
@@ -2227,6 +2311,11 @@ namespace Parser {
     class BoolTypeNode : public TypeNode {
     public:
         /**
+         * @brief Default Constructor
+         */
+        BoolTypeNode() = default;
+
+        /**
          * @brief Gets the string representation of the node as an s-expression
          *
          * @return The s-expression string of the node
@@ -2252,6 +2341,11 @@ namespace Parser {
      */
     class StringTypeNode : public TypeNode {
     public:
+        /**
+         * @brief Default Constructor
+         */
+        StringTypeNode() = default;
+
         /**
          * @brief Gets the string representation of the node as an s-expression
          *
@@ -2319,14 +2413,14 @@ namespace Parser {
         /**
          * @brief subtypes The type of each of the tuple's items.
          */
-        std::vector<TypeNodePtr> subtypes;
+        TypesNodePtr subtypes;
 
         /**
          * @brief Class constructor.
          *
          * @param subtypes The type of each of the tuple's items.
          */
-        TupleTypeNode(const std::vector<TypeNodePtr>& subtypes);
+        TupleTypeNode(TypesNodePtr subtypes);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2357,14 +2451,20 @@ namespace Parser {
         /**
          * @brief params The type of each of the function's params
          */
-        std::vector<TypeNodePtr> params;
+        TypesNodePtr params;
+
+        /**
+         * @brief returnType The return type
+         */
+        TypeNodePtr returnType;
 
         /**
          * @brief Class constructor.
          *
          * @param params The type of each of the function's params
+         * @param returnType The return type
          */
-        FunctionTypeNode(const std::vector<TypeNodePtr>& params);
+        FunctionTypeNode(TypesNodePtr params, TypeNodePtr returnType);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2407,7 +2507,7 @@ namespace Parser {
          *
          * @param varName The name of the variable.
          */
-        IdentVariableNode(std::string varName, bool constant = false);
+        IdentVariableNode(std::string varName);
 
         /**
          * @brief Reports the type of this program node.

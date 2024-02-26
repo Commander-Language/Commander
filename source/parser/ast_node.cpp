@@ -120,6 +120,8 @@ namespace Parser {
                 return "FUNCTION_TYPE";
             case TYPE:
                 return "TYPE";
+            case TYPES:
+                return "TYPES";
             case VARIABLE:
                 return "VARIABLE";
             default:
@@ -233,13 +235,29 @@ namespace Parser {
 
     std::string TypeNode::getTypeString() const { return TypeChecker::getTypeString(type); }
 
-    BindingNode::BindingNode(std::string variable, TypeNodePtr type)
-        : variable(std::move(variable)), type(std::move(type)) {}
+    TypesNode::TypesNode(TypeNodePtr type) : types({std::move(type)}) {}
+
+    TypesNode::TypesNode(std::shared_ptr<TypesNode> types, TypeNodePtr type)
+        : types(concat(types->types, std::move(type))) {}
+
+    ASTNodeType TypesNode::nodeType() const { return ASTNodeType::TYPES; }
+
+    std::string TypesNode::sExpression() const {
+        std::stringstream result;
+        result << "(TypesNode";
+        for (const auto& type : types) { result << " " << type->sExpression(); }
+        result << ")";
+        return result.str();
+    }
+
+    BindingNode::BindingNode(std::string variable, bool constant, TypeNodePtr type)
+        : variable(std::move(variable)), constant(constant), type(std::move(type)) {}
 
     ASTNodeType BindingNode::nodeType() const { return ASTNodeType::BINDING; }
 
     std::string BindingNode::sExpression() const {
-        return "(BindingNode " + variable + " " + type->sExpression() + ")";
+        return "(BindingNode " + variable + " " + (constant ? "true" : "false")
+             + (type ? " " + type->sExpression() : "") + ")";
     }
 
     ASTNodeType BindingsNode::nodeType() const { return ASTNodeType::BINDINGS; }
@@ -254,8 +272,8 @@ namespace Parser {
 
     BindingsNode::BindingsNode(BindingNodePtr binding) : bindings({std::move(binding)}) {}
 
-    BindingsNode::BindingsNode(const std::vector<BindingNodePtr>& bindings, BindingNodePtr binding)
-        : bindings(concat(bindings, std::move(binding))) {}
+    BindingsNode::BindingsNode(std::shared_ptr<BindingsNode> bindings, BindingNodePtr binding)
+        : bindings(concat(bindings->bindings, std::move(binding))) {}
 
     std::string ExprNode::getTypeString() const { return TypeChecker::getTypeString(type); }
 
@@ -386,8 +404,6 @@ namespace Parser {
         return "(PrgmNode" + builder.str() + ")";
     }
 
-    VariableNode::VariableNode(bool constant) : constant(constant) {}
-
     ASTNodeType IdentVariableNode::nodeType() const { return ASTNodeType::VARIABLE; }
 
     //  =================
@@ -504,11 +520,18 @@ namespace Parser {
              + unOpToString(opType) + getTypeString() + ")";
     }
 
+    BinOpExprNode::BinOpExprNode(BindingNodePtr leftBinding, BinOpType opType, ExprNodePtr rightExpr)
+        : leftConstant(leftBinding->constant), leftType(std::move(leftBinding->type)),
+          leftVariable(std::make_shared<IdentVariableNode>(leftBinding->variable)), opType(opType),
+          rightExpr(std::move(rightExpr)) {}
+
     BinOpExprNode::BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr)
-        : opType(opType), leftExpr(std::move(leftExpr)), rightExpr(std::move(rightExpr)) {}
+        : opType(opType), leftExpr(std::move(leftExpr)), rightExpr(std::move(rightExpr)), leftType(nullptr),
+          leftConstant(false) {}
 
     BinOpExprNode::BinOpExprNode(VariableNodePtr leftVariable, BinOpType opType, ExprNodePtr rightExpr)
-        : leftVariable(std::move(leftVariable)), opType(opType), rightExpr(std::move(rightExpr)) {}
+        : leftVariable(std::move(leftVariable)), opType(opType), rightExpr(std::move(rightExpr)), leftType(nullptr),
+          leftConstant(false) {}
 
     std::string BinOpExprNode::sExpression() const {
         return "(BinOpExprNode "
@@ -686,24 +709,24 @@ namespace Parser {
         return "(ArrayTypeNode " + subtype->sExpression() + getTypeString() + ")";
     }
 
-    TupleTypeNode::TupleTypeNode(const std::vector<TypeNodePtr>& subtypes) : subtypes(subtypes) {}
+    TupleTypeNode::TupleTypeNode(TypesNodePtr subtypes) : subtypes(std::move(subtypes)) {}
 
     std::string TupleTypeNode::sExpression() const {
         std::stringstream builder;
-        for (const TypeNodePtr& subType : subtypes) { builder << " " << subType->sExpression(); }
+        for (const TypeNodePtr& subType : subtypes->types) { builder << " " << subType->sExpression(); }
         return "(TupleTypeNode" + builder.str() + getTypeString() + ")";
     }
 
-    FunctionTypeNode::FunctionTypeNode(const std::vector<TypeNodePtr>& params) : params(params) {}
+    FunctionTypeNode::FunctionTypeNode(TypesNodePtr params, TypeNodePtr returnType)
+        : params(std::move(params)), returnType(std::move(returnType)) {}
 
     std::string FunctionTypeNode::sExpression() const {
         std::stringstream builder;
-        for (const TypeNodePtr& param : params) { builder << " " << param->sExpression(); }
-        return "(FunctionTypeNode" + builder.str() + getTypeString() + ")";
+        for (const TypeNodePtr& param : params->types) { builder << " " << param->sExpression(); }
+        return "(FunctionTypeNode" + builder.str() + " " + returnType->sExpression() + getTypeString() + ")";
     }
 
-    IdentVariableNode::IdentVariableNode(std::string varName, bool constant)
-        : VariableNode(constant), varName(std::move(varName)) {}
+    IdentVariableNode::IdentVariableNode(std::string varName) : varName(std::move(varName)) {}
 
     std::string IdentVariableNode::sExpression() const { return "(IdentVariableNode " + varName + ")"; }
 

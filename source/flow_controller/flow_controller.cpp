@@ -72,6 +72,10 @@ namespace FlowController {
                     _string(std::static_pointer_cast<Parser::StringNode>(node));
                     break;
                 }
+                case Parser::TYPES: {
+                    _types(std::static_pointer_cast<Parser::TypesNode>(node));
+                    break;
+                }
                 case Parser::TYPE: {
                     _type(std::static_pointer_cast<Parser::TypeNode>(node));
                     break;
@@ -299,6 +303,10 @@ namespace FlowController {
             indexExpression++;
         }
         return stringResult;
+    }
+
+    void FlowController::_types(const Parser::TypesNodePtr& node) {
+        for (auto& type : node->types) { _type(type); }
     }
 
     void FlowController::_type(const Parser::TypeNodePtr& node) {

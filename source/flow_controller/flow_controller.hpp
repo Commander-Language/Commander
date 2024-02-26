@@ -148,6 +148,11 @@ namespace FlowController {
          */
         std::string _string(const Parser::StringNodePtr&);
         /**
+         * @brief Helper to interpret types nodes
+         * @param types The types to interpret
+         */
+        void _types(const Parser::TypesNodePtr& types);
+        /**
          * @brief Helper to interpret type nodes
          */
         void _type(const Parser::TypeNodePtr&);
