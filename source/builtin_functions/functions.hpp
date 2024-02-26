@@ -267,6 +267,38 @@ namespace Function {
 
     void sleep(TypeChecker::CommanderInt timeToSleep);
 
+    //TODO: toString()?
+
+    //TODO: should the following be moved to their respective classes?
+    //STRING API METHODS
+    TypeChecker::CommanderString charAt(TypeChecker::CommanderInt index, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderBool startsWith(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderBool endsWith(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderBool includes(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderInt indexOf(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderInt length(TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderString replace(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderString replaceAll(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex, TypeChecker::CommanderInt endingIndex, TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderString trim(TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderString lower(TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderString upper(TypeChecker::CommanderString sourceString);
+
+    TypeChecker::CommanderTuple split(TypeChecker::CommanderString sourceString)
+
     struct AnyCallable
     {
         AnyCallable() {}

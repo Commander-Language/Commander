@@ -348,3 +348,63 @@ TypeChecker::CommanderTuple Function::date() {
 void Function::sleep(TypeChecker::CommanderInt timeToSleep) {
     std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleep));
 }
+
+//STRING METHODS
+TypeChecker::CommanderString Function::charAt(TypeChecker::CommanderInt index, TypeChecker::CommanderString sourceString) {
+    return std::to_string(sourceString[index]);
+}
+
+TypeChecker::CommanderBool Function::startsWith(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString) {
+    return sourceString.rfind(expected, 0); //rfind(str, 0) checks the beginning of the string
+}
+
+TypeChecker::CommanderBool Function::endsWith(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString) {
+    if(expected.size() == sourceString.size()) {
+        return sourceString == expected;
+    }
+    if(sourceString.find_last_of(expected) == std::string::npos) {
+        return false;
+    }
+    return true;
+}
+
+TypeChecker::CommanderBool Function::includes(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString) {
+    return sourceString.find(expected);
+}
+
+TypeChecker::CommanderInt Function::indexOf(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString) {
+    size_t startingIndex = sourceString.find_first_of(expected);
+    if(startingIndex == std::string::npos) {
+        return -1;
+    }
+    return startingIndex;
+}
+
+TypeChecker::CommanderInt Function::length(TypeChecker::CommanderString sourceString) {
+    return sourceString.size();
+}
+
+TypeChecker::CommanderString Function::replace(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase, TypeChecker::CommanderString sourceString) { //TODO: refactor?
+    size_t replaceStartsAt = sourceString.find(oldPhrase);
+    if(replaceStartsAt == std::string::npos) {
+        return sourceString;
+    }
+    TypeChecker::CommanderString firstHalf = sourceString.substr(0, replaceStartsAt); //Technically may not be half of the string
+    TypeChecker::CommanderString secondHalf = sourceString.substr(replaceStartsAt + oldPhrase.size() - 1, sourceString.size() - 1);
+
+    return firstHalf + newPhrase + secondHalf;
+}
+
+TypeChecker::CommanderString Function::replaceAll(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase, TypeChecker::CommanderString sourceString) {
+    TypeChecker::CommanderString newString = std::string(sourceString);
+    std::replace(newString.begin(), newString.end(), oldPhrase, newPhrase);
+    return newString;
+}
+
+TypeChecker::CommanderString Function::substring(TypeChecker::CommanderInt startingIndex, TypeChecker::CommanderString sourceString) {
+    return sourceString.substr(startingIndex);
+}
+
+TypeChecker::CommanderString Function::substring(TypeChecker::CommanderInt startingIndex, TypeChecker::CommanderInt endingIndex, TypeChecker::CommanderString sourceString) {
+    return sourceString.substr(startingIndex, endingIndex);
+}
