@@ -311,6 +311,11 @@ namespace Parser {
     class BindingsNode : public ASTNode {
     public:
         /**
+         * @brief Default class constructor
+         */
+        BindingsNode() = default;
+
+        /**
          * @brief Class constructor from a single binding.
          *
          * @param bindings The list of binding nodes that makes up this AST node.
@@ -1430,6 +1435,22 @@ namespace Parser {
         TypeNodePtr returnType;
 
         /**
+         * @brief Class constructor with a statement body (the default) and no bindings
+         *
+         * @param body The body of the function.
+         * @param returnType The return type of the function.
+         */
+        LambdaExprNode(StmtNodePtr body, TypeNodePtr returnType = nullptr);
+
+        /**
+         * @brief Class constructor with a return type for lambdas with just an expression for the body and no bindings.
+         *
+         * @param body The body of the function.
+         * @param returnType The return type of the function.
+         */
+        LambdaExprNode(ExprNodePtr body, TypeNodePtr returnType = nullptr);
+
+        /**
          * @brief Class constructor with a statement body (the default).
          *
          * @param bindings The bindings (arguments) of the function.
@@ -2208,6 +2229,15 @@ namespace Parser {
         TypeNodePtr returnType;
 
         /**
+         * @brief Class constructor with a statement body (the default), and no bindings
+         *
+         * @param name The name of the function
+         * @param body The body of the function.
+         * @param returnType The return type of the function.
+         */
+        FunctionStmtNode(std::string name, StmtNodePtr body, TypeNodePtr returnType = nullptr);
+
+        /**
          * @brief Class constructor with a statement body (the default).
          *
          * @param name The name of the function
@@ -2457,6 +2487,13 @@ namespace Parser {
          * @brief returnType The return type
          */
         TypeNodePtr returnType;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param returnType The return type
+         */
+        FunctionTypeNode(TypeNodePtr returnType);
 
         /**
          * @brief Class constructor.

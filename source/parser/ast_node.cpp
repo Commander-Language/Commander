@@ -557,6 +557,13 @@ namespace Parser {
              + getTypeString() + ")";
     }
 
+    LambdaExprNode::LambdaExprNode(ExprNodePtr body, TypeNodePtr returnType)
+        : bindings(std::make_shared<BindingsNode>()), body(std::make_shared<ReturnStmtNode>(std::move(body))),
+          returnType(std::move(returnType)) {}
+
+    LambdaExprNode::LambdaExprNode(StmtNodePtr body, TypeNodePtr returnType)
+        : bindings(std::make_shared<BindingsNode>()), body(std::move(body)), returnType(std::move(returnType)) {}
+
     LambdaExprNode::LambdaExprNode(BindingsNodePtr bindings, ExprNodePtr body, TypeNodePtr returnType)
         : bindings(std::move(bindings)), body(std::make_shared<ReturnStmtNode>(std::move(body))),
           returnType(std::move(returnType)) {}
@@ -671,6 +678,10 @@ namespace Parser {
 
     std::string TypeStmtNode::sExpression() const { return "(TypeStmtNode " + alias + " " + type->sExpression() + ")"; }
 
+    FunctionStmtNode::FunctionStmtNode(std::string name, StmtNodePtr body, TypeNodePtr returnType)
+        : name(std::move(name)), bindings(std::make_shared<BindingsNode>()), body(std::move(body)),
+          returnType(std::move(returnType)) {}
+
     FunctionStmtNode::FunctionStmtNode(std::string name, BindingsNodePtr bindings, StmtNodePtr body,
                                        TypeNodePtr returnType)
         : name(std::move(name)), bindings(std::move(bindings)), body(std::move(body)),
@@ -700,6 +711,9 @@ namespace Parser {
     std::string TupleTypeNode::sExpression() const {
         return "(TupleTypeNode " + subtypes->sExpression() + getTypeString() + ")";
     }
+
+    FunctionTypeNode::FunctionTypeNode(TypeNodePtr returnType)
+        : params(std::make_shared<TypesNode>()), returnType(std::move(returnType)) {}
 
     FunctionTypeNode::FunctionTypeNode(TypesNodePtr params, TypeNodePtr returnType)
         : params(std::move(params)), returnType(std::move(returnType)) {}

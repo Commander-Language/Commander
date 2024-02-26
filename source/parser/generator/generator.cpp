@@ -7,10 +7,13 @@
 #include "grammar.hpp"
 #include "kernel.hpp"
 
+#include "source/parser/ast_node.hpp"
 #include "source/util/combine_hashes.hpp"
 #include "source/util/generated_map.hpp"
 
+#include <cstddef>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <set>
 #include <sstream>

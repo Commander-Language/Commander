@@ -5,8 +5,11 @@
 
 #include "grammar.hpp"
 
+#include "source/parser/ast_node.hpp"
 #include "source/util/combine_hashes.hpp"
 
+#include <cstddef>
+#include <functional>
 #include <ostream>
 #include <string>
 #include <tuple>
@@ -535,21 +538,40 @@ namespace Parser {
                     TokenType::COLON, ASTNodeType::TYPE, ASTNodeType::STMT}},
                   makeNode("FunctionStmt",
                            {tokenContents(0), castNode("Bindings", 2), castNode("Stmt", 6), castNode("Type", 5)})}},
-                //  (EXPR) -> [LPAREN] [RPAREN] (STMT)
-                {{{ASTNodeType::EXPR, {TokenType::LPAREN, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Stmt", 2)})}},
-                //  (EXPR) -> [LPAREN] (BINDINGS) [RPAREN] (STMT)
-                {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Bindings", 1), castNode("Stmt", 3)})}},
-                //  (EXPR) -> [LPAREN] [RPAREN] [COLON] (TYPE) (STMT)
+                //  (EXPR) -> [LPAREN] [RPAREN] [LAMBDA] (STMT)
+                {{{ASTNodeType::EXPR, {TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::STMT}},
+                  makeNode("LambdaExpr", {castNode("Stmt", 3)})}},
+                //  (EXPR) -> [LPAREN] (BINDINGS) [RPAREN] [LAMBDA] (STMT)
                 {{{ASTNodeType::EXPR,
-                   {TokenType::LPAREN, TokenType::RPAREN, TokenType::COLON, ASTNodeType::TYPE, ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Stmt", 4), castNode("Type", 3)})}},
-                //  (EXPR) -> [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) (STMT)
+                   {TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::STMT}},
+                  makeNode("LambdaExpr", {castNode("Bindings", 1), castNode("Stmt", 4)})}},
+                //  (EXPR) -> [LPAREN] [RPAREN] [COLON] (TYPE) [LAMBDA] (STMT)
+                {{{ASTNodeType::EXPR,
+                   {TokenType::LPAREN, TokenType::RPAREN, TokenType::COLON, ASTNodeType::TYPE, TokenType::LAMBDA,
+                    ASTNodeType::STMT}},
+                  makeNode("LambdaExpr", {castNode("Stmt", 5), castNode("Type", 3)})}},
+                //  (EXPR) -> [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) [LAMBDA] (STMT)
                 {{{ASTNodeType::EXPR,
                    {TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::COLON, ASTNodeType::TYPE,
-                    ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Bindings", 1), castNode("Stmt", 5), castNode("Type", 4)})}},
+                    TokenType::LAMBDA, ASTNodeType::STMT}},
+                  makeNode("LambdaExpr", {castNode("Bindings", 1), castNode("Stmt", 6), castNode("Type", 4)})}},
+                //  (EXPR) -> [LPAREN] [RPAREN] [LAMBDA] (EXPR)
+                {{{ASTNodeType::EXPR, {TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::EXPR}},
+                  makeNode("LambdaExpr", {castNode("Expr", 3)})}},
+                //  (EXPR) -> [LPAREN] (BINDINGS) [RPAREN] [LAMBDA] (EXPR)
+                {{{ASTNodeType::EXPR,
+                   {TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::EXPR}},
+                  makeNode("LambdaExpr", {castNode("Bindings", 1), castNode("Expr", 4)})}},
+                //  (EXPR) -> [LPAREN] [RPAREN] [COLON] (TYPE) [LAMBDA] (EXPR)
+                {{{ASTNodeType::EXPR,
+                   {TokenType::LPAREN, TokenType::RPAREN, TokenType::COLON, ASTNodeType::TYPE, TokenType::LAMBDA,
+                    ASTNodeType::EXPR}},
+                  makeNode("LambdaExpr", {castNode("Expr", 5), castNode("Type", 3)})}},
+                //  (EXPR) -> [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) [LAMBDA] (EXPR)
+                {{{ASTNodeType::EXPR,
+                   {TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::COLON, ASTNodeType::TYPE,
+                    TokenType::LAMBDA, ASTNodeType::EXPR}},
+                  makeNode("LambdaExpr", {castNode("Bindings", 1), castNode("Expr", 6), castNode("Type", 4)})}},
 
 
                 //  (STMT) -> (CMD) [SEMICOLON]
