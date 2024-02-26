@@ -1,2 +1,2 @@
 //Should parse api toString() on int
-x = 2.toString();
+x = (2).toString();

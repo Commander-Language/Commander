@@ -1,0 +1,2 @@
+(PrgmNode
+	(WriteStmtNode (StringExpressionNode (StringNode "Hello World!")) (StringExpressionNode (StringNode "helloWorld.txt"))))

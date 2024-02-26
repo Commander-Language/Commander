@@ -8,6 +8,7 @@
 
 #include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
+#include "source/util/print.hpp"
 
 #include <any>
 #include <cmath>

@@ -32,6 +32,7 @@ namespace Lexer {
         BOOL,
         BREAK,
         CMDSTRINGVAL,
+        CMDVARIABLE,
         COLON,
         COMMA,
         CONST,
@@ -43,6 +44,7 @@ namespace Lexer {
         DOT,
         DOUBLE_EQUALS,
         ELSE,
+        END,
         END_OF_FILE,
         EXPONENTIATE,
         EXPONENTIATE_EQUALS,
@@ -346,20 +348,21 @@ namespace Lexer {
     TokenPtr lexString(const std::string& file, FilePosition& position);
 
     /**
-     * @brief Lex an VARIABLE token specifically for commands (i.e. starts with $), if it exists
+     * @brief Lex an CMDVARIABLE token specifically for commands (i.e. starts with $), if it exists
      * @param file The file contents being lexed
      * @param position The position in the file
-     * @returns The VARIABLE token, if it finds one
+     * @returns The CMDVARIABLE token, if it finds one
      */
     TokenPtr lexCommandVariable(const std::string& file, FilePosition& position);
 
     /**
-     * @brief Lex an VARIABLE token, if it exists
+     * @brief Lex an VARIABLE or CMD_VARIABLE token, if it exists
      * @param file The file contents being lexed
      * @param position The position in the file
-     * @returns The VARIABLE token, if it finds one
+     * @param isCommand Is the variable in a command (true if so, false otherwise)
+     * @returns The VARIABLE token if isCommand is true, or CMD_VARIABLE if false, if it finds one
      */
-    TokenPtr lexVariable(const std::string& file, FilePosition& position);
+    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand);
 
     /**
      * @brief Lex a command string token, if it exists

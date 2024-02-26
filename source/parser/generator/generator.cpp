@@ -159,7 +159,7 @@ namespace Parser {
         }};
 
         //  This is a vector of all the states in the parser automaton.
-        const Kernel initialKernel = {goalRule, 0, 0, TokenType::END_OF_FILE};
+        const Kernel initialKernel = {goalRule, 0, 0, TokenType::END};
         std::vector<KernelSet> states {{{initialKernel}}};
 
         //  This is a mapping from a set of kernels to the `StateNum` ID of that state.

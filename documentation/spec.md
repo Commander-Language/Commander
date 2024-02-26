@@ -756,7 +756,7 @@ comment
 Use the ```import``` keyword followed by the path to the commander script file with code you would like to use, as defined below.
 ### Grammar
 ```
-<stmt> : import <string_expr>
+<stmt> : import <string>
 ```
 ### Examples
 ```

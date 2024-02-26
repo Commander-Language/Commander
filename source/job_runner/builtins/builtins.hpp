@@ -17,9 +17,9 @@
 #ifndef COMMANDER_BUILTIN_HPP
 #define COMMANDER_BUILTIN_HPP
 
-#include "shared.hpp"
 #include "../../util/commander_exception.hpp"
 #include "print.hpp"
+#include "shared.hpp"
 #include <string>
 #include <unordered_map>
 
@@ -34,8 +34,8 @@ namespace Builtins {
             {"println", print},
     };
 
-    Function getBuiltinFunction(const std::string& name){
-        if(builtins.find(name) == builtins.end())
+    Function getBuiltinFunction(const std::string& name) {
+        if (builtins.find(name) == builtins.end())
             throw Util::CommanderException("Builtin Error: Unknown builtin " + name);
 
         return builtins[name];

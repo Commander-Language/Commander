@@ -77,28 +77,19 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     }
 
     // Set up std out to a stream
-    initscr();
-    std::stringstream output;
-    FILE* oldStdout = stdout;
-    stdout = fopen("/dev/null", "w");
-    if (!stdout) {
-        endwin();
-        std::cout << "Test Error: Unable to set up output stream for test.\n";
-        FAIL();
-    }
+    std::stringstream buffer;
+    std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
 
     // Run
     FlowController::FlowController controller(nodes);
     controller.runtime();
 
     // Get output
-    std::string capturedOutput = output.str();
-    fclose(stdout);
-    stdout = oldStdout;
-    endwin();
+    std::cout.rdbuf(old);
+    std::string output = buffer.str();
 
     // Check that output is equal to expected
-    EXPECT_EQ(Lexer::readFile(expectedFilePath), capturedOutput);
+    EXPECT_EQ(Lexer::readFile(expectedFilePath), output);
 }
 
 /**
