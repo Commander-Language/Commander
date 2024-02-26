@@ -11,7 +11,6 @@
 
 #include "source/util/commander_exception.hpp"
 
-#include <cstddef>
 #include <vector>
 
 namespace Parser {

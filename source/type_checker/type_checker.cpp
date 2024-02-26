@@ -131,10 +131,9 @@ namespace TypeChecker {
                 }
                 if (exprType->getType() == Type::TUPLE) {
                     return (exprNode->type = nullptr);
-                } else {
-                    std::shared_ptr<ArrayTy> const arrayTy = std::static_pointer_cast<ArrayTy>(exprType);
-                    return (exprNode->type = arrayTy->baseType);
                 }
+                std::shared_ptr<ArrayTy> const arrayTy = std::static_pointer_cast<ArrayTy>(exprType);
+                return (exprNode->type = arrayTy->baseType);
             }
             case Parser::TUPLE_EXPR: {
                 Parser::TupleExprNodePtr const exprNode = std::static_pointer_cast<Parser::TupleExprNode>(astNode);
@@ -343,9 +342,9 @@ namespace TypeChecker {
                     functionTypes.push_back(type);
                 }
                 std::vector<TyPtr> argTypes;
-                for (Parser::ExprNodePtr expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
+                for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
-                for (TyPtr typ : functionTypes) {
+                for (const TyPtr& typ : functionTypes) {
                     std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }
@@ -383,9 +382,9 @@ namespace TypeChecker {
                     functionTypes.push_back(type);
                 }
                 std::vector<TyPtr> argTypes;
-                for (Parser::ExprNodePtr expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
+                for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
-                for (TyPtr typ : functionTypes) {
+                for (const TyPtr& typ : functionTypes) {
                     std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }

@@ -7,13 +7,10 @@
 #include "grammar.hpp"
 #include "kernel.hpp"
 
-#include "source/parser/ast_node.hpp"
 #include "source/util/combine_hashes.hpp"
 #include "source/util/generated_map.hpp"
 
-#include <cstddef>
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -313,8 +310,8 @@ namespace Parser {
         });
 
         const std::string foot = _join("\n", {
-            "    ParserAction ParseTable::getNextAction(ParseTable::StateNum stateNum, TokenType tokenType) {",
-            "        return _nextAction[stateNum][tokenType];",
+            "    ParserAction ParseTable::getNextAction(ParseTable::StateNum stateNum, TokenType TokenType) {",
+            "        return _nextAction[stateNum][TokenType];",
             "    }",
             "",
             "    ParseTable::StateNum ParseTable::getNextState(ParseTable::StateNum stateNum, ASTNodeType nodeType) {",
@@ -331,7 +328,7 @@ namespace Parser {
             std::vector<std::string> statesNextActionStrings(statesNextActions.size());
             std::size_t statesNextActionIndex = 0;
             for (const auto& [tokenType, action] : statesNextActions) {
-                const std::string tokenTypeString = "Lexer::tokenType::" + tokenTypeToString(tokenType);
+                const std::string tokenTypeString = "Lexer::TokenType::" + tokenTypeToString(tokenType);
                 statesNextActionStrings[statesNextActionIndex++] = _pair(tokenTypeString, action);
             }
             allNextActions[allActionsIndex] = _wrap(_join(", ", statesNextActionStrings));

@@ -4,7 +4,6 @@
  */
 #include "job_runner.hpp"
 #include "builtins/builtins.hpp"
-#include "source/util/commander_exception.hpp"
 #include <cstdlib>
 #include <cstring>
 

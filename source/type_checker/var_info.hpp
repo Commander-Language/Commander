@@ -24,7 +24,7 @@ namespace TypeChecker {
         /**
          * Tells whether the variable is constant
          */
-        bool constant;
+        bool constant{};
 
         /**
          * The type(s) associated with the variable

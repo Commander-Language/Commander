@@ -5,6 +5,8 @@
 
 #include "var_info.hpp"
 
+#include <utility>
+
 namespace TypeChecker {
 
     InfoType VariableInfo::infoType() const { return InfoType::VARIABLE_INFO; }
@@ -17,11 +19,11 @@ namespace TypeChecker {
 
     VarInfo::VarInfo(bool constant, const std::vector<TyPtr>& types) : constant(constant), types(types) {}
 
-    VariableInfo::VariableInfo(bool constant, TyPtr type) : VarInfo(constant, std::vector<TyPtr> {type}) {}
+    VariableInfo::VariableInfo(bool constant, TyPtr type) : VarInfo(constant, std::vector<TyPtr> {std::move(type)}) {}
 
     FunctionInfo::FunctionInfo(const std::vector<TyPtr>& types) : VarInfo(true, types) {}
 
-    TypeInfo::TypeInfo(TyPtr type) : VarInfo(true, std::vector<TyPtr> {type}) {}
+    TypeInfo::TypeInfo(TyPtr type) : VarInfo(true, std::vector<TyPtr> {std::move(type)}) {}
 
     AliasInfo::AliasInfo() : VarInfo(true, std::vector<TyPtr> {STRING_TY}) {}
 

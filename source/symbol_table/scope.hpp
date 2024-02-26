@@ -42,7 +42,7 @@ public:
      * @param data - An object which will be stored as data (e.g. 14, "dog", std::vector<int>, etc.)
      * @param occurences - The number of times the variable is used in the script (used for garbage collection)
      */
-    void addOrUpdateVariable(std::string variableID, std::any data);
+    void addOrUpdateVariable(const std::string& variableID, const std::any& data);
 
     /**
      * updateVariable() is similar to addOrUpdateVariable. This method will only update variables if they exist anywhere
@@ -51,7 +51,7 @@ public:
      * @param newData - The new data to associate with the variable
      * @return - TRUE if the variable was successfully updated, otherwise FALSE is returned
      */
-    bool updateVariable(std::string variableID, std::any newData);
+    bool updateVariable(const std::string& variableID, const std::any& newData);
 
     /**
      * hasLocalVariable returns a boolean value according to whether the specified variable exists in this scope.
@@ -78,21 +78,21 @@ public:
      * @warning - The desired type must be identical to the stored type. If one wishes to retrieve an int as a float,
      * for instance, they must first call getVariableAsType<int>() and cast the result.
      */
-    template<typename T>
-    T* getVariable(std::string variableID) {
+    template<typename TType>
+    TType* getVariable(std::string variableID) {
         if (!_hasDataKey(variableID)) {
-            if (_parentScope != nullptr) { return _parentScope->getVariable<T>(variableID); }
+            if (_parentScope != nullptr) { return _parentScope->getVariable<TType>(variableID); }
             return nullptr;
         }
         decrementUses(variableID);
         try {
-            if (typeid(T) == _variableData[variableID].get()->type()) {
-                return std::any_cast<T>(
+            if (typeid(TType) == _variableData[variableID].get()->type()) {
+                return std::any_cast<TType>(
                         _variableData[variableID].get());  // try to get the data as the requested type if the actual
                                                            // type and expected type are identical
             }
             throw std::bad_any_cast();  // otherwise, throw an exception
-        } catch (std::exception ex) {
+        } catch (std::exception& ex) {
             throw std::bad_any_cast();  // if we've failed, throw an exception
         }
     }
@@ -115,28 +115,28 @@ public:
      * setVariableOccurrences() adds a key, value pair for variable occurrences in the Commander script
      * @param occurrences - An unsigned int value which determines how many times a variable is used in a script
      */
-    void setVariableOccurrences(std::string variableID, unsigned int occurrences);
+    void setVariableOccurrences(const std::string& variableID, unsigned int occurrences);
 
     /**
      * freeVariableData() destructs the data used by a variable
      * @param variableID - A string variableID to free data from
      * @return - TRUE if the data was destructed (or already destructed), otherwise FALSE is returned
      */
-    bool freeVariableData(std::string variableID);
+    bool freeVariableData(const std::string& variableID);
 
     /**
      * decrementUses() subtracts the number of the variable's occurrences by 1. If the number of occurrences are 0, the
      * value will not update further
      * @param variableID - The variable one wishes to decrement
      */
-    void decrementUses(std::string variableID);
+    void decrementUses(const std::string& variableID);
 
     /**
      * hasExpired() returns a boolean value according to whether the number of occurrences of a variable is equal to 0
      * @param variableID - The variable to check the garbage collection status of
      * @return - TRUE if the variable has no more occurrences, otherwise FALSE is returned
      */
-    bool hasExpired(std::string variableID);
+    bool hasExpired(const std::string& variableID);
 
 private:
     std::map<std::string, std::shared_ptr<std::any>>

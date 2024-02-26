@@ -5,7 +5,6 @@
  */
 
 #include "ast_node.hpp"
-#include "source/type_checker/type.hpp"
 
 #include <sstream>
 #include <utility>
@@ -237,7 +236,7 @@ namespace Parser {
 
     TypesNode::TypesNode(TypeNodePtr type) : types({std::move(type)}) {}
 
-    TypesNode::TypesNode(std::shared_ptr<TypesNode> types, TypeNodePtr type)
+    TypesNode::TypesNode(const std::shared_ptr<TypesNode>& types, TypeNodePtr type)
         : types(concat(types->types, std::move(type))) {}
 
     ASTNodeType TypesNode::nodeType() const { return ASTNodeType::TYPES; }
@@ -272,7 +271,7 @@ namespace Parser {
 
     BindingsNode::BindingsNode(BindingNodePtr binding) : bindings({std::move(binding)}) {}
 
-    BindingsNode::BindingsNode(std::shared_ptr<BindingsNode> bindings, BindingNodePtr binding)
+    BindingsNode::BindingsNode(const std::shared_ptr<BindingsNode>& bindings, BindingNodePtr binding)
         : bindings(concat(bindings->bindings, std::move(binding))) {}
 
     std::string ExprNode::getTypeString() const { return TypeChecker::getTypeString(type); }
@@ -321,7 +320,7 @@ namespace Parser {
 
     ExprsNode::ExprsNode(ExprNodePtr expr) : exprs({std::move(expr)}) {}
 
-    ExprsNode::ExprsNode(std::shared_ptr<ExprsNode> exprs, ExprNodePtr expr)
+    ExprsNode::ExprsNode(const std::shared_ptr<ExprsNode>& exprs, ExprNodePtr expr)
         : exprs(concat(exprs->exprs, std::move(expr))) {}
 
     ASTNodeType ExprsNode::nodeType() const { return ASTNodeType::EXPRS; }
@@ -366,7 +365,7 @@ namespace Parser {
 
     StmtsNode::StmtsNode(StmtNodePtr stmt) : stmts({std::move(stmt)}) {}
 
-    StmtsNode::StmtsNode(std::shared_ptr<StmtsNode> stmts, StmtNodePtr stmt)
+    StmtsNode::StmtsNode(const std::shared_ptr<StmtsNode>& stmts, StmtNodePtr stmt)
         : stmts(concat(stmts->stmts, std::move(stmt))) {}
 
     ASTNodeType StmtsNode::nodeType() const { return ASTNodeType::STMTS; }
@@ -520,7 +519,7 @@ namespace Parser {
              + unOpToString(opType) + getTypeString() + ")";
     }
 
-    BinOpExprNode::BinOpExprNode(BindingNodePtr leftBinding, BinOpType opType, ExprNodePtr rightExpr)
+    BinOpExprNode::BinOpExprNode(const BindingNodePtr& leftBinding, BinOpType opType, ExprNodePtr rightExpr)
         : leftConstant(leftBinding->constant), leftType(std::move(leftBinding->type)),
           leftVariable(std::make_shared<IdentVariableNode>(leftBinding->variable)), opType(opType),
           rightExpr(std::move(rightExpr)) {}

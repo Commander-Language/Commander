@@ -66,12 +66,12 @@ namespace FlowController {
          * @brief Check if flow controller could find a varible
          * @returns True or False
          */
-        bool hasVariable(std::string);
+        bool hasVariable(const std::string&);
 
         /**
          * @brief Get value of variable
          */
-        CommanderInt getVariableValue(std::string);
+        CommanderInt getVariableValue(const std::string&);
 
     private:
         /**
@@ -89,7 +89,7 @@ namespace FlowController {
          * @param name The name of the symbol
          * @param value The value of the symbol
          */
-        void _setVariable(std::string name, std::any value);
+        void _setVariable(const std::string& name, std::any value);
 
         /**
          * @brief Get a variable from the symbol table.

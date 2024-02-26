@@ -7,11 +7,8 @@
 
 #include "grammar.hpp"
 
-#include "source/parser/ast_node.hpp"
 #include "source/util/combine_hashes.hpp"
 
-#include <cstddef>
-#include <functional>
 #include <ostream>
 #include <utility>
 #include <vector>

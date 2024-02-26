@@ -225,7 +225,7 @@ namespace Parser {
          * @param types The list of type nodes that makes up this AST node.
          * @param type The type to add to the end of the list of expressions.
          */
-        TypesNode(std::shared_ptr<TypesNode> types, TypeNodePtr type);
+        TypesNode(const std::shared_ptr<TypesNode>& types, TypeNodePtr type);
 
         /**
          * @brief Reports the type of this expression-list node.
@@ -323,7 +323,7 @@ namespace Parser {
          * @param bindings The list of binding nodes at the beginning.
          * @param binding The binding node at the end.
          */
-        BindingsNode(std::shared_ptr<BindingsNode> bindings, BindingNodePtr binding);
+        BindingsNode(const std::shared_ptr<BindingsNode>& bindings, BindingNodePtr binding);
 
         /**
          * @brief Reports the type of this binding-list node.
@@ -411,7 +411,7 @@ namespace Parser {
          * @param exprs The list of expression nodes that makes up this AST node.
          * @param expr The expression to add to the end of the list of expressions.
          */
-        ExprsNode(std::shared_ptr<ExprsNode> exprs, ExprNodePtr expr);
+        ExprsNode(const std::shared_ptr<ExprsNode>& exprs, ExprNodePtr expr);
 
         /**
          * @brief Reports the type of this expression-list node.
@@ -476,7 +476,7 @@ namespace Parser {
          * @param stmts The list of statement nodes that makes up this AST node.
          * @param stmt The statement to add to the end of the list of statements.
          */
-        StmtsNode(std::shared_ptr<StmtsNode> stmts, StmtNodePtr stmt);
+        StmtsNode(const std::shared_ptr<StmtsNode>& stmts, StmtNodePtr stmt);
 
         /**
          * @brief Reports the type of this expression-list node.
@@ -1257,7 +1257,7 @@ namespace Parser {
          * @param opType The type of operation being done.
          * @param rightExpr The expression on the right-hand side of the operator.
          */
-        BinOpExprNode(BindingNodePtr leftBinding, BinOpType opType, ExprNodePtr rightExpr);
+        BinOpExprNode(const BindingNodePtr& leftBinding, BinOpType opType, ExprNodePtr rightExpr);
 
         /**
          * @brief Class constructor.

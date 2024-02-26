@@ -43,8 +43,8 @@ public:
      * @param variableID - A string representing the variable's ID (e.g. cat)
      * @param data - An object which the variable should be associated with
      */
-    template<typename T>
-    void addOrUpdateVariable(const std::string& variableID, T data) {
+    template<typename TType>
+    void addOrUpdateVariable(const std::string& variableID, TType data) {
         _symbolTables.back()->addOrUpdateVariable(variableID, data);
     }
 
@@ -58,8 +58,8 @@ public:
      * @param occurrences - The number of times the variable is found in the Commander script - will not update if the
      * parameter passed in is null
      */
-    template<typename T>
-    void addOrUpdateVariable(const std::string& variableID, T data, unsigned int occurrences) {
+    template<typename TType>
+    void addOrUpdateVariable(const std::string& variableID, TType data, unsigned int occurrences) {
         _symbolTables.back()->addOrUpdateVariable(variableID, data);
         _symbolTables.back()->setVariableOccurrences(variableID, occurrences);
     }
@@ -116,15 +116,15 @@ public:
 
     /**
      * getVariable() returns a Type pointer to the desired variable
-     * @tparam T - The expected type of the variable
+     * @tparam TType - The expected type of the variable
      * @param variableID - A string ID which the variable is referenced by
      * @return - A Type pointer to the variable's data if it exists, otherwise a nullptr is returned
      * @warning - The desired type must be identical to the stored type. If one wishes to retrieve an int as a float,
      * for instance, they must first call getVariableAsType<int>() and cast the result.
      */
-    template<typename T>
-    T* getVariable(std::string variableID) {
-        return _symbolTables.back()->getVariable<T>(variableID);
+    template<typename TType>
+    TType* getVariable(std::string variableID) {
+        return _symbolTables.back()->getVariable<TType>(variableID);
     }
 
 private:

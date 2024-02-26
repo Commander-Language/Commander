@@ -5,6 +5,8 @@
 
 #include "variable_table.hpp"
 
+#include <utility>
+
 namespace TypeChecker {
 
     VariableTable::VariableTable(std::shared_ptr<VariableTable> parent) : _parent(std::move(parent)) {}
@@ -14,7 +16,7 @@ namespace TypeChecker {
     }
 
     void VariableTable::addVariable(const std::string& variableID, VarInfoPtr variable) {
-        _variables[variableID] = variable;
+        _variables[variableID] = std::move(variable);
     }
 
     VarInfoPtr VariableTable::getVariable(const std::string& variableID) {
