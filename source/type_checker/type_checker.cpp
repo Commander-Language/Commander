@@ -406,7 +406,7 @@ namespace TypeChecker {
                 if (exprNode->type) { return exprNode->type; }
                 pushScope();
                 std::vector<TyPtr> bindings;
-                for (const Parser::BindingNodePtr& binding : exprNode->bindings) {
+                for (const Parser::BindingNodePtr& binding : exprNode->bindings->bindings) {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(exprNode->returnType);
@@ -589,7 +589,7 @@ namespace TypeChecker {
                 assertNotExists(stmtNode->name);
                 pushScope();
                 std::vector<TyPtr> bindings;
-                for (const Parser::BindingNodePtr& binding : stmtNode->bindings) {
+                for (const Parser::BindingNodePtr& binding : stmtNode->bindings->bindings) {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(stmtNode->returnType);

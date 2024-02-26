@@ -1417,7 +1417,7 @@ namespace Parser {
         /**
          * The bindings representing the arguments of the function
          */
-        std::vector<BindingNodePtr> bindings;
+        BindingsNodePtr bindings;
 
         /**
          * The body of the function
@@ -1436,7 +1436,7 @@ namespace Parser {
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, StmtNodePtr body, TypeNodePtr returnType = nullptr);
+        LambdaExprNode(BindingsNodePtr bindings, StmtNodePtr body, TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Class constructor with a return type for lambdas with just an expression for the body.
@@ -1445,7 +1445,7 @@ namespace Parser {
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        LambdaExprNode(const std::vector<BindingNodePtr>& bindings, ExprNodePtr body, TypeNodePtr returnType = nullptr);
+        LambdaExprNode(BindingsNodePtr bindings, ExprNodePtr body, TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2195,7 +2195,7 @@ namespace Parser {
         /**
          * The bindings representing the arguments of the function
          */
-        std::vector<BindingNodePtr> bindings;
+        BindingsNodePtr bindings;
 
         /**
          * The body of the function
@@ -2215,7 +2215,7 @@ namespace Parser {
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        FunctionStmtNode(std::string name, const std::vector<BindingNodePtr>& bindings, StmtNodePtr body,
+        FunctionStmtNode(std::string name, BindingsNodePtr bindings, StmtNodePtr body,
                          TypeNodePtr returnType = nullptr);
 
         /**

@@ -558,23 +558,15 @@ namespace Parser {
              + getTypeString() + ")";
     }
 
-    LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, ExprNodePtr body,
-                                   TypeNodePtr returnType)
-        : bindings(bindings), body(std::make_shared<ReturnStmtNode>(std::move(body))),
+    LambdaExprNode::LambdaExprNode(BindingsNodePtr bindings, ExprNodePtr body, TypeNodePtr returnType)
+        : bindings(std::move(bindings)), body(std::make_shared<ReturnStmtNode>(std::move(body))),
           returnType(std::move(returnType)) {}
 
-    LambdaExprNode::LambdaExprNode(const std::vector<BindingNodePtr>& bindings, StmtNodePtr body,
-                                   TypeNodePtr returnType)
-        : bindings(bindings), body(std::move(body)), returnType(std::move(returnType)) {}
+    LambdaExprNode::LambdaExprNode(BindingsNodePtr bindings, StmtNodePtr body, TypeNodePtr returnType)
+        : bindings(std::move(bindings)), body(std::move(body)), returnType(std::move(returnType)) {}
 
     std::string LambdaExprNode::sExpression() const {
-        std::stringstream bindingsBuilder;
-        bool first = true;
-        for (const BindingNodePtr& binding : bindings) {
-            bindingsBuilder << (first ? "" : " ") << binding->sExpression();
-            first = false;
-        }
-        return "(LambdaExprNode (" + bindingsBuilder.str() + ") " + returnType->sExpression() + " "
+        return "(LambdaExprNode " + bindings->sExpression() + " " + returnType->sExpression() + " "
              + body->sExpression() + getTypeString() + ")";
     }
 
@@ -680,18 +672,13 @@ namespace Parser {
 
     std::string TypeStmtNode::sExpression() const { return "(TypeStmtNode " + alias + " " + type->sExpression() + ")"; }
 
-    FunctionStmtNode::FunctionStmtNode(std::string name, const std::vector<BindingNodePtr>& bindings, StmtNodePtr body,
+    FunctionStmtNode::FunctionStmtNode(std::string name, BindingsNodePtr bindings, StmtNodePtr body,
                                        TypeNodePtr returnType)
-        : name(std::move(name)), bindings(bindings), body(std::move(body)), returnType(std::move(returnType)) {}
+        : name(std::move(name)), bindings(std::move(bindings)), body(std::move(body)),
+          returnType(std::move(returnType)) {}
 
     std::string FunctionStmtNode::sExpression() const {
-        std::stringstream bindingsBuilder;
-        bool first = true;
-        for (const BindingNodePtr& binding : bindings) {
-            bindingsBuilder << (first ? "" : " ") << binding->sExpression();
-            first = false;
-        }
-        return "(FunctionStmtNode " + name + " (" + bindingsBuilder.str() + ") " + returnType->sExpression() + " "
+        return "(FunctionStmtNode " + name + " " + bindings->sExpression() + " " + returnType->sExpression() + " "
              + body->sExpression() + ")";
     }
 
@@ -712,18 +699,14 @@ namespace Parser {
     TupleTypeNode::TupleTypeNode(TypesNodePtr subtypes) : subtypes(std::move(subtypes)) {}
 
     std::string TupleTypeNode::sExpression() const {
-        std::stringstream builder;
-        for (const TypeNodePtr& subType : subtypes->types) { builder << " " << subType->sExpression(); }
-        return "(TupleTypeNode" + builder.str() + getTypeString() + ")";
+        return "(TupleTypeNode " + subtypes->sExpression() + getTypeString() + ")";
     }
 
     FunctionTypeNode::FunctionTypeNode(TypesNodePtr params, TypeNodePtr returnType)
         : params(std::move(params)), returnType(std::move(returnType)) {}
 
     std::string FunctionTypeNode::sExpression() const {
-        std::stringstream builder;
-        for (const TypeNodePtr& param : params->types) { builder << " " << param->sExpression(); }
-        return "(FunctionTypeNode" + builder.str() + " " + returnType->sExpression() + getTypeString() + ")";
+        return "(FunctionTypeNode " + params->sExpression() + " " + returnType->sExpression() + getTypeString() + ")";
     }
 
     IdentVariableNode::IdentVariableNode(std::string varName) : varName(std::move(varName)) {}

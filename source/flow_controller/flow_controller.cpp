@@ -176,7 +176,7 @@ namespace FlowController {
                 for (auto& arg : functionExpression->args->exprs) {
                     // args and bindings should be lined up 1 to 1
                     std::any const argValue = _expr(arg);
-                    std::string const name = function.bindings[bindingIndex]->variable;
+                    std::string const name = function.bindings->bindings[bindingIndex]->variable;
 
                     _setVariable(name, argValue);
                     bindingIndex++;

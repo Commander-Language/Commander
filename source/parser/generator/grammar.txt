@@ -104,6 +104,19 @@
 (EXPR) -> [LPAREN] (EXPRS) [RPAREN]
 
 
+//  ==================
+//  ||  Functions:  ||
+//  ==================
+(STMT) -> (VARIABLE) [LPAREN] [RPAREN] (STMT)
+(STMT) -> (VARIABLE) [LPAREN] (BINDINGS) [RPAREN] (STMT)
+(STMT) -> (VARIABLE) [LPAREN] [RPAREN] [COLON] (TYPE) (STMT)
+(STMT) -> (VARIABLE) [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) (STMT)
+(EXPR) -> [LPAREN] [RPAREN] (STMT)
+(EXPR) -> [LPAREN] (BINDINGS) [RPAREN] (STMT)
+(EXPR) -> [LPAREN] [RPAREN] [COLON] (TYPE) (STMT)
+(EXPR) -> [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) (STMT)
+
+
 //  ===================
 //  ||  Statements:  ||
 //  ===================
@@ -157,6 +170,7 @@
 (TYPE) -> [STRING]
 (TYPE) -> [VOID]
 (TYPE) -> (TYPE) [LAMBDA] (TYPE)
+(TYPE) -> [LPAREN] [RPAREN] [LAMBDA] (TYPE)
 (TYPE) -> [LPAREN] (TYPES) [RPAREN] [LAMBDA] (TYPE)
 (TYPE) -> (TYPE) [LSQUARE] [RSQUARE]
 (TYPE) -> [LPAREN] (TYPES) [RPAREN]

@@ -39,8 +39,8 @@ namespace FlowController {
      * @brief A commander lambda representation
      */
     struct CommanderLambda {
-        CommanderLambda(std::vector<Parser::BindingNodePtr>, Parser::StmtNodePtr);
-        std::vector<Parser::BindingNodePtr> bindings;
+        CommanderLambda(Parser::BindingsNodePtr, Parser::StmtNodePtr);
+        Parser::BindingsNodePtr bindings;
         Parser::StmtNodePtr body;
         // TODO: save return type
     };
