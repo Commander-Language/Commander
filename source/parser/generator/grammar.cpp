@@ -613,7 +613,7 @@ namespace Parser {
                 {{{ASTNodeType::TYPE, {TokenType::VOID}}, makeNode("TupleType", {makeNode("Types", {})})}},
                 //  (TYPE) -> (TYPE) [LAMBDA] (TYPE)
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LAMBDA, ASTNodeType::TYPE}},
-                  makeNode("FunctionType", {castNode("Type", 0), castNode("Type", 2)})}},
+                  makeNode("FunctionType", {makeNode("Types", {castNode("Type", 0)}), castNode("Type", 2)})}},
                 //  (TYPE) -> [LPAREN] [RPAREN] [LAMBDA] (TYPE)
                 {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::TYPE}},
                   makeNode("FunctionType", {castNode("Type", 3)})}},
