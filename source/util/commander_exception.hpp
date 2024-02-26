@@ -22,7 +22,7 @@ namespace Util {
          * @brief Constructor for the exception that stores a single message directly
          * @param message The message of the exception
          */
-        CommanderException(std::string  message);
+        CommanderException(std::string message);
 
         /**
          * @brief Constructor for the exception that creates the message with the include position in the file

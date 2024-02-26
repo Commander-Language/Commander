@@ -12,8 +12,8 @@
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type_checker.hpp"
 #include "source/util/commander_exception.hpp"
-#include <gtest/gtest.h>
 #include <fstream>
+#include <gtest/gtest.h>
 
 /**
  * Parser used in the tests (initialized here to prevent initializing it for every test)

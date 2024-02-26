@@ -426,6 +426,11 @@ namespace Parser {
                    {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::CMD, TokenType::SEMICOLON}},
                   makeNode("AliasStmt", {tokenContents(1), castNode("Cmd", 3)})}},
 
+                //  (STMT) -> [TYPE] [VARIABLE] [EQUALS] (TYPE) [SEMICOLON]
+                {{{ASTNodeType::STMT,
+                   {TokenType::TYPE, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::TYPE, TokenType::SEMICOLON}},
+                  makeNode("TypeStmt", {tokenContents(1), castNode("Type", 3)})}},
+
                 //  (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::IF, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT,
@@ -436,7 +441,46 @@ namespace Parser {
                    {TokenType::IF, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
                   makeNode("IfStmt", {castNode("Expr", 2), castNode("Stmt", 4)})}},
 
-                //  TODO: Add cases for when no expression is provided
+                //  (STMT) -> [FOR] [LPAREN] [SEMICOLON] [SEMICOLON] [RPAREN] (STMT)
+                {{{ASTNodeType::STMT,
+                   {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, ASTNodeType::EXPR, TokenType::SEMICOLON,
+                    TokenType::RPAREN, ASTNodeType::STMT}},
+                  // Note: while statement is used here for simplicity, no need to use a for loop for this case
+                  makeNode("WhileStmt", {makeNode("BoolExpr", {"true"}), castNode("Stmt", 5)})}},
+                //  (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] [SEMICOLON] [RPAREN] (STMT)
+                {{{ASTNodeType::STMT,
+                   {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, TokenType::SEMICOLON,
+                    TokenType::RPAREN, ASTNodeType::STMT}},
+                  makeNode("ForStmt",
+                           {castNode("Stmt", 2), makeNode("BoolExpr", {"true"}), "nullptr", castNode("Stmt", 6)})}},
+                //  (STMT) -> [FOR] [LPAREN] [SEMICOLON] (EXPR) [SEMICOLON] [RPAREN] (STMT)
+                {{{ASTNodeType::STMT,
+                   {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, ASTNodeType::EXPR, TokenType::SEMICOLON,
+                    TokenType::RPAREN, ASTNodeType::STMT}},
+                  // Note: while statement is used here for simplicity, no need to use a for loop for this case
+                  makeNode("WhileStmt", {castNode("Expr", 3), castNode("Stmt", 6)})}},
+                //  (STMT) -> [FOR] [LPAREN] [SEMICOLON] [SEMICOLON] (EXPR) [RPAREN] (STMT)
+                {{{ASTNodeType::STMT,
+                   {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, TokenType::SEMICOLON, ASTNodeType::EXPR,
+                    TokenType::RPAREN, ASTNodeType::STMT}},
+                  makeNode("ForStmt",
+                           {"nullptr", makeNode("BoolExpr", {"true"}), castNode("Stmt", 4), castNode("Stmt", 6)})}},
+                //  (STMT) -> [FOR] [LPAREN] [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
+                {{{ASTNodeType::STMT,
+                   {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, ASTNodeType::EXPR, TokenType::SEMICOLON,
+                    ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
+                  makeNode("ForStmt", {"nullptr", castNode("Expr", 3), castNode("Stmt", 5), castNode("Stmt", 7)})}},
+                //  (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] [SEMICOLON] (EXPR) [RPAREN] (STMT)
+                {{{ASTNodeType::STMT,
+                   {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, TokenType::SEMICOLON,
+                    ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
+                  makeNode("ForStmt", {castNode("Stmt", 2), makeNode("BoolExpr", {"true"}), castNode("Stmt", 5),
+                                       castNode("Stmt", 7)})}},
+                //  (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] [RPAREN] (STMT)
+                {{{ASTNodeType::STMT,
+                   {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, ASTNodeType::EXPR,
+                    TokenType::SEMICOLON, TokenType::RPAREN, ASTNodeType::STMT}},
+                  makeNode("ForStmt", {castNode("Stmt", 2), castNode("Expr", 4), "nullptr", castNode("Stmt", 7)})}},
                 //  (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, ASTNodeType::EXPR,

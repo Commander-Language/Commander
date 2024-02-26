@@ -4,8 +4,8 @@
  */
 #include "source/job_runner/job_runner.hpp"
 #include "source/util/commander_exception.hpp"
-#include <gtest/gtest.h>
 #include <fstream>
+#include <gtest/gtest.h>
 #include <iostream>
 
 std::string getFileContents(const std::string& filePath) {

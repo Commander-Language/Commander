@@ -129,9 +129,7 @@ namespace TypeChecker {
                     throw Util::CommanderException(
                             "Tried to index an array or tuple with a different type than an int");
                 }
-                if (exprType->getType() == Type::TUPLE) {
-                    return (exprNode->type = nullptr);
-                }
+                if (exprType->getType() == Type::TUPLE) { return (exprNode->type = nullptr); }
                 std::shared_ptr<ArrayTy> const arrayTy = std::static_pointer_cast<ArrayTy>(exprType);
                 return (exprNode->type = arrayTy->baseType);
             }
