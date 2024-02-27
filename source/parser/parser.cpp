@@ -67,6 +67,7 @@ namespace Parser {
             case PRGM:
             case STMTS:
             case STRING:
+            case STRING_EXPRS:
             case TYPES:
             case VARIABLE:
                 return type;

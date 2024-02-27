@@ -109,12 +109,6 @@ namespace Parser {
         const auto tokenContents = [](const std::size_t index) -> std::string {
             return "productionList[" + std::to_string(index) + "].token->contents";
         };
-        const auto stringTokenContents = [&](const std::size_t index) -> std::string {
-            //  FIXME: Doesn't support string interpolation or empty strings.
-            return callFunc("std::reinterpret_pointer_cast<Lexer::StringToken>",
-                            {"productionList[" + std::to_string(index) + "].token"})
-                 + "->subTokens[0]->contents";
-        };
         const auto flatten =
                 [&](const std::vector<std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>>>& rules)
                 -> std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>> {
@@ -586,9 +580,15 @@ namespace Parser {
                 //  ||  Strings:  ||
                 //  ================
 
-                //  (STRING) -> [STRINGVAL]
-                {{{ASTNodeType::STRING, {TokenType::STRINGVAL}}, makeNode("String", {stringTokenContents(0)})}},
-
+                //  (STRINGEXPRS) -> [STRINGLITERAL]
+                {{{ASTNodeType::STRING_EXPRS, {TokenType::STRINGLITERAL}},
+                  makeNode("StringExprs", {tokenContents(0)})}},
+                //  (STRINGEXPRS) -> (STRINGEXPRS) (EXPR) [STRINGLITERAL]
+                {{{ASTNodeType::STRING_EXPRS, {ASTNodeType::STRING_EXPRS, ASTNodeType::EXPR, TokenType::STRINGLITERAL}},
+                  makeNode("StringExprs", {tokenContents(2), castNode("Expr", 1), castNode("StringExprs", 0)})}},
+                //  (STRING) -> [STRINGVAL] (STRINGEXPRS) [ENDSTRINGVAL]
+                {{{ASTNodeType::STRING, {TokenType::STRINGVAL, ASTNodeType::STRING_EXPRS, TokenType::ENDSTRINGVAL}},
+                  makeNode("String", {castNode("StringExprs", 1)})}},
 
                 //  ==============
                 //  ||  Types:  ||

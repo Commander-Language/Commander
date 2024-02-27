@@ -103,6 +103,8 @@ namespace Parser {
                 return "STMTS";
             case STRING:
                 return "STRING";
+            case STRING_EXPRS:
+                return "STRING_EXPRS";
             case INT_TYPE:
                 return "INT_TYPE";
             case FLOAT_TYPE:
@@ -378,17 +380,37 @@ namespace Parser {
         return result.str();
     }
 
-    StringNode::StringNode(std::string literal) : literals({std::move(literal)}) {}
+    StringExprsNode::StringExprsNode(std::string literal) {
+        expressions = {std::make_shared<StringExprNode>(std::make_shared<StringNode>(StringNode(std::move(literal))))};
+    }
+
+    StringExprsNode::StringExprsNode(std::string literal, ExprNodePtr expr,
+                                     const std::shared_ptr<StringExprsNode>& exprs)
+        : StringExprsNode(std::move(literal)) {
+        expressions.push_back(std::move(expr));
+        expressions.insert(expressions.end(), exprs->expressions.begin(), exprs->expressions.end());
+    }
+
+    ASTNodeType StringExprsNode::nodeType() const { return ASTNodeType::STRING_EXPRS; }
+
+    std::string StringExprsNode::sExpression() const {
+        std::stringstream builder;
+        builder << "(StringExprsNode";
+        for (const ExprNodePtr& expr : expressions) { builder << " " << expr->sExpression(); }
+        builder << ")";
+        return builder.str();
+    }
+
+    StringNode::StringNode(std::string literal) : literal(std::move(literal)) {}
+
+    StringNode::StringNode(StringExprsNodePtr exprs) : expressions(std::move(exprs)) {}
+
+    bool StringNode::isLiteral() const { return expressions != nullptr; }
 
     ASTNodeType StringNode::nodeType() const { return ASTNodeType::STRING; }
 
     std::string StringNode::sExpression() const {
-        std::stringstream builder;
-        for (size_t i = 0; i < literals.size(); i++) {
-            builder << " \"" << literals[i] << "\"";
-            if (i < expressions.size()) { builder << " " << expressions[i]->sExpression(); }
-        }
-        return "(StringNode" + builder.str() + ")";
+        return "(StringNode " + (isLiteral() ? "'" + literal + "'" : expressions->sExpression()) + ")";
     }
 
     PrgmNode::PrgmNode() : stmts(std::make_shared<StmtsNode>()) {}

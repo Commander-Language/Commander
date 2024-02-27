@@ -65,6 +65,7 @@ namespace Parser {
         STMT,
         STMTS,
         STRING,
+        STRING_EXPRS,
         INT_TYPE,
         FLOAT_TYPE,
         BOOL_TYPE,
@@ -510,10 +511,57 @@ namespace Parser {
     using StmtsNodePtr = std::shared_ptr<StmtsNode>;
 
     /**
+     * @brief A string expressions AST node.
+     * @details It contains e list of string expressions.
+     *
+     */
+    class StringExprsNode : public ASTNode {
+    public:
+        /**
+         * @brief Class constructor from a string literal.
+         *
+         * @param literal The string literal.
+         */
+        StringExprsNode(std::string literal);
+
+        /**
+         * @brief Class constructor from a literal, expression, and another existing list
+         *
+         * @param literal The string literal.
+         * @param expr The additional expression
+         * @param exprs The list of string expressions
+         */
+        StringExprsNode(std::string literal, ExprNodePtr expr, const std::shared_ptr<StringExprsNode>& exprs);
+
+        /**
+         * @brief Reports the type of this string node.
+         *
+         * @return `STRING_EXPRS` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief The list of expressions in the string.
+         *
+         */
+        std::vector<ExprNodePtr> expressions;
+    };
+    /**
+     * @brief A pointer to a StringExprs node.
+     *
+     */
+    using StringExprsNodePtr = std::shared_ptr<StringExprsNode>;
+
+    /**
      * @brief A string AST node.
-     * @details It contains a list of string literals and expression node pointers. When interpreting this node, it will
-     * take the first string literal, append the value of the first expression to it, then append the second string
-     * literal, then append the value of the second expression to it, and so on until it iterates through everything.
+     * @details It contains either a literal string or a list of string expressions (if doing string interpolation).
      *
      */
     class StringNode : public ASTNode {
@@ -526,16 +574,28 @@ namespace Parser {
         StringNode(std::string literal);
 
         /**
-         * @brief The list of string literals in the string.
+         * @brief Class constructor from a list of string expressions
+         *
+         * @param exprs The list of string expressions
+         */
+        StringNode(StringExprsNodePtr exprs);
+
+        /**
+         * @brief The string literal if it is a literal string
          *
          */
-        std::vector<std::string> literals;
+        std::string literal;
 
         /**
          * @brief The list of expressions in the string (from string interpolation).
          *
          */
-        std::vector<ExprNodePtr> expressions;
+        StringExprsNodePtr expressions;
+
+        /**
+         * @brief Tells whether the string is a literal
+         */
+        [[nodiscard]] bool isLiteral() const;
 
         /**
          * @brief Reports the type of this string node.

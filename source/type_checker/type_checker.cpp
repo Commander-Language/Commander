@@ -612,14 +612,20 @@ namespace TypeChecker {
             }
             case Parser::STRING: {
                 Parser::StringNodePtr const stringPtr = std::static_pointer_cast<Parser::StringNode>(astNode);
-                for (const Parser::ExprNodePtr& exprPtr : stringPtr->expressions) {
+                if (!stringPtr->isLiteral()) { typeCheck(stringPtr->expressions); }
+                return STRING_TY;
+            }
+            case Parser::STRING_EXPRS: {
+                Parser::StringExprsNodePtr const stringsPtr = std::static_pointer_cast<Parser::StringExprsNode>(
+                        astNode);
+                for (const Parser::ExprNodePtr& exprPtr : stringsPtr->expressions) {
                     TyPtr const exprType = typeCheck(exprPtr);
                     if (!exprPtr || exprType->getType() != Type::STRING) {
                         // TODO: Improve error
                         throw Util::CommanderException("String has an expression that is not a string.");
                     }
                 }
-                return STRING_TY;
+                return nullptr;
             }
             case Parser::INT_TYPE: {
                 Parser::IntTypeNodePtr const intPtr = std::static_pointer_cast<Parser::IntTypeNode>(astNode);

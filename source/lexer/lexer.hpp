@@ -46,6 +46,7 @@ namespace Lexer {
         ELSE,
         END,
         END_OF_FILE,
+        ENDSTRINGVAL,
         EXPONENTIATE,
         EXPONENTIATE_EQUALS,
         EQUALS,
@@ -189,12 +190,6 @@ namespace Lexer {
          * interpolation.
          */
         TokenList subTokens;
-
-        /**
-         * @brief Returns the string representation of the Token
-         * @return The string representation of the Token
-         */
-        [[nodiscard]] std::string toString() const override;
     };
 
     /**
