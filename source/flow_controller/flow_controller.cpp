@@ -23,7 +23,7 @@ namespace FlowController {
     //  ==========================
     //  ||   Commander types    ||
     //  ==========================
-    CommanderLambda::CommanderLambda(std::vector<Parser::BindingNodePtr> bindings, Parser::StmtNodePtr body)
+    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body)
         : bindings(std::move(bindings)), body(std::move(body)) {}
 
     //  ==========================
@@ -70,6 +70,10 @@ namespace FlowController {
                 }
                 case Parser::STRING: {
                     _string(std::static_pointer_cast<Parser::StringNode>(node));
+                    break;
+                }
+                case Parser::TYPES: {
+                    _types(std::static_pointer_cast<Parser::TypesNode>(node));
                     break;
                 }
                 case Parser::TYPE: {
@@ -172,7 +176,7 @@ namespace FlowController {
                 for (auto& arg : functionExpression->args->exprs) {
                     // args and bindings should be lined up 1 to 1
                     std::any const argValue = _expr(arg);
-                    std::string const name = function.bindings[bindingIndex]->variable;
+                    std::string const name = function.bindings->bindings[bindingIndex]->variable;
 
                     _setVariable(name, argValue);
                     bindingIndex++;
@@ -299,6 +303,10 @@ namespace FlowController {
             indexExpression++;
         }
         return stringResult;
+    }
+
+    void FlowController::_types(const Parser::TypesNodePtr& node) {
+        for (auto& type : node->types) { _type(type); }
     }
 
     void FlowController::_type(const Parser::TypeNodePtr& node) {
@@ -449,13 +457,13 @@ namespace FlowController {
         // TODO: Implement
     }
 
-    void FlowController::_setVariable(std::string name, std::any value) {
+    void FlowController::_setVariable(const std::string& name, std::any value) {
         // TODO: update when symbol table is generic
-        _symbolTable.addOrUpdateVariable(std::move(name), std::any_cast<CommanderInt>(value));
+        _symbolTable.addOrUpdateVariable(name, std::any_cast<CommanderInt>(value));
     }
 
     std::any FlowController::_getVariable(const std::string& name) {
-        CommanderInt* value = _symbolTable.getVariable<CommanderInt>(name);
+        auto* value = _symbolTable.getVariable<CommanderInt>(name);
         if (value != nullptr) { return static_cast<CommanderInt>(*value); }
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
@@ -466,9 +474,9 @@ namespace FlowController {
         return std::any_cast<std::string>(value);
     }
 
-    bool FlowController::hasVariable(std::string name) { return _symbolTable.varExistsInScope(name); }
+    bool FlowController::hasVariable(const std::string& name) { return _symbolTable.varExistsInScope(name); }
 
-    CommanderInt FlowController::getVariableValue(std::string name) {
+    CommanderInt FlowController::getVariableValue(const std::string& name) {
         return std::any_cast<CommanderInt>(_getVariable(name));
     }
 }  // namespace FlowController

@@ -12,7 +12,7 @@
 
 namespace Lexer {
 
-    std::string tokenTypeToString(const tokenType& type) {
+    std::string tokenTypeToString(const TokenType& type) {
         switch (type) {
             case ADD:
                 return "ADD";
@@ -171,7 +171,7 @@ namespace Lexer {
 
     Token::Token() : type(UNKNOWN), position({"", -1, -1, -1}) {}
 
-    Token::Token(std::string contents, tokenType type, FilePosition position)
+    Token::Token(std::string contents, TokenType type, FilePosition position)
         : contents(std::move(contents)), type(type), position(std::move(position)) {}
 
     std::string Token::toString() const {
@@ -308,8 +308,8 @@ namespace Lexer {
 
     TokenPtr
     lexLiteral(const std::string& file, FilePosition& position,
-               const std::vector<std::pair<std::basic_string<char>, tokenType>>& literals,
-               const std::function<bool(const std::pair<std::basic_string<char>, tokenType>& literal,
+               const std::vector<std::pair<std::basic_string<char>, TokenType>>& literals,
+               const std::function<bool(const std::pair<std::basic_string<char>, TokenType>& literal,
                                         const std::string& file, FilePosition& position)>& notLiteralCondition) {
         for (const auto& literal : literals) {
             const int length = (int)literal.first.length();
@@ -324,7 +324,7 @@ namespace Lexer {
 
     TokenPtr lexTokenLiteral(const std::string& file, FilePosition& position) {
         return lexLiteral(file, position, tokenLiterals,
-                          [](const std::pair<std::basic_string<char>, tokenType>& literal, const std::string& file,
+                          [](const std::pair<std::basic_string<char>, TokenType>& literal, const std::string& file,
                              FilePosition& position) {
                               const int length = (int)literal.first.length();
                               return position.index + length > file.length()
@@ -334,7 +334,7 @@ namespace Lexer {
 
     TokenPtr lexCommandTokenLiteral(const std::string& file, FilePosition& position) {
         return lexLiteral(file, position, commandTokenLiterals,
-                          [](const std::pair<std::basic_string<char>, tokenType>& literal, const std::string& file,
+                          [](const std::pair<std::basic_string<char>, TokenType>& literal, const std::string& file,
                              FilePosition& position) {
                               const int length = (int)literal.first.length();
                               const int fileLength = (int)file.length();
@@ -346,7 +346,7 @@ namespace Lexer {
 
     TokenPtr lexKeyword(const std::string& file, FilePosition& position) {
         return lexLiteral(file, position, keywords,
-                          [](const std::pair<std::basic_string<char>, tokenType>& literal, const std::string& file,
+                          [](const std::pair<std::basic_string<char>, TokenType>& literal, const std::string& file,
                              FilePosition& position) {
                               const int length = (int)literal.first.length();
                               return position.index + length > file.length()
@@ -615,7 +615,7 @@ namespace Lexer {
         return !isWhitespace(character) && (character < ' ' || character > '~');
     }
 
-    TokenPtr expectToken(const tokenType& type, const std::string& file, FilePosition& position, bool& isCommand) {
+    TokenPtr expectToken(const TokenType& type, const std::string& file, FilePosition& position, bool& isCommand) {
         skipWhitespace(file, position);
         if (position.index >= file.length()) {
             throw Util::CommanderException("Expected " + tokenTypeToString(type) + " token, but file ended.", position);
@@ -630,7 +630,7 @@ namespace Lexer {
     }
 
     void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position,
-                      const tokenType& terminatingToken) {
+                      const TokenType& terminatingToken) {
         bool isCommand = false;
         bool isBacktickCommand = false;
         bool isFirst = true;
@@ -733,8 +733,8 @@ namespace Lexer {
                 "Statement was not terminated with " + tokenTypeToString(terminatingToken) + " token", startPosition);
     }
 
-    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const tokenType& startToken,
-                       const tokenType& terminatingToken) {
+    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const TokenType& startToken,
+                       const TokenType& terminatingToken) {
         const FilePosition startPosition = position;
         bool isCommand = false;
         FilePosition commandPosition;

@@ -15,9 +15,9 @@ namespace Util {
 
     extern bool usingNCurses;
 
-    void print(std::string str);
+    void print(const std::string& str);
 
-    void println(std::string str);
+    void println(const std::string& str);
 
 }  // namespace Util
 

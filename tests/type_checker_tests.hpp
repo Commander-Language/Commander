@@ -17,8 +17,8 @@
  * @return The shared pointer type
  */
 template<typename TType>
-std::shared_ptr<TType> makeType() {
-    return std::make_shared<TType>();
+std::shared_ptr<TypeChecker::VariableInfo> makeType() {
+    return std::make_shared<TypeChecker::VariableInfo>(true, std::make_shared<TType>());
 }
 
 /**

@@ -41,11 +41,11 @@ namespace Parser {
          * @brief The token type of this `GrammarEntry`.
          * @details Void if `nodeType` is set.
          */
-        Lexer::tokenType tokenType;
+        Lexer::TokenType tokenType;
 
         /**
          * @brief The AST node type of this `GrammarEntry`.
-         * @details Void if `tokenType` is set.
+         * @details Void if `TokenType` is set.
          */
         ASTNodeType nodeType;
 
@@ -54,7 +54,7 @@ namespace Parser {
          *
          * @param tokenType The token type of this `GrammarEntry`.
          */
-        GrammarEntry(Lexer::tokenType tokenType);
+        GrammarEntry(Lexer::TokenType tokenType);
 
         /**
          * @brief Class constructor for an AST node type.
@@ -179,7 +179,7 @@ namespace Parser {
         /**
          * @brief Shorthand for the `TokenType` enumeration from the lexer.
          */
-        using TokenType = Lexer::tokenType;
+        using TokenType = Lexer::TokenType;
 
         /**
          * @brief A method that makes a new AST node smart pointer.

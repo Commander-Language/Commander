@@ -39,8 +39,8 @@ namespace FlowController {
      * @brief A commander lambda representation
      */
     struct CommanderLambda {
-        CommanderLambda(std::vector<Parser::BindingNodePtr>, Parser::StmtNodePtr);
-        std::vector<Parser::BindingNodePtr> bindings;
+        CommanderLambda(Parser::BindingsNodePtr, Parser::StmtNodePtr);
+        Parser::BindingsNodePtr bindings;
         Parser::StmtNodePtr body;
         // TODO: save return type
     };
@@ -66,12 +66,12 @@ namespace FlowController {
          * @brief Check if flow controller could find a varible
          * @returns True or False
          */
-        bool hasVariable(std::string);
+        bool hasVariable(const std::string&);
 
         /**
          * @brief Get value of variable
          */
-        CommanderInt getVariableValue(std::string);
+        CommanderInt getVariableValue(const std::string&);
 
     private:
         /**
@@ -89,7 +89,7 @@ namespace FlowController {
          * @param name The name of the symbol
          * @param value The value of the symbol
          */
-        void _setVariable(std::string name, std::any value);
+        void _setVariable(const std::string& name, std::any value);
 
         /**
          * @brief Get a variable from the symbol table.
@@ -147,6 +147,11 @@ namespace FlowController {
          * @brief Helper to interpret string nodes
          */
         std::string _string(const Parser::StringNodePtr&);
+        /**
+         * @brief Helper to interpret types nodes
+         * @param types The types to interpret
+         */
+        void _types(const Parser::TypesNodePtr& types);
         /**
          * @brief Helper to interpret type nodes
          */

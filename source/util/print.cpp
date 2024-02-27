@@ -10,7 +10,7 @@ namespace Util {
 
     bool usingNCurses = false;
 
-    void print(std::string str) {
+    void print(const std::string& str) {
         if (usingNCurses) {
             printw("%s", str.c_str());
         } else {
@@ -18,11 +18,11 @@ namespace Util {
         }
     }
 
-    void println(std::string str) {
+    void println(const std::string& str) {
         if (usingNCurses) {
             printw("%s\n", str.c_str());
         } else {
-            std::cout << str << std::endl;
+            std::cout << str << '\n';
         }
     }
 

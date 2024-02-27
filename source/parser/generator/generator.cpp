@@ -306,6 +306,9 @@ namespace Parser {
             "    std::shared_ptr<TypeNode> castType(const std::shared_ptr<ASTNode>& node) {",
             "        return std::reinterpret_pointer_cast<TypeNode>(node);",
             "    }",
+            "    std::shared_ptr<TypesNode> castTypes(const std::shared_ptr<ASTNode>& node) {",
+            "        return std::reinterpret_pointer_cast<TypesNode>(node);",
+            "    }",
             "    std::shared_ptr<VariableNode> castVariable(const std::shared_ptr<ASTNode>& node) {",
             "        return std::reinterpret_pointer_cast<VariableNode>(node);",
             "    }",
@@ -313,8 +316,8 @@ namespace Parser {
         });
 
         const std::string foot = _join("\n", {
-            "    ParserAction ParseTable::getNextAction(ParseTable::StateNum stateNum, TokenType tokenType) {",
-            "        return _nextAction[stateNum][tokenType];",
+            "    ParserAction ParseTable::getNextAction(ParseTable::StateNum stateNum, TokenType TokenType) {",
+            "        return _nextAction[stateNum][TokenType];",
             "    }",
             "",
             "    ParseTable::StateNum ParseTable::getNextState(ParseTable::StateNum stateNum, ASTNodeType nodeType) {",
@@ -331,7 +334,7 @@ namespace Parser {
             std::vector<std::string> statesNextActionStrings(statesNextActions.size());
             std::size_t statesNextActionIndex = 0;
             for (const auto& [tokenType, action] : statesNextActions) {
-                const std::string tokenTypeString = "Lexer::tokenType::" + tokenTypeToString(tokenType);
+                const std::string tokenTypeString = "Lexer::TokenType::" + tokenTypeToString(tokenType);
                 statesNextActionStrings[statesNextActionIndex++] = _pair(tokenTypeString, action);
             }
             allNextActions[allActionsIndex] = _wrap(_join(", ", statesNextActionStrings));

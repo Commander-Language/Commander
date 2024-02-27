@@ -1,9 +1,6 @@
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/lexer/lexer.hpp"
-#include "source/parser/parser.hpp"
 #include "source/type_checker/type_checker.hpp"
-#include "source/util/commander_exception.hpp"
-#include "source/util/print.hpp"
 #include <fstream>
 #include <iostream>
 #include <ncurses.h>
@@ -32,7 +29,7 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
 
 int main(int argc, char** argv) {
     std::vector<std::string> arguments;
-    for (int i = 1; i < argc; i++) { arguments.push_back(argv[i]); }
+    for (int i = 1; i < argc; i++) { arguments.emplace_back(argv[i]); }
     try {
         Parser::Parser parser;
         TypeChecker::TypeChecker typeChecker;
@@ -56,10 +53,10 @@ int main(int argc, char** argv) {
         std::string currentLine;
         std::vector<std::string> lines;
         int line = 0;
-        int i = 0;
+        int idx = 0;
         while (true) {
-            int ch = getch();
-            switch (ch) {
+            int chr = getch();
+            switch (chr) {
                 case KEY_ENTER:
                 case '\n':
                     move(getcury(stdscr), 3);
@@ -81,17 +78,17 @@ int main(int argc, char** argv) {
                             std::remove(tmpFileName.c_str());
                         } catch (const Util::CommanderException& err) { Util::println(err.what()); }
                     }
-                    i = 0;
+                    idx = 0;
                     Util::print(">> ");
-                    if (lines.size() == 0 || lines.back() != currentLine) { lines.push_back(currentLine); }
-                    line = lines.size();
+                    if (lines.empty() || lines.back() != currentLine) { lines.push_back(currentLine); }
+                    line = (int)lines.size();
                     currentLine.clear();
                     break;
                 case KEY_BACKSPACE:
                     if (getcurx(stdscr) > 3) {
                         move(getcury(stdscr), getcurx(stdscr) - 1);  // Move cursor back
                         delch();                                     // Delete character
-                        currentLine.erase(currentLine.begin() + --i);
+                        currentLine.erase(currentLine.begin() + --idx);
                     }
                     break;
                 case KEY_UP:
@@ -100,7 +97,7 @@ int main(int argc, char** argv) {
                     move(getcury(stdscr), 3);
                     clrtoeol();
                     Util::print(currentLine);
-                    i = currentLine.size();
+                    idx = (int)currentLine.size();
                     break;
                 case KEY_DOWN:
                     if (line == lines.size()) { break; }
@@ -112,24 +109,24 @@ int main(int argc, char** argv) {
                     move(getcury(stdscr), 3);
                     clrtoeol();
                     Util::print(currentLine);
-                    i = currentLine.size();
+                    idx = (int)currentLine.size();
                     break;
                 case KEY_LEFT:
                     if (getcurx(stdscr) > 3) {
                         move(getcury(stdscr), getcurx(stdscr) - 1);
-                        i--;
+                        idx--;
                     }
                     break;
                 case KEY_RIGHT:
                     if (getcurx(stdscr) - 3 < currentLine.size()) {
                         move(getcury(stdscr), getcurx(stdscr) + 1);
-                        i++;
+                        idx++;
                     }
                     break;
                 default:
                     if (getcurx(stdscr) < getmaxx(stdscr)) {
-                        insch(ch);
-                        currentLine.insert(i++, std::string(1, (char)ch));
+                        insch(chr);
+                        currentLine.insert(idx++, std::string(1, (char)chr));
                         move(getcury(stdscr), getcurx(stdscr) + 1);
                     }
             }
