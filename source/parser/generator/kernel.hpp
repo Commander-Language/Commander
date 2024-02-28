@@ -35,11 +35,10 @@ namespace Parser {
          * @brief Class constructor.
          *
          * @param rule The `GrammarRule` to which this kernel refers.
-         * @param priority The priority of the `GrammarRule`.
          * @param index How far we are into the `GrammarRule`.
          * @param lookahead The next lookahead token type.
          */
-        Kernel(const GrammarRule* rule, std::size_t priority, std::size_t index, TokenType lookahead);
+        Kernel(const GrammarRule* rule, std::size_t index, TokenType lookahead);
 
         /**
          * @brief Equality operator.
@@ -79,11 +78,6 @@ namespace Parser {
          * @details Not a smart pointer because the kernel does not own the rule.
          */
         const GrammarRule* rule;
-
-        /**
-         * @brief The priority of the grammar rule.
-         */
-        std::size_t priority;
 
         /**
          * @brief The index into the grammar rule.
