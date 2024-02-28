@@ -167,7 +167,9 @@
 //  ||  Strings:  ||
 //  ================
 
-(STRING) -> [STRINGVAL]
+(STRINGEXPRS) -> [STRINGLITERAL]
+(STRINGEXPRS) -> (STRINGEXPRS) (EXPR) [STRINGLITERAL]
+(STRING) -> [STRINGVAL] (STRINGEXPRS) [ENDSTRINGVAL]
 
 
 //  ==============

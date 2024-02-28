@@ -72,6 +72,9 @@ namespace FlowController {
                     _string(std::static_pointer_cast<Parser::StringNode>(node));
                     break;
                 }
+                case Parser::STRING_EXPRS: {
+                    // TODO: Handle string expressions
+                }
                 case Parser::TYPES: {
                     _types(std::static_pointer_cast<Parser::TypesNode>(node));
                     break;
@@ -290,17 +293,9 @@ namespace FlowController {
         auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
         auto stringNode = stringExp->stringNode;
 
-        int indexLiteral = 0;
-        int indexExpression = 0;
         std::string stringResult;
-        while (indexLiteral < stringNode->literals.size() && indexExpression < stringNode->expressions.size()) {
-            std::any const exprValue = _expr(stringNode->expressions[indexExpression]);
-
-            stringResult.append(stringNode->literals[indexLiteral]);
-            stringResult.append(_commanderTypeToString(exprValue));
-
-            indexLiteral++;
-            indexExpression++;
+        for (const Parser::ExprNodePtr& ptr : stringNode->expressions->expressions) {
+            stringResult.append(_commanderTypeToString(_expr(ptr)));
         }
         return stringResult;
     }
