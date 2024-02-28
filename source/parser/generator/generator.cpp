@@ -60,7 +60,7 @@ namespace Parser {
                 if (grammar.rules[ruleInd].result == nodeType) {
                     //  The kernel is made of the rule, the rule's priority,
                     //  the index 0 (this is the beginning of that rule), and a lookahead that's never used.
-                    generators.emplace(grammar.rules[ruleInd], ruleInd + 1, 0, TokenType {});
+                    generators.emplace(&grammar.rules[ruleInd], ruleInd + 1, 0, TokenType {});
                 }
             }
 
@@ -79,7 +79,7 @@ namespace Parser {
                     visitedNodeTypes.insert(item.nodeType);
 
                     for (const auto& kernel : nodeGenerators[item.nodeType]) {
-                        const auto& firstItem = kernel.rule.components[0];
+                        const auto& firstItem = kernel.rule->components[0];
 
                         if (firstItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
                             tokenSet.insert(firstItem.tokenType);
@@ -123,11 +123,11 @@ namespace Parser {
 
             for (std::size_t index = 0; index < kernelVec.size(); ++index) {
                 const Kernel& currentKernel = kernelVec[index];
-                if (currentKernel.index == currentKernel.rule.components.size()) continue;
-                const std::vector<GrammarEntry> remaining {currentKernel.rule.components.begin()
+                if (currentKernel.index == currentKernel.rule->components.size()) continue;
+                const std::vector<GrammarEntry> remaining {currentKernel.rule->components.begin()
                                                                    + static_cast<long>(currentKernel.index),
-                                                           currentKernel.rule.components.end()};
-                const GrammarEntry& currentItem = currentKernel.rule.components[currentKernel.index];
+                                                           currentKernel.rule->components.end()};
+                const GrammarEntry& currentItem = currentKernel.rule->components[currentKernel.index];
                 if (currentItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
 
                 const auto lookaheads = [&]() -> std::unordered_set<TokenType> {
@@ -159,7 +159,7 @@ namespace Parser {
         }};
 
         //  This is a vector of all the states in the parser automaton.
-        const Kernel initialKernel = {goalRule, 0, 0, TokenType::END};
+        const Kernel initialKernel = {&goalRule, 0, 0, TokenType::END};
         std::vector<KernelSet> states {{{initialKernel}}};
 
         //  This is a mapping from a set of kernels to the `StateNum` ID of that state.
@@ -198,7 +198,7 @@ namespace Parser {
 
             //  For all kernels in the closure:
             for (const auto& enclosedKernel : enclosedKernels) {
-                const auto& components = enclosedKernel.rule.components;
+                const auto& components = enclosedKernel.rule->components;
 
                 //  If the kernel is complete (i.e., the index is equal to the number of components),
                 //  we're able to perform a `REDUCE` action.
@@ -214,7 +214,7 @@ namespace Parser {
                 }
 
                 //  Otherwise, examine the next item.
-                const auto& nextItem = enclosedKernel.rule.components[enclosedKernel.index];
+                const auto& nextItem = enclosedKernel.rule->components[enclosedKernel.index];
                 const Kernel nextKernel {enclosedKernel.rule, enclosedKernel.priority, enclosedKernel.index + 1,
                                          enclosedKernel.lookahead};
                 if (nextItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
@@ -249,7 +249,7 @@ namespace Parser {
                 const auto& priority = reductionPriorities[tokenType];
 
                 //  If this kernel was actually the goal rule, then accept. This was a successful parse.
-                if (kernel.rule == goalRule) {
+                if (*kernel.rule == goalRule) {
                     _nextAction[stateNum][tokenType] = _wrap("ParserAction::ActionType::ACCEPT");
                     continue;
                 }
@@ -257,9 +257,9 @@ namespace Parser {
                 //  Add this reduce action, if it has a higher priority than a conflicting shift action.
                 if (shiftPriorities.count(tokenType) == 0 || shiftPriorities[tokenType] >= priority) {
                     _nextAction[stateNum][tokenType] = _join("",
-                                                             {"{", std::to_string(kernel.rule.components.size()), ", ",
+                                                             {"{", std::to_string(kernel.rule->components.size()), ", ",
                                                               "[&](const ProductionItemList& productionList) { return ",
-                                                              grammar.reductions.at(kernel.rule), "; }}"});
+                                                              grammar.reductions.at(*kernel.rule), "; }}"});
                 }
             }
         }
