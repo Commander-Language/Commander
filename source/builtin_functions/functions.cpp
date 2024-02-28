@@ -397,7 +397,7 @@ TypeChecker::CommanderString Function::replace(TypeChecker::CommanderString oldP
 
 TypeChecker::CommanderString Function::replaceAll(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase, TypeChecker::CommanderString sourceString) {
     TypeChecker::CommanderString newString = std::string(sourceString);
-    std::replace(newString.begin(), newString.end(), oldPhrase, newPhrase);
+    newString.replace(oldPhrase.begin(), oldPhrase.end(), newPhrase);
     return newString;
 }
 
@@ -407,4 +407,39 @@ TypeChecker::CommanderString Function::substring(TypeChecker::CommanderInt start
 
 TypeChecker::CommanderString Function::substring(TypeChecker::CommanderInt startingIndex, TypeChecker::CommanderInt endingIndex, TypeChecker::CommanderString sourceString) {
     return sourceString.substr(startingIndex, endingIndex);
+}
+
+TypeChecker::CommanderString Function::trim(TypeChecker::CommanderString sourceString) {
+    std::string whitespaceChars = "\n\r\t\f\v";
+    size_t startIndex = sourceString.find_first_of(whitespaceChars);
+    size_t endIndex = sourceString.find_last_of(whitespaceChars);
+    return sourceString.substr(startIndex + 1, endIndex);
+}
+
+TypeChecker::CommanderString Function::lower(TypeChecker::CommanderString sourceString) {
+    TypeChecker::CommanderString newString;
+    for (char currentChar : sourceString) {
+        newString += std::tolower(currentChar);
+    }
+    return newString;
+}
+
+TypeChecker::CommanderString Function::upper(TypeChecker::CommanderString sourceString) {
+    TypeChecker::CommanderString newString;
+    for (char currentChar : sourceString) {
+        newString += std::toupper(currentChar);
+    }
+    return newString;
+}
+
+TypeChecker::CommanderArray<TypeChecker::CommanderString> Function::split(TypeChecker::CommanderString splitToken, TypeChecker::CommanderString sourceString) {
+    TypeChecker::CommanderArray<TypeChecker::CommanderString> strings = TypeChecker::CommanderArray<TypeChecker::CommanderString>();
+    TypeChecker::CommanderString workingString = std::string(sourceString);
+    size_t currentTokenLocation = 1; //temp value
+
+    while(currentTokenLocation != 0) {
+        currentTokenLocation = workingString.find(splitToken);
+        //TODO: incomplete
+        //find an occurrence of the token to remove, make a substring, and remove from workingString
+    }
 }
