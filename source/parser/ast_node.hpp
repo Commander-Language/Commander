@@ -1862,6 +1862,56 @@ namespace Parser {
     using DoWhileStmtNodePtr = std::shared_ptr<DoWhileStmtNode>;
 
     /**
+     * @brief A function statement node
+     *
+     */
+    class FunctionStmtNode : public StmtNode {
+    public:
+        /**
+         * The bindings representing the arguments of the function
+         */
+        std::vector<BindingNodePtr> bindings;
+
+        /**
+         * The body of the function
+         */
+        StmtNodePtr body;
+
+        /**
+         * The (optional) return type of the function
+         */
+        TypeNodePtr returnType;
+
+        /**
+         * @brief Class constructor with a statement body (the default).
+         *
+         * @param bindings The bindings (arguments) of the function.
+         * @param body The body of the function.
+         * @param returnType The return type of the function.
+         */
+        FunctionStmtNode(const std::vector<BindingNodePtr>& bindings, StmtNodePtr body, TypeNodePtr returnType = nullptr);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `FUNCTION_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a function statement node.
+     *
+     */
+    using FunctionStmtNodePtr = std::shared_ptr<FunctionStmtNode>;
+
+    /**
      * @brief A return statement.
      */
     class ReturnStmtNode : public StmtNode {
