@@ -10,6 +10,7 @@
 #include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/util/print.hpp"
+#include "source/type_checker/type.hpp"
 
 #include <any>
 #include <cmath>
@@ -20,14 +21,60 @@
 namespace FlowController {
 
     /**
+     * @brief A Commander array representation
+     */
+    template<typename TType>
+    struct CommanderArray {
+        /**
+         * @brief The values in the array
+         */
+        std::vector<TType> values;
+        /**
+         * @brief The type of the values in the array
+         */
+        TypeChecker::Type type;
+    };
+    /**
+     * @brief A Commander bool representation
+     */
+    using CommanderBool = bool;
+    /**
+     * @brief A Commander tuple representation
+     */
+    struct CommanderTuple {
+        /**
+         * @brief The values of a tuple
+         */
+        std::vector<std::any> values;
+        /**
+         * @brief The types of the values in the tuple
+         * @details This should be a 1-to-1 mapping with the values list.
+         */
+        std::vector<TypeChecker::Type> types;
+    };
+    /**
+     * @brief A Commander string representation
+     */
+    using CommanderString = std::string;
+    /**
+     * @brief A Commander int representation
+     */
+    using CommanderInt = int64_t;
+    /**
+     * @brief A Commander float representation
+     */
+    using CommanderFloat = double;
+
+    /**
      * @brief A commander lambda representation
      */
     struct CommanderLambda {
         CommanderLambda(Parser::BindingsNodePtr, Parser::StmtNodePtr);
         Parser::BindingsNodePtr bindings;
         Parser::StmtNodePtr body;
-        // TODO: save return type
+        TypeChecker::Type returnType;
     };
+
 
     /**
      * @brief Interpret the AST Nodes given from the Parser
@@ -90,7 +137,9 @@ namespace FlowController {
         /**
          * @brief Get a String representation of a Commander type value
          */
-        static std::string _commanderTypeToString(std::any);
+        static std::string _commanderTypeToString(std::any value, TypeChecker::Type type,
+                                                  TypeChecker::Type subtype = TypeChecker::Type::INT);
+
 
         /**
          * @brief Helper to interpret binding nodes
@@ -154,6 +203,22 @@ namespace FlowController {
          * @brief Helper to interpret binary operations
          */
         std::any _binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp);
+        /**
+         *
+         * @return
+         */
+        template<typename TType>
+        static std::string _helper(CommanderArray<TType> arr) {
+            std::string output = "[";
+            for (int i = 0; i < arr.values.size(); i++) {
+                if (i < arr.values.size() - 1)
+                    output.append(output + _commanderTypeToString(arr.values[i], arr.type) + ", ");
+                else
+                    output.append(output + _commanderTypeToString(arr.values[i], arr.type) + "]");
+            }
+            return output;
+        }
     };
+
 }  // namespace FlowController
 #endif

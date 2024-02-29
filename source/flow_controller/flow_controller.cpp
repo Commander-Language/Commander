@@ -477,10 +477,71 @@ namespace FlowController {
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
 
-    std::string FlowController::_commanderTypeToString(std::any value) {
-        // TODO: Fix this.
-        // This is not the right approach, send type of value as a parameter instead.
-        return std::any_cast<std::string>(value);
+    std::string FlowController::_commanderTypeToString(std::any value, TypeChecker::Type type,
+                                                       TypeChecker::Type subtype) {
+        switch (type) {
+            case TypeChecker::INT: {
+                return std::to_string(std::any_cast<CommanderInt>(value));
+            }
+            case TypeChecker::FLOAT: {
+                return std::to_string(std::any_cast<CommanderFloat>(value));
+            }
+            case TypeChecker::BOOL: {
+                if (std::any_cast<CommanderBool>(value))
+                    return "true";
+                return "false";
+            }
+            case TypeChecker::TUPLE: {
+                auto tuple = std::any_cast<CommanderTuple>(value);
+                std::string output = "(";
+                for (int i = 0; i < tuple.values.size(); i++) {
+                    if (i < tuple.values.size() - 1)
+                        output.append(output + _commanderTypeToString(tuple.values[i], tuple.types[i]) + ", ");
+                    else
+                        output.append(output + _commanderTypeToString(tuple.values[i], tuple.types[i]) + ")");
+                }
+                return output;
+            }
+            case TypeChecker::ARRAY: {
+                switch (subtype) {
+                    case TypeChecker::INT: {
+                        auto array = std::any_cast<CommanderArray<CommanderInt>>(value);
+                        return _helper(array);
+                    }
+                    case TypeChecker::FLOAT: {
+                        auto array = std::any_cast<CommanderArray<CommanderFloat>>(value);
+                        return _helper(array);
+                    }
+                    case TypeChecker::BOOL: {
+                        auto array = std::any_cast<CommanderArray<CommanderBool>>(value);
+                        return _helper(array);
+                    }
+                    case TypeChecker::TUPLE: {
+                        auto array = std::any_cast<CommanderArray<CommanderTuple>>(value);
+                        return _helper(array);
+                    }
+                    case TypeChecker::ARRAY: {
+                        // TODO: Recursively get types?
+                        //auto array = std::any_cast<CommanderArray<CommanderArray<>>>(value);
+                        //return _helper(array);
+                    }
+                    case TypeChecker::FUNCTION: {
+                        auto array = std::any_cast<CommanderArray<CommanderLambda>>(value);
+                        return _helper(array);
+                    }
+                    case TypeChecker::STRING: {
+                        auto array = std::any_cast<CommanderArray<CommanderString>>(value);
+                        return _helper(array);
+                    }
+                }
+            }
+            case TypeChecker::FUNCTION: {
+                auto lambda = std::any_cast<CommanderLambda>(value);
+            }
+            case TypeChecker::STRING: {
+                return std::any_cast<CommanderString>(value);
+            }
+        }
     }
 
     bool FlowController::hasVariable(const std::string& name) { return _symbolTable.varExistsInScope(name); }
