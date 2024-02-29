@@ -35,11 +35,10 @@ namespace Parser {
          * @brief Class constructor.
          *
          * @param rule The `GrammarRule` to which this kernel refers.
-         * @param priority The priority of the `GrammarRule`.
          * @param index How far we are into the `GrammarRule`.
          * @param lookahead The next lookahead token type.
          */
-        Kernel(GrammarRule rule, size_t priority, size_t index, TokenType lookahead);
+        Kernel(const GrammarRule* rule, std::size_t index, TokenType lookahead);
 
         /**
          * @brief Equality operator.
@@ -76,18 +75,14 @@ namespace Parser {
 
         /**
          * @brief The `GrammarRule` to which this kernel refers.
+         * @details Not a smart pointer because the kernel does not own the rule.
          */
-        GrammarRule rule;
-
-        /**
-         * @brief The priority of the grammar rule.
-         */
-        size_t priority;
+        const GrammarRule* rule;
 
         /**
          * @brief The index into the grammar rule.
          */
-        size_t index;
+        std::size_t index;
 
         /**
          * @brief The lookahead token.
@@ -97,22 +92,18 @@ namespace Parser {
 
 }  //  namespace Parser
 
-namespace std {
-
+/**
+ * @brief Specialization of the `std::hash` class for a `Kernel`.
+ */
+template<>
+struct std::hash<Parser::Kernel> {
     /**
-     * @brief Specialization of the `std::hash` class for a `Kernel`.
+     * @brief Hashing functor call (`()`) operator.
+     *
+     * @param kernel The kernel to hash.
+     * @return The hashed value of the kernel.
      */
-    template<>
-    struct hash<Parser::Kernel> {
-        /**
-         * @brief Hashing functor call (`()`) operator.
-         *
-         * @param kernel The kernel to hash.
-         * @return The hashed value of the kernel.
-         */
-        size_t operator()(const Parser::Kernel& kernel) const;
-    };
-
-}  //  namespace std
+    std::size_t operator()(const Parser::Kernel& kernel) const noexcept;
+};
 
 #endif  //  KERNEL_HPP

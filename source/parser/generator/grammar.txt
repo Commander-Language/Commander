@@ -2,8 +2,7 @@
 //  ||  Program:  ||
 //  ================
 
-(PRGM) -> [END_OF_FILE]
-(PRGM) -> (STMTS) [END_OF_FILE]
+(PRGM) -> (STMTS)
 
 
 //  =================

@@ -12,18 +12,74 @@
 #include "source/util/generated_map.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <set>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace Parser {
+    struct PotentialAction {
+        enum PotentialActionType : std::uint8_t { SHIFT, REDUCE, ACCEPT };
+
+        PotentialAction() : type(), priority(), shiftNextState(), reduceRule() {}
+
+        PotentialAction(const PotentialActionType type) : type(type), priority(0), shiftNextState(), reduceRule() {}
+
+        PotentialAction(const std::size_t shiftNextState, const std::size_t priority)
+            : type(SHIFT), priority(priority), shiftNextState(shiftNextState), reduceRule() {}
+
+        PotentialAction(const GrammarRule* reduceRule, const std::size_t priority)
+            : type(REDUCE), priority(priority), shiftNextState(), reduceRule(reduceRule) {}
+
+        friend std::ostream& operator<<(std::ostream& stream, const PotentialAction& action) {
+            stream << "{";
+            switch (action.type) {
+                case SHIFT:
+                    stream << "SHIFT: -> " << action.shiftNextState;
+                    break;
+                case REDUCE:
+                    stream << "REDUCE: " << *action.reduceRule;
+                    break;
+                case ACCEPT:
+                    stream << "ACCEPT";
+                    break;
+            }
+            stream << "}";
+            return stream;
+        }
+
+        PotentialActionType type;
+
+        std::size_t priority;
+
+        std::size_t shiftNextState;
+
+        const GrammarRule* reduceRule;
+    };
+
     Generator::Generator() {
+        //  Runs the given operation on each element of the given array in a multithreaded manner.
+        const auto multiForEach = [](auto& inputs, const auto& func) {
+            constexpr std::size_t numThreads = 8;
+
+            std::vector<std::thread> threads(numThreads);
+            for (std::size_t threadNum = 0; threadNum < numThreads; ++threadNum) {
+                threads[threadNum] = std::thread([threadNum, numThreads, &inputs, &func] {
+                    for (std::size_t ind = threadNum; ind < inputs.size(); ind += numThreads) func(inputs[ind]);
+                });
+            }
+            for (auto& thread : threads) thread.join();
+        };
+
         //  This object contains the entirety of the grammar as a set of `GrammarRule`s.
         //  Each `GrammarRule` contains a production that dictates,
         //  "given this list of tokens and AST nodes, generate this type of AST node."
@@ -42,62 +98,66 @@ namespace Parser {
         struct HashKernelSet {
             std::size_t operator()(const KernelSet& kernelSet) const {
                 constexpr std::hash<Kernel> hash;
+                constexpr std::size_t numThreads = 8;
+
+                const std::vector<Kernel> kernels {kernelSet.begin(), kernelSet.end()};
                 std::vector<std::size_t> hashes(kernelSet.size());
-                std::size_t index = 0;
-                for (const Kernel& kernel : kernelSet) hashes[index++] = hash(kernel);
+                std::vector<std::thread> threads(numThreads);
+                for (std::size_t threadNum = 0; threadNum < numThreads; ++threadNum) {
+                    threads[threadNum] = std::thread([&kernels, threadNum, &hashes, hash] {
+                        for (std::size_t kernelInd = threadNum; kernelInd < kernels.size(); kernelInd += numThreads) {
+                            hashes[kernelInd] = hash(kernels[kernelInd]);
+                        }
+                    });
+                }
+                for (auto& thread : threads) thread.join();
+
                 return Util::combineHashes(hashes);
             }
         };
 
-        //  A `Kernel` mainly consists of a `GrammarRule` and an index into that `GrammarRule`.
+        //  This is a mapping from an AST node type to a set of all grammar rules that produce that node type.
+        const std::unordered_map nodeGenerators {[&] {
+            std::unordered_map<ASTNodeType, std::unordered_set<const GrammarRule*>> result;
+            for (const auto& rule : grammar.rules) result[rule.result].insert(&rule);
+            return result;
+        }()};
 
-        //  This is a mapping from an AST node type to a set of all kernels that produce that node type.
-        Util::GeneratedMap<ASTNodeType, KernelSet> nodeGenerators {[&](const ASTNodeType& nodeType) {
-            KernelSet generators;
+        //  Reports the set of all token types that can be the first of the given AST node type.
+        const std::unordered_map firstSet {[&] {
+            std::unordered_map<ASTNodeType, std::unordered_set<TokenType>> result;
 
-            for (std::size_t ruleInd = 0; ruleInd < grammar.rules.size(); ++ruleInd) {
-                //  If this rule generates the given `nodeType`, then make a `Kernel` for that rule.
-                if (grammar.rules[ruleInd].result == nodeType) {
-                    //  The kernel is made of the rule, the rule's priority,
-                    //  the index 0 (this is the beginning of that rule), and a lookahead that's never used.
-                    generators.emplace(grammar.rules[ruleInd], ruleInd + 1, 0, TokenType {});
-                }
-            }
+            for (const auto& [nodeType, del] : nodeGenerators) {
+                std::unordered_set<ASTNodeType> visitedNodeTypes;
+                std::unordered_set<TokenType> tokenSet;
 
-            return generators;
-        }};
+                const std::function<void(const ASTNodeType&)> getFirstRec = [&](const ASTNodeType& curNodeType) {
+                    visitedNodeTypes.insert(curNodeType);
 
-        //  Reports the set of all token types that can be the first of the given GrammarEntry type.
-        Util::GeneratedMap<GrammarEntry, std::unordered_set<TokenType>> first {[&](const GrammarEntry& entry) {
-            std::unordered_set<ASTNodeType> visitedNodeTypes;
-            std::unordered_set<TokenType> tokenSet;
+                    if (nodeGenerators.count(curNodeType) > 0) {
+                        for (const auto& rule : nodeGenerators.at(curNodeType)) {
+                            const auto& firstItem = rule->components[0];
 
-            const std::function<void(const GrammarEntry&)> getFirstRec = [&](const GrammarEntry& item) {
-                if (item.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
-                    tokenSet.insert(item.tokenType);
-                } else {
-                    visitedNodeTypes.insert(item.nodeType);
+                            if (firstItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
+                                tokenSet.insert(firstItem.tokenType);
+                                continue;
+                            }
 
-                    for (const auto& kernel : nodeGenerators[item.nodeType]) {
-                        const auto& firstItem = kernel.rule.components[0];
-
-                        if (firstItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
-                            tokenSet.insert(firstItem.tokenType);
-                            continue;
-                        }
-
-                        if (visitedNodeTypes.count(firstItem.nodeType) == 0) {
-                            visitedNodeTypes.insert(firstItem.nodeType);
-                            getFirstRec(firstItem);
+                            if (visitedNodeTypes.count(firstItem.nodeType) == 0) {
+                                visitedNodeTypes.insert(firstItem.nodeType);
+                                getFirstRec(firstItem.nodeType);
+                            }
                         }
                     }
-                }
-            };
+                };
 
-            getFirstRec(entry);
+                getFirstRec(nodeType);
 
-            return tokenSet;
-        }};
+                result[nodeType] = tokenSet;
+            }
+
+            return result;
+        }()};
 
         //  Given a kernel, reports the closure of that kernel.
         //  The closure of a kernel is the set of all kernels that can be "next".
@@ -123,56 +183,72 @@ namespace Parser {
 
             for (std::size_t index = 0; index < kernelVec.size(); ++index) {
                 const Kernel& currentKernel = kernelVec[index];
-                if (currentKernel.index == currentKernel.rule.components.size()) continue;
-                const std::vector<GrammarEntry> remaining {currentKernel.rule.components.begin()
+                if (currentKernel.index == currentKernel.rule->components.size()) continue;
+                const std::vector<GrammarEntry> remaining {currentKernel.rule->components.begin()
                                                                    + static_cast<long>(currentKernel.index),
-                                                           currentKernel.rule.components.end()};
-                const GrammarEntry& currentItem = currentKernel.rule.components[currentKernel.index];
+                                                           currentKernel.rule->components.end()};
+                const GrammarEntry& currentItem = currentKernel.rule->components[currentKernel.index];
                 if (currentItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
 
                 const auto lookaheads = [&]() -> std::unordered_set<TokenType> {
                     if (remaining.size() < 2) return {currentKernel.lookahead};
 
-                    return first[remaining[1]];
+                    if (remaining[1].grammarEntryType == GrammarEntry::TOKEN_TYPE) return {remaining[1].tokenType};
+                    return firstSet.at(remaining[1].nodeType);
                 }();
 
-                for (const auto& production : nodeGenerators[currentItem.nodeType]) {
-                    for (const auto& lookahead : lookaheads) {
-                        const Kernel newKernel {production.rule, production.priority, 0, lookahead};
-                        if (usedKernels.count(newKernel) > 0) continue;
-                        usedKernels.insert(newKernel);
-                        kernelVec.push_back(newKernel);
+                if (nodeGenerators.count(currentItem.nodeType) > 0) {
+                    for (const auto& production : nodeGenerators.at(currentItem.nodeType)) {
+                        for (const auto& lookahead : lookaheads) {
+                            const Kernel newKernel {production, 0, lookahead};
+                            if (usedKernels.count(newKernel) > 0) continue;
+                            usedKernels.insert(newKernel);
+                            kernelVec.push_back(newKernel);
+                        }
                     }
                 }
             }
 
             return usedKernels;
         }};
+        std::mutex singleClosureLock;
 
         //  This is like the `singleClosure` map above, but for a `KernelSet`.
         Util::GeneratedMap<KernelSet, KernelSet, HashKernelSet> closure {[&](const KernelSet& kernelSet) {
             KernelSet enclosed;
             for (const auto& kernel : kernelSet) {
+                const std::lock_guard lock(singleClosureLock);
                 enclosed.insert(singleClosure[kernel].begin(), singleClosure[kernel].end());
             }
             return enclosed;
         }};
 
         //  This is a vector of all the states in the parser automaton.
-        const Kernel initialKernel = {goalRule, 0, 0, TokenType::END};
-        std::vector<KernelSet> states {{{initialKernel}}};
+        const Kernel initialKernel = {&goalRule, 0, TokenType::END_OF_FILE};
+
+        std::vector globalCanonStates {singleClosure[initialKernel]};
+        std::mutex globalCanonStatesLock;
 
         //  This is a mapping from a set of kernels to the `StateNum` ID of that state.
-        Util::GeneratedMap<KernelSet, std::size_t, HashKernelSet> stateNums {[&](const KernelSet& kernelSet) {
-            states.push_back(kernelSet);
-            return states.size() - 1;
+        Util::GeneratedMap<KernelSet, std::size_t, HashKernelSet> globalCanonStateNum {[&](const KernelSet& kernelSet) {
+            std::lock_guard lock(globalCanonStatesLock);
+            globalCanonStates.push_back(kernelSet);
+            return globalCanonStates.size() - 1;
         }};
+
+        //  The map of shift and reduce actions from each state.
+        std::unordered_map<StateNum, std::unordered_map<TokenType, PotentialAction>> globalCanonAction;
+        std::mutex globalCanonActionLock;
+        globalCanonAction[0][TokenType::END_OF_FILE] = {PotentialAction::ACCEPT};
+
+        //  The map of goto actions to take from each state.
+        std::unordered_map<StateNum, std::unordered_map<ASTNodeType, StateNum>> globalCanonNextState;
 
         //  Now, we iterate through all the states. In most iterations, we'll add more states.
         //  Eventually, though, we'll get to the point where there are no new states to add,
         //  and this loop will terminate.
-        for (StateNum stateNum = 0; stateNum < states.size(); ++stateNum) {
-            const KernelSet currentState = states[stateNum];
+        for (StateNum stateNum = 0; stateNum < globalCanonStates.size(); ++stateNum) {
+            const KernelSet currentState = globalCanonStates[stateNum];
 
             //  From this state, upon encountering a certain `TokenType`,
             //  we may be able to shift that token onto the stack and move to a new state.
@@ -190,40 +266,34 @@ namespace Parser {
 
             //  From this state, after reducing a certain `ASTNodeType`,
             //  we should move to a different state.
-            //  This is a record of all `Kernel`s that we can reach upon moving over a new AST node.
+            //  This is a record of all kernels that we can reach upon moving over a new AST node.
             std::unordered_map<ASTNodeType, KernelSet> nextStates;
 
-            //  Start by calculating this state's closure.
-            const auto& enclosedKernels = closure[currentState];
-
             //  For all kernels in the closure:
-            for (const auto& enclosedKernel : enclosedKernels) {
-                const auto& components = enclosedKernel.rule.components;
-
+            for (const auto& enclosedKernel : currentState) {
                 //  If the kernel is complete (i.e., the index is equal to the number of components),
                 //  we're able to perform a `REDUCE` action.
-                if (enclosedKernel.index == components.size()) {
+                if (enclosedKernel.index == enclosedKernel.rule->components.size()) {
                     //  Consider rule priorities for disambiguation.
                     if (reductions.count(enclosedKernel.lookahead) == 0
-                        || enclosedKernel.priority < reductionPriorities[enclosedKernel.lookahead]) {
+                        || enclosedKernel.rule->priority < reductionPriorities[enclosedKernel.lookahead]) {
                         reductions[enclosedKernel.lookahead] = enclosedKernel;
-                        reductionPriorities[enclosedKernel.lookahead] = enclosedKernel.priority;
+                        reductionPriorities[enclosedKernel.lookahead] = enclosedKernel.rule->priority;
                     }
 
                     continue;
                 }
 
                 //  Otherwise, examine the next item.
-                const auto& nextItem = enclosedKernel.rule.components[enclosedKernel.index];
-                const Kernel nextKernel {enclosedKernel.rule, enclosedKernel.priority, enclosedKernel.index + 1,
-                                         enclosedKernel.lookahead};
+                const auto& nextItem = enclosedKernel.rule->components[enclosedKernel.index];
+                const Kernel nextKernel {enclosedKernel.rule, enclosedKernel.index + 1, enclosedKernel.lookahead};
                 if (nextItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
                     //  If the next item type is a token, we can do a shift action.
                     shifts[nextItem.tokenType].insert(nextKernel);
                     //  Record the rule's priority.
                     if (shiftPriorities.count(nextItem.tokenType) == 0
-                        || shiftPriorities[nextItem.tokenType] > nextKernel.priority)
-                        shiftPriorities[nextItem.tokenType] = nextKernel.priority;
+                        || shiftPriorities[nextItem.tokenType] > nextKernel.rule->priority)
+                        shiftPriorities[nextItem.tokenType] = nextKernel.rule->priority;
                 } else {
                     //  The next item type is a node; we should do a move action.
                     nextStates[nextItem.nodeType].insert(nextKernel);
@@ -232,15 +302,18 @@ namespace Parser {
 
             //  At this point, we know the set of kernels reachable for every possible action from this state.
             //  Set the transitions in this `Generator`'s fields.
-            for (const auto& [tokenType, nextKernels] : shifts) {
+            const std::vector<std::tuple<TokenType, KernelSet>> shiftsVec {shifts.begin(), shifts.end()};
+            multiForEach(shiftsVec, [&](const std::tuple<TokenType, KernelSet>& tuple) {
                 //  Make a new `SHIFT` action to the state ID of the next state.
-                _nextAction[stateNum][tokenType] = _pair("ParserAction::ActionType::SHIFT",
-                                                         std::to_string(stateNums[nextKernels]));
-            }
+                StateNum nextState = globalCanonStateNum[closure[std::get<1>(tuple)]];
+                PotentialAction action {nextState, shiftPriorities[std::get<0>(tuple)]};
+                std::lock_guard lock(globalCanonActionLock);
+                globalCanonAction[stateNum][std::get<0>(tuple)] = action;
+            });
 
             //  For each node type after doing a reduction action, add that to the `_nextState` table.
             for (const auto& [nodeType, nextKernels] : nextStates) {
-                _nextState[stateNum][nodeType] = stateNums[nextKernels];
+                globalCanonNextState[stateNum][nodeType] = globalCanonStateNum[closure[nextKernels]];
             }
 
             //  Finally, add the reduction actions.
@@ -249,20 +322,76 @@ namespace Parser {
                 const auto& priority = reductionPriorities[tokenType];
 
                 //  If this kernel was actually the goal rule, then accept. This was a successful parse.
-                if (kernel.rule == goalRule) {
-                    _nextAction[stateNum][tokenType] = _wrap("ParserAction::ActionType::ACCEPT");
+                if (*kernel.rule == goalRule) {
+                    globalCanonAction[stateNum][tokenType] = {PotentialAction::PotentialActionType::ACCEPT};
                     continue;
                 }
 
                 //  Add this reduce action, if it has a higher priority than a conflicting shift action.
-                if (shiftPriorities.count(tokenType) == 0 || shiftPriorities[tokenType] >= priority) {
-                    _nextAction[stateNum][tokenType] = _join("",
-                                                             {"{", std::to_string(kernel.rule.components.size()), ", ",
-                                                              "[&](const ProductionItemList& productionList) { return ",
-                                                              grammar.reductions.at(kernel.rule), "; }}"});
+                if (globalCanonAction[stateNum].count(tokenType) == 0
+                    || priority <= globalCanonAction[stateNum][tokenType].priority) {
+                    globalCanonAction[stateNum][tokenType] = {kernel.rule, priority};
                 }
             }
         }
+
+        //  At this point, we have the canonical LR(1) parse table built and ready to go.
+        //  However, it's too bulky to generate and then compile; we need to trim it down into an LALR parse table.
+        struct HashLALRKernelSet {
+            [[nodiscard]] std::size_t operator()(const KernelSet& kernelSet) const noexcept {
+                KernelSet newKernels;
+                for (const auto& kernel : kernelSet) {
+                    newKernels.emplace(kernel.rule, kernel.index, TokenType::END_OF_FILE);
+                }
+                return HashKernelSet {}(newKernels);
+            }
+        };
+        constexpr HashLALRKernelSet hash;
+        std::unordered_map<std::size_t, StateNum> lalrStateNums;
+        std::unordered_map<StateNum, StateNum> lalrStateTranslation;
+        std::unordered_map<StateNum, std::unordered_map<TokenType, PotentialAction>> lalrActions;
+        for (StateNum state = 0; state < globalCanonStates.size(); ++state) {
+            const std::size_t hashVal = hash(globalCanonStates[state]);
+            if (lalrStateNums.count(hashVal) == 0) lalrStateNums[hashVal] = lalrStateNums.size();
+            lalrStateTranslation[state] = lalrStateNums[hashVal];
+        }
+        for (StateNum state = 0; state < globalCanonStates.size(); ++state) {
+            const StateNum newState = lalrStateTranslation[state];
+            for (const auto& [tokenType, action] : globalCanonAction[state]) {
+                if (lalrActions[newState].count(tokenType) == 0
+                    || action.priority < lalrActions[newState][tokenType].priority) {
+                    lalrActions[newState][tokenType] = action;
+                }
+            }
+        }
+        for (const auto& [state, actions] : lalrActions) {
+            for (const auto& [tokenType, action] : actions) {
+                switch (action.type) {
+                    case PotentialAction::SHIFT:
+                        _nextAction[state][tokenType] = _pair(
+                                "ParserAction::ActionType::SHIFT",
+                                std::to_string(lalrStateTranslation[action.shiftNextState]));
+                        break;
+                    case PotentialAction::REDUCE:
+                        _nextAction[state][tokenType] = _join(
+                                "", {"{", std::to_string(action.reduceRule->components.size()), ", ",
+                                     "[&](const ProductionItemList& productionList) { return ",
+                                     grammar.reductions.at(*action.reduceRule), "; }}"});
+                        break;
+                    case PotentialAction::ACCEPT:
+                        _nextAction[state][tokenType] = _wrap("ParserAction::ActionType::ACCEPT");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        for (const auto& [stateNum, map] : globalCanonNextState) {
+            for (const auto& [nodeType, nextState] : map) {
+                _nextState[lalrStateTranslation[stateNum]][nodeType] = lalrStateTranslation[nextState];
+            }
+        }
+        _numStates = lalrStateNums.size();
     }
 
     void Generator::generateSource(std::ostream& output) const {
@@ -332,7 +461,7 @@ namespace Parser {
         });
         // clang-format on
 
-        std::vector<std::string> allNextActions(_nextAction.size());
+        std::vector<std::string> allNextActions(_numStates, "{}");
         for (const auto& [allActionsIndex, statesNextActions] : _nextAction) {
             std::vector<std::string> statesNextActionStrings(statesNextActions.size());
             std::size_t statesNextActionIndex = 0;

@@ -33,6 +33,11 @@ namespace Parser {
 
     bool GrammarEntry::operator!=(const GrammarEntry& other) const { return !(*this == other); }
 
+    bool GrammarEntry::operator<(const GrammarEntry& other) const {
+        constexpr std::hash<GrammarEntry> hash;
+        return hash(*this) < hash(other);
+    }
+
     std::ostream& operator<<(std::ostream& stream, const GrammarEntry& grammarEntry) {
         if (grammarEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
             stream << "[" << tokenTypeToString(grammarEntry.tokenType) << "]";
@@ -41,6 +46,12 @@ namespace Parser {
         }
         return stream;
     }
+
+    GrammarRule::GrammarRule() : result(), priority() {}
+
+    GrammarRule::GrammarRule(const ASTNodeType result, const std::vector<GrammarEntry>& components,
+                             const std::size_t priority)
+        : result(result), components(components), priority(priority) {}
 
     bool GrammarRule::operator==(const GrammarRule& other) const {
         if (this->result != other.result) return false;
@@ -55,6 +66,16 @@ namespace Parser {
     }
 
     bool GrammarRule::operator!=(const GrammarRule& other) const { return !(*this == other); }
+
+    bool GrammarRule::operator<(const GrammarRule& other) const {
+        if (this->priority != other.priority) return this->priority < other.priority;
+        if (this->result != other.result) return this->result < other.result;
+        if (this->components.size() != other.components.size()) return this->components.size() < components.size();
+        for (std::size_t ind = 0; ind < this->components.size(); ++ind) {
+            if (this->components[ind] != other.components[ind]) return this->components[ind] < other.components[ind];
+        }
+        return false;
+    }
 
     std::ostream& operator<<(std::ostream& stream, const GrammarRule& grammarRule) {
         stream << "{(" << nodeTypeToString(grammarRule.result) << ") -> ";
@@ -128,11 +149,8 @@ namespace Parser {
                 //  ||  Program:  ||
                 //  ================
 
-                //  (PRGM) -> [END_OF_FILE]
-                {{{ASTNodeType::PRGM, {TokenType::END_OF_FILE}}, makeNode("Prgm", {})}},
-                //  (PRGM) -> (STMTS) [END_OF_FILE]
-                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS, TokenType::END_OF_FILE}},
-                  makeNode("Prgm", {castNode("Stmts", 0)})}},
+                //  (PRGM) -> (STMTS)
+                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0)})}},
 
 
                 //  =================

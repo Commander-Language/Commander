@@ -89,6 +89,11 @@ namespace Parser {
          * @brief A mapping of a state number an an AST node type to the parser's next state.
          */
         std::unordered_map<StateNum, std::unordered_map<ASTNodeType, StateNum>> _nextState;
+
+        /**
+         * @brief The number of states in the parse table.
+         */
+        std::size_t _numStates;
     };
 
 }  //  namespace Parser

@@ -80,6 +80,14 @@ namespace Parser {
         bool operator!=(const GrammarEntry& other) const;
 
         /**
+         * @brief Less-than operator.
+         *
+         * @param other The other `GrammarEntry` against which to compare.
+         * @return True if this grammar entry should come before the other; false otherwise.
+         */
+        bool operator<(const GrammarEntry& other) const;
+
+        /**
          * @brief Stream insertion operator.
          *
          * @param stream The `std::ostream` that will receive a grammar entry as input.
@@ -94,19 +102,18 @@ namespace Parser {
      */
     struct GrammarRule {
         /**
-         * @brief The resulting AST node type.
+         * @brief Default constructor.
          */
-        ASTNodeType result;
+        GrammarRule();
 
         /**
-         * @brief The parts that make up the grammar rule.
+         * @brief Class constructor.
+         *
+         * @param result The result of applying this grammar rule.
+         * @param components The components that make up this grammar rule.
+         * @param priority The priority of this grammar rule. Defaults to 0.
          */
-        std::vector<GrammarEntry> components;
-
-        /**
-         * @brief The priority of this grammar rule.
-         */
-        std::size_t precedence;
+        GrammarRule(ASTNodeType result, const std::vector<GrammarEntry>& components, std::size_t priority = 0);
 
         /**
          * @brief Equality operator.
@@ -125,6 +132,14 @@ namespace Parser {
         bool operator!=(const GrammarRule& other) const;
 
         /**
+         * @brief Less-than operator.
+         *
+         * @param other The other `GrammarRule` against which to compare.
+         * @return True if this rule should come before the other grammar rule; false otherwise.
+         */
+        bool operator<(const GrammarRule& other) const;
+
+        /**
          * @brief Stream insertion operator.
          *
          * @param stream The `std::ostream` that will receive a grammar rule as input.
@@ -132,6 +147,21 @@ namespace Parser {
          * @return The given stream.
          */
         friend std::ostream& operator<<(std::ostream& stream, const GrammarRule& grammarRule);
+
+        /**
+         * @brief The resulting AST node type.
+         */
+        ASTNodeType result;
+
+        /**
+         * @brief The parts that make up the grammar rule.
+         */
+        std::vector<GrammarEntry> components;
+
+        /**
+         * @brief The priority of this grammar rule.
+         */
+        std::size_t priority;
     };
 
 }  //  namespace Parser
