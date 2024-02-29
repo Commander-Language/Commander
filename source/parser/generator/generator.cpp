@@ -239,6 +239,7 @@ namespace Parser {
         //  The map of shift and reduce actions from each state.
         std::unordered_map<StateNum, std::unordered_map<TokenType, PotentialAction>> globalCanonAction;
         std::mutex globalCanonActionLock;
+        globalCanonAction[0][TokenType::END_OF_FILE] = {PotentialAction::ACCEPT};
 
         //  The map of goto actions to take from each state.
         std::unordered_map<StateNum, std::unordered_map<ASTNodeType, StateNum>> globalCanonNextState;

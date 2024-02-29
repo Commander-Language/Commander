@@ -149,11 +149,8 @@ namespace Parser {
                 //  ||  Program:  ||
                 //  ================
 
-                //  (PRGM) -> [END_OF_FILE]
-                {{{ASTNodeType::PRGM, {TokenType::END_OF_FILE}}, makeNode("Prgm", {})}},
-                //  (PRGM) -> (STMTS) [END_OF_FILE]
-                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS, TokenType::END_OF_FILE}},
-                  makeNode("Prgm", {castNode("Stmts", 0)})}},
+                //  (PRGM) -> (STMTS)
+                {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0)})}},
 
 
                 //  =================
