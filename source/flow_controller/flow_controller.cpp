@@ -296,7 +296,7 @@ namespace FlowController {
 
         std::string stringResult;
         for (const Parser::ExprNodePtr& ptr : stringNode->expressions->expressions) {
-            stringResult.append(_commanderTypeToString(_expr(ptr)));
+            stringResult.append(_commanderTypeToString(_expr(ptr), TypeChecker::Type::INT));
         }
         return stringResult;
     }
