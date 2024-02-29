@@ -9,7 +9,7 @@
  * Node Helper Functions:
  *      TODO: Finish the following:  _type,
  * Statements:
- *      TODO: Finish the following: If, For, While, Do While, Return, Scope, Alias
+ *      TODO: Finish the following: If, Alias
  */
 
 #include "source/flow_controller/flow_controller.hpp"
@@ -273,27 +273,86 @@ namespace FlowController {
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
                 // TODO: Implement
-                break;
+                auto stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(node);
+                return nullptr;
             }
             case Parser::FOR_STMT: {
-                // TODO: Implement
-                break;
+                auto stmtNode = std::static_pointer_cast<Parser::ForStmtNode>(node);
+
+                _symbolTable.pushSymbolTable(); // for gets new scope
+                _stmt(stmtNode->initial);
+
+                CommanderTypePtr exprResult = _expr(stmtNode->condition);
+                // Type checked?
+                auto condition = std::static_pointer_cast<CommanderBool>(exprResult);
+
+                // infinite loop error checking?
+                while (condition->value) {
+                    _stmt(stmtNode->body);
+                    _stmt(stmtNode->update);
+
+                    // update condition value
+                    exprResult = _expr(stmtNode->condition);
+                    condition = std::static_pointer_cast<CommanderBool>(exprResult);
+                }
+
+                _symbolTable.popSymbolTable(); // pop scope from for
+
+                return nullptr;
             }
             case Parser::WHILE_STMT: {
-                // TODO: Implement
-                break;
+                auto stmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(node);
+
+                _symbolTable.pushSymbolTable(); // while gets new scope
+
+                CommanderTypePtr exprResult = _expr(stmtNode->condition);
+                // Type checked?
+                auto condition = std::static_pointer_cast<CommanderBool>(exprResult);
+
+                while (condition->value) {
+                    _stmt(stmtNode->body);
+                    exprResult = _expr(stmtNode->condition);
+                    condition = std::static_pointer_cast<CommanderBool>(exprResult);
+                }
+
+                _symbolTable.popSymbolTable(); // pop scope from while
+
+                return nullptr;
             }
             case Parser::DO_WHILE_STMT: {
-                // TODO: Implement
-                break;
+                auto stmtNode = std::static_pointer_cast<Parser::DoWhileStmtNode>(node);
+
+                _symbolTable.pushSymbolTable(); // do-while gets new scope
+
+                // do
+                _stmt(stmtNode->body);
+
+                CommanderTypePtr exprResult = _expr(stmtNode->condition);
+                // Type checked?
+                auto condition = std::static_pointer_cast<CommanderBool>(exprResult);
+
+                while (condition->value) {
+                    _stmt(stmtNode->body);
+                    exprResult = _expr(stmtNode->condition);
+                    condition = std::static_pointer_cast<CommanderBool>(exprResult);
+                }
+
+                _symbolTable.popSymbolTable(); // pop scope from do-while
+
+                return nullptr;
             }
             case Parser::RETURN_STMT: {
-                // TODO: Implement
-                break;
+                auto stmtNode = std::static_pointer_cast<Parser::ReturnStmtNode>(node);
+                return _expr(stmtNode->retExpr);
             }
             case Parser::SCOPE_STMT: {
-                // TODO: Implement
-                break;
+                auto stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
+                _symbolTable.pushSymbolTable(); // new scope
+                for(auto &statement : stmtNode->stmts){
+                    _stmt(statement);
+                }
+                _symbolTable.popSymbolTable(); // pop the created scope
+
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
