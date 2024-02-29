@@ -12,6 +12,7 @@
 #include "source/util/generated_map.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -21,9 +22,49 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace Parser {
+    struct PotentialAction {
+        enum PotentialActionType : std::uint8_t { SHIFT, REDUCE, ACCEPT };
+
+        PotentialAction() : type(), priority(), shiftNextState(), reduceRule() {}
+
+        PotentialAction(const PotentialActionType type) : type(type), priority(0), shiftNextState(), reduceRule() {}
+
+        PotentialAction(const std::size_t shiftNextState, const std::size_t priority)
+            : type(SHIFT), priority(priority), shiftNextState(shiftNextState), reduceRule() {}
+
+        PotentialAction(const GrammarRule* reduceRule, const std::size_t priority)
+            : type(REDUCE), priority(priority), shiftNextState(), reduceRule(reduceRule) {}
+
+        friend std::ostream& operator<<(std::ostream& stream, const PotentialAction& action) {
+            stream << "{";
+            switch (action.type) {
+                case SHIFT:
+                    stream << "SHIFT: -> " << action.shiftNextState;
+                    break;
+                case REDUCE:
+                    stream << "REDUCE: " << *action.reduceRule;
+                    break;
+                case ACCEPT:
+                    stream << "ACCEPT";
+                    break;
+            }
+            stream << "}";
+            return stream;
+        }
+
+        PotentialActionType type;
+
+        std::size_t priority;
+
+        std::size_t shiftNextState;
+
+        const GrammarRule* reduceRule;
+    };
+
     Generator::Generator() {
         //  Runs the given operation on each element of the given array in a multithreaded manner.
         const auto multiForEach = [](const auto& inputs, const auto& func) {
@@ -46,6 +87,7 @@ namespace Parser {
         //  This is a memory-intensive object. Don't copy.
         const Grammar grammar;
 
+
         //  The grammar's goal AST node type is `ASTNodeType::PRGM`.
         //  This is also the result of the first (highest-priority) rule in the grammar specification.
         const ASTNodeType goalNode = grammar.rules[0].result;
@@ -64,14 +106,14 @@ namespace Parser {
         };
 
         //  This is a mapping from an AST node type to a set of all grammar rules that produce that node type.
-        const std::unordered_map nodeGenerators {[&]() {
+        const std::unordered_map nodeGenerators {[&] {
             std::unordered_map<ASTNodeType, std::unordered_set<const GrammarRule*>> result;
             for (const auto& rule : grammar.rules) result[rule.result].insert(&rule);
             return result;
         }()};
 
-        //  Reports the set of all token types that can be the first of the given GrammarEntry type.
-        const std::unordered_map firstSet {[&]() {
+        //  Reports the set of all token types that can be the first of the given AST node type.
+        const std::unordered_map firstSet {[&] {
             std::unordered_map<ASTNodeType, std::unordered_set<TokenType>> result;
 
             for (const auto& [nodeType, del] : nodeGenerators) {
@@ -165,7 +207,7 @@ namespace Parser {
         }};
 
         //  This is a vector of all the states in the parser automaton.
-        const Kernel initialKernel = {&goalRule, 0, TokenType::END};
+        const Kernel initialKernel = {&goalRule, 0, TokenType::END_OF_FILE};
         std::vector states {singleClosure[initialKernel]};
 
         //  This is a mapping from a set of kernels to the `StateNum` ID of that state.
@@ -173,6 +215,9 @@ namespace Parser {
             states.push_back(kernelSet);
             return states.size() - 1;
         }};
+
+        std::unordered_map<StateNum, std::unordered_map<TokenType, PotentialAction>> potentialActions;
+        std::unordered_map<StateNum, std::unordered_map<ASTNodeType, StateNum>> nextStateMap;
 
         //  Now, we iterate through all the states. In most iterations, we'll add more states.
         //  Eventually, though, we'll get to the point where there are no new states to add,
@@ -196,7 +241,7 @@ namespace Parser {
 
             //  From this state, after reducing a certain `ASTNodeType`,
             //  we should move to a different state.
-            //  This is a record of all `Kernel`s that we can reach upon moving over a new AST node.
+            //  This is a record of all kernels that we can reach upon moving over a new AST node.
             std::unordered_map<ASTNodeType, KernelSet> nextStates;
 
             //  For all kernels in the closure:
@@ -234,13 +279,13 @@ namespace Parser {
             //  Set the transitions in this `Generator`'s fields.
             for (const auto& [tokenType, nextKernels] : shifts) {
                 //  Make a new `SHIFT` action to the state ID of the next state.
-                _nextAction[stateNum][tokenType] = _pair("ParserAction::ActionType::SHIFT",
-                                                         std::to_string(stateNums[closure[nextKernels]]));
+                StateNum nextState = stateNums[closure[nextKernels]];
+                potentialActions[stateNum][tokenType] = {nextState, shiftPriorities[tokenType]};
             }
 
             //  For each node type after doing a reduction action, add that to the `_nextState` table.
             for (const auto& [nodeType, nextKernels] : nextStates) {
-                _nextState[stateNum][nodeType] = stateNums[closure[nextKernels]];
+                nextStateMap[stateNum][nodeType] = stateNums[closure[nextKernels]];
             }
 
             //  Finally, add the reduction actions.
@@ -250,17 +295,72 @@ namespace Parser {
 
                 //  If this kernel was actually the goal rule, then accept. This was a successful parse.
                 if (*kernel.rule == goalRule) {
-                    _nextAction[stateNum][tokenType] = _wrap("ParserAction::ActionType::ACCEPT");
+                    potentialActions[stateNum][tokenType] = {PotentialAction::PotentialActionType::ACCEPT};
                     continue;
                 }
 
                 //  Add this reduce action, if it has a higher priority than a conflicting shift action.
-                if (shiftPriorities.count(tokenType) == 0 || shiftPriorities[tokenType] >= priority) {
-                    _nextAction[stateNum][tokenType] = _join("",
-                                                             {"{", std::to_string(kernel.rule->components.size()), ", ",
-                                                              "[&](const ProductionItemList& productionList) { return ",
-                                                              grammar.reductions.at(*kernel.rule), "; }}"});
+                if (potentialActions[stateNum].count(tokenType) == 0
+                    || priority <= potentialActions[stateNum][tokenType].priority) {
+                    potentialActions[stateNum][tokenType] = {kernel.rule, priority};
                 }
+            }
+        }
+
+        //  At this point, we have the canonical LR(1) parse table built and ready to go.
+        //  However, it's too bulky to generate and then compile; we need to trim it down into an LALR parse table.
+        struct HashLALRKernelSet {
+            [[nodiscard]] std::size_t operator()(const KernelSet& kernelSet) const noexcept {
+                KernelSet newKernels;
+                for (const auto& kernel : kernelSet) {
+                    newKernels.emplace(kernel.rule, kernel.index, TokenType::END_OF_FILE);
+                }
+                return HashKernelSet {}(newKernels);
+            }
+        };
+        constexpr HashLALRKernelSet hash;
+        std::unordered_map<std::size_t, StateNum> lalrStateNums;
+        std::unordered_map<StateNum, StateNum> lalrStateTranslation;
+        std::unordered_map<StateNum, std::unordered_map<TokenType, PotentialAction>> lalrActions;
+        for (StateNum state = 0; state < states.size(); ++state) {
+            const std::size_t hashVal = hash(states[state]);
+            if (lalrStateNums.count(hashVal) == 0) lalrStateNums[hashVal] = lalrStateNums.size();
+            lalrStateTranslation[state] = lalrStateNums[hashVal];
+        }
+        for (StateNum state = 0; state < states.size(); ++state) {
+            const StateNum newState = lalrStateTranslation[state];
+            for (const auto& [tokenType, action] : potentialActions[state]) {
+                if (lalrActions[newState].count(tokenType) == 0
+                    || action.priority < lalrActions[newState][tokenType].priority) {
+                    lalrActions[newState][tokenType] = action;
+                }
+            }
+        }
+        for (const auto& [state, actions] : lalrActions) {
+            for (const auto& [tokenType, action] : actions) {
+                switch (action.type) {
+                    case PotentialAction::SHIFT:
+                        _nextAction[state][tokenType] = _pair(
+                                "ParserAction::ActionType::SHIFT",
+                                std::to_string(lalrStateTranslation[action.shiftNextState]));
+                        break;
+                    case PotentialAction::REDUCE:
+                        _nextAction[state][tokenType] = _join(
+                                "", {"{", std::to_string(action.reduceRule->components.size()), ", ",
+                                     "[&](const ProductionItemList& productionList) { return ",
+                                     grammar.reductions.at(*action.reduceRule), "; }}"});
+                        break;
+                    case PotentialAction::ACCEPT:
+                        _nextAction[state][tokenType] = _wrap("ParserAction::ActionType::ACCEPT");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        for (const auto& [stateNum, map] : nextStateMap) {
+            for (const auto& [nodeType, nextState] : map) {
+                _nextState[lalrStateTranslation[stateNum]][nodeType] = lalrStateTranslation[nextState];
             }
         }
     }
