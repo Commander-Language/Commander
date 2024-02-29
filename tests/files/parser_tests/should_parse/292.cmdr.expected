@@ -1,0 +1,2 @@
+(PrgmNode
+	(ImportStmtNode (StringNode "add.txt")))

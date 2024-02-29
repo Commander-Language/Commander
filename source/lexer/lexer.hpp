@@ -22,7 +22,7 @@ namespace Lexer {
     /**
      * @brief Enumeration of different types of tokens.
      */
-    enum tokenType : std::uint8_t {
+    enum TokenType : std::uint8_t {
         ADD,
         ADD_EQUALS,
         ALIAS,
@@ -32,6 +32,7 @@ namespace Lexer {
         BOOL,
         BREAK,
         CMDSTRINGVAL,
+        CMDVARIABLE,
         COLON,
         COMMA,
         CONST,
@@ -43,7 +44,9 @@ namespace Lexer {
         DOT,
         DOUBLE_EQUALS,
         ELSE,
+        END,
         END_OF_FILE,
+        ENDSTRINGVAL,
         EXPONENTIATE,
         EXPONENTIATE_EQUALS,
         EQUALS,
@@ -93,6 +96,7 @@ namespace Lexer {
         TYPE,
         UNKNOWN,
         VARIABLE,
+        VOID,
         WHILE,
         WRITE
     };
@@ -140,7 +144,7 @@ namespace Lexer {
         /**
          * The type of the token
          */
-        tokenType type;
+        TokenType type;
 
         /**
          * The position the token appears in the file
@@ -158,7 +162,7 @@ namespace Lexer {
          * @param type The token type
          * @param position The position the token appears in the file
          */
-        Token(std::string contents, tokenType type, FilePosition position);
+        Token(std::string contents, TokenType type, FilePosition position);
 
         /**
          * @brief Use default contructor
@@ -186,28 +190,23 @@ namespace Lexer {
          * interpolation.
          */
         TokenList subTokens;
-
-        /**
-         * @brief Returns the string representation of the Token
-         * @return The string representation of the Token
-         */
-        [[nodiscard]] std::string toString() const override;
     };
 
     /**
      * Vector of string token literal pairs that are keywords
      */
-    const std::vector<std::pair<std::string, tokenType>> keywords(
+    const std::vector<std::pair<std::string, TokenType>> keywords(
             {{"alias", ALIAS}, {"bool", BOOL},     {"break", BREAK}, {"const", CONST},   {"continue", CONTINUE},
              {"do", DO},       {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
              {"if", IF},       {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
              {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"timeout", TIMEOUT},
-             {"to", TO},       {"true", TRUE},     {"type", TYPE},   {"while", WHILE},   {"write", WRITE}});
+             {"to", TO},       {"true", TRUE},     {"type", TYPE},   {"void", VOID},     {"while", WHILE},
+             {"write", WRITE}});
 
     /**
      * Vector of string token literal pairs that are not keywords (order matters here; longest to shortest)
      */
-    const std::vector<std::pair<std::string, tokenType>> tokenLiterals({{"**=", EXPONENTIATE_EQUALS},
+    const std::vector<std::pair<std::string, TokenType>> tokenLiterals({{"**=", EXPONENTIATE_EQUALS},
                                                                         {"->", LAMBDA},
                                                                         {"==", DOUBLE_EQUALS},
                                                                         {"!=", NOT_EQUALS},
@@ -244,14 +243,14 @@ namespace Lexer {
     /**
      * Vector of string token literal pairs that can be parsed in commands as well as normally
      */
-    const std::vector<std::pair<std::string, tokenType>> commandTokenLiterals(
+    const std::vector<std::pair<std::string, TokenType>> commandTokenLiterals(
             {{"`", BACKTICK}, {"(", LPAREN}, {")", RPAREN}, {"|", PIPE}, {"&", AMPERSAND}, {";", SEMICOLON}});
 
     /**
      * @brief Helper that turns TokenType into a string
      * @return The string representation of the TokenType
      */
-    std::string tokenTypeToString(const tokenType& type);
+    std::string tokenTypeToString(const TokenType& type);
 
     /**
      * @brief Takes in a path to a file, and tokenizes its contents.
@@ -293,8 +292,8 @@ namespace Lexer {
      */
     TokenPtr
     lexLiteral(const std::string& file, FilePosition& position,
-               const std::vector<std::pair<std::basic_string<char>, tokenType>>& literals,
-               const std::function<bool(const std::pair<std::basic_string<char>, tokenType>& literal,
+               const std::vector<std::pair<std::basic_string<char>, TokenType>>& literals,
+               const std::function<bool(const std::pair<std::basic_string<char>, TokenType>& literal,
                                         const std::string& file, FilePosition& position)>& notLiteralCondition);
 
     /**
@@ -346,20 +345,21 @@ namespace Lexer {
     TokenPtr lexString(const std::string& file, FilePosition& position);
 
     /**
-     * @brief Lex an VARIABLE token specifically for commands (i.e. starts with $), if it exists
+     * @brief Lex an CMDVARIABLE token specifically for commands (i.e. starts with $), if it exists
      * @param file The file contents being lexed
      * @param position The position in the file
-     * @returns The VARIABLE token, if it finds one
+     * @returns The CMDVARIABLE token, if it finds one
      */
     TokenPtr lexCommandVariable(const std::string& file, FilePosition& position);
 
     /**
-     * @brief Lex an VARIABLE token, if it exists
+     * @brief Lex an VARIABLE or CMD_VARIABLE token, if it exists
      * @param file The file contents being lexed
      * @param position The position in the file
-     * @returns The VARIABLE token, if it finds one
+     * @param isCommand Is the variable in a command (true if so, false otherwise)
+     * @returns The VARIABLE token if isCommand is true, or CMD_VARIABLE if false, if it finds one
      */
-    TokenPtr lexVariable(const std::string& file, FilePosition& position);
+    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand);
 
     /**
      * @brief Lex a command string token, if it exists
@@ -419,7 +419,7 @@ namespace Lexer {
      * @param isCommand Tells whether a command is being lexed or not
      * @return The token if the next token is the correct type
      */
-    TokenPtr expectToken(const tokenType& type, const std::string& file, FilePosition& position, bool& isCommand);
+    TokenPtr expectToken(const TokenType& type, const std::string& file, FilePosition& position, bool& isCommand);
 
     /**
      * @brief Helper function that lexes a statement
@@ -429,7 +429,7 @@ namespace Lexer {
      * @param terminatingToken The token to look for to stop lexing the expression
      */
     void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position,
-                      const tokenType& terminatingToken);
+                      const TokenType& terminatingToken);
 
     /**
      * @brief Helper function that lexes an expression
@@ -439,8 +439,8 @@ namespace Lexer {
      * @param startToken The token that begins the expression
      * @param terminatingToken The token to look for to stop lexing the expression
      */
-    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const tokenType& startToken,
-                       const tokenType& terminatingToken);
+    void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const TokenType& startToken,
+                       const TokenType& terminatingToken);
 
 }  // namespace Lexer
 

@@ -1,6 +1,6 @@
 /**
- * @file commander_exception.cpp
- * @brief Contains implementation for functions in commander_exception.hpp
+ * @file commander_exception.hpp
+ * @brief Contains commander exception
  *
  */
 
@@ -22,7 +22,7 @@ namespace Util {
          * @brief Constructor for the exception that stores a single message directly
          * @param message The message of the exception
          */
-        CommanderException(const std::string& message);
+        CommanderException(std::string message);
 
         /**
          * @brief Constructor for the exception that creates the message with the include position in the file

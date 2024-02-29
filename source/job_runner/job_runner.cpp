@@ -4,7 +4,6 @@
  */
 #include "job_runner.hpp"
 #include "builtins/builtins.hpp"
-#include "source/util/commander_exception.hpp"
 #include <cstdlib>
 #include <cstring>
 
@@ -23,11 +22,11 @@ namespace JobRunner {
 
     ProcessType Process::getType() const { return type; }
 
-    const char *Process::getName() const { return processName.c_str(); }
+    const char* Process::getName() const { return processName.c_str(); }
 
-    Process::Process(std::vector<Process *> processes) : pipe(processes[1]), pipeSize(processes.size()), isFirst(true) {
+    Process::Process(std::vector<Process*> processes) : pipe(processes[1]), pipeSize(processes.size()), isFirst(true) {
         // first in pipe is this process
-        Process *start = processes[0];
+        Process* start = processes[0];
         type = start->type;
         processName = start->processName;
         args = start->args;
@@ -41,13 +40,13 @@ namespace JobRunner {
     }
 
     Process::Process(std::vector<std::string> args, ProcessType type, bool isBackground, bool isSave)
-            : args(args), type(type), processName(args[0].c_str()), background(isBackground), saveInfo(isSave) {}
+        : args(args), type(type), processName(args[0].c_str()), background(isBackground), saveInfo(isSave) {}
 
     //  ==========================
     //  ||   JobRunner Class    ||
     //  ==========================
 
-    JobRunner::JobRunner(Process *process) : _process(process) {}
+    JobRunner::JobRunner(Process* process) : _process(process) {}
 
     JobInfo JobRunner::execProcess() {
         switch (_process->getType()) {
@@ -74,24 +73,24 @@ namespace JobRunner {
         }
     }
 
-    JobInfo JobRunner::_execBuiltin(Process *process, int in, int out) {
+    JobInfo JobRunner::_execBuiltin(Process* process, int in, int out) {
         // get the function so we can call it!
         auto builtin = Builtins::getBuiltinFunction(process->getName());
         return builtin(process->args, in, out);
     }
 
-    void JobRunner::_execBuiltinNoReturn(Process *process, int in, int out) {
+    void JobRunner::_execBuiltinNoReturn(Process* process, int in, int out) {
         // get the function so we can call it!
         auto builtin = Builtins::getBuiltinFunction(process->getName());
         builtin(process->args, in, out);
         _Exit(0);
     }
 
-    void JobRunner::_execNoFork(Process *process) {
+    void JobRunner::_execNoFork(Process* process) {
         // convert to c style array
-        std::vector<char *> cargs;
+        std::vector<char*> cargs;
         cargs.reserve(process->args.size() + 1);
-        for (auto &arg: process->args) { cargs.emplace_back(arg.data()); }
+        for (auto& arg : process->args) { cargs.emplace_back(arg.data()); }
         // make sure to null terminate!
         cargs.emplace_back(nullptr);
 
@@ -99,13 +98,13 @@ namespace JobRunner {
         throw Util::CommanderException("Job Runner: Bad exec");
     }
 
-    JobInfo JobRunner::_execFork(Process *process) {
+    JobInfo JobRunner::_execFork(Process* process) {
         int pid = _fork();
         if (pid == 0) {
             // convert to c style array
-            std::vector<char *> cargs;
+            std::vector<char*> cargs;
             cargs.reserve(process->args.size() + 1);
-            for (auto &arg: process->args) { cargs.emplace_back(arg.data()); }
+            for (auto& arg : process->args) { cargs.emplace_back(arg.data()); }
             // make sure to null terminate!
             cargs.emplace_back(nullptr);
 
@@ -117,7 +116,7 @@ namespace JobRunner {
         return {"", "", SUCCESS};
     }
 
-    void JobRunner::_exec(Process *process) {
+    void JobRunner::_exec(Process* process) {
         switch (process->getType()) {
             case ProcessType::EXTERNAL: {
                 _execNoFork(process);
@@ -128,8 +127,8 @@ namespace JobRunner {
         }
     }
 
-    JobInfo JobRunner::_doPiping(Process *process) {
-        JobInfo result{};
+    JobInfo JobRunner::_doPiping(Process* process) {
+        JobInfo result {};
 
         size_t fdCount = (process->pipeSize - 1) * 2;
         int pipes[fdCount];
@@ -137,7 +136,7 @@ namespace JobRunner {
 
         int rIndex = 0;
         int wIndex = 1;
-        Process *current = process;
+        Process* current = process;
 
         while (current != nullptr) {
             if (current->isFirst) {
@@ -179,7 +178,7 @@ namespace JobRunner {
         return result;
     }
 
-    void JobRunner::_doBackground(Process *process) {
+    void JobRunner::_doBackground(Process* process) {
         int pid = _fork();
         if (pid == 0) {
             int pid2 = _fork();
@@ -189,7 +188,7 @@ namespace JobRunner {
         waitpid(pid, nullptr, 0);
     }
 
-    JobInfo JobRunner::_doSaveInfo(Process *process, bool partOfPipe, int *fds, size_t count) {
+    JobInfo JobRunner::_doSaveInfo(Process* process, bool partOfPipe, int* fds, size_t count) {
         int pipeOut[2];
         int pipeErr[2];
         pipe2(pipeOut, O_CLOEXEC);
@@ -274,7 +273,7 @@ namespace JobRunner {
     //  ==========================
     //  ||    Helper Methods    ||
     //  ==========================
-    void JobRunner::_resize(std::unique_ptr<char[]> &arr, size_t size) {
+    void JobRunner::_resize(std::unique_ptr<char[]>& arr, size_t size) {
         auto newArray = std::make_unique<char[]>(size * 2);
         memcpy(newArray.get(), arr.get(), size);
 
@@ -283,9 +282,7 @@ namespace JobRunner {
 
     int JobRunner::_fork() {
         int pid = fork();
-        if (pid < 0) {
-            throw Util::CommanderException("Job Runner: Error forking");
-        }
+        if (pid < 0) { throw Util::CommanderException("Job Runner: Error forking"); }
         return pid;
     }
 }  // namespace JobRunner

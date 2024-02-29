@@ -23,7 +23,7 @@ namespace Parser {
         /**
          * @brief An enumeration of the different types of tokens.
          */
-        using TokenType = Lexer::tokenType;
+        using TokenType = Lexer::TokenType;
 
         /**
          * @brief Default constructor.

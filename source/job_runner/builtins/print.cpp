@@ -4,11 +4,11 @@
  *
  */
 
-#include "shared.hpp"
 #include "print.hpp"
+#include "shared.hpp"
 #include <unistd.h>
 
-ReturnInfo print(const List &args, int in, int out) {
+ReturnInfo print(const List& args, int in, int out) {
     if (args.size() == 1) { return {"", "", SUCCESS}; }
 
     std::string output;

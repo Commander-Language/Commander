@@ -26,7 +26,7 @@ namespace Parser {
         /**
          * @brief Shorthand for the `TokenType` enumeration from the lexer.
          */
-        using TokenType = Lexer::tokenType;
+        using TokenType = Lexer::TokenType;
 
         /**
          * @brief Each state has a unique integer ID.

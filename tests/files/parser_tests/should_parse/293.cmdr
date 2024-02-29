@@ -1,2 +1,2 @@
 //Should parse import
-import $"my{x}name.{ext}" + "Hello";
+import $"my{x}name.{ext}";

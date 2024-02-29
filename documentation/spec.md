@@ -688,10 +688,10 @@ You may output strings to the console using ```print``` along with the string be
 <string_expr> : scan <string_expr>
               | scan( <string_expr> )
 
-<stmt>   : print <string_expr>
-         | print( <string_expr> )
-         | println <string_expr>
-         | println( <string_expr> )
+<stmt>   : print <string_expr> ;
+         | print( <string_expr> );
+         | println <string_expr> ;
+         | println( <string_expr> );
 ```
 ### Examples
 ```
@@ -709,8 +709,8 @@ You may read in a file as a string using ```read``` followed by the path to the 
 <string_expr> : read <string_expr>
               | read( <string_expr> )
               
-<stmt> : write <string_expr> to <string_expr>
-       | write( <string_expr>, <string_expr> )
+<stmt> : write <string_expr> to <string_expr> ;
+       | write( <string_expr>, <string_expr> );
 ```
 ### Examples
 ```
@@ -756,7 +756,7 @@ comment
 Use the ```import``` keyword followed by the path to the commander script file with code you would like to use, as defined below.
 ### Grammar
 ```
-<stmt> : import <string_expr>
+<stmt> : import <string>
 ```
 ### Examples
 ```

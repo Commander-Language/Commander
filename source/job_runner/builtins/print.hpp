@@ -15,6 +15,6 @@
  * @param out - file descriptor to write to
  * @details Depending on the first argument (i.e. print or println), adds a newline.
  */
-ReturnInfo print(const List &args, int in, int out);
+ReturnInfo print(const List& args, int in, int out);
 
 #endif

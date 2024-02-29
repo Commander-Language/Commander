@@ -30,6 +30,7 @@ namespace TypeChecker {
     }
 
     std::string getTypeString(const TypeChecker::TyPtr& tyPtr) {
+        // TODO: Print types for array, tuple, and function in more detail
         return (tyPtr ? " " + TypeChecker::typeToString(tyPtr->getType()) : "");
     }
 

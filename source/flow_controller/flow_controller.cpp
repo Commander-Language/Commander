@@ -23,7 +23,7 @@ namespace FlowController {
     //  ==========================
     //  ||   Commander types    ||
     //  ==========================
-    CommanderLambda::CommanderLambda(std::vector<Parser::BindingNodePtr> bindings, Parser::StmtNodePtr body)
+    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body)
         : bindings(std::move(bindings)), body(std::move(body)) {}
 
     //  ==========================
@@ -70,6 +70,13 @@ namespace FlowController {
                 }
                 case Parser::STRING: {
                     _string(std::static_pointer_cast<Parser::StringNode>(node));
+                    break;
+                }
+                case Parser::STRING_EXPRS: {
+                    // TODO: Handle string expressions
+                }
+                case Parser::TYPES: {
+                    _types(std::static_pointer_cast<Parser::TypesNode>(node));
                     break;
                 }
                 case Parser::TYPE: {
@@ -130,38 +137,21 @@ namespace FlowController {
             case Parser::ARRAY_EXPR: {
                 auto arrExp = std::static_pointer_cast<Parser::ArrayExprNode>(node);
                 CommanderArray<std::any> array;
-                for (auto& expr : arrExp->expressions) {
+                for (auto& expr : arrExp->expressions->exprs) {
                     std::any const value = _expr(expr);
                     array.push_back(value);
                 }
                 return array;
             }
-            case Parser::ARRAY_INDEX_EXPR: {
-                auto arrayIndexExpression = std::static_pointer_cast<Parser::ArrayIndexExprNode>(node);
-                auto arrayVariable = std::dynamic_pointer_cast<Parser::IdentVariableNode>(arrayIndexExpression->array);
-                // TODO: Update to generic array
-                auto array = std::any_cast<CommanderArray<CommanderInt>>(_getVariable(arrayVariable->varName));
-
-                // TODO: might be understanding this wrong? why list of indices?
-                auto index = std::any_cast<CommanderInt>(_expr(arrayIndexExpression->indexExprs[0]));
-                return array[index];
+            case Parser::INDEX_EXPR: {
+                // TODO: Index expressions
+                return nullptr;
             }
             case Parser::TUPLE_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleExprNode>(node);
                 CommanderTuple tuple;
-                for (auto& expr : tupleExp->expressions) { tuple.emplace_back(_expr(expr)); }
+                for (auto& expr : tupleExp->expressions->exprs) { tuple.emplace_back(_expr(expr)); }
                 return tuple;
-            }
-            case Parser::TUPLE_INDEX_EXPR: {
-                auto tupleExp = std::static_pointer_cast<Parser::TupleIndexExprNode>(node);
-                auto index = std::any_cast<CommanderInt>(_expr(tupleExp->index));
-                auto tuple = std::any_cast<CommanderTuple>(_expr(tupleExp->tuple));
-
-                if (index >= tuple.size() || index < 0) {
-                    throw Util::CommanderException("Index out of bounds: Index " + std::to_string(index)
-                                                   + "out of bounds for tuple of size " + std::to_string(tuple.size()));
-                }
-                return tuple[index];
             }
             case Parser::TERNARY_EXPR: {
                 auto ternaryExpression = std::static_pointer_cast<Parser::TernaryExprNode>(node);
@@ -186,10 +176,10 @@ namespace FlowController {
                 _symbolTable.pushSymbolTable();  // new scope for function
 
                 int bindingIndex = 0;
-                for (auto& arg : functionExpression->args) {
+                for (auto& arg : functionExpression->args->exprs) {
                     // args and bindings should be lined up 1 to 1
                     std::any const argValue = _expr(arg);
-                    std::string const name = function.bindings[bindingIndex]->variable;
+                    std::string const name = function.bindings->bindings[bindingIndex]->variable;
 
                     _setVariable(name, argValue);
                     bindingIndex++;
@@ -220,7 +210,7 @@ namespace FlowController {
     }
 
     void FlowController::_prgm(const std::shared_ptr<Parser::PrgmNode>& node) {
-        for (auto& stmt : node->stmts) { _stmt(stmt); }
+        for (auto& stmt : node->stmts->stmts) { _stmt(stmt); }
     }
 
     std::any FlowController::_stmt(const Parser::StmtNodePtr& node) {
@@ -259,15 +249,15 @@ namespace FlowController {
                 switch (expr->expression->type->getType()) {
                     case TypeChecker::INT:
                         // TODO: Implement method that stringifies a int
-                        printw("%ld\n", std::any_cast<CommanderInt>(value));
+                        Util::println(std::to_string(std::any_cast<CommanderInt>(value)));
                         break;
                     case TypeChecker::FLOAT:
                         // TODO: Implement method that stringifies a float
-                        printw("%f\n", std::any_cast<double_t>(value));
+                        Util::println(std::to_string(std::any_cast<double_t>(value)));
                         break;
                     case TypeChecker::BOOL:
                         // TODO: Implement method that stringifies a bool
-                        printw("%s\n", std::any_cast<CommanderBool>(value) ? "true" : "false");
+                        Util::println(std::to_string(std::any_cast<CommanderBool>(value)));
                         break;
                     case TypeChecker::TUPLE:
                         // TODO: Implement method that stringifies a tuple and call it here
@@ -303,19 +293,15 @@ namespace FlowController {
         auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
         auto stringNode = stringExp->stringNode;
 
-        int indexLiteral = 0;
-        int indexExpression = 0;
         std::string stringResult;
-        while (indexLiteral < stringNode->literals.size() && indexExpression < stringNode->expressions.size()) {
-            std::any const exprValue = _expr(stringNode->expressions[indexExpression]);
-
-            stringResult.append(stringNode->literals[indexLiteral]);
-            stringResult.append(_commanderTypeToString(exprValue));
-
-            indexLiteral++;
-            indexExpression++;
+        for (const Parser::ExprNodePtr& ptr : stringNode->expressions->expressions) {
+            stringResult.append(_commanderTypeToString(_expr(ptr)));
         }
         return stringResult;
+    }
+
+    void FlowController::_types(const Parser::TypesNodePtr& node) {
+        for (auto& type : node->types) { _type(type); }
     }
 
     void FlowController::_type(const Parser::TypeNodePtr& node) {
@@ -334,6 +320,7 @@ namespace FlowController {
                 auto expr = std::any_cast<CommanderBool>(_expr(unOp->expr));
                 return !expr;
             }
+            // TODO: Fix increment and decrement to work on variable, not expr
             case Parser::PRE_INCREMENT: {
                 // might have to update symbol table if variable
                 auto expr = std::any_cast<CommanderInt>(_expr(unOp->expr));
@@ -465,13 +452,13 @@ namespace FlowController {
         // TODO: Implement
     }
 
-    void FlowController::_setVariable(std::string name, std::any value) {
+    void FlowController::_setVariable(const std::string& name, std::any value) {
         // TODO: update when symbol table is generic
-        _symbolTable.addOrUpdateVariable(std::move(name), std::any_cast<CommanderInt>(value));
+        _symbolTable.addOrUpdateVariable(name, std::any_cast<CommanderInt>(value));
     }
 
     std::any FlowController::_getVariable(const std::string& name) {
-        CommanderInt* value = _symbolTable.getVariable<CommanderInt>(name);
+        auto* value = _symbolTable.getVariable<CommanderInt>(name);
         if (value != nullptr) { return static_cast<CommanderInt>(*value); }
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
     }
@@ -482,9 +469,9 @@ namespace FlowController {
         return std::any_cast<std::string>(value);
     }
 
-    bool FlowController::hasVariable(std::string name) { return _symbolTable.varExistsInScope(name); }
+    bool FlowController::hasVariable(const std::string& name) { return _symbolTable.varExistsInScope(name); }
 
-    CommanderInt FlowController::getVariableValue(std::string name) {
+    CommanderInt FlowController::getVariableValue(const std::string& name) {
         return std::any_cast<CommanderInt>(_getVariable(name));
     }
 }  // namespace FlowController

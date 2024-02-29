@@ -27,7 +27,7 @@ namespace Parser {
         /**
          * @brief Shorthand for the `TokenType` enumeration from the lexer.
          */
-        using TokenType = Lexer::tokenType;
+        using TokenType = Lexer::TokenType;
 
         /**
          * @brief Each state has a unique integer ID.
@@ -72,16 +72,13 @@ namespace Parser {
         static std::string _wrap(const std::string& contents);
 
         /**
-         * @brief Makes a braced pair of the two given items.
+         * @brief Makes a braced pair of the two given strings.
          *
-         * @tparam LeftType The type of the item on the left.
-         * @tparam RightType The type of the item on the right.
-         * @param left The left item.
-         * @param right The right item.
-         * @return A braced pair of the two given items.
+         * @param left The left string.
+         * @param right The right string.
+         * @return A braced pair of the two given strings.
          */
-        template<typename LeftType, typename RightType>
-        static std::string _pair(const LeftType& left, const RightType& right);
+        static std::string _pair(const std::string& left, const std::string& right);
 
         /**
          * @brief A mapping of a state number and a token type to a parser action.
