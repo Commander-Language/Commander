@@ -6,6 +6,7 @@
 #ifndef FLOW_CONTROLLER_HPP
 #define FLOW_CONTROLLER_HPP
 
+#include "source/builtin_functions/functions.hpp"
 #include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/util/print.hpp"
@@ -18,23 +19,6 @@
 
 namespace FlowController {
 
-    template<typename TType>
-    /**
-     * @brief A Commander array representation
-     */
-    using CommanderArray = std::vector<TType>;
-    /**
-     * @brief A Commander bool representation
-     */
-    using CommanderBool = bool;
-    /**
-     * @brief A Commander tuple representation
-     */
-    using CommanderTuple = std::vector<std::any>;
-    /**
-     * @brief A Commander int representation
-     */
-    using CommanderInt = int64_t;
     /**
      * @brief A commander lambda representation
      */
@@ -71,7 +55,7 @@ namespace FlowController {
         /**
          * @brief Get value of variable
          */
-        CommanderInt getVariableValue(const std::string&);
+        TypeChecker::CommanderInt getVariableValue(const std::string&);
 
     private:
         /**

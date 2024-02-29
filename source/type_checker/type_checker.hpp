@@ -6,6 +6,7 @@
 
 #ifndef CPP_UTILITIES_TYPE_CHECKER_HPP
 #define CPP_UTILITIES_TYPE_CHECKER_HPP
+#include "source/builtin_functions/functions.hpp"
 #include "source/parser/parser.hpp"
 #include "source/util/commander_exception.hpp"
 #include "type.hpp"

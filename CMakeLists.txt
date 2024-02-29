@@ -163,7 +163,7 @@ add_library(parser source/parser/parser.cpp
 
         source/util/commander_exception.cpp
 )
-add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/type_checker/var_info.cpp source/type_checker/variable_table.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp)
+add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/type_checker/var_info.cpp source/type_checker/variable_table.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp source/builtin_functions/functions.cpp)
 add_library(flow_controller source/flow_controller/flow_controller.cpp source/util/print.cpp)
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 add_library(job_runner source/job_runner/job_runner.cpp)
@@ -190,6 +190,10 @@ gtest_discover_tests(typeCheckerTests)
 add_executable(symbolTableTests tests/symbol_table_tests.cpp)
 target_link_libraries(symbolTableTests symbol_table GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
+
+add_executable(builtinFunctionsTests tests/builtin_functions_tests.cpp)
+target_link_libraries(builtinFunctionsTests type_checker GTest::gtest_main)
+gtest_discover_tests(builtinFunctionsTests)
 
 add_executable(flowControllerTests tests/flow_controller_tests.cpp)
 target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table GTest::gtest_main ncurses)
