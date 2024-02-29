@@ -11,8 +11,8 @@ namespace TypeChecker {
     // TODO: Default-Constructor: get it working
     /*TypeChecker::TypeChecker() {
         for (auto pair : Function::functionTypes) {
-    setOrUpdateType(pair.first, pair.second);
-}
+            _table.addVariable(pair.first, std::make_shared<FunctionInfo>())
+        }
     }*/
 
     void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
@@ -105,9 +105,8 @@ namespace TypeChecker {
             case Parser::ARRAY_EXPR: {
                 Parser::ArrayExprNodePtr const exprNode = std::static_pointer_cast<Parser::ArrayExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr const type = exprNode->expressions->exprs.empty()
-                                                       ? nullptr
-                                                       : typeCheck(exprNode->expressions->exprs[0]);
+                TyPtr const type = exprNode->expressions->exprs.empty() ? nullptr
+                                                                        : typeCheck(exprNode->expressions->exprs[0]);
                 if (!exprNode->expressions->exprs.empty()) {
                     if (!type) {
                         // TODO: Improve error
@@ -509,16 +508,6 @@ namespace TypeChecker {
                     throw Util::CommanderException("The condition does not evaluate to a bool type.");
                 }
                 return nullptr;
-            }
-            case Parser::FUNCTION_STMT: {
-                Parser::FunctionStmtNodePtr const functionNode = std::static_pointer_cast<Parser::FunctionStmtNode>(astNode);
-                std::vector<TyPtr> bindings;
-                for (const Parser::BindingNodePtr& binding : functionNode->bindings) {
-                    bindings.push_back(typeCheck(binding));
-                }
-                // TODO: See if possible to check return type and return stmt match
-                TyPtr const returnType = typeCheck(functionNode->body);
-                return std::make_shared<FunctionTy>(bindings, returnType);
             }
             case Parser::RETURN_STMT: {
                 Parser::ReturnStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ReturnStmtNode>(astNode);

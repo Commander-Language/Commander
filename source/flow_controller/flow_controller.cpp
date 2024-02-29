@@ -171,7 +171,7 @@ namespace FlowController {
             }
             case Parser::CALL_EXPR: {
                 auto functionExpression = std::static_pointer_cast<Parser::CallExprNode>(node);
-                //TODO: Handle variable functions
+                // TODO: Handle variable functions
                 auto function = std::any_cast<CommanderLambda>(_expr(functionExpression->func));
 
                 _symbolTable.pushSymbolTable();  // new scope for function
@@ -394,10 +394,12 @@ namespace FlowController {
                 return static_cast<TypeChecker::CommanderInt>(std::pow(left, right));
             }
             case Parser::AND: {
-                return std::any_cast<TypeChecker::CommanderBool>(left) && std::any_cast<TypeChecker::CommanderBool>(right);
+                return std::any_cast<TypeChecker::CommanderBool>(left)
+                    && std::any_cast<TypeChecker::CommanderBool>(right);
             }
             case Parser::OR: {
-                return std::any_cast<TypeChecker::CommanderBool>(left) || std::any_cast<TypeChecker::CommanderBool>(right);
+                return std::any_cast<TypeChecker::CommanderBool>(left)
+                    || std::any_cast<TypeChecker::CommanderBool>(right);
             }
             case Parser::SET: {
                 // auto variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
@@ -410,33 +412,44 @@ namespace FlowController {
                 return left != right;
             }
             case Parser::ADD_SET: {
-                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) + right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(
+                                                                   variableName)
+                                                         + right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::SUBTRACT_SET: {
-                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) - right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(
+                                                                   variableName)
+                                                         - right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MULTIPLY_SET: {
-                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) * right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(
+                                                                   variableName)
+                                                         * right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::DIVIDE_SET: {
                 if (right == 0) { throw Util::CommanderException("Divide by zero error encountered"); }
-                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) / right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(
+                                                                   variableName)
+                                                         / right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::MODULO_SET: {
-                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName) % right;
+                TypeChecker::CommanderInt const newValue = *_symbolTable.getVariable<TypeChecker::CommanderInt>(
+                                                                   variableName)
+                                                         % right;
                 _setVariable(variableName, newValue);
                 return newValue;
             }
             case Parser::EXPONENTIATE_SET: {
-                TypeChecker::CommanderInt const newValue = std::pow(*_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName), right);
+                TypeChecker::CommanderInt const newValue = std::pow(
+                        *_symbolTable.getVariable<TypeChecker::CommanderInt>(variableName), right);
                 _setVariable(variableName, newValue);
                 return newValue;
             }

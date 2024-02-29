@@ -6,9 +6,9 @@
 
 #ifndef CPP_UTILITIES_TYPE_CHECKER_HPP
 #define CPP_UTILITIES_TYPE_CHECKER_HPP
+#include "source/builtin_functions/functions.hpp"
 #include "source/parser/parser.hpp"
 #include "source/util/commander_exception.hpp"
-#include "source/builtin_functions/functions.hpp"
 #include "type.hpp"
 #include "variable_table.hpp"
 #include <string>
@@ -20,7 +20,7 @@ namespace TypeChecker {
      */
     class TypeChecker {
     public:
-        TypeChecker();   // Default Constructor
+        TypeChecker() = default;   // Default Constructor
         ~TypeChecker() = default;  // Default Destructor
 
         /**

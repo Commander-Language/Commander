@@ -1,19 +1,19 @@
 /**
-* @file functions.hpp
-* @brief Contains header content for functions.cpp, which contains all built in functions
-*
-*/
+ * @file functions.hpp
+ * @brief Contains header content for functions.cpp, which contains all built in functions
+ *
+ */
 
 #ifndef COMMANDER_FUNCTIONS_HPP
 #define COMMANDER_FUNCTIONS_HPP
 
-#include <vector>
-#include <string>
 #include "source/type_checker/type.hpp"
-#include <functional>
-#include <cmath>
 #include <chrono>
+#include <cmath>
+#include <functional>
+#include <string>
 #include <thread>
+#include <vector>
 
 namespace Function {
 
@@ -25,12 +25,13 @@ namespace Function {
      * @return The function type
      */
     TypeChecker::FunctionTyPtr getFunctionTy(TypeChecker::TyPtr arg) {
-        std::vector<TypeChecker::TyPtr> params;
+        const std::vector<TypeChecker::TyPtr> params;
         return std::make_shared<TypeChecker::FunctionTy>(params, arg);
     }
 
     /**
-     * Returns a function type with the first n - 1 arguments as param types and the return type as the nth argument type
+     * Returns a function type with the first n - 1 arguments as param types and the return type as the nth argument
+     * type
      * @tparam Args The type of the param arguments (should be TyPtr); required for variadic functions
      * @param first The first argument
      * @param args The rest of the arguments
@@ -40,9 +41,9 @@ namespace Function {
     TypeChecker::FunctionTyPtr getFunctionTy(TypeChecker::TyPtr first, Args... args) {
         std::vector<TypeChecker::TyPtr> params;
         params.push_back(first);
-        auto push_args = [&](auto&&... xs) { (params.push_back(std::forward<decltype(xs)>(xs)), ...); };
-        (push_args(args), ...);
-        TypeChecker::TyPtr returnTy = params.back();
+        auto pushArgs = [&](auto&&... arg) { (params.push_back(std::forward<decltype(arg)>(arg)), ...); };
+        (pushArgs(args), ...);
+        const TypeChecker::TyPtr returnTy = params.back();
         params.pop_back();
         return std::make_shared<TypeChecker::FunctionTy>(params, returnTy);
     }
@@ -53,65 +54,111 @@ namespace Function {
     const TypeChecker::FloatTyPtr FLOAT = std::make_shared<TypeChecker::FloatTy>();
     const TypeChecker::BoolTyPtr BOOL = std::make_shared<TypeChecker::BoolTy>();
     const TypeChecker::StringTyPtr STRING = std::make_shared<TypeChecker::StringTy>();
-    const TypeChecker::TupleTyPtr TUPLE = std::make_shared<TypeChecker::TupleTy>(std::vector<TypeChecker::TyPtr> {}); //TODO: Types may be incorrect
+    const TypeChecker::TupleTyPtr TUPLE = std::make_shared<TypeChecker::TupleTy>(
+            std::vector<TypeChecker::TyPtr> {});  // TODO: Types may be incorrect
     const TypeChecker::ArrayTyPtr ARRAY = std::make_shared<TypeChecker::ArrayTy>(std::shared_ptr<TypeChecker::Ty>());
 
     /**
      * The built in function types
      */
     const std::vector<std::pair<std::string, TypeChecker::FunctionTyPtr>> functionTypes {
-            {"parseInt", getFunctionTy(INT, INT)},                          {"parseInt", getFunctionTy(FLOAT, INT)},
-            {"parseInt", getFunctionTy(BOOL, INT)},                         {"parseInt", getFunctionTy(STRING, INT)},
-            {"parseFloat", getFunctionTy(INT, FLOAT)},                      {"parseFloat", getFunctionTy(FLOAT, FLOAT)},
-            {"parseFloat", getFunctionTy(BOOL, FLOAT)},                     {"parseFloat", getFunctionTy(STRING, FLOAT)},
-            {"parseBool", getFunctionTy(INT, BOOL)},                        {"parseBool", getFunctionTy(FLOAT, BOOL)},
-            {"parseBool", getFunctionTy(BOOL, BOOL)},                       {"parseBool", getFunctionTy(STRING, BOOL)},
-            {"print", getFunctionTy(STRING, VOID)},                         {"toString", getFunctionTy(INT, STRING)},
-            {"println", getFunctionTy(STRING, VOID)},                       {"sqrt", getFunctionTy(INT, FLOAT)},
-            {"sqrt", getFunctionTy(FLOAT, FLOAT)},                          {"ln", getFunctionTy(INT, FLOAT)},
-            {"ln", getFunctionTy(FLOAT, FLOAT)},                            {"log", getFunctionTy(INT, FLOAT)},
-            {"log", getFunctionTy(FLOAT, FLOAT)},                           {"abs", getFunctionTy(INT, INT)},
-            {"abs", getFunctionTy(FLOAT, FLOAT)},                           {"floor", getFunctionTy(INT, INT)},
-            {"floor", getFunctionTy(FLOAT, INT)},                           {"ceil", getFunctionTy(INT, INT)},
-            {"ceil", getFunctionTy(FLOAT, INT)},                            {"round", getFunctionTy(INT, INT)},
-            {"round", getFunctionTy(FLOAT, INT)},                           {"sin", getFunctionTy(INT, FLOAT)},
-            {"sin", getFunctionTy(FLOAT, FLOAT)},                           {"cos", getFunctionTy(INT, FLOAT)},
-            {"cos", getFunctionTy(FLOAT, FLOAT)},                           {"tan", getFunctionTy(INT, FLOAT)},
-            {"tan", getFunctionTy(FLOAT, FLOAT)},                           {"csc", getFunctionTy(INT, FLOAT)},
-            {"csc", getFunctionTy(FLOAT, FLOAT)},                           {"sec", getFunctionTy(INT, FLOAT)},
-            {"sec", getFunctionTy(FLOAT, FLOAT)},                           {"cot", getFunctionTy(INT, FLOAT)},
-            {"cot", getFunctionTy(FLOAT, FLOAT)},                           {"sinh", getFunctionTy(INT, FLOAT)},
-            {"sinh", getFunctionTy(FLOAT, FLOAT)},                          {"cosh", getFunctionTy(INT, FLOAT)},
-            {"cosh", getFunctionTy(FLOAT, FLOAT)},                          {"tanh", getFunctionTy(INT, FLOAT)},
-            {"tanh", getFunctionTy(FLOAT, FLOAT)},                          {"csch", getFunctionTy(INT, FLOAT)},
-            {"csch", getFunctionTy(FLOAT, FLOAT)},                          {"sech", getFunctionTy(INT, FLOAT)},
-            {"sech", getFunctionTy(FLOAT, FLOAT)},                          {"coth", getFunctionTy(INT, FLOAT)},
-            {"coth", getFunctionTy(FLOAT, FLOAT)},                          {"arcsin", getFunctionTy(INT, FLOAT)},
-            {"arcsin", getFunctionTy(FLOAT, FLOAT)},                        {"arccos", getFunctionTy(INT, FLOAT)},
-            {"arccos", getFunctionTy(FLOAT, FLOAT)},                        {"arctan", getFunctionTy(INT, FLOAT)},
-            {"arctan", getFunctionTy(FLOAT, FLOAT)},                        {"arccsc", getFunctionTy(INT, FLOAT)},
-            {"arccsc", getFunctionTy(FLOAT, FLOAT)},                        {"arcsec", getFunctionTy(INT, FLOAT)},
-            {"arcsec", getFunctionTy(FLOAT, FLOAT)},                        {"arccot", getFunctionTy(INT, FLOAT)},
-            {"arccot", getFunctionTy(FLOAT, FLOAT)},                        {"arcsinh", getFunctionTy(INT, FLOAT)},
-            {"arcsinh", getFunctionTy(FLOAT, FLOAT)},                       {"arccosh", getFunctionTy(INT, FLOAT)},
-            {"arccosh", getFunctionTy(FLOAT, FLOAT)},                       {"arctanh", getFunctionTy(INT, FLOAT)},
-            {"arctanh", getFunctionTy(FLOAT, FLOAT)},                       {"arccsch", getFunctionTy(INT, FLOAT)},
-            {"arccsch", getFunctionTy(FLOAT, FLOAT)},                       {"arcsech", getFunctionTy(INT, FLOAT)},
-            {"arcsech", getFunctionTy(FLOAT, FLOAT)},                       {"arccoth", getFunctionTy(INT, FLOAT)},
-            {"arccoth", getFunctionTy(FLOAT, FLOAT)},                       {"random", getFunctionTy(VOID, FLOAT)},
-            {"time", getFunctionTy(VOID, INT)},                             {"date", getFunctionTy(VOID, TUPLE)},
-            {"sleep", getFunctionTy(INT, VOID)},                            {"charAt", getFunctionTy(INT, STRING, STRING)},
-            {"startsWith", getFunctionTy(STRING, STRING, BOOL)},            {"endsWith", getFunctionTy(STRING, STRING, BOOL)},
-            {"includes", getFunctionTy(STRING, STRING, BOOL)},              {"indexOf", getFunctionTy(STRING, STRING, INT)},
-            {"length", getFunctionTy(STRING, INT)},                         {"replace", getFunctionTy(STRING, STRING, STRING, STRING)},
-            {"replaceAll", getFunctionTy(STRING, STRING, STRING, STRING)},  {"substring", getFunctionTy(INT, STRING, STRING)},
-            {"substring", getFunctionTy(INT, INT, STRING, STRING)},         {"trim", getFunctionTy(VOID, STRING, STRING)},
-            {"lower", getFunctionTy(VOID, STRING, STRING)},                 {"upper", getFunctionTy(VOID, STRING, STRING)},
-            {"split", getFunctionTy(STRING, STRING, ARRAY)}
-        };
+            {"parseInt", getFunctionTy(INT, INT)},
+            {"parseInt", getFunctionTy(FLOAT, INT)},
+            {"parseInt", getFunctionTy(BOOL, INT)},
+            {"parseInt", getFunctionTy(STRING, INT)},
+            {"parseFloat", getFunctionTy(INT, FLOAT)},
+            {"parseFloat", getFunctionTy(FLOAT, FLOAT)},
+            {"parseFloat", getFunctionTy(BOOL, FLOAT)},
+            {"parseFloat", getFunctionTy(STRING, FLOAT)},
+            {"parseBool", getFunctionTy(INT, BOOL)},
+            {"parseBool", getFunctionTy(FLOAT, BOOL)},
+            {"parseBool", getFunctionTy(BOOL, BOOL)},
+            {"parseBool", getFunctionTy(STRING, BOOL)},
+            {"print", getFunctionTy(STRING, VOID)},
+            {"toString", getFunctionTy(INT, STRING)},
+            {"println", getFunctionTy(STRING, VOID)},
+            {"sqrt", getFunctionTy(INT, FLOAT)},
+            {"sqrt", getFunctionTy(FLOAT, FLOAT)},
+            {"ln", getFunctionTy(INT, FLOAT)},
+            {"ln", getFunctionTy(FLOAT, FLOAT)},
+            {"log", getFunctionTy(INT, FLOAT)},
+            {"log", getFunctionTy(FLOAT, FLOAT)},
+            {"abs", getFunctionTy(INT, INT)},
+            {"abs", getFunctionTy(FLOAT, FLOAT)},
+            {"floor", getFunctionTy(INT, INT)},
+            {"floor", getFunctionTy(FLOAT, INT)},
+            {"ceil", getFunctionTy(INT, INT)},
+            {"ceil", getFunctionTy(FLOAT, INT)},
+            {"round", getFunctionTy(INT, INT)},
+            {"round", getFunctionTy(FLOAT, INT)},
+            {"sin", getFunctionTy(INT, FLOAT)},
+            {"sin", getFunctionTy(FLOAT, FLOAT)},
+            {"cos", getFunctionTy(INT, FLOAT)},
+            {"cos", getFunctionTy(FLOAT, FLOAT)},
+            {"tan", getFunctionTy(INT, FLOAT)},
+            {"tan", getFunctionTy(FLOAT, FLOAT)},
+            {"csc", getFunctionTy(INT, FLOAT)},
+            {"csc", getFunctionTy(FLOAT, FLOAT)},
+            {"sec", getFunctionTy(INT, FLOAT)},
+            {"sec", getFunctionTy(FLOAT, FLOAT)},
+            {"cot", getFunctionTy(INT, FLOAT)},
+            {"cot", getFunctionTy(FLOAT, FLOAT)},
+            {"sinh", getFunctionTy(INT, FLOAT)},
+            {"sinh", getFunctionTy(FLOAT, FLOAT)},
+            {"cosh", getFunctionTy(INT, FLOAT)},
+            {"cosh", getFunctionTy(FLOAT, FLOAT)},
+            {"tanh", getFunctionTy(INT, FLOAT)},
+            {"tanh", getFunctionTy(FLOAT, FLOAT)},
+            {"csch", getFunctionTy(INT, FLOAT)},
+            {"csch", getFunctionTy(FLOAT, FLOAT)},
+            {"sech", getFunctionTy(INT, FLOAT)},
+            {"sech", getFunctionTy(FLOAT, FLOAT)},
+            {"coth", getFunctionTy(INT, FLOAT)},
+            {"coth", getFunctionTy(FLOAT, FLOAT)},
+            {"arcsin", getFunctionTy(INT, FLOAT)},
+            {"arcsin", getFunctionTy(FLOAT, FLOAT)},
+            {"arccos", getFunctionTy(INT, FLOAT)},
+            {"arccos", getFunctionTy(FLOAT, FLOAT)},
+            {"arctan", getFunctionTy(INT, FLOAT)},
+            {"arctan", getFunctionTy(FLOAT, FLOAT)},
+            {"arccsc", getFunctionTy(INT, FLOAT)},
+            {"arccsc", getFunctionTy(FLOAT, FLOAT)},
+            {"arcsec", getFunctionTy(INT, FLOAT)},
+            {"arcsec", getFunctionTy(FLOAT, FLOAT)},
+            {"arccot", getFunctionTy(INT, FLOAT)},
+            {"arccot", getFunctionTy(FLOAT, FLOAT)},
+            {"arcsinh", getFunctionTy(INT, FLOAT)},
+            {"arcsinh", getFunctionTy(FLOAT, FLOAT)},
+            {"arccosh", getFunctionTy(INT, FLOAT)},
+            {"arccosh", getFunctionTy(FLOAT, FLOAT)},
+            {"arctanh", getFunctionTy(INT, FLOAT)},
+            {"arctanh", getFunctionTy(FLOAT, FLOAT)},
+            {"arccsch", getFunctionTy(INT, FLOAT)},
+            {"arccsch", getFunctionTy(FLOAT, FLOAT)},
+            {"arcsech", getFunctionTy(INT, FLOAT)},
+            {"arcsech", getFunctionTy(FLOAT, FLOAT)},
+            {"arccoth", getFunctionTy(INT, FLOAT)},
+            {"arccoth", getFunctionTy(FLOAT, FLOAT)},
+            {"random", getFunctionTy(VOID, FLOAT)},
+            {"time", getFunctionTy(VOID, INT)},
+            {"date", getFunctionTy(VOID, TUPLE)},
+            {"sleep", getFunctionTy(INT, VOID)},
+            {"charAt", getFunctionTy(INT, STRING, STRING)},
+            {"startsWith", getFunctionTy(STRING, STRING, BOOL)},
+            {"endsWith", getFunctionTy(STRING, STRING, BOOL)},
+            {"includes", getFunctionTy(STRING, STRING, BOOL)},
+            {"indexOf", getFunctionTy(STRING, STRING, INT)},
+            {"length", getFunctionTy(STRING, INT)},
+            {"replace", getFunctionTy(STRING, STRING, STRING, STRING)},
+            {"replaceAll", getFunctionTy(STRING, STRING, STRING, STRING)},
+            {"substring", getFunctionTy(INT, STRING, STRING)},
+            {"substring", getFunctionTy(INT, INT, STRING, STRING)},
+            {"trim", getFunctionTy(VOID, STRING, STRING)},
+            {"lower", getFunctionTy(VOID, STRING, STRING)},
+            {"upper", getFunctionTy(VOID, STRING, STRING)},
+            {"split", getFunctionTy(STRING, STRING, ARRAY)}};
 
     /* ========== Implementations ========== */
-    std::vector<std::any> VOID_RETURN;
 
     TypeChecker::CommanderInt parseIntAsInt(TypeChecker::CommanderInt number);
 
@@ -137,9 +184,9 @@ namespace Function {
 
     TypeChecker::CommanderBool parseStringAsBool(TypeChecker::CommanderString string);
 
-    TypeChecker::CommanderTuple println(TypeChecker::CommanderString string);
+    void println(TypeChecker::CommanderString string);
 
-    TypeChecker::CommanderTuple print(TypeChecker::CommanderString string);
+    void print(TypeChecker::CommanderString string);
 
     TypeChecker::CommanderString toString(TypeChecker::CommanderInt value);
 
@@ -275,26 +322,35 @@ namespace Function {
 
     void sleep(TypeChecker::CommanderInt timeToSleep);
 
-    //STRING API METHODS
+    // STRING API METHODS
     TypeChecker::CommanderString charAt(TypeChecker::CommanderInt index, TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderBool startsWith(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderBool startsWith(TypeChecker::CommanderString expected,
+                                          TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderBool endsWith(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderBool endsWith(TypeChecker::CommanderString expected,
+                                        TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderBool includes(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderBool includes(TypeChecker::CommanderString expected,
+                                        TypeChecker::CommanderString sourceString);
 
     TypeChecker::CommanderInt indexOf(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
 
     TypeChecker::CommanderInt length(TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderString replace(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderString replace(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase,
+                                         TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderString replaceAll(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderString replaceAll(TypeChecker::CommanderString oldPhrase,
+                                            TypeChecker::CommanderString newPhrase,
+                                            TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex,
+                                           TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex, TypeChecker::CommanderInt endingIndex, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex,
+                                           TypeChecker::CommanderInt endingIndex,
+                                           TypeChecker::CommanderString sourceString);
 
     TypeChecker::CommanderString trim(TypeChecker::CommanderString sourceString);
 
@@ -302,14 +358,14 @@ namespace Function {
 
     TypeChecker::CommanderString upper(TypeChecker::CommanderString sourceString);
 
-    TypeChecker::CommanderArray<TypeChecker::CommanderString> split(TypeChecker::CommanderString splitToken, TypeChecker::CommanderString sourceString);
+    TypeChecker::CommanderArray<TypeChecker::CommanderString> split(TypeChecker::CommanderString splitToken,
+                                                                    TypeChecker::CommanderString sourceString);
 
-    struct AnyCallable
-    {
+    struct AnyCallable {
         AnyCallable() {}
         template<typename F>
         AnyCallable(F&& fun) : AnyCallable(std::function(std::forward<F>(fun))) {}
-        template<typename Ret, typename ... Args>
+        template<typename Ret, typename... Args>
         AnyCallable(std::function<Ret(Args...)> fun) : m_any(fun) {}
         std::any m_any;
     };
@@ -319,21 +375,22 @@ namespace Function {
      * https://www.geeksforgeeks.org/passing-a-function-as-a-parameter-in-cpp/
      * https://stackoverflow.com/questions/45715219/store-functions-with-different-signatures-in-a-map
      */
-    inline const std::unordered_map<std::string, AnyCallable> functionImplementations {
-            {"println", println},       {"toString", toString},
-            {"print", print}
-    };
+    inline const std::unordered_map<std::string, AnyCallable> functionImplementations {{"println", println},
+                                                                                       {"toString", toString},
+                                                                                       {"print", print}};
 
     /**
      * parseAsType() allows the user to parse the specified data as a specified type.
      * @tparam T - The type of the original data
      * @tparam U - The type of the data to parse as
      * @param originalVal - The unmodified data to parse as type U
-     * @return - The original data parsed as type U (e.g. parseAsType<int, bool>(36) will convert 36 from an int to a boolean value)
+     * @return - The original data parsed as type U (e.g. parseAsType<int, bool>(36) will convert 36 from an int to a
+     * boolean value)
      */
     template<typename T, typename U>
     U parseAsType(T originalVal) {
-        return (U)originalVal;  // TODO: exceptions when string is passed in (or redirect to parseAsString / parseStringAsType)
+        return (U)originalVal;  // TODO: exceptions when string is passed in (or redirect to parseAsString /
+                                // parseStringAsType)
     }
 
     template<typename T>
@@ -352,6 +409,6 @@ namespace Function {
             // e.g. "TruE", "tRUe", etc. should yield true
         }
     }
-}
+}  // namespace Function
 
 #endif  // COMMANDER_FUNCTIONS_HPP
