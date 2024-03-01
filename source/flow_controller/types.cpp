@@ -16,8 +16,7 @@ namespace FlowController {
     [[nodiscard]] std::string CommanderArray::getStringRepresentation() const {
         std::string output = "[";
         for (int i = 0; i < values.size(); i++) {
-            if (i != values.size() - 1)
-                output.append(values[i]->getStringRepresentation() + ", ");
+            if (i != values.size() - 1) output.append(values[i]->getStringRepresentation() + ", ");
             else
                 output.append(values[i]->getStringRepresentation());
         }
@@ -64,8 +63,7 @@ namespace FlowController {
     [[nodiscard]] std::string CommanderTuple::getStringRepresentation() const {
         std::string output = "(";
         for (int i = 0; i < values.size(); i++) {
-            if (i != values.size() - 1)
-                output.append(values[i]->getStringRepresentation() + ", ");
+            if (i != values.size() - 1) output.append(values[i]->getStringRepresentation() + ", ");
             else
                 output.append(values[i]->getStringRepresentation());
         }
@@ -84,8 +82,7 @@ namespace FlowController {
     [[nodiscard]] TypeChecker::Type CommanderTuple::getType() const { return TypeChecker::TUPLE; }
 
     [[nodiscard]] std::string CommanderLambda::getStringRepresentation() const {
-        if (name.empty())
-            return "<Anonymous Lambda>";
+        if (name.empty()) return "<Anonymous Lambda>";
 
         return "<Function " + name + ">";
     }

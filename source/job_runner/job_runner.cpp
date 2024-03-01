@@ -25,7 +25,8 @@ namespace JobRunner {
 
     const char* Process::getName() const { return processName.c_str(); }
 
-    Process::Process(std::vector<ProcessPtr > processes) : pipe(processes[1]), pipeSize(processes.size()), isFirst(true) {
+    Process::Process(std::vector<ProcessPtr> processes)
+        : pipe(processes[1]), pipeSize(processes.size()), isFirst(true) {
         // first in pipe is this process
         ProcessPtr start = processes[0];
         type = start->type;
@@ -41,7 +42,7 @@ namespace JobRunner {
     }
 
     Process::Process(std::vector<std::string> args, ProcessType type, bool isBackground, bool isSave)
-            : args(args), type(type), processName(args[0]), background(isBackground), saveInfo(isSave) {}
+        : args(args), type(type), processName(args[0]), background(isBackground), saveInfo(isSave) {}
 
     //  ==========================
     //  ||   JobRunner Class    ||
@@ -129,7 +130,7 @@ namespace JobRunner {
     }
 
     JobInfo JobRunner::_doPiping(const ProcessPtr& process) {
-        JobInfo result{};
+        JobInfo result {};
 
         size_t fdCount = (process->pipeSize - 1) * 2;
         int pipes[fdCount];
@@ -189,7 +190,7 @@ namespace JobRunner {
         waitpid(pid, nullptr, 0);
     }
 
-    JobInfo JobRunner::_doSaveInfo(const ProcessPtr& process, bool partOfPipe, int *fds, size_t count) {
+    JobInfo JobRunner::_doSaveInfo(const ProcessPtr& process, bool partOfPipe, int* fds, size_t count) {
         int pipeOut[2];
         int pipeErr[2];
         pipe2(pipeOut, O_CLOEXEC);

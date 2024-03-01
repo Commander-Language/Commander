@@ -62,7 +62,7 @@ namespace TypeChecker {
             case Parser::ASYNC_CMD: {
                 Parser::AsyncCmdNodePtr const asyncCommand = std::static_pointer_cast<Parser::AsyncCmdNode>(astNode);
                 Parser::CmdCmdNodePtr const command = std::static_pointer_cast<Parser::CmdCmdNode>(asyncCommand->cmd);
-                for (const Parser::ASTNodePtr &node: command->arguments) {
+                for (const Parser::ASTNodePtr& node : command->arguments) {
                     TyPtr const nodeType = typeCheck(node);
                     if (!nodeType || nodeType->getType() != Type::STRING) {
                         // TODO: Improve error

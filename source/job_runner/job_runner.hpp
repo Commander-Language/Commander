@@ -222,7 +222,7 @@ namespace JobRunner {
          *                     (if it is, should call this at end of pipe)
          * @return The job information
          */
-        JobInfo _doSaveInfo(const ProcessPtr& process, bool partOfPipe, int *fds = nullptr, size_t count = 0);
+        JobInfo _doSaveInfo(const ProcessPtr& process, bool partOfPipe, int* fds = nullptr, size_t count = 0);
 
         /**
          * @brief Helper to resize a char array
