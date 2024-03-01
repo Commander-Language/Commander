@@ -7,13 +7,13 @@
 #define FLOW_CONTROLLER_HPP
 
 #include "source/builtin_functions/functions.hpp"
-#include "source/parser/parser.hpp"
 #include "source/flow_controller/types.hpp"
 #include "source/job_runner/job_runner.hpp"
 #include "source/parser/ast_node.hpp"
+#include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
-#include "source/util/print.hpp"
 #include "source/type_checker/type.hpp"
+#include "source/util/print.hpp"
 
 #include <cmath>
 #include <memory>
@@ -155,7 +155,7 @@ namespace FlowController {
          * @brief Helper to interpret types nodes
          * @param types The types to interpret
          */
-        void _types(const Parser::TypesNodePtr &types);
+        void _types(const Parser::TypesNodePtr& types);
 
         /**
          * @brief Helper to interpret type nodes

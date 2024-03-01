@@ -8,18 +8,18 @@
 
 namespace TypeChecker {
 
-    // TODO: Default-Constructor: get it working
-    /*TypeChecker::TypeChecker() {
-        for (auto pair : Function::functionTypes) {
-            _table.addVariable(pair.first, std::make_shared<FunctionInfo>())
+    TypeChecker::TypeChecker() {
+        for (const auto& pair : Function::functionTypes) {
+            _table.addVariable(pair.first, std::make_shared<FunctionInfo>(
+                                                   std::vector<TyPtr> {pair.second.begin(), pair.second.end()}));
         }
-    }*/
-
-    void TypeChecker::typeCheck(const Parser::ASTNodeList &astNodeList) {
-        for (const Parser::ASTNodePtr &node: astNodeList) { typeCheck(node); }
     }
 
-    TyPtr TypeChecker::typeCheck(const Parser::ASTNodePtr &astNode) {
+    void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
+        for (const Parser::ASTNodePtr& node : astNodeList) { typeCheck(node); }
+    }
+
+    TyPtr TypeChecker::typeCheck(const Parser::ASTNodePtr& astNode) {
         if (!astNode) { return nullptr; }
         switch (astNode->nodeType()) {
             case Parser::BINDING: {
@@ -31,12 +31,12 @@ namespace TypeChecker {
             }
             case Parser::BINDINGS: {
                 Parser::BindingsNodePtr const bindings = std::static_pointer_cast<Parser::BindingsNode>(astNode);
-                for (const Parser::BindingNodePtr &currentBinding: bindings->bindings) { typeCheck(currentBinding); }
+                for (const Parser::BindingNodePtr& currentBinding : bindings->bindings) { typeCheck(currentBinding); }
                 return nullptr;
             }
             case Parser::CMD_CMD: {
                 Parser::CmdCmdNodePtr const command = std::static_pointer_cast<Parser::CmdCmdNode>(astNode);
-                for (const Parser::ASTNodePtr &node: command->arguments) {
+                for (const Parser::ASTNodePtr& node : command->arguments) {
                     TyPtr const nodeType = typeCheck(node);
                     if (!nodeType || nodeType->getType() != Type::STRING) {
                         // TODO: Improve error
@@ -91,8 +91,7 @@ namespace TypeChecker {
                 return (exprNode->type = FLOAT_TY);
             }
             case Parser::STRING_EXPR: {
-                if(astNode == nullptr)
-                    return nullptr;
+                if (astNode == nullptr) return nullptr;
                 Parser::StringExprNodePtr const exprNode = std::static_pointer_cast<Parser::StringExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 typeCheck(exprNode->stringNode);
@@ -126,7 +125,7 @@ namespace TypeChecker {
                         // TODO: Improve error
                         throw Util::CommanderException("Array has an unknown type.");
                     }
-                    for (const Parser::ExprNodePtr &exprNodePtr: exprNode->expressions->exprs) {
+                    for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
                         if (!areTypesEqual(type, typeCheck(exprNodePtr))) {
                             // TODO: Improve error
                             throw Util::CommanderException("Array contains multiple different types.");
@@ -157,7 +156,7 @@ namespace TypeChecker {
                 Parser::TupleExprNodePtr const exprNode = std::static_pointer_cast<Parser::TupleExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 std::vector<TyPtr> expressionTypes;
-                for (const Parser::ExprNodePtr &exprNodePtr: exprNode->expressions->exprs) {
+                for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
                     TyPtr const exprType = typeCheck(exprNodePtr);
                     if (!exprType) {
                         // TODO: Improve error
@@ -246,8 +245,8 @@ namespace TypeChecker {
                 bool const isString = rightType == Type::STRING;
                 bool const areEqual = areTypesEqual(leftTy, rightTy);
                 bool const areIntFloat = leftTy
-                                         && ((leftTy->getType() == Type::INT && isFloat)
-                                             || (leftTy->getType() == Type::FLOAT && isInt));
+                                      && ((leftTy->getType() == Type::INT && isFloat)
+                                          || (leftTy->getType() == Type::FLOAT && isInt));
                 switch (exprNode->opType) {
                     case Parser::SET: {
                         if (!isVariable) {
@@ -311,9 +310,9 @@ namespace TypeChecker {
                             throw Util::CommanderException("Variable is not initialized");
                         }
                         if (_table.getVariable(
-                                        std::static_pointer_cast<Parser::IdentVariableNode>(exprNode->leftVariable)
-                                                ->varName)
-                                ->constant) {
+                                          std::static_pointer_cast<Parser::IdentVariableNode>(exprNode->leftVariable)
+                                                  ->varName)
+                                    ->constant) {
                             // TODO: Improve error
                             throw Util::CommanderException("Unable to update constant variable.");
                         }
@@ -360,10 +359,10 @@ namespace TypeChecker {
                     functionTypes.push_back(type);
                 }
                 std::vector<TyPtr> argTypes;
-                for (const Parser::ExprNodePtr &expr: exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
+                for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
-                for (const TyPtr &typ: functionTypes) {
-                    std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(typ);
+                for (const TyPtr& typ : functionTypes) {
+                    FunctionTyPtr const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }
                     for (int i = 0; i < size; i++) {
@@ -400,10 +399,10 @@ namespace TypeChecker {
                     functionTypes.push_back(type);
                 }
                 std::vector<TyPtr> argTypes;
-                for (const Parser::ExprNodePtr &expr: exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
+                for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
-                for (const TyPtr &typ: functionTypes) {
-                    std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(typ);
+                for (const TyPtr& typ : functionTypes) {
+                    FunctionTyPtr const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }
                     for (int i = 0; i < size; i++) {
@@ -423,7 +422,7 @@ namespace TypeChecker {
                 if (exprNode->type) { return exprNode->type; }
                 pushScope();
                 std::vector<TyPtr> bindings;
-                for (const Parser::BindingNodePtr &binding: exprNode->bindings->bindings) {
+                for (const Parser::BindingNodePtr& binding : exprNode->bindings->bindings) {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(exprNode->returnType);
@@ -471,7 +470,7 @@ namespace TypeChecker {
             }
             case Parser::EXPRS: {
                 Parser::ExprsNodePtr const exprsPtr = std::static_pointer_cast<Parser::ExprsNode>(astNode);
-                for (const Parser::ExprNodePtr &exprPtr: exprsPtr->exprs) { typeCheck(exprPtr); }
+                for (const Parser::ExprNodePtr& exprPtr : exprsPtr->exprs) { typeCheck(exprPtr); }
                 return nullptr;
             }
             case Parser::PRGM: {
@@ -606,7 +605,7 @@ namespace TypeChecker {
                 assertNotExists(stmtNode->name);
                 pushScope();
                 std::vector<TyPtr> bindings;
-                for (const Parser::BindingNodePtr &binding: stmtNode->bindings->bindings) {
+                for (const Parser::BindingNodePtr& binding : stmtNode->bindings->bindings) {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(stmtNode->returnType);
@@ -618,13 +617,13 @@ namespace TypeChecker {
                     throw Util::CommanderException("Return types for the function " + stmtNode->name + " don't match.");
                 }
                 popScope();
-                _table.addVariable(stmtNode->name, std::make_shared<FunctionInfo>(std::vector<TyPtr>{
-                        std::make_shared<FunctionTy>(bindings, returnType)}));
+                _table.addVariable(stmtNode->name, std::make_shared<FunctionInfo>(std::vector<TyPtr> {
+                                                           std::make_shared<FunctionTy>(bindings, returnType)}));
                 return nullptr;
             }
             case Parser::STMTS: {
                 Parser::StmtsNodePtr const stmtsPtr = std::static_pointer_cast<Parser::StmtsNode>(astNode);
-                for (const Parser::StmtNodePtr &stmtPtr: stmtsPtr->stmts) { typeCheck(stmtPtr); }
+                for (const Parser::StmtNodePtr& stmtPtr : stmtsPtr->stmts) { typeCheck(stmtPtr); }
                 TyPtr returnType = VOID_TY;
                 Parser::StmtNodePtr const lastStmt = stmtsPtr->stmts.back();
                 if (lastStmt->nodeType() == Parser::RETURN_STMT) { returnType = typeCheck(lastStmt); }
@@ -638,7 +637,7 @@ namespace TypeChecker {
             case Parser::STRING_EXPRS: {
                 Parser::StringExprsNodePtr const stringsPtr = std::static_pointer_cast<Parser::StringExprsNode>(
                         astNode);
-                for (const Parser::ExprNodePtr &exprPtr: stringsPtr->expressions) {
+                for (const Parser::ExprNodePtr& exprPtr : stringsPtr->expressions) {
                     TyPtr const exprType = typeCheck(exprPtr);
                     if (!exprPtr || exprType->getType() != Type::STRING) {
                         // TODO: Improve error
@@ -677,7 +676,7 @@ namespace TypeChecker {
                 Parser::TupleTypeNodePtr const tupleTypePtr = std::static_pointer_cast<Parser::TupleTypeNode>(astNode);
                 if (tupleTypePtr->type) { return tupleTypePtr->type; }
                 std::vector<TyPtr> types;
-                for (const Parser::TypeNodePtr &typeNodePtr: tupleTypePtr->subtypes->types) {
+                for (const Parser::TypeNodePtr& typeNodePtr : tupleTypePtr->subtypes->types) {
                     types.push_back(typeCheck(typeNodePtr));
                 }
                 return (tupleTypePtr->type = std::make_shared<TupleTy>(types));
@@ -687,7 +686,7 @@ namespace TypeChecker {
                         astNode);
                 if (functionTypePtr->type) { return functionTypePtr->type; }
                 std::vector<TyPtr> types;
-                for (const Parser::TypeNodePtr &typeNodePtr: functionTypePtr->params->types) {
+                for (const Parser::TypeNodePtr& typeNodePtr : functionTypePtr->params->types) {
                     types.push_back(typeCheck(typeNodePtr));
                 }
                 return (functionTypePtr->type = std::make_shared<FunctionTy>(types,
@@ -702,7 +701,7 @@ namespace TypeChecker {
             }
             case Parser::TYPES: {
                 Parser::TypesNodePtr const typesPtr = std::static_pointer_cast<Parser::TypesNode>(astNode);
-                for (const Parser::TypeNodePtr &typePtr: typesPtr->types) { typeCheck(typePtr); }
+                for (const Parser::TypeNodePtr& typePtr : typesPtr->types) { typeCheck(typePtr); }
                 return nullptr;
             }
             default:
@@ -711,7 +710,7 @@ namespace TypeChecker {
         }
     }
 
-    void TypeChecker::assertNotExists(const std::string &variable) {
+    void TypeChecker::assertNotExists(const std::string& variable) {
         if (_table.hasVariable(variable)) {
             // TODO: Improve error
             throw Util::CommanderException("Variable of name " + variable + " already exists in current scope.");
@@ -722,7 +721,8 @@ namespace TypeChecker {
 
     VariableTablePtr TypeChecker::popScope() {
         VariableTablePtr scope = std::make_shared<VariableTable>(_table);
-        _table = *_table.getParent();
+        auto parent = _table.getParent();
+        if (parent) { _table = *parent; }
         return scope;
     }
 
