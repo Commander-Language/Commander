@@ -125,7 +125,7 @@ namespace FlowController {
             }
             case Parser::PIPE_CMD: {
                 auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(node);
-                std::vector<std::vector<std::string>> pipeArgs;
+                const std::vector<std::vector<std::string>> pipeArgs;
                 std::vector<JobRunner::ProcessPtr> processes;
 
                 std::vector<Parser::CmdCmdNodePtr> jobs;
@@ -192,8 +192,17 @@ namespace FlowController {
                 return std::make_shared<CommanderArray>(array);
             }
             case Parser::INDEX_EXPR: {
-                // TODO: Index expressions
-                return nullptr;
+                auto expr = std::static_pointer_cast<Parser::IndexExprNode>(node);
+                const CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(expr->index));
+                auto baseExpr = expr->expr;
+                auto baseEval = _expr(baseExpr);
+                if (baseExpr->type->getType() == TypeChecker::ARRAY) {
+                    const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(_expr(baseExpr));
+                    return array->values[index->value];
+                } else {
+                    const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(_expr(baseExpr));
+                    return tuple->values[index->value];
+                }
             }
             case Parser::TUPLE_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::TupleExprNode>(node);
@@ -279,9 +288,15 @@ namespace FlowController {
 
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
-                // TODO: Implement
                 auto stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(node);
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                CommanderTypePtr conditionResult = _expr(stmtNode->condition);
+                Parser::StmtNodePtr statements;
+                if (std::static_pointer_cast<CommanderBool>(conditionResult)->value) {
+                    statements = stmtNode->trueStmt;
+                } else {
+                    statements = stmtNode->falseStmt;
+                }
+                return _stmt(statements);
             }
             case Parser::FOR_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ForStmtNode>(node);
