@@ -74,10 +74,8 @@ namespace FlowController {
     //  =================
     //  ||   Lambda    ||
     //  =================
-    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings,
-                                     Parser::StmtNodePtr body, std::string name) : bindings(std::move(bindings)),
-                                                                                   body(std::move(body)),
-                                                                                   name(std::move(name)) {}
+    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body, std::string name)
+        : bindings(std::move(bindings)), body(std::move(body)), name(std::move(name)) {}
 
     [[nodiscard]] TypeChecker::Type CommanderTuple::getType() const { return TypeChecker::TUPLE; }
 
@@ -98,4 +96,4 @@ namespace FlowController {
     [[nodiscard]] std::string CommanderString::getStringRepresentation() const { return value; }
 
     [[nodiscard]] TypeChecker::Type CommanderString::getType() const { return TypeChecker::STRING; }
-} // namespace FlowController
+}  // namespace FlowController

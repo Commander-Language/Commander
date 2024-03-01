@@ -288,6 +288,6 @@ namespace FlowController {
     // Primitive representation of Commander Types
     using PrimitiveInt = int64_t;
     using PrimitiveFloat = double;
-} // namespace FlowController
+}  // namespace FlowController
 
 #endif
