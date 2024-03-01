@@ -6,6 +6,11 @@
 #include "functions.hpp"
 #include <iostream>
 
+TypeChecker::FunctionTyPtr Function::getFunctionTy(TypeChecker::TyPtr arg) {
+    const std::vector<TypeChecker::TyPtr> params;
+    return std::make_shared<TypeChecker::FunctionTy>(params, arg);
+}
+
 void Function::println(TypeChecker::CommanderString string) { std::cout << string << std::endl; }
 
 void Function::print(TypeChecker::CommanderString string) { std::cout << string; }

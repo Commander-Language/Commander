@@ -29,9 +29,36 @@ namespace TypeChecker {
         }
     }
 
-    std::string getTypeString(const TypeChecker::TyPtr& tyPtr) {
-        // TODO: Print types for array, tuple, and function in more detail
-        return (tyPtr ? " " + TypeChecker::typeToString(tyPtr->getType()) : "");
+    std::string getTypeString(const TyPtr& tyPtr) {
+        if (!tyPtr) { return ""; }
+        switch (tyPtr->getType()) {
+            case INT:
+            case FLOAT:
+            case BOOL:
+            case STRING:
+                return " " + typeToString(tyPtr->getType());
+            case ARRAY:
+                return " " + typeToString(std::static_pointer_cast<ArrayTy>(tyPtr)->baseType->getType()) + "[]";
+            case FUNCTION: {
+                const FunctionTyPtr functionTy = std::static_pointer_cast<FunctionTy>(tyPtr);
+                std::stringstream builder;
+                builder << "(";
+                for (const TyPtr& type : functionTy->parameters) { builder << " " << typeToString(type->getType()); }
+                builder << " ) -> " << typeToString(functionTy->returnType->getType());
+                return " " + builder.str();
+            }
+            case TUPLE: {
+                std::stringstream builder;
+                builder << "{";
+                for (const TyPtr& type : std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes) {
+                    builder << " " << typeToString(type->getType());
+                }
+                builder << " }";
+                return " " + builder.str();
+            }
+            default:
+                return "";
+        }
     }
 
     bool areTypesEqual(const TyPtr& type1, const TyPtr& type2) {
@@ -71,22 +98,32 @@ namespace TypeChecker {
         }
     }
 
+    bool Ty::any() const { return _any; }
+
+    Ty::Ty(bool any) : _any(any) {}
+    IntTy::IntTy() : Ty(true) {}
+    FloatTy::FloatTy() : Ty(true) {}
+    BoolTy::BoolTy() : Ty(true) {}
+    StringTy::StringTy() : Ty(true) {}
+
     Type IntTy::getType() const { return Type::INT; }
 
     Type FloatTy::getType() const { return Type::FLOAT; }
 
     Type BoolTy::getType() const { return Type::BOOL; }
 
-    TupleTy::TupleTy(std::vector<std::shared_ptr<Ty>> types) : contentTypes(std::move(types)) {}
+    TupleTy::TupleTy(bool any) : Ty(any) {}
+
+    TupleTy::TupleTy(std::vector<std::shared_ptr<Ty>> types) : Ty(types.empty()), contentTypes(std::move(types)) {}
 
     Type TupleTy::getType() const { return Type::TUPLE; }
 
-    ArrayTy::ArrayTy(std::shared_ptr<Ty> type) : baseType(std::move(type)) {}
+    ArrayTy::ArrayTy(std::shared_ptr<Ty> type) : Ty(type == ANY_TY), baseType(std::move(type)) {}
 
     Type ArrayTy::getType() const { return Type::ARRAY; }
 
     FunctionTy::FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> retType)
-        : parameters(std::move(params)), returnType(std::move(retType)) {}
+        : Ty(false), parameters(std::move(params)), returnType(std::move(retType)) {}
 
     Type FunctionTy::getType() const { return Type::FUNCTION; }
 

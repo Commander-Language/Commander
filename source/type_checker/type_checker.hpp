@@ -20,7 +20,7 @@ namespace TypeChecker {
      */
     class TypeChecker {
     public:
-        TypeChecker() = default;   // Default Constructor
+        TypeChecker();             // Default Constructor
         ~TypeChecker() = default;  // Default Destructor
 
         /**
