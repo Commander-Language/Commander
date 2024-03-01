@@ -164,7 +164,7 @@ add_library(parser source/parser/parser.cpp
         source/util/commander_exception.cpp
 )
 add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/type_checker/var_info.cpp source/type_checker/variable_table.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp source/builtin_functions/functions.cpp)
-add_library(flow_controller source/flow_controller/flow_controller.cpp source/util/print.cpp source/flow_controller/types.cpp)
+add_library(flow_controller source/flow_controller/flow_controller.cpp source/util/print.cpp source/flow_controller/types.cpp source/flow_controller/operations.cpp)
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)

@@ -14,6 +14,7 @@
 
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/flow_controller/types.hpp"
+#include "source/flow_controller/operations.hpp"
 #include "source/job_runner/job_runner.hpp"
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
@@ -119,7 +120,8 @@ namespace FlowController {
                 args = _parseArguments(cmd->arguments);
 
                 // Run the command
-                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, false, saveInfo);
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, false,
+                                                                saveInfo);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
@@ -134,7 +136,8 @@ namespace FlowController {
                 std::vector<std::string> pArgs;
                 for (const auto &job: jobs) {
                     pArgs = _parseArguments(job->arguments);
-                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL, false, saveInfo);
+                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL, false,
+                                                                        saveInfo);
                     processes.emplace_back(process);
                 }
 
@@ -473,362 +476,58 @@ namespace FlowController {
         }
     }
 
-    CommanderTypePtr FlowController::_binaryOp(std::shared_ptr<Parser::BinOpExprNode> &binOp) {
-        using TypeChecker::Type;
-
+    CommanderTypePtr FlowController::_binaryOp(Parser::BinOpExprNodePtr &binOp) {
         CommanderTypePtr right = _expr(binOp->rightExpr);
-        TypeChecker::Type const rightType = right->getType();
 
         CommanderTypePtr left;
-        TypeChecker::Type leftType;
-
         Parser::IdentVariableNodePtr variable;
-        if (binOp->leftExpr != nullptr) {
+        if (binOp->leftExpr != nullptr)
             left = _expr(binOp->leftExpr);
-            leftType = left->getType();
-        } else {
+        else
             variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
-        }
+
         switch (binOp->opType) {
             case Parser::LESSER: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value < rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value < rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value < rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value < rightFloat->value);
-                }
+                return lesserOperation(left, right);
             }
             case Parser::GREATER: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value > rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value > rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value > rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value > rightFloat->value);
-                }
+                return greaterOperation(left, right);
             }
             case Parser::EQUAL: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value == rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value == rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value == rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value == rightFloat->value);
-                }
+                return equalOperation(left, right);
             }
             case Parser::NOT_EQUAL: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value != rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value != rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value != rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value != rightFloat->value);
-                }
+                return notEqualOperation(left, right);
             }
             case Parser::LESSER_EQUAL: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value <= rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value <= rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value <= rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value <= rightFloat->value);
-                }
+                return lesserEqualOperation(left, right);
             }
             case Parser::GREATER_EQUAL: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value >= rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftInt->value >= rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value >= rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderBool>(leftFloat->value >= rightFloat->value);
-                }
+                return greaterEqualOperation(left, right);
             }
             case Parser::MODULO: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderInt>(leftInt->value % rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    // TODO: Define expected behavior for modulus and floats, for now cast to int
-                    // Probably will have to create our own modulus
-                    return std::make_shared<CommanderFloat>(leftInt->value % (PrimitiveInt) rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    // TODO: Define expected behavior for modulus and floats, for now cast to int
-                    // Probably will have to create our own modulus
-                    return std::make_shared<CommanderFloat>((PrimitiveInt) leftFloat->value % rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    // TODO: Define expected behavior for modulus and floats, for now cast to int
-                    // Probably will have to create our own modulus
-                    return std::make_shared<CommanderFloat>(
-                            (PrimitiveInt) leftFloat->value % (PrimitiveInt) rightFloat->value);
-                }
+                return moduloOperation(left, right);
             }
             case Parser::DIVIDE: {
-                if (rightType == Type::INT) {
-                    if (std::static_pointer_cast<CommanderInt>(right)->value == 0)
-                        throw Util::CommanderException("DivisionError: unable to divide by zero");
-                }
-                if (rightType == Type::FLOAT) {
-                    if (std::static_pointer_cast<CommanderFloat>(right)->value == 0)
-                        throw Util::CommanderException("DivisionError: unable to divide by zero");
-                }
-
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderInt>(leftInt->value / rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftInt->value / rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value / rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value / rightFloat->value);
-                }
+                return divideOperation(left, right);
             }
             case Parser::MULTIPLY: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderInt>(leftInt->value * rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftInt->value * rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value * rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value * rightFloat->value);
-                }
+                return multiplyOperation(left, right);
             }
             case Parser::SUBTRACT: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderInt>(leftInt->value - rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftInt->value - rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value - rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value - rightFloat->value);
-                }
+                return subtractOperation(left, right);
             }
             case Parser::ADD: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderInt>(leftInt->value + rightInt->value);
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftInt->value + rightFloat->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value + rightInt->value);
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(leftFloat->value + rightFloat->value);
-                }
+                return addOperation(left, right);
             }
             case Parser::EXPONENTIATE: {
-                if (leftType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderInt>(std::pow(leftInt->value, rightInt->value));
-                }
-                if (leftType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(std::pow(leftInt->value, rightFloat->value));
-                }
-                if (leftType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    return std::make_shared<CommanderFloat>(std::pow(leftFloat->value, rightInt->value));
-                }
-                if (leftType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(left);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    return std::make_shared<CommanderFloat>(std::pow(leftFloat->value, rightFloat->value));
-                }
+                return exponentiateOperation(left, right);
             }
             case Parser::AND: {
-                auto leftBool = std::static_pointer_cast<CommanderBool>(left);
-                auto rightBool = std::static_pointer_cast<CommanderBool>(right);
-
-                return std::make_shared<CommanderBool>(leftBool->value && rightBool->value);
+                return andOperation(left, right);
             }
             case Parser::OR: {
-                auto leftBool = std::static_pointer_cast<CommanderBool>(left);
-                auto rightBool = std::static_pointer_cast<CommanderBool>(right);
-
-                return std::make_shared<CommanderBool>(leftBool->value || rightBool->value);
+                return orOperation(left, right);
             }
             case Parser::SET: {
                 _setVariable(variable->varName, right);
@@ -836,235 +535,39 @@ namespace FlowController {
             }
             case Parser::ADD_SET: {
                 CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                Type const leftVarType = leftVar->getType();
-
-                if (leftVarType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderInt>(leftInt->value + rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftInt->value + rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value + rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value + rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
+                CommanderTypePtr result = addOperation(leftVar, right);
+                _setVariable(variable->varName, result);
+                return result;
             }
             case Parser::SUBTRACT_SET: {
                 CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                Type const leftVarType = leftVar->getType();
-
-                if (leftVarType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderInt>(leftInt->value - rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftInt->value - rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value - rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value - rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
+                CommanderTypePtr result = subtractOperation(leftVar, right);
+                _setVariable(variable->varName, result);
+                return result;
             }
             case Parser::MULTIPLY_SET: {
                 CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                Type const leftVarType = leftVar->getType();
-
-                if (leftVarType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderInt>(leftInt->value * rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftInt->value * rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value * rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value * rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
+                CommanderTypePtr result = multiplyOperation(leftVar, right);
+                _setVariable(variable->varName, result);
+                return result;
             }
             case Parser::DIVIDE_SET: {
                 CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                Type const leftVarType = leftVar->getType();
-
-                if (rightType == Type::INT) {
-                    if (std::static_pointer_cast<CommanderInt>(right)->value == 0)
-                        throw Util::CommanderException("DivisionError: unable to divide by zero");
-                }
-                if (rightType == Type::FLOAT) {
-                    if (std::static_pointer_cast<CommanderFloat>(right)->value == 0)
-                        throw Util::CommanderException("DivisionError: unable to divide by zero");
-                }
-
-                if (leftVarType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderInt>(leftInt->value / rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftInt->value / rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value / rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftFloat->value / rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
+                CommanderTypePtr result = divideOperation(leftVar, right);
+                _setVariable(variable->varName, result);
+                return result;
             }
             case Parser::MODULO_SET: {
                 CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                Type const leftVarType = leftVar->getType();
-
-                if (leftVarType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderInt>(leftInt->value % rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(leftInt->value % (PrimitiveInt) rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderFloat>((PrimitiveInt) leftFloat->value % rightInt->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(
-                            (PrimitiveInt) leftFloat->value % (PrimitiveInt) rightFloat->value);
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
+                CommanderTypePtr result = moduloOperation(leftVar, right);
+                _setVariable(variable->varName, result);
+                return result;
             }
             case Parser::EXPONENTIATE_SET: {
                 CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                Type const leftVarType = leftVar->getType();
-
-                if (leftVarType == Type::INT && rightType == Type::INT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderInt>(std::pow(leftInt->value, rightInt->value));
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::INT && rightType == Type::FLOAT) {
-                    auto leftInt = std::static_pointer_cast<CommanderInt>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(std::pow(leftInt->value, rightFloat->value));
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::INT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightInt = std::static_pointer_cast<CommanderInt>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(std::pow(leftFloat->value, rightInt->value));
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
-                if (leftVarType == Type::FLOAT && rightType == Type::FLOAT) {
-                    auto leftFloat = std::static_pointer_cast<CommanderFloat>(leftVar);
-                    auto rightFloat = std::static_pointer_cast<CommanderFloat>(right);
-
-                    auto result = std::make_shared<CommanderFloat>(std::pow(leftFloat->value, rightFloat->value));
-                    _setVariable(variable->varName, result);
-                    return result;
-                }
+                CommanderTypePtr result = exponentiateOperation(leftVar, right);
+                _setVariable(variable->varName, result);
+                return result;
             }
             default: {
                 throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
@@ -1113,12 +616,12 @@ namespace FlowController {
         return result;
     }
 
-    void FlowController::_getJobs(const Parser::CmdNodePtr& head, std::vector<Parser::CmdCmdNodePtr> &jobs) {
-        if(head == nullptr)
+    void FlowController::_getJobs(const Parser::CmdNodePtr &head, std::vector<Parser::CmdCmdNodePtr> &jobs) {
+        if (head == nullptr)
             return;
 
         // leaf nodes are cmd_cmd nodes
-        if(head->nodeType() == Parser::CMD_CMD){
+        if (head->nodeType() == Parser::CMD_CMD) {
             jobs.emplace_back(std::static_pointer_cast<Parser::CmdCmdNode>(head));
             return;
         }
