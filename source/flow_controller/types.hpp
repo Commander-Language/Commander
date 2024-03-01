@@ -284,6 +284,10 @@ namespace FlowController {
      * @brief A pointer to a Commander lambda.
      */
     using CommanderLambdaPtr = std::shared_ptr<CommanderLambda>;
+
+    // Primitive representation of Commander Types
+    using PrimitiveInt = int64_t;
+    using PrimitiveFloat = double;
 } // namespace FlowController
 
 #endif
