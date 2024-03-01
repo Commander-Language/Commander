@@ -91,6 +91,8 @@ namespace TypeChecker {
                 return (exprNode->type = FLOAT_TY);
             }
             case Parser::STRING_EXPR: {
+                if(astNode == nullptr)
+                    return nullptr;
                 Parser::StringExprNodePtr const exprNode = std::static_pointer_cast<Parser::StringExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 typeCheck(exprNode->stringNode);

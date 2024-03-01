@@ -31,12 +31,12 @@ namespace FlowController {
     //  ==========================
     //  ||    Flow Controller   ||
     //  ==========================
-    FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
+    FlowController::FlowController(Parser::ASTNodeList &nodes) : _nodes(std::move(nodes)) {
         _symbolTable.pushSymbolTable();  // push in the global scope
     }
 
     void FlowController::runtime() {
-        for (auto& node : _nodes) {
+        for (auto &node: _nodes) {
             switch (getAbstractNodeType(node->nodeType())) {
                 case Parser::BINDING: {
                     _binding(std::static_pointer_cast<Parser::BindingNode>(node));
@@ -99,17 +99,17 @@ namespace FlowController {
     //  ==========================
     //  ||    Node Evaluation   ||
     //  ==========================
-    void FlowController::_binding(const Parser::BindingNodePtr& node) {
+    void FlowController::_binding(const Parser::BindingNodePtr &node) {
         // TODO: Find better default value for each type
         _setVariable(node->variable, nullptr);
     }
 
-    void FlowController::_bindings(const Parser::BindingsNodePtr& nodes) {
-        for (auto& binding : nodes->bindings) { _binding(binding); }
+    void FlowController::_bindings(const Parser::BindingsNodePtr &nodes) {
+        for (auto &binding: nodes->bindings) { _binding(binding); }
     }
 
 
-    CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr& node, bool saveInfo) {
+    CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr &node, bool saveInfo) {
         std::vector<std::string> args;
 
         switch (node->nodeType()) {
@@ -132,7 +132,7 @@ namespace FlowController {
                 _getJobs(pipeCmd, jobs);
 
                 std::vector<std::string> pArgs;
-                for (const auto& job : jobs) {
+                for (const auto &job: jobs) {
                     pArgs = _parseArguments(job->arguments);
                     auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL, false,
                                                                         saveInfo);
@@ -161,7 +161,7 @@ namespace FlowController {
         }
     }
 
-    CommanderTypePtr FlowController::_expr(const Parser::ExprNodePtr& node) {
+    CommanderTypePtr FlowController::_expr(const Parser::ExprNodePtr &node) {
         switch (node->nodeType()) {
             case Parser::INT_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::IntExprNode>(node);
@@ -255,15 +255,15 @@ namespace FlowController {
         }
     }
 
-    void FlowController::_exprs(const Parser::ExprsNodePtr& nodes) {
-        for (auto& expr : nodes->exprs) { _expr(expr); }
+    void FlowController::_exprs(const Parser::ExprsNodePtr &nodes) {
+        for (auto &expr: nodes->exprs) { _expr(expr); }
     }
 
     void FlowController::_prgm(const std::shared_ptr<Parser::PrgmNode> &node) {
         for (auto &stmt: node->stmts->stmts) { _stmt(stmt); }
     }
 
-    CommanderTypePtr FlowController::_stmt(const Parser::StmtNodePtr& node) {
+    CommanderTypePtr FlowController::_stmt(const Parser::StmtNodePtr &node) {
         if (node == nullptr) return nullptr;
 
         switch (node->nodeType()) {
@@ -394,19 +394,22 @@ namespace FlowController {
         return nullptr;
     }
 
-    void FlowController::_stmts(const Parser::StmtsNodePtr& nodes) {
-        for (auto& stmt : nodes->stmts) { _stmt(stmt); }
+    void FlowController::_stmts(const Parser::StmtsNodePtr &nodes) {
+        for (auto &stmt: nodes->stmts) { _stmt(stmt); }
     }
 
     std::string FlowController::_string(const Parser::StringNodePtr &node) {
-        auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
-        auto stringNode = stringExp->stringNode;
-
-        std::string stringResult;
-        for (auto &ptr: stringNode->expressions->expressions) {
-            stringResult.append(_expr(ptr)->getStringRepresentation());
+        //auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
+        if (!node->literal.empty()) {
+            return node->literal;
+        } else if(node->expressions != nullptr) {
+            std::string stringResult;
+            for (auto &ptr: node->expressions->expressions) {
+                stringResult.append(_expr(ptr)->getStringRepresentation());
+            }
+            return stringResult;
         }
-        return stringResult;
+        return {};
     }
 
     void FlowController::_types(const Parser::TypesNodePtr &node) {
@@ -417,9 +420,9 @@ namespace FlowController {
         // TODO: Implement
     }
 
-    void FlowController::_variable(const Parser::VariableNodePtr&) {}
+    void FlowController::_variable(const Parser::VariableNodePtr &) {}
 
-    CommanderTypePtr FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
+    CommanderTypePtr FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode> &unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
                 CommanderTypePtr const expr = _expr(unOp->expr);
@@ -534,7 +537,7 @@ namespace FlowController {
         }
     }
 
-    CommanderTypePtr FlowController::_binaryOp(Parser::BinOpExprNodePtr& binOp) {
+    CommanderTypePtr FlowController::_binaryOp(Parser::BinOpExprNodePtr &binOp) {
         CommanderTypePtr right = _expr(binOp->rightExpr);
 
         CommanderTypePtr left;
@@ -640,19 +643,19 @@ namespace FlowController {
         return runner.execProcess();
     }
 
-    void FlowController::_setVariable(const std::string& name, const CommanderTypePtr& value) {
+    void FlowController::_setVariable(const std::string &name, const CommanderTypePtr &value) {
         _symbolTable.addOrUpdateVariable(name, value);
     }
 
-    CommanderTypePtr FlowController::_getVariable(const std::string& name) {
+    CommanderTypePtr FlowController::_getVariable(const std::string &name) {
         if (_symbolTable.getVariable<CommanderTypePtr>(name) == nullptr)
             throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
         return *_symbolTable.getVariable<CommanderTypePtr>(name);
     }
 
-    std::vector<std::string> FlowController::_parseArguments(const std::vector<Parser::ASTNodePtr>& args) {
+    std::vector<std::string> FlowController::_parseArguments(const std::vector<Parser::ASTNodePtr> &args) {
         std::vector<std::string> result;
-        for (const auto& arg : args) {
+        for (const auto &arg: args) {
             if (arg->nodeType() == Parser::ASTNodeType::VAR_EXPR) {
                 auto var = std::static_pointer_cast<Parser::VarExprNode>(arg);
                 result.emplace_back(_expr(var)->getStringRepresentation());
@@ -664,7 +667,7 @@ namespace FlowController {
         return result;
     }
 
-    std::vector<CommanderTypePtr> FlowController::_parseJobReturnInfo(const JobRunner::JobInfo& info) {
+    std::vector<CommanderTypePtr> FlowController::_parseJobReturnInfo(const JobRunner::JobInfo &info) {
         std::vector<CommanderTypePtr> result;
         result.emplace_back(std::make_shared<CommanderString>(std::get<0>(info)));
         result.emplace_back(std::make_shared<CommanderString>(std::get<1>(info)));
@@ -672,7 +675,7 @@ namespace FlowController {
         return result;
     }
 
-    void FlowController::_getJobs(const Parser::CmdNodePtr& head, std::vector<Parser::CmdCmdNodePtr>& jobs) {
+    void FlowController::_getJobs(const Parser::CmdNodePtr &head, std::vector<Parser::CmdCmdNodePtr> &jobs) {
         if (head == nullptr) return;
 
         // leaf nodes are cmd_cmd nodes
