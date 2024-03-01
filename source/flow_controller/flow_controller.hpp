@@ -84,7 +84,7 @@ namespace FlowController {
         /**
          * @brief Helper to interpret cmd nodes
          */
-        void _cmd(const Parser::CmdNodePtr &);
+        CommanderTypePtr _cmd(const Parser::CmdNodePtr &);
 
         /**
          * @brief Helper to interpret expr nodes

@@ -102,7 +102,7 @@ namespace FlowController {
         for (auto &binding: node->bindings) { _binding(binding); }
     }
 
-    void FlowController::_cmd(const Parser::CmdNodePtr &node) {
+    CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr &node) {
         std::vector<std::string> args;
 
         switch (node->nodeType()) {
@@ -121,11 +121,14 @@ namespace FlowController {
                 // Run the command
                 JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, false, false);
                 _runCommand(&job);
+                // TODO: fix return
+                return {};
             }
             case Parser::PIPE_CMD: {
                 auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(node);
                 std::vector<std::vector<std::string>> pipeArgs;
-
+                // TODO: fix return
+                return {};
             }
             case Parser::ASYNC_CMD: {
                 auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
@@ -143,11 +146,16 @@ namespace FlowController {
                 // Run the command
                 JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, true, false);
                 _runCommand(&job);
+
+                // TODO: fix return
+                return {};
             }
             default:
                 // TODO: Better error
                 throw Util::CommanderException("Not a command");
         }
+
+        return {};
     }
 
     CommanderTypePtr FlowController::_expr(const Parser::ExprNodePtr &node) {
@@ -282,7 +290,7 @@ namespace FlowController {
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
-                _cmd(cmd->command);
+                return _cmd(cmd->command);
             }
                 //Util::println(std::to_string(std::any_cast<TypeChecker::CommanderBool>(value)));
             case Parser::EXPR_STMT: {
