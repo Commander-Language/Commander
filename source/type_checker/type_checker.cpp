@@ -722,7 +722,10 @@ namespace TypeChecker {
 
     VariableTablePtr TypeChecker::popScope() {
         VariableTablePtr scope = std::make_shared<VariableTable>(_table);
-        _table = *_table.getParent();
+        auto parent = _table.getParent();
+        if (parent) {
+            _table = *parent;
+        }
         return scope;
     }
 
