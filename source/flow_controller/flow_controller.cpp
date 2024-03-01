@@ -17,14 +17,9 @@
 #include "flow_controller.hpp"
 #include "source/job_runner/job_runner.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/flow_controller/types.hpp"
 
 namespace FlowController {
-
-    //  ==========================
-    //  ||   Commander types    ||
-    //  ==========================
-    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body)
-        : bindings(std::move(bindings)), body(std::move(body)) {}
 
     //  ==========================
     //  ||    Flow Controller   ||
@@ -193,8 +188,7 @@ namespace FlowController {
             }
             case Parser::LAMBDA_EXPR: {
                 auto lambdaExpression = std::static_pointer_cast<Parser::LambdaExprNode>(node);
-                CommanderLambda lambda(lambdaExpression->bindings, lambdaExpression->body);
-                return lambda;
+                return std::make_shared<CommanderLambda>(lambdaExpression->bindings, lambdaExpression->body);
             }
             case Parser::CMD_EXPR: {
                 // TODO: Implement
@@ -297,7 +291,8 @@ namespace FlowController {
 
         std::string stringResult;
         for (const Parser::ExprNodePtr& ptr : stringNode->expressions->expressions) {
-            stringResult.append(_commanderTypeToString(_expr(ptr), TypeChecker::Type::INT));
+            auto str = std::any_cast<CommanderTypePtr>(_expr(ptr));
+            stringResult.append(str->getStringRepresentation(), TypeChecker::Type::INT);
         }
         return stringResult;
     }
@@ -476,73 +471,6 @@ namespace FlowController {
         auto* value = _symbolTable.getVariable<TypeChecker::CommanderInt>(name);
         if (value != nullptr) { return static_cast<TypeChecker::CommanderInt>(*value); }
         throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
-    }
-
-    std::string FlowController::_commanderTypeToString(std::any value, TypeChecker::Type type,
-                                                       TypeChecker::Type subtype) {
-        switch (type) {
-            case TypeChecker::INT: {
-                return std::to_string(std::any_cast<CommanderInt>(value));
-            }
-            case TypeChecker::FLOAT: {
-                return std::to_string(std::any_cast<CommanderFloat>(value));
-            }
-            case TypeChecker::BOOL: {
-                if (std::any_cast<CommanderBool>(value))
-                    return "true";
-                return "false";
-            }
-            case TypeChecker::TUPLE: {
-                auto tuple = std::any_cast<CommanderTuple>(value);
-                std::string output = "(";
-                for (int i = 0; i < tuple.values.size(); i++) {
-                    if (i < tuple.values.size() - 1)
-                        output.append(output + _commanderTypeToString(tuple.values[i], tuple.types[i]) + ", ");
-                    else
-                        output.append(output + _commanderTypeToString(tuple.values[i], tuple.types[i]) + ")");
-                }
-                return output;
-            }
-            case TypeChecker::ARRAY: {
-                switch (subtype) {
-                    case TypeChecker::INT: {
-                        auto array = std::any_cast<CommanderArray<CommanderInt>>(value);
-                        return _helper(array);
-                    }
-                    case TypeChecker::FLOAT: {
-                        auto array = std::any_cast<CommanderArray<CommanderFloat>>(value);
-                        return _helper(array);
-                    }
-                    case TypeChecker::BOOL: {
-                        auto array = std::any_cast<CommanderArray<CommanderBool>>(value);
-                        return _helper(array);
-                    }
-                    case TypeChecker::TUPLE: {
-                        auto array = std::any_cast<CommanderArray<CommanderTuple>>(value);
-                        return _helper(array);
-                    }
-                    case TypeChecker::ARRAY: {
-                        // TODO: Recursively get types?
-                        //auto array = std::any_cast<CommanderArray<CommanderArray<>>>(value);
-                        //return _helper(array);
-                    }
-                    case TypeChecker::FUNCTION: {
-                        auto array = std::any_cast<CommanderArray<CommanderLambda>>(value);
-                        return _helper(array);
-                    }
-                    case TypeChecker::STRING: {
-                        auto array = std::any_cast<CommanderArray<CommanderString>>(value);
-                        return _helper(array);
-                    }
-                }
-            }
-            case TypeChecker::FUNCTION: {
-                auto lambda = std::any_cast<CommanderLambda>(value);
-            }
-            case TypeChecker::STRING: {
-                return std::any_cast<CommanderString>(value);
-            }
-        }
     }
 
     bool FlowController::hasVariable(const std::string& name) { return _symbolTable.varExistsInScope(name); }
