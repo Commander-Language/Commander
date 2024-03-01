@@ -1030,10 +1030,8 @@ namespace FlowController {
     }
 
     CommanderTypePtr FlowController::_getVariable(const std::string &name) {
-        auto value = _symbolTable.getVariable<CommanderTypePtr>(name);
-        if (value == nullptr) {
+        if (_symbolTable.getVariable<CommanderTypePtr>(name) == nullptr)
             throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
-        }
-        return *value;
+        return *_symbolTable.getVariable<CommanderTypePtr>(name);
     }
 }  // namespace FlowController
