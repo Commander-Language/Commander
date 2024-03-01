@@ -29,12 +29,12 @@ namespace FlowController {
     //  ==========================
     //  ||    Flow Controller   ||
     //  ==========================
-    FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
+    FlowController::FlowController(Parser::ASTNodeList &nodes) : _nodes(std::move(nodes)) {
         _symbolTable.pushSymbolTable();  // push in the global scope
     }
 
     void FlowController::runtime() {
-        for (auto& node : _nodes) {
+        for (auto &node: _nodes) {
             switch (getAbstractNodeType(node->nodeType())) {
                 case Parser::BINDING: {
                     _binding(std::static_pointer_cast<Parser::BindingNode>(node));
@@ -97,20 +97,20 @@ namespace FlowController {
     //  ==========================
     //  ||    Node Evaluation   ||
     //  ==========================
-    void FlowController::_binding(const Parser::BindingNodePtr& node) {
+    void FlowController::_binding(const Parser::BindingNodePtr &node) {
         // TODO: Find better default value for each type
         _setVariable(node->variable, 0);
     }
 
-    void FlowController::_bindings(const Parser::BindingsNodePtr& node) {
-        for (auto& binding : node->bindings) { _binding(binding); }
+    void FlowController::_bindings(const Parser::BindingsNodePtr &node) {
+        for (auto &binding: node->bindings) { _binding(binding); }
     }
 
-    void FlowController::_cmd(const Parser::CmdNodePtr& node) {
+    void FlowController::_cmd(const Parser::CmdNodePtr &node) {
         // TODO: Implement
     }
 
-    std::any FlowController::_expr(const Parser::ExprNodePtr& node) {
+    std::any FlowController::_expr(const Parser::ExprNodePtr &node) {
         switch (node->nodeType()) {
             case Parser::INT_EXPR: {
                 auto intExp = std::static_pointer_cast<Parser::IntExprNode>(node);
@@ -149,6 +149,7 @@ namespace FlowController {
             }
             case Parser::TUPLE_EXPR: {
                 auto tupleExp = std::static_pointer_cast<Parser::TupleExprNode>(node);
+
                 TypeChecker::CommanderTuple tuple;
                 for (auto& expr : tupleExp->expressions->exprs) { tuple.emplace_back(_expr(expr)); }
                 return tuple;
@@ -206,15 +207,15 @@ namespace FlowController {
         return -1;  // TODO: Find better default return
     }
 
-    void FlowController::_exprs(const Parser::ExprsNodePtr& node) {
-        for (auto& expr : node->exprs) { _expr(expr); }
+    void FlowController::_exprs(const Parser::ExprsNodePtr &node) {
+        for (auto &expr: node->exprs) { _expr(expr); }
     }
 
     void FlowController::_prgm(const std::shared_ptr<Parser::PrgmNode>& node) {
         for (auto& stmt : node->stmts->stmts) { _stmt(stmt); }
     }
 
-    std::any FlowController::_stmt(const Parser::StmtNodePtr& node) {
+    std::any FlowController::_stmt(const Parser::StmtNodePtr &node) {
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
                 // TODO: Implement
@@ -286,11 +287,11 @@ namespace FlowController {
         return nullptr;
     }
 
-    void FlowController::_stmts(const Parser::StmtsNodePtr& node) {
-        for (auto& stmt : node->stmts) { _stmt(stmt); }
+    void FlowController::_stmts(const Parser::StmtsNodePtr &node) {
+        for (auto &stmt: node->stmts) { _stmt(stmt); }
     }
 
-    std::string FlowController::_string(const Parser::StringNodePtr& node) {
+    std::string FlowController::_string(const Parser::StringNodePtr &node) {
         auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
         auto stringNode = stringExp->stringNode;
 
@@ -309,9 +310,9 @@ namespace FlowController {
         // TODO: Implement
     }
 
-    void FlowController::_variable(const Parser::VariableNodePtr&) {}
+    void FlowController::_variable(const Parser::VariableNodePtr &) {}
 
-    std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
+    std::any FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode> &unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
                 auto expr = std::any_cast<TypeChecker::CommanderInt>(_expr(unOp->expr));
@@ -348,7 +349,7 @@ namespace FlowController {
         }
     }
 
-    std::any FlowController::_binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp) {
+    std::any FlowController::_binaryOp(std::shared_ptr<Parser::BinOpExprNode> &binOp) {
         // TODO: Make general to any type, for now assume just using int or bool
         TypeChecker::CommanderInt left;
         TypeChecker::CommanderInt right;

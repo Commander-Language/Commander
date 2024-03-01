@@ -87,7 +87,8 @@ namespace FlowController {
         /**
          * @brief Class Constructor
          */
-        FlowController(Parser::ASTNodeList&);
+        FlowController(Parser::ASTNodeList &);
+
         /**
          * @brief Parse the AST Nodes
          */
@@ -127,7 +128,7 @@ namespace FlowController {
          * @param name The name of the symbol
          * @returns The value of the symbol
          */
-        std::any _getVariable(const std::string& name);
+        std::any _getVariable(const std::string &name);
 
         /**
          * @brief Run a command
@@ -144,42 +145,51 @@ namespace FlowController {
         /**
          * @brief Helper to interpret binding nodes
          */
-        void _binding(const Parser::BindingNodePtr&);
+        void _binding(const Parser::BindingNodePtr &);
+
         /**
          * @brief Helper to interpret bindings nodes
          */
-        void _bindings(const Parser::BindingsNodePtr&);
+        void _bindings(const Parser::BindingsNodePtr &);
+
         /**
          * @brief Helper to interpret cmd nodes
          */
-        void _cmd(const Parser::CmdNodePtr&);
+        void _cmd(const Parser::CmdNodePtr &);
+
         /**
          * @brief Helper to interpret expr nodes
          */
-        std::any _expr(const Parser::ExprNodePtr&);
+        std::any _expr(const Parser::ExprNodePtr &);
+
         /**
          * @brief Helper to interpret exprs nodes
          */
-        void _exprs(const Parser::ExprsNodePtr&);
+        void _exprs(const Parser::ExprsNodePtr &);
+
         /**
          * @brief Helper to interpret prgm nodes
          */
-        void _prgm(const std::shared_ptr<Parser::PrgmNode>&);
+        void _prgm(const std::shared_ptr<Parser::PrgmNode> &);
+
         /**
          * @brief Helper to interpret stmt nodes
          * @details Some statements need to return some generic value;
          * for example the body of a function call, so return value or nullptr if unnecessary.
          * @returns Generic value or nullptr if not needed.
          */
-        std::any _stmt(const Parser::StmtNodePtr&);
+        std::any _stmt(const Parser::StmtNodePtr &);
+
         /**
          * @brief Helper to interpret stmts nodes
          */
-        void _stmts(const Parser::StmtsNodePtr&);
+        void _stmts(const Parser::StmtsNodePtr &);
+
         /**
          * @brief Helper to interpret string nodes
          */
-        std::string _string(const Parser::StringNodePtr&);
+        std::string _string(const Parser::StringNodePtr &);
+
         /**
          * @brief Helper to interpret types nodes
          * @param types The types to interpret
@@ -188,21 +198,23 @@ namespace FlowController {
         /**
          * @brief Helper to interpret type nodes
          */
-        void _type(const Parser::TypeNodePtr&);
+        void _type(const Parser::TypeNodePtr &);
+
         /**
          * @brief Helper to interpret variable nodes
          */
-        void _variable(const Parser::VariableNodePtr&);
+        void _variable(const Parser::VariableNodePtr &);
 
         /**
          * @brief Helper to interpret unary operations
          */
-        std::any _unaryOp(std::shared_ptr<Parser::UnOpExprNode>&);
+        std::any _unaryOp(std::shared_ptr<Parser::UnOpExprNode> &);
 
         /**
          * @brief Helper to interpret binary operations
          */
-        std::any _binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp);
+        std::any _binaryOp(std::shared_ptr<Parser::BinOpExprNode> &binOp);
+
         /**
          *
          * @return
