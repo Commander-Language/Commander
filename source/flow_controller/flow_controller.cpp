@@ -9,12 +9,13 @@
  * Node Helper Functions:
  *      TODO: Finish the following:  _type,
  * Statements:
- *      TODO: Finish the following: If, For, While, Do While, Return, Scope, Command, Alias
+ *      TODO: Finish the following: If, For, While, Do While, Return, Scope, Alias
  */
 
 #include "source/flow_controller/flow_controller.hpp"
-#include "source/flow_controller/types.hpp"
 #include "source/flow_controller/operations.hpp"
+
+
 #include "source/job_runner/job_runner.hpp"
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
@@ -22,6 +23,7 @@
 #include "source/util/commander_exception.hpp"
 #include "source/flow_controller/types.hpp"
 #include <cmath>
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -152,6 +154,7 @@ namespace FlowController {
                 args = _parseArguments(cmd->arguments);
 
                 // Run the command
+                // Note: hard-coded false for async command because we shouldn't save info for an async command
                 auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, true, false);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));

@@ -1,6 +1,6 @@
 /**
  * @brief Implementations of Commander Operations
- * @details Each operation will have to check the type of the incoming
+ * @details Each operation will have to check the type of the incoming Commander Types
  */
 #include "source/flow_controller/types.hpp"
 
