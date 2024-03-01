@@ -249,6 +249,18 @@ namespace FlowController {
                 auto expr = std::static_pointer_cast<Parser::CmdExprNode>(node);
                 return _cmd(expr->cmd, true);
             }
+            case Parser::API_CALL_EXPR: {
+                //TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+            }
+            case Parser::SCAN_EXPR: {
+                //TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+            }
+            case Parser::READ_EXPR: {
+                //TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+            }
             default: {
                 throw Util::CommanderException("Flow Controller: Unknown expression encountered");
             }
@@ -270,7 +282,7 @@ namespace FlowController {
             case Parser::IF_STMT: {
                 // TODO: Implement
                 auto stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(node);
-                return nullptr;
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
             }
             case Parser::FOR_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ForStmtNode>(node);
@@ -385,7 +397,31 @@ namespace FlowController {
             }
             case Parser::ALIAS_STMT: {
                 // TODO: Implement
-                break;
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::IMPORT_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::PRINT_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::PRINTLN_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::WRITE_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::TYPE_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::FUNCTION_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
             }
             default: {
                 throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
@@ -400,16 +436,14 @@ namespace FlowController {
 
     std::string FlowController::_string(const Parser::StringNodePtr &node) {
         //auto stringExp = std::dynamic_pointer_cast<Parser::StringExprNode>(node);
-        if (!node->literal.empty()) {
+        if (node->isLiteral()) {
             return node->literal;
-        } else if(node->expressions != nullptr) {
-            std::string stringResult;
-            for (auto &ptr: node->expressions->expressions) {
-                stringResult.append(_expr(ptr)->getStringRepresentation());
-            }
-            return stringResult;
         }
-        return {};
+        std::string stringResult;
+        for (auto &ptr: node->expressions->expressions) {
+            stringResult.append(_expr(ptr)->getStringRepresentation());
+        }
+        return stringResult;
     }
 
     void FlowController::_types(const Parser::TypesNodePtr &node) {

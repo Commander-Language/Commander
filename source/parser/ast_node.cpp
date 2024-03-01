@@ -405,7 +405,7 @@ namespace Parser {
 
     StringNode::StringNode(StringExprsNodePtr exprs) : expressions(std::move(exprs)) {}
 
-    bool StringNode::isLiteral() const { return expressions != nullptr; }
+    bool StringNode::isLiteral() const { return expressions == nullptr; }
 
     ASTNodeType StringNode::nodeType() const { return ASTNodeType::STRING; }
 
