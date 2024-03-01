@@ -682,16 +682,16 @@ subtract = () -> {
 ## User I/O
 You may read in user input using ```scan```, which takes in a string to prompt the user with (use ```""``` if no prompt is necessary). 
 
-You may output strings to the console using ```print``` along with the string being printed (you may alternatively use ```println``` to print with a newline following the string, or use the built-in command ```echo```).
+You may output strings to the console using ```print``` along with the data being printed (you may alternatively use ```println``` to print with a newline following the printed string, or use the built-in command ```echo```).
 ### Grammar
 ```
 <string_expr> : scan <string_expr>
               | scan( <string_expr> )
 
-<stmt>   : print <string_expr> ;
-         | print( <string_expr> );
-         | println <string_expr> ;
-         | println( <string_expr> );
+<stmt>   : print <expr> ;
+         | print( <expr> );
+         | println <expr> ;
+         | println( <expr> );
 ```
 ### Examples
 ```

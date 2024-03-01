@@ -365,7 +365,47 @@ namespace FlowController {
                 // Util::println(std::to_string(std::any_cast<TypeChecker::CommanderBool>(value)));
             case Parser::EXPR_STMT: {
                 auto expr = std::static_pointer_cast<Parser::ExprStmtNode>(node);
-                CommanderTypePtr value = _expr(expr->expression);
+                return _expr(expr->expression);
+            }
+            case Parser::ALIAS_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::IMPORT_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::PRINT_STMT: {
+                auto expr = std::static_pointer_cast<Parser::PrintStmtNode>(node);
+                const CommanderTypePtr value = _expr(expr->expression);
+                switch (expr->expression->type->getType()) {
+                    case TypeChecker::INT:
+                        Util::print(std::static_pointer_cast<CommanderInt>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::FLOAT:
+                        Util::print(std::static_pointer_cast<CommanderFloat>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::BOOL:
+                        Util::print(std::static_pointer_cast<CommanderBool>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::TUPLE:
+                        Util::print(std::static_pointer_cast<CommanderTuple>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::ARRAY:
+                        Util::print(std::static_pointer_cast<CommanderArray>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::FUNCTION:
+                        Util::print(std::static_pointer_cast<CommanderLambda>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::STRING:
+                        Util::print(std::static_pointer_cast<CommanderString>(value)->getStringRepresentation());
+                        break;
+                }
+                return value;
+            }
+            case Parser::PRINTLN_STMT: {
+                auto expr = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
+                const CommanderTypePtr value = _expr(expr->expression);
                 switch (expr->expression->type->getType()) {
                     case TypeChecker::INT:
                         Util::println(std::static_pointer_cast<CommanderInt>(value)->getStringRepresentation());
@@ -390,22 +430,6 @@ namespace FlowController {
                         break;
                 }
                 return value;
-            }
-            case Parser::ALIAS_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
-            }
-            case Parser::IMPORT_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
-            }
-            case Parser::PRINT_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
-            }
-            case Parser::PRINTLN_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
             }
             case Parser::WRITE_STMT: {
                 // TODO: Implement

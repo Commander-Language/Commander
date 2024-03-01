@@ -559,22 +559,12 @@ namespace TypeChecker {
             }
             case Parser::PRINT_STMT: {
                 Parser::PrintStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::PrintStmtNode>(astNode);
-                TyPtr const exprType = typeCheck(stmtNode->expression);
-                if (!exprType || exprType->getType() != Type::STRING) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Expected a string expression for print statement, but got something else.");
-                }
+                typeCheck(stmtNode->expression);
                 return nullptr;
             }
             case Parser::PRINTLN_STMT: {
                 Parser::PrintlnStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::PrintlnStmtNode>(astNode);
-                TyPtr const exprType = typeCheck(stmtNode->expression);
-                if (!exprType || exprType->getType() != Type::STRING) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Expected a string expression for println statement, but got something else.");
-                }
+                typeCheck(stmtNode->expression);
                 return nullptr;
             }
             case Parser::WRITE_STMT: {
