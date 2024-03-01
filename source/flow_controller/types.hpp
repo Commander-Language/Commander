@@ -41,9 +41,15 @@ namespace FlowController {
      */
     struct CommanderArray : public CommanderType {
         /**
+         * @brief Class Constructor
+         * @param values The values to set the array.
+         */
+        CommanderArray(std::vector<CommanderTypePtr> values);
+
+        /**
          * @brief The values in the array.
          */
-        std::vector<CommanderTypePtr> values{};
+        std::vector<CommanderTypePtr> values;
 
         /**
          * @brief Get a string representation of the type.
@@ -71,9 +77,15 @@ namespace FlowController {
      */
     struct CommanderBool : public CommanderType {
         /**
+         * @brief Class Constructor
+         * @param value The value to set to.
+         */
+        CommanderBool(bool value);
+
+        /**
          * @brief That value of this Commander bool.
          */
-        bool value{};
+        bool value;
 
         /**
          * @brief Get a string representation of the type.
@@ -100,6 +112,12 @@ namespace FlowController {
      * @brief A Commander tuple representation.
      */
     struct CommanderTuple : public CommanderType {
+        /**
+         * @brief Class Constructor
+         * @param values The values of the tuple to set
+         */
+        CommanderTuple(std::vector<CommanderTypePtr> values);
+
         /**
          * @brief The values of a tuple
          */
@@ -130,6 +148,15 @@ namespace FlowController {
      * @brief A Commander string representation.
      */
     struct CommanderString : public CommanderType {
+        /**
+         * @brief Class Constructor
+         * @param value The value to set to.
+         */
+        CommanderString(std::string value);
+
+        /**
+         * @brief The value of this string
+         */
         std::string value;
 
         /**
@@ -157,6 +184,15 @@ namespace FlowController {
      * @brief A Commander int representation.
      */
     struct CommanderInt : public CommanderType {
+        /**
+         * @brief Class Constructor
+         * @param value The value to set to.
+         */
+        CommanderInt(int64_t value);
+
+        /**
+         * @brief The value of this int.
+         */
         int64_t value;
 
         /**
@@ -184,6 +220,15 @@ namespace FlowController {
      * @brief A Commander float representation.
      */
     struct CommanderFloat : public CommanderType {
+        /**
+         * @brief Class Constructor
+         * @param value The value to set to
+         */
+        CommanderFloat(double value);
+
+        /**
+         * @brief The value of this float.
+         */
         double value;
 
         /**
@@ -211,12 +256,17 @@ namespace FlowController {
      * @brief A commander lambda representation
      */
     struct CommanderLambda : public CommanderType {
-        CommanderLambda(Parser::BindingsNodePtr, Parser::StmtNodePtr);
+        /**
+         * @brief Class Constructor
+         * @param bindings The bindings for the lambda/function
+         * @param body The body of the lambda/function
+         * @param name The name of the lambda/function (defaults to empty)
+         */
+        CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body, std::string name = "");
 
         std::string name;
         Parser::BindingsNodePtr bindings;
         Parser::StmtNodePtr body;
-        TypeChecker::TyPtr returnType;
 
         /**
          * @brief Get a string representation of the type.

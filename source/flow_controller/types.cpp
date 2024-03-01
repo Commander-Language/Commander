@@ -4,11 +4,14 @@
  */
 #include "types.hpp"
 
+#include <utility>
+
 namespace FlowController {
 
     //  =================
     //  ||    Array    ||
     //  =================
+    CommanderArray::CommanderArray(std::vector<CommanderTypePtr> values) : values(std::move(values)) {}
 
     [[nodiscard]] std::string CommanderArray::getStringRepresentation() const {
         std::string output = "[";
@@ -28,6 +31,8 @@ namespace FlowController {
     //  ||     Bool    ||
     //  =================
 
+    CommanderBool::CommanderBool(bool value) : value(value) {}
+
     [[nodiscard]] std::string CommanderBool::getStringRepresentation() const { return value ? "true" : "false"; }
 
     [[nodiscard]] TypeChecker::Type CommanderBool::getType() const { return TypeChecker::BOOL; }
@@ -35,6 +40,7 @@ namespace FlowController {
     //  =================
     //  ||     Int     ||
     //  =================
+    CommanderInt::CommanderInt(int64_t value) : value(value) {}
 
     [[nodiscard]] std::string CommanderInt::getStringRepresentation() const { return std::to_string(value); }
 
@@ -44,6 +50,8 @@ namespace FlowController {
     //  ||    Float    ||
     //  =================
 
+    CommanderFloat::CommanderFloat(double value) : value(value) {}
+
     [[nodiscard]] std::string CommanderFloat::getStringRepresentation() const { return std::to_string(value); }
 
     [[nodiscard]] TypeChecker::Type CommanderFloat::getType() const { return TypeChecker::FLOAT; }
@@ -51,6 +59,7 @@ namespace FlowController {
     //  =================
     //  ||    Tuple    ||
     //  =================
+    CommanderTuple::CommanderTuple(std::vector<CommanderTypePtr> values) : values(std::move(values)) {}
 
     [[nodiscard]] std::string CommanderTuple::getStringRepresentation() const {
         std::string output = "(";
@@ -67,14 +76,18 @@ namespace FlowController {
     //  =================
     //  ||   Lambda    ||
     //  =================
+    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings,
+                                     Parser::StmtNodePtr body, std::string name) : bindings(std::move(bindings)),
+                                                                                   body(std::move(body)),
+                                                                                   name(std::move(name)) {}
 
     [[nodiscard]] TypeChecker::Type CommanderTuple::getType() const { return TypeChecker::TUPLE; }
 
     [[nodiscard]] std::string CommanderLambda::getStringRepresentation() const {
         if (name.empty())
             return "<Anonymous Lambda>";
-        else
-            return "<Function " + name + ">";
+
+        return "<Function " + name + ">";
     }
 
     [[nodiscard]] TypeChecker::Type CommanderLambda::getType() const { return TypeChecker::FUNCTION; }
@@ -82,6 +95,8 @@ namespace FlowController {
     //  =================
     //  ||   String    ||
     //  =================
+
+    CommanderString::CommanderString(std::string value) : value(std::move(value)) {}
 
     [[nodiscard]] std::string CommanderString::getStringRepresentation() const { return value; }
 
