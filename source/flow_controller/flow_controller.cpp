@@ -125,7 +125,7 @@ namespace FlowController {
             }
             case Parser::PIPE_CMD: {
                 auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(node);
-                std::vector<std::vector<std::string>> pipeArgs;
+                const std::vector<std::vector<std::string>> pipeArgs;
                 std::vector<JobRunner::ProcessPtr> processes;
 
                 std::vector<Parser::CmdCmdNodePtr> jobs;
@@ -192,8 +192,17 @@ namespace FlowController {
                 return std::make_shared<CommanderArray>(array);
             }
             case Parser::INDEX_EXPR: {
-                // TODO: Index expressions
-                return nullptr;
+                auto expr = std::static_pointer_cast<Parser::IndexExprNode>(node);
+                const CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(expr->index));
+                auto baseExpr = expr->expr;
+                auto baseEval = _expr(baseExpr);
+                if (baseExpr->type->getType() == TypeChecker::ARRAY) {
+                    const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(_expr(baseExpr));
+                    return array->values[index->value];
+                } else {
+                    const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(_expr(baseExpr));
+                    return tuple->values[index->value];
+                }
             }
             case Parser::TUPLE_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::TupleExprNode>(node);
@@ -256,8 +265,9 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
             }
             case Parser::READ_EXPR: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+                auto expr = std::static_pointer_cast<Parser::ReadExprNode>(node);
+                const CommanderStringPtr path = std::static_pointer_cast<CommanderString>(_expr(expr->filePath));
+                return std::make_shared<CommanderString>(CommanderString {Util::readFile(path->value)});
             }
             default: {
                 throw Util::CommanderException("Flow Controller: Unknown expression encountered");
@@ -278,9 +288,15 @@ namespace FlowController {
 
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
-                // TODO: Implement
                 auto stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(node);
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                CommanderTypePtr conditionResult = _expr(stmtNode->condition);
+                Parser::StmtNodePtr statements;
+                if (std::static_pointer_cast<CommanderBool>(conditionResult)->value) {
+                    statements = stmtNode->trueStmt;
+                } else {
+                    statements = stmtNode->falseStmt;
+                }
+                return _stmt(statements);
             }
             case Parser::FOR_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ForStmtNode>(node);
@@ -309,7 +325,7 @@ namespace FlowController {
             case Parser::WHILE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(node);
 
-                _symbolTable.pushSymbolTable();  // while gets new scope
+                //_symbolTable.pushSymbolTable();  // while gets new scope
 
                 CommanderTypePtr exprResult = _expr(stmtNode->condition);
                 // Type checked?
@@ -321,7 +337,7 @@ namespace FlowController {
                     condition = std::static_pointer_cast<CommanderBool>(exprResult);
                 }
 
-                _symbolTable.popSymbolTable();  // pop scope from while
+                //_symbolTable.popSymbolTable();  // pop scope from while
 
                 return nullptr;
             }
@@ -356,6 +372,7 @@ namespace FlowController {
                 _symbolTable.pushSymbolTable();  // new scope
                 for (auto& statement : stmtNode->stmts->stmts) { _stmt(statement); }
                 _symbolTable.popSymbolTable();  // pop the created scope
+                return nullptr;
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
@@ -364,7 +381,47 @@ namespace FlowController {
                 // Util::println(std::to_string(std::any_cast<TypeChecker::CommanderBool>(value)));
             case Parser::EXPR_STMT: {
                 auto expr = std::static_pointer_cast<Parser::ExprStmtNode>(node);
-                CommanderTypePtr value = _expr(expr->expression);
+                return _expr(expr->expression);
+            }
+            case Parser::ALIAS_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::IMPORT_STMT: {
+                // TODO: Implement
+                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+            }
+            case Parser::PRINT_STMT: {
+                auto expr = std::static_pointer_cast<Parser::PrintStmtNode>(node);
+                const CommanderTypePtr value = _expr(expr->expression);
+                switch (expr->expression->type->getType()) {
+                    case TypeChecker::INT:
+                        Util::print(std::static_pointer_cast<CommanderInt>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::FLOAT:
+                        Util::print(std::static_pointer_cast<CommanderFloat>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::BOOL:
+                        Util::print(std::static_pointer_cast<CommanderBool>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::TUPLE:
+                        Util::print(std::static_pointer_cast<CommanderTuple>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::ARRAY:
+                        Util::print(std::static_pointer_cast<CommanderArray>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::FUNCTION:
+                        Util::print(std::static_pointer_cast<CommanderLambda>(value)->getStringRepresentation());
+                        break;
+                    case TypeChecker::STRING:
+                        Util::print(std::static_pointer_cast<CommanderString>(value)->getStringRepresentation());
+                        break;
+                }
+                return nullptr;
+            }
+            case Parser::PRINTLN_STMT: {
+                auto expr = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
+                const CommanderTypePtr value = _expr(expr->expression);
                 switch (expr->expression->type->getType()) {
                     case TypeChecker::INT:
                         Util::println(std::static_pointer_cast<CommanderInt>(value)->getStringRepresentation());
@@ -388,27 +445,14 @@ namespace FlowController {
                         Util::println(std::static_pointer_cast<CommanderString>(value)->getStringRepresentation());
                         break;
                 }
-                return value;
-            }
-            case Parser::ALIAS_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
-            }
-            case Parser::IMPORT_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
-            }
-            case Parser::PRINT_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
-            }
-            case Parser::PRINTLN_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                return nullptr;
             }
             case Parser::WRITE_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                auto expr = std::static_pointer_cast<Parser::WriteStmtNode>(node);
+                const CommanderStringPtr data = std::static_pointer_cast<CommanderString>(_expr(expr->fileData));
+                const CommanderStringPtr path = std::static_pointer_cast<CommanderString>(_expr(expr->filePath));
+                Util::writeToFile(data->value, path->value);
+                return nullptr;
             }
             case Parser::TYPE_STMT: {
                 // TODO: Implement
@@ -450,6 +494,31 @@ namespace FlowController {
     CommanderTypePtr FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            intType->value *= -1;
+                            _setVariable(varI->varName, intType);
+                            return intType;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            floatType->value *= -1.0F;
+                            _setVariable(varI->varName, floatType);
+                            return floatType;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
+
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
@@ -469,6 +538,17 @@ namespace FlowController {
             }
             case Parser::NOT: {
                 auto expr = std::static_pointer_cast<CommanderBool>(_expr(unOp->expr));
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    auto boolType = std::static_pointer_cast<CommanderBool>(value);
+                    boolType->value = !boolType->value;
+                    _setVariable(varI->varName, boolType);
+                    return boolType;
+                }
                 switch (expr->getType()) {
                     case TypeChecker::BOOL: {
                         auto boolType = std::static_pointer_cast<CommanderBool>(expr);
@@ -482,6 +562,30 @@ namespace FlowController {
             }
             case Parser::PRE_INCREMENT: {
                 CommanderTypePtr const expr = _expr(unOp->expr);
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            intType->value++;
+                            _setVariable(varI->varName, intType);
+                            return intType;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            floatType->value++;
+                            _setVariable(varI->varName, floatType);
+                            return floatType;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
                         auto intType = std::static_pointer_cast<CommanderInt>(expr);
@@ -499,6 +603,31 @@ namespace FlowController {
                 }
             }
             case Parser::POST_INCREMENT: {
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            auto hold = std::make_shared<CommanderInt>(intType->value);
+                            intType->value++;
+                            _setVariable(varI->varName, intType);
+                            return hold;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
+                            floatType->value++;
+                            _setVariable(varI->varName, floatType);
+                            return hold;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
@@ -519,6 +648,30 @@ namespace FlowController {
                 }
             }
             case Parser::PRE_DECREMENT: {
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            intType->value--;
+                            _setVariable(varI->varName, intType);
+                            return intType;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            floatType->value--;
+                            _setVariable(varI->varName, floatType);
+                            return floatType;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
@@ -537,6 +690,31 @@ namespace FlowController {
                 }
             }
             case Parser::POST_DECREMENT: {
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            auto hold = std::make_shared<CommanderInt>(intType->value);
+                            intType->value--;
+                            _setVariable(varI->varName, intType);
+                            return hold;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
+                            floatType->value--;
+                            _setVariable(varI->varName, floatType);
+                            return hold;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
