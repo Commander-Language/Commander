@@ -68,7 +68,7 @@ namespace FlowController {
          * @brief Run a command
          */
         static JobRunner::JobInfo
-        _runCommand(JobRunner::Process *process);
+        _runCommand(JobRunner::ProcessPtr process);
 
         /**
          * @brief Helper to interpret binding nodes
@@ -104,7 +104,7 @@ namespace FlowController {
         /**
          * @brief Helper to interpret cmd nodes
          */
-        CommanderTypePtr _cmd(const Parser::CmdNodePtr &);
+        CommanderTypePtr _cmd(const Parser::CmdNodePtr &, bool saveInfo = false);
 
         /**
          * @brief Helper to interpret expr nodes

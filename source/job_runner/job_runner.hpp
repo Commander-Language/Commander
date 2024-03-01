@@ -51,7 +51,7 @@ namespace JobRunner {
          * @details This links up the pipeline in the order given.
          *          Use other constructor to create these processes.
          */
-        Process(std::vector<Process*> processes);
+        Process(std::vector<std::shared_ptr<Process>> processes);
 
         /**
          * @brief Constructor
@@ -107,7 +107,7 @@ namespace JobRunner {
          * @brief A linked-list of processes, that represents a pipe.
          * @details Order of the linked-list is the order to execute and link pipes.
          */
-        Process* pipe = nullptr;
+        std::shared_ptr<Process> pipe = nullptr;
 
         /**
          * @brief The size of the pipeline
@@ -125,6 +125,8 @@ namespace JobRunner {
         bool isLast = false;
     };
 
+    using ProcessPtr = std::shared_ptr<Process>;
+
     //  ==========================
     //  ||   JobRunner Class    ||
     //  ==========================
@@ -138,7 +140,7 @@ namespace JobRunner {
          * @brief Constructor
          * @param process - The process being set to run
          */
-        JobRunner(Process* process);
+        JobRunner(ProcessPtr process);
 
         /**
          * @brief Destructor
@@ -154,7 +156,7 @@ namespace JobRunner {
         /**
          * @details The process to execute
          */
-        Process* _process;
+        ProcessPtr _process;
 
         /**
          * @brief Executes a process
@@ -164,7 +166,7 @@ namespace JobRunner {
          * @param in - file descriptor to read from (for builtins)
          * @param out - file descriptor to write to (for builtins)
          */
-        void _exec(Process* process);
+        void _exec(const ProcessPtr& process);
 
         /**
          * @brief Exectue a builtin command without returning
@@ -173,29 +175,30 @@ namespace JobRunner {
          * @param in - The file descriptor to read from (default std in)
          * @param out - The file descriptor to write to (default std out)
          */
-        void _execBuiltinNoReturn(Process* process, int in = STDIN_FILENO, int out = STDOUT_FILENO);
+        void _execBuiltinNoReturn(const ProcessPtr& process, int in = STDIN_FILENO, int out = STDOUT_FILENO);
 
         /**
          * @brief Execute a builtin
+         * @param process - The process to execute
          * @param in - The file descriptor to read from (default std in)
          * @param out - The file descriptor to write to (default std out)
          * @return The job information
          */
-        JobInfo _execBuiltin(Process*, int in = STDIN_FILENO, int out = STDOUT_FILENO);
+        JobInfo _execBuiltin(const ProcessPtr& process, int in = STDIN_FILENO, int out = STDOUT_FILENO);
 
         /**
          * @brief Execute an external program without forking
          * @details This shouldn't return, so fork before calling if needed.
          * @param process - The process to execute
          */
-        void _execNoFork(Process* process);
+        void _execNoFork(const ProcessPtr& process);
 
         /**
          * @brief Execute a external program with a fork
          * @param process - The process to execute
          * @return The job information
          */
-        JobInfo _execFork(Process* process);
+        JobInfo _execFork(const ProcessPtr& process);
 
         /**
          * @brief Does piping of processes
@@ -204,13 +207,13 @@ namespace JobRunner {
          * @param process - The start process of the pipeline
          * @return The job information of the last process if set to save
          */
-        JobInfo _doPiping(Process* process);
+        JobInfo _doPiping(const ProcessPtr& process);
 
         /**
          * @brief Execute a process in the background
          * @param process - The process to execute
          */
-        void _doBackground(Process* process);
+        void _doBackground(const ProcessPtr& process);
 
         /**
          * @brief Set up process to be able to save return information from
@@ -219,7 +222,7 @@ namespace JobRunner {
          *                     (if it is, should call this at end of pipe)
          * @return The job information
          */
-        JobInfo _doSaveInfo(Process* process, bool partOfPipe, int* fds = nullptr, size_t count = 0);
+        JobInfo _doSaveInfo(const ProcessPtr& process, bool partOfPipe, int *fds = nullptr, size_t count = 0);
 
         /**
          * @brief Helper to resize a char array

@@ -7,11 +7,9 @@
  *             through type checking or saving types in the symbol table.
  *
  * Node Helper Functions:
- *      TODO: Finish the following: _cmd, _type,
+ *      TODO: Finish the following:  _type,
  * Statements:
  *      TODO: Finish the following: If, For, While, Do While, Return, Scope, Command, Alias
- * Expressions:
- *      TODO: Finish the following: Command
  */
 
 #include "source/flow_controller/flow_controller.hpp"
@@ -112,7 +110,7 @@ namespace FlowController {
     }
 
 
-    CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr &node) {
+    CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr &node, bool saveInfo) {
         std::vector<std::string> args;
 
         switch (node->nodeType()) {
@@ -121,14 +119,14 @@ namespace FlowController {
                 args = _parseArguments(cmd->arguments);
 
                 // Run the command
-                JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, false, false);
-                auto jobResult = _runCommand(&job);
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, false, saveInfo);
+                auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             case Parser::PIPE_CMD: {
                 auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(node);
                 std::vector<std::vector<std::string>> pipeArgs;
-                std::vector<JobRunner::Process *> processes;
+                std::vector<JobRunner::ProcessPtr> processes;
 
                 std::vector<Parser::CmdCmdNodePtr> jobs;
                 _getJobs(pipeCmd, jobs);
@@ -136,12 +134,12 @@ namespace FlowController {
                 std::vector<std::string> pArgs;
                 for (const auto &job: jobs) {
                     pArgs = _parseArguments(job->arguments);
-                    auto* process = new JobRunner::Process(pArgs, JobRunner::ProcessType::EXTERNAL, false, false);
+                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL, false, saveInfo);
                     processes.emplace_back(process);
                 }
 
-                JobRunner::Process pipeline(processes);
-                auto jobResult = _runCommand(&pipeline);
+                auto pipeline = std::make_shared<JobRunner::Process>(processes);
+                auto jobResult = _runCommand(pipeline);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             case Parser::ASYNC_CMD: {
@@ -151,8 +149,8 @@ namespace FlowController {
                 args = _parseArguments(cmd->arguments);
 
                 // Run the command
-                JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, true, false);
-                auto jobResult = _runCommand(&job);
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, true, false);
+                auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             default:
@@ -247,8 +245,8 @@ namespace FlowController {
                 return std::make_shared<CommanderLambda>(expr->bindings, expr->body);
             }
             case Parser::CMD_EXPR: {
-                // TODO: Implement
-                break;
+                auto expr = std::static_pointer_cast<Parser::CmdExprNode>(node);
+                return _cmd(expr->cmd, true);
             }
             default: {
                 throw Util::CommanderException("Flow Controller: Unknown expression encountered");
@@ -1078,8 +1076,8 @@ namespace FlowController {
     //  ||   Helper Methods     ||
     //  ==========================
     JobRunner::JobInfo
-    FlowController::_runCommand(JobRunner::Process *process) {
-        JobRunner::JobRunner runner(process);
+    FlowController::_runCommand(JobRunner::ProcessPtr process) {
+        JobRunner::JobRunner runner(std::move(process));
         return runner.execProcess();
     }
 
