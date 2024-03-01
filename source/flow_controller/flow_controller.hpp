@@ -10,15 +10,14 @@
 #include "source/parser/parser.hpp"
 #include "source/flow_controller/types.hpp"
 #include "source/job_runner/job_runner.hpp"
+#include "source/parser/ast_node.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/util/print.hpp"
 #include "source/type_checker/type.hpp"
 
-#include <any>
 #include <cmath>
-#include <iostream>
-#include <ncurses.h>
-#include <tuple>
+#include <memory>
+#include <string>
 
 namespace FlowController {
     /**
@@ -68,8 +67,8 @@ namespace FlowController {
         /**
          * @brief Run a command
          */
-        JobRunner::JobInfo
-        _runCommand(JobRunner::Process* process);
+        static JobRunner::JobInfo
+        _runCommand(JobRunner::Process *process);
 
         /**
          * @brief Helper to interpret binding nodes

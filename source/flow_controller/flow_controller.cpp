@@ -14,11 +14,20 @@
  *      TODO: Finish the following: Command
  */
 
-#include "flow_controller.hpp"
+#include "source/flow_controller/flow_controller.hpp"
+#include "source/flow_controller/types.hpp"
 #include "source/job_runner/job_runner.hpp"
 #include "source/parser/ast_node.hpp"
+#include "source/parser/parser.hpp"
+#include "source/type_checker/type.hpp"
 #include "source/util/commander_exception.hpp"
 #include "source/flow_controller/types.hpp"
+#include <cmath>
+#include <memory>
+#include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace FlowController {
 
@@ -154,8 +163,6 @@ namespace FlowController {
                 // TODO: Better error
                 throw Util::CommanderException("Not a command");
         }
-
-        return {};
     }
 
     CommanderTypePtr FlowController::_expr(const Parser::ExprNodePtr &node) {
@@ -229,7 +236,7 @@ namespace FlowController {
                 for (auto &arg: expr->args->exprs) {
                     // args and bindings should be lined up 1 to 1
                     CommanderTypePtr argValue = _expr(arg);
-                    std::string argName = function->bindings->bindings[bindingIndex]->variable;
+                    std::string const argName = function->bindings->bindings[bindingIndex]->variable;
                     _setVariable(argName, argValue);
 
                     bindingIndex++;
