@@ -19,15 +19,15 @@ namespace Function {
 
     /* ========== Type Maker ========== */
 
-    /**
-     * Returns a function type with zero param types and the return type as the argument type
-     * @param arg The argument type that is used for the return type
-     * @return The function type
-     */
-    TypeChecker::FunctionTyPtr getFunctionTy(TypeChecker::TyPtr arg) {
-        const std::vector<TypeChecker::TyPtr> params;
-        return std::make_shared<TypeChecker::FunctionTy>(params, arg);
-    }
+   // /**
+   //  * Returns a function type with zero param types and the return type as the argument type
+   //  * @param arg The argument type that is used for the return type
+   //  * @return The function type
+   //  */
+   // TypeChecker::FunctionTyPtr getFunctionTy(TypeChecker::TyPtr arg) {
+   //     const std::vector<TypeChecker::TyPtr> params;
+   //     return std::make_shared<TypeChecker::FunctionTy>(params, arg);
+   // }
 
     /**
      * Returns a function type with the first n - 1 arguments as param types and the return type as the nth argument
