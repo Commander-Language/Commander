@@ -2,10 +2,6 @@
  * @file flow_controller.cpp
  * @brief Implements the Flow Controller and runtime
  *
- *  Important: Assuming the types used with binary/unary expressions to be int. The only exceptions being logical
- *             operators like && and ||. Update to be more generic when we know the types of expressions, possibly
- *             through type checking or saving types in the symbol table.
- *
  * Node Helper Functions:
  *      TODO: Finish the following:  _type,
  * Statements:
@@ -108,8 +104,8 @@ namespace FlowController {
         _setVariable(node->variable, nullptr);
     }
 
-    void FlowController::_bindings(const Parser::BindingsNodePtr &node) {
-        for (auto &binding: node->bindings) { _binding(binding); }
+    void FlowController::_bindings(const Parser::BindingsNodePtr &nodes) {
+        for (auto &binding: nodes->bindings) { _binding(binding); }
     }
 
 
@@ -258,11 +254,10 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unknown expression encountered");
             }
         }
-        return {};  // TODO: Find better default return
     }
 
-    void FlowController::_exprs(const Parser::ExprsNodePtr &node) {
-        for (auto &expr: node->exprs) { _expr(expr); }
+    void FlowController::_exprs(const Parser::ExprsNodePtr &nodes) {
+        for (auto &expr: nodes->exprs) { _expr(expr); }
     }
 
     void FlowController::_prgm(const std::shared_ptr<Parser::PrgmNode> &node) {
@@ -270,6 +265,9 @@ namespace FlowController {
     }
 
     CommanderTypePtr FlowController::_stmt(const Parser::StmtNodePtr &node) {
+        if (node == nullptr)
+            return nullptr;
+
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
                 // TODO: Implement
@@ -348,7 +346,7 @@ namespace FlowController {
             case Parser::SCOPE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
                 _symbolTable.pushSymbolTable(); // new scope
-                for(auto &statement : stmtNode->stmts){
+                for (auto &statement: stmtNode->stmts->stmts) {
                     _stmt(statement);
                 }
                 _symbolTable.popSymbolTable(); // pop the created scope
@@ -398,8 +396,8 @@ namespace FlowController {
         return nullptr;
     }
 
-    void FlowController::_stmts(const Parser::StmtsNodePtr &node) {
-        for (auto &stmt: node->stmts) { _stmt(stmt); }
+    void FlowController::_stmts(const Parser::StmtsNodePtr &nodes) {
+        for (auto &stmt: nodes->stmts) { _stmt(stmt); }
     }
 
     std::string FlowController::_string(const Parser::StringNodePtr &node) {
