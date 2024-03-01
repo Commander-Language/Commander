@@ -309,7 +309,7 @@ namespace FlowController {
             case Parser::WHILE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(node);
 
-                _symbolTable.pushSymbolTable();  // while gets new scope
+                //_symbolTable.pushSymbolTable();  // while gets new scope
 
                 CommanderTypePtr exprResult = _expr(stmtNode->condition);
                 // Type checked?
@@ -321,7 +321,7 @@ namespace FlowController {
                     condition = std::static_pointer_cast<CommanderBool>(exprResult);
                 }
 
-                _symbolTable.popSymbolTable();  // pop scope from while
+                //_symbolTable.popSymbolTable();  // pop scope from while
 
                 return nullptr;
             }
@@ -356,6 +356,7 @@ namespace FlowController {
                 _symbolTable.pushSymbolTable();  // new scope
                 for (auto& statement : stmtNode->stmts->stmts) { _stmt(statement); }
                 _symbolTable.popSymbolTable();  // pop the created scope
+                return nullptr;
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
