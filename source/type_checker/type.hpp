@@ -10,6 +10,7 @@
 #include <any>
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -53,11 +54,27 @@ namespace TypeChecker {
      *
      */
     class Ty {
+    protected:
+        /**
+         * @brief Boolean that represents whether the type can be anything of the given type
+         */
+        bool _any = true;
+
+        /**
+         * @breif Constructor
+         */
+        Ty(bool any);
+
     public:
         /**
          * @brief Destructor
          */
         virtual ~Ty() = default;
+
+        /**
+         * @brief Tells whether the type can be anything of the given type
+         */
+        [[nodiscard]] bool any() const;
         /**
          * @brief Gets the type that the Ty class represents
          *
@@ -92,13 +109,18 @@ namespace TypeChecker {
      *
      * @return The string representation of the given type
      */
-    std::string getTypeString(const TypeChecker::TyPtr& tyPtr);
+    std::string getTypeString(const TyPtr& tyPtr);
 
     /**
      * @brief A class representing a Commander int type
      *
      */
     class IntTy : public Ty {
+    public:
+        /**
+         * Default constructor
+         */
+        IntTy();
         /**
          * @brief Gets the type that the class represents
          *
@@ -116,6 +138,11 @@ namespace TypeChecker {
      *
      */
     class FloatTy : public Ty {
+    public:
+        /**
+         * Default constructor
+         */
+        FloatTy();
         /**
          * @brief Gets the type that the class represents
          *
@@ -133,6 +160,11 @@ namespace TypeChecker {
      *
      */
     class BoolTy : public Ty {
+    public:
+        /**
+         * Default constructor
+         */
+        BoolTy();
         /**
          * @brief Gets the type that the class represents
          *
@@ -150,6 +182,11 @@ namespace TypeChecker {
      *
      */
     class StringTy : public Ty {
+    public:
+        /**
+         * Default constructor
+         */
+        StringTy();
         /**
          * @brief Gets the type that the class represents
          *
@@ -168,6 +205,10 @@ namespace TypeChecker {
      */
     class TupleTy : public Ty {
     public:
+        /**
+         * @brief Constructor
+         */
+        TupleTy(bool any);
         /**
          * @brief Constructor
          */
@@ -244,11 +285,12 @@ namespace TypeChecker {
      */
     using FunctionTyPtr = std::shared_ptr<FunctionTy>;
 
-    const TupleTyPtr VOID_TY = std::make_shared<TypeChecker::TupleTy>(std::vector<TypeChecker::TyPtr> {});
-    const IntTyPtr INT_TY = std::make_shared<TypeChecker::IntTy>();
-    const FloatTyPtr FLOAT_TY = std::make_shared<TypeChecker::FloatTy>();
-    const BoolTyPtr BOOL_TY = std::make_shared<TypeChecker::BoolTy>();
-    const StringTyPtr STRING_TY = std::make_shared<TypeChecker::StringTy>();
+    const TupleTyPtr VOID_TY = std::make_shared<TupleTy>(false);
+    const IntTyPtr INT_TY = std::make_shared<IntTy>();
+    const FloatTyPtr FLOAT_TY = std::make_shared<FloatTy>();
+    const BoolTyPtr BOOL_TY = std::make_shared<BoolTy>();
+    const StringTyPtr STRING_TY = std::make_shared<StringTy>();
+    const TyPtr ANY_TY = nullptr;
 
 
 }  //  namespace TypeChecker

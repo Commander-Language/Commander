@@ -8,12 +8,12 @@
 
 namespace TypeChecker {
 
-    // TODO: Default-Constructor: get it working
-    /*TypeChecker::TypeChecker() {
-        for (auto pair : Function::functionTypes) {
-            _table.addVariable(pair.first, std::make_shared<FunctionInfo>())
+    TypeChecker::TypeChecker() {
+        for (const auto& pair : Function::functionTypes) {
+            _table.addVariable(pair.first, std::make_shared<FunctionInfo>(
+                                                   std::vector<TyPtr> {pair.second.begin(), pair.second.end()}));
         }
-    }*/
+    }
 
     void TypeChecker::typeCheck(const Parser::ASTNodeList &astNodeList) {
         for (const Parser::ASTNodePtr &node: astNodeList) { typeCheck(node); }
@@ -363,7 +363,7 @@ namespace TypeChecker {
                 for (const Parser::ExprNodePtr &expr: exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
                 for (const TyPtr &typ: functionTypes) {
-                    std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(typ);
+                    FunctionTyPtr const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }
                     for (int i = 0; i < size; i++) {
@@ -403,7 +403,7 @@ namespace TypeChecker {
                 for (const Parser::ExprNodePtr &expr: exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
                 for (const TyPtr &typ: functionTypes) {
-                    std::shared_ptr<FunctionTy> const functionTy = std::static_pointer_cast<FunctionTy>(typ);
+                    FunctionTyPtr const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }
                     for (int i = 0; i < size; i++) {
@@ -722,7 +722,8 @@ namespace TypeChecker {
 
     VariableTablePtr TypeChecker::popScope() {
         VariableTablePtr scope = std::make_shared<VariableTable>(_table);
-        _table = *_table.getParent();
+        auto parent = _table.getParent();
+        if (parent) { _table = *parent; }
         return scope;
     }
 
