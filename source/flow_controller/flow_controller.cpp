@@ -256,8 +256,9 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
             }
             case Parser::READ_EXPR: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+                auto expr = std::static_pointer_cast<Parser::ReadExprNode>(node);
+                const CommanderStringPtr path = std::static_pointer_cast<CommanderString>(_expr(expr->filePath));
+                return std::make_shared<CommanderString>(CommanderString {Util::readFile(path->value)});
             }
             default: {
                 throw Util::CommanderException("Flow Controller: Unknown expression encountered");
@@ -401,7 +402,7 @@ namespace FlowController {
                         Util::print(std::static_pointer_cast<CommanderString>(value)->getStringRepresentation());
                         break;
                 }
-                return value;
+                return nullptr;
             }
             case Parser::PRINTLN_STMT: {
                 auto expr = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
@@ -429,11 +430,14 @@ namespace FlowController {
                         Util::println(std::static_pointer_cast<CommanderString>(value)->getStringRepresentation());
                         break;
                 }
-                return value;
+                return nullptr;
             }
             case Parser::WRITE_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                auto expr = std::static_pointer_cast<Parser::WriteStmtNode>(node);
+                const CommanderStringPtr data = std::static_pointer_cast<CommanderString>(_expr(expr->fileData));
+                const CommanderStringPtr path = std::static_pointer_cast<CommanderString>(_expr(expr->filePath));
+                Util::writeToFile(data->value, path->value);
+                return nullptr;
             }
             case Parser::TYPE_STMT: {
                 // TODO: Implement
