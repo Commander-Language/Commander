@@ -23,8 +23,8 @@
 #include "source/util/commander_exception.hpp"
 #include "source/flow_controller/types.hpp"
 #include <cmath>
-#include <memory>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -111,57 +111,53 @@ namespace FlowController {
         for (auto &binding: node->bindings) { _binding(binding); }
     }
 
+
     CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr &node) {
         std::vector<std::string> args;
 
         switch (node->nodeType()) {
             case Parser::CMD_CMD: {
                 auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
-                // Parse the arguments
-                for (auto &arg: cmd->arguments) {
-                    if (arg->nodeType() == Parser::ASTNodeType::VAR_EXPR) {
-                        auto var = std::static_pointer_cast<Parser::VarExprNode>(arg);
-                        args.emplace_back(_expr(var)->getStringRepresentation());
-                    } else if (arg->nodeType() == Parser::ASTNodeType::STRING) {
-                        auto string = std::static_pointer_cast<Parser::StringNode>(arg);
-                        args.emplace_back(_string(string));
-                    }
-                }
+                args = _parseArguments(cmd->arguments);
+
                 // Run the command
                 JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, false, false);
-                _runCommand(&job);
-                // TODO: fix return
-                return {};
+                auto jobResult = _runCommand(&job);
+                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             case Parser::PIPE_CMD: {
                 auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(node);
                 std::vector<std::vector<std::string>> pipeArgs;
-                // TODO: fix return
-                return {};
+                std::vector<JobRunner::Process *> processes;
+
+                std::vector<Parser::CmdCmdNodePtr> jobs;
+                _getJobs(pipeCmd, jobs);
+
+                std::vector<std::string> pArgs;
+                for (const auto &job: jobs) {
+                    pArgs = _parseArguments(job->arguments);
+                    auto* process = new JobRunner::Process(pArgs, JobRunner::ProcessType::EXTERNAL, false, false);
+                    processes.emplace_back(process);
+                }
+
+                JobRunner::Process pipeline(processes);
+                auto jobResult = _runCommand(&pipeline);
+                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             case Parser::ASYNC_CMD: {
                 auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
                 auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(asyncCmd->cmd);
                 // Parse the arguments
-                for (auto &arg: cmd->arguments) {
-                    if (arg->nodeType() == Parser::ASTNodeType::VAR_EXPR) {
-                        auto var = std::static_pointer_cast<Parser::VarExprNode>(arg);
-                        args.emplace_back(_expr(var)->getStringRepresentation());
-                    } else if (arg->nodeType() == Parser::ASTNodeType::STRING) {
-                        auto string = std::static_pointer_cast<Parser::StringNode>(arg);
-                        args.emplace_back(_string(string));
-                    }
-                }
+                args = _parseArguments(cmd->arguments);
+
                 // Run the command
                 JobRunner::Process job(args, JobRunner::ProcessType::EXTERNAL, true, false);
-                _runCommand(&job);
-
-                // TODO: fix return
-                return {};
+                auto jobResult = _runCommand(&job);
+                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             default:
-                // TODO: Better error
-                throw Util::CommanderException("Not a command");
+                throw Util::CommanderException(
+                        "Unknown command type encountered: " + Parser::nodeTypeToString(node->nodeType()));
         }
     }
 
@@ -1095,5 +1091,46 @@ namespace FlowController {
         if (_symbolTable.getVariable<CommanderTypePtr>(name) == nullptr)
             throw Util::CommanderException("Symbol Error: Not found \"" + name + "\"");
         return *_symbolTable.getVariable<CommanderTypePtr>(name);
+    }
+
+    std::vector<std::string> FlowController::_parseArguments(const std::vector<Parser::ASTNodePtr> &args) {
+        std::vector<std::string> result;
+        for (const auto &arg: args) {
+            if (arg->nodeType() == Parser::ASTNodeType::VAR_EXPR) {
+                auto var = std::static_pointer_cast<Parser::VarExprNode>(arg);
+                result.emplace_back(_expr(var)->getStringRepresentation());
+            } else if (arg->nodeType() == Parser::ASTNodeType::STRING) {
+                auto string = std::static_pointer_cast<Parser::StringNode>(arg);
+                result.emplace_back(_string(string));
+            }
+        }
+        return result;
+    }
+
+    std::vector<CommanderTypePtr> FlowController::_parseJobReturnInfo(const JobRunner::JobInfo &info) {
+        std::vector<CommanderTypePtr> result;
+        result.emplace_back(std::make_shared<CommanderString>(std::get<0>(info)));
+        result.emplace_back(std::make_shared<CommanderString>(std::get<1>(info)));
+        result.emplace_back(std::make_shared<CommanderInt>(std::get<2>(info)));
+        return result;
+    }
+
+    void FlowController::_getJobs(const Parser::CmdNodePtr& head, std::vector<Parser::CmdCmdNodePtr> &jobs) {
+        if(head == nullptr)
+            return;
+
+        // leaf nodes are cmd_cmd nodes
+        if(head->nodeType() == Parser::CMD_CMD){
+            jobs.emplace_back(std::static_pointer_cast<Parser::CmdCmdNode>(head));
+            return;
+        }
+
+        if (head->nodeType() == Parser::PIPE_CMD) {
+            auto tmp = std::static_pointer_cast<Parser::PipeCmdNode>(head);
+            _getJobs(tmp->leftCmd, jobs);
+            // in current state of parser,
+            // right cmds are always leaf nodes
+            jobs.emplace_back(std::static_pointer_cast<Parser::CmdCmdNode>(tmp->rightCmd));
+        }
     }
 }  // namespace FlowController

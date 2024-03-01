@@ -76,9 +76,30 @@ namespace FlowController {
         void _binding(const Parser::BindingNodePtr &);
 
         /**
-         * @brief Helper to interpret bindings nodes
+         * @brief Helper to interpret bindings nodes.
          */
         void _bindings(const Parser::BindingsNodePtr &);
+
+        /**
+         * @brief Parse the list of ASTNodePtr from a CMD node to a list of strings.
+         * @param args The list of ASTNodes to get strings from
+         * @return The list of strings, used as args for a command
+         */
+        std::vector<std::string> _parseArguments(const std::vector<Parser::ASTNodePtr>& args);
+        /**
+         * @brief Parse the output from the Job Runner to something a CommanderTuple takes
+         * @param info The job output to parse
+         * @return A vector of [CommanderString, CommanderString, CommanderInt]
+         */
+        static std::vector<CommanderTypePtr> _parseJobReturnInfo(const JobRunner::JobInfo& info);
+
+        /**
+         * @brief Get the jobs from a PipeCmdNode
+         * @details When doing depth-first search, the order we encounter leaf nodes is
+         *          the correct order (This depends greatly on how the parser outputs the AST).
+         * @param node A node in the PipeCmdNode tree
+         */
+        void _getJobs(const Parser::CmdNodePtr &node, std::vector<Parser::CmdCmdNodePtr> &jobs);
 
         /**
          * @brief Helper to interpret cmd nodes
