@@ -494,6 +494,31 @@ namespace FlowController {
     CommanderTypePtr FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            intType->value *= -1;
+                            _setVariable(varI->varName, intType);
+                            return intType;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            floatType->value *= -1.0F;
+                            _setVariable(varI->varName, floatType);
+                            return floatType;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
+
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
@@ -513,6 +538,17 @@ namespace FlowController {
             }
             case Parser::NOT: {
                 auto expr = std::static_pointer_cast<CommanderBool>(_expr(unOp->expr));
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    auto boolType = std::static_pointer_cast<CommanderBool>(value);
+                    boolType->value = !boolType->value;
+                    _setVariable(varI->varName, boolType);
+                    return boolType;
+                }
                 switch (expr->getType()) {
                     case TypeChecker::BOOL: {
                         auto boolType = std::static_pointer_cast<CommanderBool>(expr);
@@ -526,6 +562,30 @@ namespace FlowController {
             }
             case Parser::PRE_INCREMENT: {
                 CommanderTypePtr const expr = _expr(unOp->expr);
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            intType->value++;
+                            _setVariable(varI->varName, intType);
+                            return intType;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            floatType->value++;
+                            _setVariable(varI->varName, floatType);
+                            return floatType;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
                         auto intType = std::static_pointer_cast<CommanderInt>(expr);
@@ -543,6 +603,31 @@ namespace FlowController {
                 }
             }
             case Parser::POST_INCREMENT: {
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            auto hold = std::make_shared<CommanderInt>(intType->value);
+                            intType->value++;
+                            _setVariable(varI->varName, intType);
+                            return hold;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
+                            floatType->value++;
+                            _setVariable(varI->varName, floatType);
+                            return hold;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
@@ -563,6 +648,30 @@ namespace FlowController {
                 }
             }
             case Parser::PRE_DECREMENT: {
+                // might need to set variable
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            intType->value--;
+                            _setVariable(varI->varName, intType);
+                            return intType;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            floatType->value--;
+                            _setVariable(varI->varName, floatType);
+                            return floatType;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
@@ -581,6 +690,31 @@ namespace FlowController {
                 }
             }
             case Parser::POST_DECREMENT: {
+                if (unOp->variable != nullptr) {
+                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
+                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
+                    auto value = _getVariable(varI->varName);
+
+                    switch (value->getType()) {
+                        case TypeChecker::INT: {
+                            auto intType = std::static_pointer_cast<CommanderInt>(value);
+                            auto hold = std::make_shared<CommanderInt>(intType->value);
+                            intType->value--;
+                            _setVariable(varI->varName, intType);
+                            return hold;
+                        }
+                        case TypeChecker::FLOAT: {
+                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
+                            floatType->value--;
+                            _setVariable(varI->varName, floatType);
+                            return hold;
+                        }
+                        default:
+                            throw Util::CommanderException("Trying to negate bad type "
+                                                           + TypeChecker::typeToString(value->getType()));
+                    }
+                }
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
