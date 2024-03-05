@@ -19,6 +19,9 @@
 #include <tuple>
 #include <unistd.h>
 #include <vector>
+#include <sstream>
+#include <iostream>
+#include "source/util/print.hpp"
 
 namespace JobRunner {
     /**

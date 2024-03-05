@@ -198,7 +198,7 @@ target_link_libraries(builtinFunctionsTests type_checker GTest::gtest_main)
 gtest_discover_tests(builtinFunctionsTests)
 
 add_executable(flowControllerTests tests/flow_controller_tests.cpp)
-target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table GTest::gtest_main ncurses)
+target_link_libraries(flowControllerTests lexer parser type_checker source/util/print.cpp flow_controller symbol_table job_runner ncurses GTest::gtest_main)
 gtest_discover_tests(flowControllerTests)
 
 add_executable(jobRunnerTests tests/job_runner_tests.cpp)
