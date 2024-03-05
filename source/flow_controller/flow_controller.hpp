@@ -33,19 +33,14 @@ namespace FlowController {
          * @brief Class Constructor
          * @param nodes An AST
          */
-        FlowController(Parser::ASTNodeList& nodes);
+        FlowController();
 
         /**
          * @brief Evaluate the AST nodes
          */
-        void runtime();
+        void runtime(const Parser::ASTNodeList& nodes);
 
     private:
-        /**
-         * @brief The AST nodes in a list
-         */
-        Parser::ASTNodeList _nodes;
-
         /**
          * @brief The symbol table
          */

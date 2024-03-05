@@ -6,7 +6,7 @@
 #include <ncurses.h>
 
 void interpretFile(std::string& fileName, std::vector<std::string>& arguments, Parser::Parser& parser,
-                   TypeChecker::TypeChecker& typeChecker) {
+                   TypeChecker::TypeChecker& typeChecker, FlowController::FlowController& controller) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, fileName);
     if (std::find(arguments.begin(), arguments.end(), "-l") != arguments.end()) {
@@ -23,8 +23,7 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
         for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
-    FlowController::FlowController controller(nodes);
-    controller.runtime();
+    controller.runtime(nodes);
 }
 
 int main(int argc, char** argv) {
@@ -33,11 +32,12 @@ int main(int argc, char** argv) {
     try {
         Parser::Parser parser;
         TypeChecker::TypeChecker typeChecker;
+        FlowController::FlowController controller;
         auto fileIterator = std::find(arguments.begin(), arguments.end(), "-f");
         if (fileIterator++ != arguments.end()) {
             if (fileIterator == arguments.end()) { throw Util::CommanderException("No file name provided."); }
             std::string file = *fileIterator;
-            interpretFile(file, arguments, parser, typeChecker);
+            interpretFile(file, arguments, parser, typeChecker, controller);
             return 0;
         }
         Util::usingNCurses = true;
@@ -74,12 +74,14 @@ int main(int argc, char** argv) {
                             std::ofstream tmp(tmpFileName);
                             tmp << currentLine;
                             tmp.close();  // close file here to save changes
-                            interpretFile(tmpFileName, arguments, parser, typeChecker);
+                            interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
                             std::remove(tmpFileName.c_str());
                         } catch (const Util::CommanderException& err) { Util::println(err.what()); }
                     }
                     idx = 0;
+                    if (getcurx(stdscr) > 0) { Util::print("\n"); }
                     Util::print(">> ");
+
                     if (lines.empty() || lines.back() != currentLine) { lines.push_back(currentLine); }
                     line = (int)lines.size();
                     currentLine.clear();

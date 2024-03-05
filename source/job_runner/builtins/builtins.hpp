@@ -17,9 +17,9 @@
 #ifndef COMMANDER_BUILTIN_HPP
 #define COMMANDER_BUILTIN_HPP
 
-#include "source/util/commander_exception.hpp"
 #include "print.hpp"
 #include "shared.hpp"
+#include "source/util/commander_exception.hpp"
 #include <string>
 #include <unordered_map>
 

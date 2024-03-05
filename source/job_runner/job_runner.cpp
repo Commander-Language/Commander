@@ -79,7 +79,6 @@ namespace JobRunner {
             default:
                 return {};
         }
-
     }
 
     JobInfo JobRunner::_execBuiltin(const ProcessPtr& process, int in, int out) {
