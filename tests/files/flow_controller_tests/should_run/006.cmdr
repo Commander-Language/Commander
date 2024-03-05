@@ -1,5 +1,5 @@
 //Test simple variable assignment with tuples
 x = (3.0, "hi", true, 1);
 y = x;
-print x;
-print y;
+println x;
+println y;

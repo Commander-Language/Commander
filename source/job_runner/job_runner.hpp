@@ -21,6 +21,9 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include "source/job_runner/builtins/builtins.hpp"
 #include "source/util/print.hpp"
 
 namespace JobRunner {

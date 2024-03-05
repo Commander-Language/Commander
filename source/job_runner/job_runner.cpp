@@ -3,9 +3,6 @@
  * @brief Implements the classes Process and JobRunner
  */
 #include "job_runner.hpp"
-#include "source/job_runner/builtins/builtins.hpp"
-#include <cstdlib>
-#include <cstring>
 
 /* Unix/Mac specific includes */
 #include <fcntl.h>

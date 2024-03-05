@@ -1,5 +1,5 @@
 //Test multiply with floats
 x = 1.5 * 2.25 * 3.125 * 4.75 * 5.90;
-print x;
+println x;
 x *= 2.1;
-print x;
+println x;
