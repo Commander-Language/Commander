@@ -1,5 +1,5 @@
 //Test add with strings
-x = "My" + ' name ' + " is " + "bob";
+x = "My" + ' name ' + "is " + "bob";
 println x;
 x += ".";
 println x;

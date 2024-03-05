@@ -1,5 +1,5 @@
 //Test modulo with ints
-x = 100 % 2;
+x = 100 % 51;
 println x;
 x %= 9;
 println x;
