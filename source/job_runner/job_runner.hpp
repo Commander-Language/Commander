@@ -14,7 +14,13 @@
 #ifndef JOBRUNNER_HPP
 #define JOBRUNNER_HPP
 
+#include "source/job_runner/builtins/builtins.hpp"
+#include "source/util/print.hpp"
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <unistd.h>

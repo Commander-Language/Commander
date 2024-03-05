@@ -1,5 +1,5 @@
 //Test simple variable assignment with floats
 x = 3.14;
 y = x;
-print x;
-print y;
+println x;
+println y;

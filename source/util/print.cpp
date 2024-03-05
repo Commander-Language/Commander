@@ -19,6 +19,8 @@ namespace Util {
     }
 
     void println(const std::string& str) {
+        if (str.empty()) return;
+
         if (usingNCurses) {
             printw("%s\n", str.c_str());
         } else {

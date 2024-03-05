@@ -1,5 +1,5 @@
 //Test exponentiate with floats
 x = 2.71828 ** 3.6;
-print x;
+println x;
 x **= 2.1;
-print x;
+println x;

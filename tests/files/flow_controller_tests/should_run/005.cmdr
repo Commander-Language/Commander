@@ -1,5 +1,5 @@
 //Test simple variable assignment with arrays
 x = [1, 2, 3];
 y = x;
-print x;
-print y;
+println x;
+println y;

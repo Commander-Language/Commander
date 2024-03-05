@@ -3,9 +3,6 @@
  * @brief Implements the classes Process and JobRunner
  */
 #include "job_runner.hpp"
-#include "builtins/builtins.hpp"
-#include <cstdlib>
-#include <cstring>
 
 /* Unix/Mac specific includes */
 #include <fcntl.h>
@@ -51,6 +48,9 @@ namespace JobRunner {
     JobRunner::JobRunner(ProcessPtr process) : _process(std::move(process)) {}
 
     JobInfo JobRunner::execProcess() {
+        std::stringstream buffer;
+        std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
+
         switch (_process->getType()) {
             case ProcessType::BUILTIN: {
                 if (_process->pipe != nullptr) { return _doPiping(_process); }
@@ -59,6 +59,9 @@ namespace JobRunner {
                     return {};
                 }
                 if (_process->saveInfo) { return _doSaveInfo(_process, false); }
+                std::cout.rdbuf(old);
+                std::string output = buffer.str();
+                Util::println(output);
                 return _execBuiltin(_process);
             }
             case ProcessType::EXTERNAL: {
@@ -68,6 +71,9 @@ namespace JobRunner {
                     return {};
                 }
                 if (_process->saveInfo) { return _doSaveInfo(_process, false); }
+                std::cout.rdbuf(old);
+                std::string output = buffer.str();
+                Util::println(output);
                 return _execFork(_process);
             }
             default:

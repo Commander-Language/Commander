@@ -31,12 +31,12 @@ namespace FlowController {
     //  ==========================
     //  ||    Flow Controller   ||
     //  ==========================
-    FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
+    FlowController::FlowController() {
         _symbolTable.pushSymbolTable();  // push in the global scope
     }
 
-    void FlowController::runtime() {
-        for (auto& node : _nodes) {
+    void FlowController::runtime(const Parser::ASTNodeList& nodes) {
+        for (auto& node : nodes) {
             switch (getAbstractNodeType(node->nodeType())) {
                 case Parser::BINDING: {
                     _binding(std::static_pointer_cast<Parser::BindingNode>(node));
@@ -376,6 +376,14 @@ namespace FlowController {
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
+                if (Util::usingNCurses) {
+                    auto returnInfo = _cmd(cmd->command, true);
+                    auto tuple = std::static_pointer_cast<CommanderTuple>(returnInfo);
+
+                    Util::print(tuple->values[0]->getStringRepresentation());
+                    Util::print(tuple->values[1]->getStringRepresentation());
+                    return returnInfo;
+                }
                 return _cmd(cmd->command);
             }
                 // Util::println(std::to_string(std::any_cast<TypeChecker::CommanderBool>(value)));
