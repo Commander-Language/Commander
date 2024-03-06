@@ -1,2 +1,2 @@
 (PrgmNode
-	(WriteStmtNode (StringExpressionNode (StringNode "Hello World!")) (StringExpressionNode (StringNode "helloWorld.txt"))))
+	(WriteStmtNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Hello World!'))))) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'helloWorld.txt')))))))

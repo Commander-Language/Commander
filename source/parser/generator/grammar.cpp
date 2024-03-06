@@ -377,6 +377,10 @@ namespace Parser {
 
                 //  Functions:
                 //  ----------
+                // (STMT) -> [RETURN] (EXPR) [SEMICOLON]
+                {{{ASTNodeType::STMT, {TokenType::RETURN, ASTNodeType::EXPR, TokenType::SEMICOLON}},
+                  makeNode("ReturnStmt", {castNode("Expr", 1)})}},
+
                 // (EXPR) -> (EXPR) [LPAREN] [RPAREN]
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LPAREN, TokenType::RPAREN}},
                   makeNode("CallExpr", {castNode("Expr", 0)})}},

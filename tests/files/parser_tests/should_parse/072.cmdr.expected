@@ -1,0 +1,2 @@
+(PrgmNode
+	(PrintStmtNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Output: ')) (IndexExprNode (CmdExprNode (CmdCmdNode (StringNode 'cat') (StringNode 'myfile.txt'))) (IntExprNode 0)) (StringExpressionNode (StringNode '!')))))))

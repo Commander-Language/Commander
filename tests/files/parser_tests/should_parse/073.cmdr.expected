@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (AsyncCmdNode (CmdCmdNode (StringNode "git") (StringNode "clone") (StringNode "https://github.com/repo.git")))))
+	(CmdStmtNode (AsyncCmdNode (CmdCmdNode (StringNode 'git') (StringNode 'clone') (StringNode 'https://github.com/repo.git')))))

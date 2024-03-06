@@ -108,6 +108,7 @@
 //  ==================
 //  ||  Functions:  ||
 //  ==================
+(STMT) -> [RETURN] (EXPR) [SEMICOLON]
 (STMT) -> (VARIABLE) [LPAREN] [RPAREN] (STMT)
 (STMT) -> (VARIABLE) [LPAREN] (BINDINGS) [RPAREN] (STMT)
 (STMT) -> (VARIABLE) [LPAREN] [RPAREN] [COLON] (TYPE) (STMT)
