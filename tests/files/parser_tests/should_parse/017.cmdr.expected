@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (PipeCmdNode (CmdCmdNode (StringNode "ls")) | (CmdCmdNode (StringNode "wc")))))
+	(CmdStmtNode (PipeCmdNode (CmdCmdNode (StringNode 'ls')) | (CmdCmdNode (StringNode 'wc')))))

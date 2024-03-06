@@ -1,2 +1,2 @@
 (PrgmNode
-	(CallExprNode isFun))
+	(ExprStmtNode (CallExprNode (VarExprNode (IdentVariableNode isFun)) (ExprsNode))))

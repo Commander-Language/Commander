@@ -1,2 +1,2 @@
 //Should not parse
-scan hello;
+x: (int = (2);

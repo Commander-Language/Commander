@@ -1,2 +1,2 @@
 (PrgmNode
-	(VarStmtNode isTuple (TupleExprNode )))
+	(VarStmtNode isTuple (TupleExprNode (ExprsNode))))

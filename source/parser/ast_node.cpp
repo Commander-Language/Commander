@@ -257,7 +257,7 @@ namespace Parser {
     ASTNodeType BindingNode::nodeType() const { return ASTNodeType::BINDING; }
 
     std::string BindingNode::sExpression() const {
-        return "(BindingNode " + variable + " " + (constant ? "true" : "false")
+        return "(BindingNode " + std::string(constant ? "const " : "") + variable
              + (type ? " " + type->sExpression() : "") + ")";
     }
 
@@ -381,14 +381,16 @@ namespace Parser {
     }
 
     StringExprsNode::StringExprsNode(std::string literal) {
-        expressions = {std::make_shared<StringExprNode>(std::make_shared<StringNode>(StringNode(std::move(literal))))};
+        expressions.push_back(
+                std::make_shared<StringExprNode>(std::make_shared<StringNode>(StringNode(std::move(literal)))));
     }
 
     StringExprsNode::StringExprsNode(std::string literal, ExprNodePtr expr,
-                                     const std::shared_ptr<StringExprsNode>& exprs)
-        : StringExprsNode(std::move(literal)) {
-        expressions.push_back(std::move(expr));
+                                     const std::shared_ptr<StringExprsNode>& exprs) {
         expressions.insert(expressions.end(), exprs->expressions.begin(), exprs->expressions.end());
+        expressions.push_back(std::move(expr));
+        expressions.push_back(
+                std::make_shared<StringExprNode>(std::make_shared<StringNode>(StringNode(std::move(literal)))));
     }
 
     ASTNodeType StringExprsNode::nodeType() const { return ASTNodeType::STRING_EXPRS; }
@@ -555,7 +557,7 @@ namespace Parser {
           leftConstant(false) {}
 
     std::string BinOpExprNode::sExpression() const {
-        return "(BinOpExprNode "
+        return "(BinOpExprNode " + std::string(leftConstant ? "const " : "")
              + (leftExpr == nullptr ? (ASTNodePtr)leftVariable : (ASTNodePtr)leftExpr)->sExpression() + " "
              + binOpToString(opType) + " " + rightExpr->sExpression() + getTypeString() + ")";
     }
@@ -594,7 +596,7 @@ namespace Parser {
         : bindings(std::move(bindings)), body(std::move(body)), returnType(std::move(returnType)) {}
 
     std::string LambdaExprNode::sExpression() const {
-        return "(LambdaExprNode " + bindings->sExpression() + " " + returnType->sExpression() + " "
+        return "(LambdaExprNode " + bindings->sExpression() + (returnType ? " " + returnType->sExpression() : "") + " "
              + body->sExpression() + getTypeString() + ")";
     }
 
