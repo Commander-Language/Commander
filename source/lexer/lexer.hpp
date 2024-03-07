@@ -94,6 +94,7 @@ namespace Lexer {
         TO,
         TRUE,
         TYPE,
+        TYPEVARIABLE,
         UNKNOWN,
         VARIABLE,
         VOID,
@@ -280,9 +281,11 @@ namespace Lexer {
      * @param position The position in the file
      * @param isCommand Tells whether a command is being lexed or not
      * @param isFirst Tells whether the token is the first token of a statement or not
+     * @param isTypeExpression Tells whether the token is part of a type expression
      * @returns The token, if it finds one
      */
-    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst);
+    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst,
+                      const bool& isTypeExpression);
 
     /**
      * @brief Helper for lexing a literal token, if it exists
@@ -357,9 +360,10 @@ namespace Lexer {
      * @param file The file contents being lexed
      * @param position The position in the file
      * @param isCommand Is the variable in a command (true if so, false otherwise)
+     * @param isType Is the variable in a type expression (true if so, false otherwise)
      * @returns The VARIABLE token if isCommand is true, or CMD_VARIABLE if false, if it finds one
      */
-    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand);
+    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand, bool isType);
 
     /**
      * @brief Lex a command string token, if it exists
@@ -438,9 +442,10 @@ namespace Lexer {
      * @param position The current position in the file
      * @param startToken The token that begins the expression
      * @param terminatingToken The token to look for to stop lexing the expression
+     * @param isTypeExpression Tells whether or not you are lexing a type expression
      */
     void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const TokenType& startToken,
-                       const TokenType& terminatingToken);
+                       const TokenType& terminatingToken, bool isTypeExpression);
 
 }  // namespace Lexer
 

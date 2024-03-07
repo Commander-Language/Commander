@@ -2463,7 +2463,6 @@ namespace Parser {
      */
     class VariableTypeNode : public TypeNode {
     public:
-
         /**
          * The variable name
          */

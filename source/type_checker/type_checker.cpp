@@ -355,7 +355,8 @@ namespace TypeChecker {
                     VarInfoPtr const functionInfo = _table.getVariable(variablePtr->varName);
                     if (functionInfo->infoType() != FUNCTION_INFO) {
                         // TODO: Improve error
-                        throw Util::CommanderException("Variable of name " + variablePtr->varName + " does not refer to a function.");
+                        throw Util::CommanderException("Variable of name " + variablePtr->varName
+                                                       + " does not refer to a function.");
                     }
                     functionTypes = functionInfo->types;
                 } else {
@@ -398,7 +399,8 @@ namespace TypeChecker {
                     VarInfoPtr const functionInfo = _table.getVariable(variablePtr->varName);
                     if (functionInfo->infoType() != FUNCTION_INFO) {
                         // TODO: Improve error
-                        throw Util::CommanderException("Variable of name " + variablePtr->varName + " does not refer to a function.");
+                        throw Util::CommanderException("Variable of name " + variablePtr->varName
+                                                       + " does not refer to a function.");
                     }
                     functionTypes = functionInfo->types;
                 } else {
@@ -695,7 +697,8 @@ namespace TypeChecker {
                 VarInfoPtr typeInfo = _table.getVariable(variableTypePtr->name);
                 if (typeInfo->infoType() != TYPE_INFO) {
                     // TODO: Improve error
-                    throw Util::CommanderException("Variable of name " + variableTypePtr->name + " does not refer to a type.");
+                    throw Util::CommanderException("Variable of name " + variableTypePtr->name
+                                                   + " does not refer to a type.");
                 }
                 return (variableTypePtr->type = typeInfo->types[0]);
             }

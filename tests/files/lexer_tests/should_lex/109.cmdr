@@ -1,0 +1,14 @@
+//Test that array indexing lexes correctly
+a[i] = 1;
+a[i] += 1;
+a[i] -= 1;
+a[i] *= 1;
+a[i] /= 1;
+a[i] %= 1;
+a[i] **= 1;
+a[i]++;
+a[i]--;
+++a[i];
+--a[i];
+!a[i];
+-a[i];

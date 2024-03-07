@@ -752,9 +752,7 @@ namespace Parser {
 
     VariableTypeNode::VariableTypeNode(std::string name) : name(name) {}
 
-    std::string VariableTypeNode::sExpression() const {
-        return "(VariableTypeNode " + name + getTypeString() + ")";
-    }
+    std::string VariableTypeNode::sExpression() const { return "(VariableTypeNode " + name + getTypeString() + ")"; }
 
     IdentVariableNode::IdentVariableNode(std::string varName) : varName(std::move(varName)) {}
 

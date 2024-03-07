@@ -637,8 +637,8 @@ namespace Parser {
                 {{{ASTNodeType::TYPE, {TokenType::STRING}}, makeNode("StringType", {})}},
                 //  (TYPE) -> [VOID]
                 {{{ASTNodeType::TYPE, {TokenType::VOID}}, makeNode("TupleType", {makeNode("Types", {})})}},
-                //  (TYPE) -> [VARIABLE]
-                {{{ASTNodeType::TYPE, {TokenType::VARIABLE}}, makeNode("VariableType", {tokenContents(0)})}},
+                //  (TYPE) -> [TYPEVARIABLE]
+                {{{ASTNodeType::TYPE, {TokenType::TYPEVARIABLE}}, makeNode("VariableType", {tokenContents(0)})}},
                 //  (TYPE) -> (TYPE) [LAMBDA] (TYPE)
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LAMBDA, ASTNodeType::TYPE}},
                   makeNode("FunctionType", {makeNode("Types", {castNode("Type", 0)}), castNode("Type", 2)})}},
@@ -653,7 +653,8 @@ namespace Parser {
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LSQUARE, TokenType::RSQUARE}},
                   makeNode("ArrayType", {castNode("Type", 0)})}},
                 //  (TYPE) -> [LPAREN] [RPAREN]
-                {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN}}, makeNode("TupleType", {makeNode("Types", {})})}},
+                {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN}},
+                  makeNode("TupleType", {makeNode("Types", {})})}},
                 //  (TYPE) -> [LPAREN] (TYPES) [RPAREN]
                 {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN}},
                   makeNode("TupleType", {castNode("Types", 1)})}},
