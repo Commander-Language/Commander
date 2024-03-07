@@ -249,13 +249,13 @@ namespace Parser {
                 //  Prefix:
                 //  (EXPR) -> [INCREMENT] (VARIABLE)
                 {{{ASTNodeType::EXPR, {TokenType::INCREMENT, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_INCREMENT", castNode("Variable", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::PRE_INCREMENT", castNode("Variable", 1)})}},
                 //  (EXPR) -> [DECREMENT] (VARIABLE)
                 {{{ASTNodeType::EXPR, {TokenType::DECREMENT, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_DECREMENT", castNode("Variable", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::PRE_DECREMENT", castNode("Variable", 1)})}},
                 //  (EXPR) -> [NOT] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::NOT, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::NOT", castNode("Expr", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::NOT", castNode("Expr", 1)})}},
 
                 //  Binary operations:
                 //  ------------------
@@ -286,7 +286,7 @@ namespace Parser {
                 // Negate operation:
                 //  (EXPR) -> [MINUS] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::MINUS, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 1)})}},
 
                 //  Comparison operations:
                 //  ----------------------

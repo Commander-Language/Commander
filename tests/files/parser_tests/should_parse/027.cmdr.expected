@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (UnOpExprNode (IntExprNode 5) NEGATE)))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (UnOpExprNode (VarExprNode (IdentVariableNode x)) NEGATE))))

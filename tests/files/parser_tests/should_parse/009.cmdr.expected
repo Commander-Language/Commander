@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode isArray) SET (TupleExprNode (ExprsNode)))))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode isTuple) SET (TupleExprNode (ExprsNode)))))

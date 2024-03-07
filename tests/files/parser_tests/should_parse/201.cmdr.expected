@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode z) SET (BinOpExprNode (IndexExprNode (VarExprNode (IdentVariableNode x)) (BinOpExprNode (BinOpExprNode (BinOpExprNode (UnOpExprNode (VarExprNode (IdentVariableNode a)) NOT) ADD (BinOpExprNode (VarExprNode (IdentVariableNode b)) MULTIPLY (VarExprNode (IdentVariableNode c)))) LESSER (VarExprNode (IdentVariableNode e))) EQUAL (BinOpExprNode (VarExprNode (IdentVariableNode f)) MULTIPLY (IndexExprNode (VarExprNode (IdentVariableNode g)) (IntExprNode 1))))) EXPONENTIATE (VarExprNode (IdentVariableNode x))))))

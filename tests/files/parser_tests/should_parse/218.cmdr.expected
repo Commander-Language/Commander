@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (CmdExprNode (CmdCmdNode (StringNode "./commander") (StringNode "-l"))))))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (CmdExprNode (CmdCmdNode (StringNode './commander') (StringNode '-l'))))))

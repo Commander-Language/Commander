@@ -1,0 +1,4 @@
+(PrgmNode
+	(WhileStmtNode (CallExprNode (VarExprNode (IdentVariableNode parseBool)) (ExprsNode (IndexExprNode (CmdExprNode (CmdCmdNode (StringNode 'get') (StringNode 'bool'))) (IntExprNode 0)))) (ScopeStmtNode (StmtsNode
+	(WhileStmtNode (IndexExprNode (TupleExprNode (ExprsNode (BoolExprNode true) (BoolExprNode false))) (IntExprNode 1)) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi')))))))))))))

@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (TernaryExprNode (IndexExprNode (CmdExprNode (CmdCmdNode (StringNode 'echo') (StringNode 'hi'))) (IntExprNode 1)) ? (IndexExprNode (CmdExprNode (CmdCmdNode (StringNode 'git') (StringNode 'clone') (StringNode 'myurl.com'))) (IntExprNode 0)) : (IndexExprNode (CmdExprNode (CmdCmdNode (StringNode 'echo') (StringNode 'bye'))) (IntExprNode 2))))))
