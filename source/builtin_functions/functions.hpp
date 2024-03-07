@@ -14,6 +14,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include "source/flow_controller/operations.hpp"
 
 namespace Function {
     //TODO: refactor TypeChecker::SomeType to use FlowController::SomeType
@@ -212,212 +213,212 @@ namespace Function {
             {"sort", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
             {"filter", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
             {"map", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
-            {"foreach", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::VOID_TY)}},};
+            {"foreach", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::VOID_TY)}}};
 
     /* ========== Implementations ========== */
 
-    TypeChecker::CommanderInt parseIntAsInt(TypeChecker::CommanderInt number);
+    FlowController::CommanderInt parseIntAsInt(FlowController::CommanderInt number);
 
-    TypeChecker::CommanderInt parseFloatAsInt(TypeChecker::CommanderFloat number);
+    FlowController::CommanderInt parseFloatAsInt(FlowController::CommanderFloat number);
 
-    TypeChecker::CommanderInt parseBoolAsInt(TypeChecker::CommanderBool value);
+    FlowController::CommanderInt parseBoolAsInt(FlowController::CommanderBool value);
 
-    TypeChecker::CommanderInt parseStringAsInt(TypeChecker::CommanderString string);
+    FlowController::CommanderInt parseStringAsInt(FlowController::CommanderString string);
 
-    TypeChecker::CommanderFloat parseIntAsFloat(TypeChecker::CommanderInt number);
+    FlowController::CommanderFloat parseIntAsFloat(FlowController::CommanderInt number);
 
-    TypeChecker::CommanderFloat parseFloatAsFloat(TypeChecker::CommanderFloat number);
+    FlowController::CommanderFloat parseFloatAsFloat(FlowController::CommanderFloat number);
 
-    TypeChecker::CommanderFloat parseBoolAsFloat(TypeChecker::CommanderBool value);
+    FlowController::CommanderFloat parseBoolAsFloat(FlowController::CommanderBool value);
 
-    TypeChecker::CommanderFloat parseStringAsFloat(TypeChecker::CommanderString string);
+    FlowController::CommanderFloat parseStringAsFloat(FlowController::CommanderString string);
 
-    TypeChecker::CommanderBool parseIntAsBool(TypeChecker::CommanderInt number);
+    FlowController::CommanderBool parseIntAsBool(FlowController::CommanderInt number);
 
-    TypeChecker::CommanderBool parseFloatAsBool(TypeChecker::CommanderFloat number);
+    FlowController::CommanderBool parseFloatAsBool(FlowController::CommanderFloat number);
 
-    TypeChecker::CommanderBool parseBoolAsBool(TypeChecker::CommanderBool value);
+    FlowController::CommanderBool parseBoolAsBool(FlowController::CommanderBool value);
 
-    TypeChecker::CommanderBool parseStringAsBool(TypeChecker::CommanderString string);
+    FlowController::CommanderBool parseStringAsBool(FlowController::CommanderString string);
 
-    void println(TypeChecker::CommanderString string);
+    void println(FlowController::CommanderString string);
 
-    void print(TypeChecker::CommanderString string);
+    void print(FlowController::CommanderString string);
 
-    TypeChecker::CommanderString toString(TypeChecker::CommanderInt value);
+    FlowController::CommanderString toString(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat sqrt(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat sqrt(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat sqrt(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat sqrt(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat ln(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat ln(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat ln(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat ln(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat log(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat log(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat log(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat log(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderInt abs(TypeChecker::CommanderInt value);
+    FlowController::CommanderInt abs(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat abs(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat abs(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderInt floor(TypeChecker::CommanderInt value);
+    FlowController::CommanderInt floor(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderInt floor(TypeChecker::CommanderFloat value);
+    FlowController::CommanderInt floor(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderInt ceil(TypeChecker::CommanderInt value);
+    FlowController::CommanderInt ceil(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderInt ceil(TypeChecker::CommanderFloat value);
+    FlowController::CommanderInt ceil(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderInt round(TypeChecker::CommanderInt value);
+    FlowController::CommanderInt round(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderInt round(TypeChecker::CommanderFloat value);
+    FlowController::CommanderInt round(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat sin(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat sin(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat sin(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat sin(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat cos(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat cos(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat cos(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat cos(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat tan(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat tan(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat tan(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat tan(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat csc(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat csc(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat csc(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat csc(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat sec(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat sec(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat sec(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat sec(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat cot(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat cot(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat cot(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat cot(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat sinh(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat sinh(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat sinh(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat sinh(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat cosh(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat cosh(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat cosh(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat cosh(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat tanh(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat tanh(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat tanh(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat tanh(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat csch(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat csch(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat csch(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat csch(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat sech(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat sech(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat sech(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat sech(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat coth(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat coth(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat coth(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat coth(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arcsin(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arcsin(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arcsin(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arcsin(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arccos(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arccos(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arccos(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arccos(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arctan(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arctan(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arctan(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arctan(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arccsc(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arccsc(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arccsc(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arccsc(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arcsec(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arcsec(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arcsec(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arcsec(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arccot(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arccot(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arccot(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arccot(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arcsinh(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arcsinh(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arcsinh(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arcsinh(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arccosh(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arccosh(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arccosh(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arccosh(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arctanh(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arctanh(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arctanh(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arctanh(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arccsch(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arccsch(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arccsch(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arccsch(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arcsech(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arcsech(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arcsech(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arcsech(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat arccoth(TypeChecker::CommanderInt value);
+    FlowController::CommanderFloat arccoth(FlowController::CommanderInt value);
 
-    TypeChecker::CommanderFloat arccoth(TypeChecker::CommanderFloat value);
+    FlowController::CommanderFloat arccoth(FlowController::CommanderFloat value);
 
-    TypeChecker::CommanderFloat random();
+    FlowController::CommanderFloat random();
 
-    TypeChecker::CommanderInt time();
+    FlowController::CommanderInt time();
 
-    TypeChecker::CommanderTuple date();
+    FlowController::CommanderTuple date();
 
-    void sleep(TypeChecker::CommanderInt timeToSleep);
+    void sleep(FlowController::CommanderInt timeToSleep);
 
     // STRING API METHODS
-    TypeChecker::CommanderString charAt(TypeChecker::CommanderInt index, TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString charAt(FlowController::CommanderInt index, FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderBool startsWith(TypeChecker::CommanderString expected,
-                                          TypeChecker::CommanderString sourceString);
+    FlowController::CommanderBool startsWith(FlowController::CommanderString expected,
+                                          FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderBool endsWith(TypeChecker::CommanderString expected,
-                                        TypeChecker::CommanderString sourceString);
+    FlowController::CommanderBool endsWith(FlowController::CommanderString expected,
+                                        FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderBool includes(TypeChecker::CommanderString expected,
-                                        TypeChecker::CommanderString sourceString);
+    FlowController::CommanderBool includes(FlowController::CommanderString expected,
+                                        FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderInt indexOf(TypeChecker::CommanderString expected, TypeChecker::CommanderString sourceString);
+    FlowController::CommanderInt indexOf(FlowController::CommanderString expected, FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderInt length(TypeChecker::CommanderString sourceString);
+    FlowController::CommanderInt length(FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderString replace(TypeChecker::CommanderString oldPhrase, TypeChecker::CommanderString newPhrase,
-                                         TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString replace(FlowController::CommanderString oldPhrase, FlowController::CommanderString newPhrase,
+                                         FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderString replaceAll(TypeChecker::CommanderString oldPhrase,
-                                            TypeChecker::CommanderString newPhrase,
-                                            TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString replaceAll(FlowController::CommanderString oldPhrase,
+                                            FlowController::CommanderString newPhrase,
+                                            FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex,
-                                           TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString substring(FlowController::CommanderInt startingIndex,
+                                           FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderString substring(TypeChecker::CommanderInt startingIndex,
-                                           TypeChecker::CommanderInt endingIndex,
-                                           TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString substring(FlowController::CommanderInt startingIndex,
+                                           FlowController::CommanderInt endingIndex,
+                                           FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderString trim(TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString trim(FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderString lower(TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString lower(FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderString upper(TypeChecker::CommanderString sourceString);
+    FlowController::CommanderString upper(FlowController::CommanderString sourceString);
 
-    TypeChecker::CommanderArray<TypeChecker::CommanderString> split(TypeChecker::CommanderString splitToken,
-                                                                    TypeChecker::CommanderString sourceString);
+    FlowController::CommanderArray<FlowController::CommanderString> split(FlowController::CommanderString splitToken,
+                                                                    FlowController::CommanderString sourceString);
 
-    FlowController::CommanderStringPtr toString(FlowController::CommanderTuplePtr tuple);
+    FlowController::CommanderStringPtr toString(FlowController::CommanderTypePtr type);
 
     FlowController::CommanderBoolPtr includes(FlowController::CommanderTuplePtr tuple, FlowController::CommanderTypePtr data);
 
@@ -425,8 +426,6 @@ namespace Function {
 
     FlowController::CommanderIntPtr length(FlowController::CommanderTuplePtr tuple);
 
-
-    FlowController::CommanderStringPtr toString(FlowController::CommanderArrayPtr array);
 
     FlowController::CommanderArrayPtr sort(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
 
@@ -441,6 +440,9 @@ namespace Function {
     FlowController::CommanderIntPtr indexOf(FlowController::CommanderArrayPtr array, FlowController::CommanderTypePtr data);
 
     FlowController::CommanderIntPtr length(FlowController::CommanderArrayPtr array);
+
+
+    FlowController::CommanderStringPtr toString(FlowController::CommanderLambdaPtr function);
 
     struct AnyCallable {
         AnyCallable() {}
@@ -458,7 +460,7 @@ namespace Function {
      * https://www.geeksforgeeks.org/passing-a-function-as-a-parameter-in-cpp/
      * https://stackoverflow.com/questions/45715219/store-functions-with-different-signatures-in-a-map
      */
-    inline const std::unordered_map<std::string, std::vector<functionType>> functionImplementations {{"toString", std::vector<functionType>{toString}}};
+    //inline const std::unordered_map<std::string, std::vector<functionType>> functionImplementations {{"toString", std::vector<functionType>{*toString}}};
 
     /**
      * parseAsType() allows the user to parse the specified data as a specified type.
@@ -477,7 +479,7 @@ namespace Function {
     template<typename T>
     std::string parseAsString(T originalVal) {
         if (typeid(T) == typeid(bool)) {
-            if ((TypeChecker::CommanderInt)originalVal > 0) { return "true"; }
+            if ((FlowController::CommanderInt)originalVal > 0) { return "true"; }
             return "false";
         }
         return std::to_string(originalVal);
