@@ -352,8 +352,11 @@ namespace TypeChecker {
                             exprNode->func);
                     Parser::IdentVariableNodePtr const variablePtr
                             = std::static_pointer_cast<Parser::IdentVariableNode>(varExprPtr->variable);
-                    FunctionInfoPtr const functionInfo = std::static_pointer_cast<FunctionInfo>(
-                            _table.getVariable(variablePtr->varName));
+                    VarInfoPtr const functionInfo = _table.getVariable(variablePtr->varName);
+                    if (functionInfo->infoType() != FUNCTION_INFO) {
+                        // TODO: Improve error
+                        throw Util::CommanderException("Variable of name " + variablePtr->varName + " does not refer to a function.");
+                    }
                     functionTypes = functionInfo->types;
                 } else {
                     functionTypes.push_back(type);
@@ -392,8 +395,11 @@ namespace TypeChecker {
                 if (exprNode->nodeType() == Parser::VARIABLE) {
                     Parser::IdentVariableNodePtr const variablePtr
                             = std::static_pointer_cast<Parser::IdentVariableNode>(exprNode->func);
-                    FunctionInfoPtr const functionInfo = std::static_pointer_cast<FunctionInfo>(
-                            _table.getVariable(variablePtr->varName));
+                    VarInfoPtr const functionInfo = _table.getVariable(variablePtr->varName);
+                    if (functionInfo->infoType() != FUNCTION_INFO) {
+                        // TODO: Improve error
+                        throw Util::CommanderException("Variable of name " + variablePtr->varName + " does not refer to a function.");
+                    }
                     functionTypes = functionInfo->types;
                 } else {
                     functionTypes.push_back(type);
@@ -681,6 +687,17 @@ namespace TypeChecker {
                 }
                 return (functionTypePtr->type = std::make_shared<FunctionTy>(types,
                                                                              typeCheck(functionTypePtr->returnType)));
+            }
+            case Parser::VARIABLE_TYPE: {
+                Parser::VariableTypeNodePtr const variableTypePtr = std::static_pointer_cast<Parser::VariableTypeNode>(
+                        astNode);
+                if (variableTypePtr->type) { return variableTypePtr->type; }
+                VarInfoPtr typeInfo = _table.getVariable(variableTypePtr->name);
+                if (typeInfo->infoType() != TYPE_INFO) {
+                    // TODO: Improve error
+                    throw Util::CommanderException("Variable of name " + variableTypePtr->name + " does not refer to a type.");
+                }
+                return (variableTypePtr->type = typeInfo->types[0]);
             }
             case Parser::VARIABLE: {
                 Parser::IdentVariableNodePtr const variablePtr = std::static_pointer_cast<Parser::IdentVariableNode>(

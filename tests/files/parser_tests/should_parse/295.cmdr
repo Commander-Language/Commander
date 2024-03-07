@@ -1,0 +1,2 @@
+//Should parse all types
+type a = (int, float, bool, string, (int, float), bool[], (float) -> int, () -> ())) -> void;

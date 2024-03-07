@@ -121,6 +121,7 @@ namespace Parser {
             case ARRAY_TYPE:
             case TUPLE_TYPE:
             case FUNCTION_TYPE:
+            case VARIABLE_TYPE:
                 return TYPE;
         }
         return PRGM;

@@ -119,6 +119,8 @@ namespace Parser {
                 return "TUPLE_TYPE";
             case FUNCTION_TYPE:
                 return "FUNCTION_TYPE";
+            case VARIABLE_TYPE:
+                return "VARIABLE_TYPE";
             case TYPE:
                 return "TYPE";
             case TYPES:
@@ -233,6 +235,8 @@ namespace Parser {
     ASTNodeType TupleTypeNode::nodeType() const { return ASTNodeType::TUPLE_TYPE; }
 
     ASTNodeType FunctionTypeNode::nodeType() const { return ASTNodeType::FUNCTION_TYPE; }
+
+    ASTNodeType VariableTypeNode::nodeType() const { return ASTNodeType::VARIABLE_TYPE; }
 
     std::string TypeNode::getTypeString() const { return TypeChecker::getTypeString(type); }
 
@@ -744,6 +748,12 @@ namespace Parser {
 
     std::string FunctionTypeNode::sExpression() const {
         return "(FunctionTypeNode " + params->sExpression() + " " + returnType->sExpression() + getTypeString() + ")";
+    }
+
+    VariableTypeNode::VariableTypeNode(std::string name) : name(name) {}
+
+    std::string VariableTypeNode::sExpression() const {
+        return "(VariableTypeNode " + name + getTypeString() + ")";
     }
 
     IdentVariableNode::IdentVariableNode(std::string varName) : varName(std::move(varName)) {}
