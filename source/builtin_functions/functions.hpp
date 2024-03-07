@@ -1,12 +1,12 @@
 /**
  * @file functions.hpp
  * @brief Contains header content for functions.cpp, which contains all built in functions
- *
  */
 
 #ifndef COMMANDER_FUNCTIONS_HPP
 #define COMMANDER_FUNCTIONS_HPP
 
+#include "source/flow_controller/types.hpp"
 #include "source/type_checker/type.hpp"
 #include <chrono>
 #include <cmath>
@@ -16,6 +16,7 @@
 #include <vector>
 
 namespace Function {
+    //TODO: refactor TypeChecker::SomeType to use FlowController::SomeType
 
     /* ========== Type Maker ========== */
 
@@ -177,11 +178,17 @@ namespace Function {
             {"endsWith", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
                                  TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY)}},
             {"includes", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                 TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY)}},
+                                 TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY),
+                                getFunctionTy(TypeChecker::TUPLE_TY, TypeChecker::ANY_TY, TypeChecker::BOOL_TY),
+                                getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::BOOL_TY)}},
             {"indexOf", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::INT_TY)}},
+                                TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::INT_TY),
+                                getFunctionTy(TypeChecker::TUPLE_TY, TypeChecker::ANY_TY, TypeChecker::INT_TY),
+                                getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::INT_TY)}},
             {"length",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::INT_TY)}},
+             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::INT_TY),
+                                                        getFunctionTy(TypeChecker::TUPLE_TY, TypeChecker::INT_TY),
+                                                        getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::INT_TY),}},
             {"replace",
              std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,
                                                                     TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
@@ -201,7 +208,11 @@ namespace Function {
              std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
             {"split", std::vector<TypeChecker::FunctionTyPtr> {
                               getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,
-                                            std::make_shared<TypeChecker::ArrayTy>(TypeChecker::STRING_TY))}}};
+                                            std::make_shared<TypeChecker::ArrayTy>(TypeChecker::STRING_TY))}},
+            {"sort", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
+            {"filter", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
+            {"map", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
+            {"foreach", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::VOID_TY)}},};
 
     /* ========== Implementations ========== */
 
@@ -406,6 +417,31 @@ namespace Function {
     TypeChecker::CommanderArray<TypeChecker::CommanderString> split(TypeChecker::CommanderString splitToken,
                                                                     TypeChecker::CommanderString sourceString);
 
+    FlowController::CommanderStringPtr toString(FlowController::CommanderTuplePtr tuple);
+
+    FlowController::CommanderBoolPtr includes(FlowController::CommanderTuplePtr tuple, FlowController::CommanderTypePtr data);
+
+    FlowController::CommanderIntPtr indexOf(FlowController::CommanderTuplePtr tuple, FlowController::CommanderTypePtr data);
+
+    FlowController::CommanderIntPtr length(FlowController::CommanderTuplePtr tuple);
+
+
+    FlowController::CommanderStringPtr toString(FlowController::CommanderArrayPtr array);
+
+    FlowController::CommanderArrayPtr sort(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
+
+    FlowController::CommanderArrayPtr filter(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
+
+    FlowController::CommanderArrayPtr map(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
+
+    FlowController::CommanderTuplePtr foreach(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
+
+    FlowController::CommanderBoolPtr includes(FlowController::CommanderArrayPtr array, FlowController::CommanderTypePtr data);
+
+    FlowController::CommanderIntPtr indexOf(FlowController::CommanderArrayPtr array, FlowController::CommanderTypePtr data);
+
+    FlowController::CommanderIntPtr length(FlowController::CommanderArrayPtr array);
+
     struct AnyCallable {
         AnyCallable() {}
         template<typename F>
@@ -415,14 +451,14 @@ namespace Function {
         std::any m_any;
     };
 
+
+    using functionType = std::function<FlowController::CommanderTypePtr(...)>;
     /**
      * TODO: Not sure which way we should do this yet
      * https://www.geeksforgeeks.org/passing-a-function-as-a-parameter-in-cpp/
      * https://stackoverflow.com/questions/45715219/store-functions-with-different-signatures-in-a-map
      */
-    inline const std::unordered_map<std::string, AnyCallable> functionImplementations {{"println", println},
-                                                                                       {"toString", toString},
-                                                                                       {"print", print}};
+    inline const std::unordered_map<std::string, std::vector<functionType>> functionImplementations {{"toString", std::vector<functionType>{toString}}};
 
     /**
      * parseAsType() allows the user to parse the specified data as a specified type.
