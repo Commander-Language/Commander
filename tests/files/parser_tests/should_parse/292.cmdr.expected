@@ -1,2 +1,2 @@
 (PrgmNode
-	(ImportStmtNode (StringNode "add.txt")))
+	(ImportStmtNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'add.txt'))))))

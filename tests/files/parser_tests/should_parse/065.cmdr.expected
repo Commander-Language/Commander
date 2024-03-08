@@ -1,2 +1,2 @@
 (PrgmNode
-	(PrintlnStmtNode (StringExpressionNode (StringNode "Hello"))))
+	(PrintlnStmtNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Hello')))))))

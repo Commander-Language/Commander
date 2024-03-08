@@ -1,0 +1,2 @@
+//Should not parse
+x void = 4;

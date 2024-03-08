@@ -1,4 +1,4 @@
 (PrgmNode
-	(CmdStmtNode (CmdCmdNode (StringNode "echo") (StringNode "hi")))
-	(CmdStmtNode (CmdCmdNode (StringNode "echo") (StringNode "world")))
+	(CmdStmtNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))
+	(CmdStmtNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'world'))))))
 	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (IntExprNode 2))))

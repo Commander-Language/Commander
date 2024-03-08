@@ -1,0 +1,2 @@
+(PrgmNode
+	(ImportStmtNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'lib.cmdr'))))))

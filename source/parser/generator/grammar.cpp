@@ -249,13 +249,13 @@ namespace Parser {
                 //  Prefix:
                 //  (EXPR) -> [INCREMENT] (VARIABLE)
                 {{{ASTNodeType::EXPR, {TokenType::INCREMENT, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_INCREMENT", castNode("Variable", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::PRE_INCREMENT", castNode("Variable", 1)})}},
                 //  (EXPR) -> [DECREMENT] (VARIABLE)
                 {{{ASTNodeType::EXPR, {TokenType::DECREMENT, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_DECREMENT", castNode("Variable", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::PRE_DECREMENT", castNode("Variable", 1)})}},
                 //  (EXPR) -> [NOT] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::NOT, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::NOT", castNode("Expr", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::NOT", castNode("Expr", 1)})}},
 
                 //  Binary operations:
                 //  ------------------
@@ -286,7 +286,7 @@ namespace Parser {
                 // Negate operation:
                 //  (EXPR) -> [MINUS] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::MINUS, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 0)})}},
+                  makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 1)})}},
 
                 //  Comparison operations:
                 //  ----------------------
@@ -377,6 +377,10 @@ namespace Parser {
 
                 //  Functions:
                 //  ----------
+                // (STMT) -> [RETURN] (EXPR) [SEMICOLON]
+                {{{ASTNodeType::STMT, {TokenType::RETURN, ASTNodeType::EXPR, TokenType::SEMICOLON}},
+                  makeNode("ReturnStmt", {castNode("Expr", 1)})}},
+
                 // (EXPR) -> (EXPR) [LPAREN] [RPAREN]
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LPAREN, TokenType::RPAREN}},
                   makeNode("CallExpr", {castNode("Expr", 0)})}},
@@ -507,10 +511,10 @@ namespace Parser {
                 {{{ASTNodeType::STMT,
                    {TokenType::WHILE, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
                   makeNode("WhileStmt", {castNode("Expr", 2), castNode("Stmt", 4)})}},
-                //  (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN]
+                //  (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN] [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::DO, ASTNodeType::STMT, TokenType::WHILE, TokenType::LPAREN, ASTNodeType::EXPR,
-                    TokenType::RPAREN}},
+                    TokenType::RPAREN, TokenType::SEMICOLON}},
                   makeNode("DoWhileStmt", {castNode("Expr", 4), castNode("Stmt", 1)})}},
 
                 //  (STMT) -> [LCURLY] [RCURLY]
@@ -520,11 +524,15 @@ namespace Parser {
                   makeNode("ScopeStmt", {castNode("Stmts", 1)})}},
 
                 //  Arrays:
+                //  (EXPR) -> [LSQUARE] [RSQUARE]
+                {{{ASTNodeType::EXPR, {TokenType::LSQUARE, TokenType::RSQUARE}}, makeNode("ArrayExpr", {})}},
                 //  (EXPR) -> [LSQUARE] (EXPRS) [RSQUARE]
                 {{{ASTNodeType::EXPR, {TokenType::LSQUARE, ASTNodeType::EXPRS, TokenType::RSQUARE}},
                   makeNode("ArrayExpr", {castNode("Exprs", 1)})}},
 
                 //  Tuples:
+                //  (EXPR) -> [LPAREN] [RPAREN]
+                {{{ASTNodeType::EXPR, {TokenType::LPAREN, TokenType::RPAREN}}, makeNode("TupleExpr", {})}},
                 //  (EXPR) -> [LPAREN] (EXPRS) [RPAREN]
                 {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::RPAREN}},
                   makeNode("TupleExpr", {castNode("Exprs", 1)})}},
@@ -629,6 +637,8 @@ namespace Parser {
                 {{{ASTNodeType::TYPE, {TokenType::STRING}}, makeNode("StringType", {})}},
                 //  (TYPE) -> [VOID]
                 {{{ASTNodeType::TYPE, {TokenType::VOID}}, makeNode("TupleType", {makeNode("Types", {})})}},
+                //  (TYPE) -> [TYPEVARIABLE]
+                {{{ASTNodeType::TYPE, {TokenType::TYPEVARIABLE}}, makeNode("VariableType", {tokenContents(0)})}},
                 //  (TYPE) -> (TYPE) [LAMBDA] (TYPE)
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LAMBDA, ASTNodeType::TYPE}},
                   makeNode("FunctionType", {makeNode("Types", {castNode("Type", 0)}), castNode("Type", 2)})}},
@@ -642,6 +652,9 @@ namespace Parser {
                 //  (TYPE) -> (TYPE) [LSQUARE] [RSQUARE]
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LSQUARE, TokenType::RSQUARE}},
                   makeNode("ArrayType", {castNode("Type", 0)})}},
+                //  (TYPE) -> [LPAREN] [RPAREN]
+                {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN}},
+                  makeNode("TupleType", {makeNode("Types", {})})}},
                 //  (TYPE) -> [LPAREN] (TYPES) [RPAREN]
                 {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN}},
                   makeNode("TupleType", {castNode("Types", 1)})}},

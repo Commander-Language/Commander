@@ -1,0 +1,3 @@
+(PrgmNode
+	(ForStmtNode (BinOpExprNode (IdentVariableNode i) SET (BinopExprNode (IntExprNode 0) ADD (IntExprNode 9))) (BinOpExprNode (BinOpExprNode (VarExprNode (IdentVariableNode i)) LESSER (IntExprNode 2)) OR (IndexExprNode (TupleExprNode (ExprsNode (BoolExprNode true) (BoolExprNode false))) (IntExprNode 1))) (BinOpExprNode (IdentVariableNode i) SET (BinOpExprNode (VarExprNode (IdentVariableNode i)) ADD (IntExprNode 9))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Hi'))))))))))

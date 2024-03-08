@@ -10,8 +10,8 @@ void runFile(const std::string& filePath) {
     Lexer::tokenize(tokens, filePath);
     Parser::ASTNodeList nodes = parser.parse(tokens);
     typeChecker.typeCheck(nodes);
-    FlowController::FlowController controller(nodes);
-    controller.runtime();
+    FlowController::FlowController controller;
+    controller.runtime(nodes);
 }
 
 /**

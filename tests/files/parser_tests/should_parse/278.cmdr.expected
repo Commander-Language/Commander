@@ -1,0 +1,2 @@
+(PrgmNode
+	(CmdStmtNode (CmdCmdNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'echo')))) (StringNode (StringExprsNode (StringExpressionNode (StringNode '2 + 3 = ')) (BinOpExprNode (IntExprNode 2) ADD (IntExprNode 3)) (StringExpressionNode (StringNode '')))) (StringNode '+') (StringNode (StringExprsNode (StringExpressionNode (StringNode '5 + 5 = ')) (CallExprNode (VarExprNode (IdentVariableNode add)) (ExprsNode (IntExprNode 3) (IntExprNode 5))) (StringExpressionNode (StringNode '')))))))

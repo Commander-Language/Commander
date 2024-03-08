@@ -73,6 +73,7 @@ namespace Parser {
         ARRAY_TYPE,
         TUPLE_TYPE,
         FUNCTION_TYPE,
+        VARIABLE_TYPE,
         TYPE,
         TYPES,
         VARIABLE
@@ -2266,7 +2267,7 @@ namespace Parser {
      * @brief A function statement node.
      *
      */
-    class FunctionStmtNode : public ExprNode {
+    class FunctionStmtNode : public StmtNode {
     public:
         /**
          * The function name
@@ -2455,6 +2456,43 @@ namespace Parser {
      *
      */
     using StringTypeNodePtr = std::shared_ptr<StringTypeNode>;
+
+    /**
+     * @brief A `variable` type node.
+     *
+     */
+    class VariableTypeNode : public TypeNode {
+    public:
+        /**
+         * The variable name
+         */
+        std::string name;
+
+        /**
+         * @brief Constructor
+         * @param name
+         */
+        VariableTypeNode(std::string name);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this type node.
+         *
+         * @return `VARIABLE_TYPE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a variable type node.
+     *
+     */
+    using VariableTypeNodePtr = std::shared_ptr<VariableTypeNode>;
 
     /**
      * @brief An array-type node.

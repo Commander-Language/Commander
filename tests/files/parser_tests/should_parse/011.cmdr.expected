@@ -1,2 +1,2 @@
 (PrgmNode
-	(VarStmtNode isTuple (TupleExprNode (IntExprNode 1) (BoolExprNode true) (StringNode 'Hello'))))
+	(ExprStmtNode (BinOpExprNode (IdentVariableNode isTuple) SET (TupleExprNode (ExprsNode (IntExprNode 1) (BoolExprNode true) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hello'))))))))))
