@@ -347,7 +347,7 @@ namespace TypeChecker {
                     throw Util::CommanderException("Tried to call something that wasn't a function.");
                 }
                 std::vector<TyPtr> functionTypes;
-                if (exprNode->nodeType() == Parser::VARIABLE) {
+                if (exprNode->func->nodeType() == Parser::VAR_EXPR) {
                     Parser::VarExprNodePtr const varExprPtr = std::static_pointer_cast<Parser::VarExprNode>(
                             exprNode->func);
                     Parser::IdentVariableNodePtr const variablePtr
