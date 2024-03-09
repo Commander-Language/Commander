@@ -17,7 +17,6 @@
 #include "source/flow_controller/operations.hpp"
 
 namespace Function {
-    //TODO: refactor TypeChecker::SomeType to use FlowController::SomeType
 
     /* ========== Type Maker ========== */
 
@@ -66,12 +65,8 @@ namespace Function {
                                                       getFunctionTy(TypeChecker::FLOAT_TY, TypeChecker::BOOL_TY),
                                                       getFunctionTy(TypeChecker::BOOL_TY, TypeChecker::BOOL_TY),
                                                       getFunctionTy(TypeChecker::STRING_TY, TypeChecker::BOOL_TY)}},
-            {"print",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ANY_TY, TypeChecker::VOID_TY)}},
             {"toString",
              std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ANY_TY, TypeChecker::STRING_TY)}},
-            {"println",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ANY_TY, TypeChecker::VOID_TY)}},
             {"sqrt",
              std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::INT_TY, TypeChecker::FLOAT_TY),
                                                       getFunctionTy(TypeChecker::FLOAT_TY, TypeChecker::FLOAT_TY)}},
@@ -167,265 +162,143 @@ namespace Function {
                                                       getFunctionTy(TypeChecker::FLOAT_TY, TypeChecker::FLOAT_TY)}},
             {"random", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::FLOAT_TY)}},
             {"time", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::INT_TY)}},
-            {"date", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(std::make_shared<TypeChecker::TupleTy>(
-                             std::vector<TypeChecker::TyPtr> {TypeChecker::INT_TY, TypeChecker::INT_TY,
-                                                              TypeChecker::INT_TY}))}},
-            {"sleep",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::INT_TY, TypeChecker::VOID_TY)}},
-            {"charAt", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                               TypeChecker::STRING_TY, TypeChecker::INT_TY, TypeChecker::STRING_TY)}},
-            {"startsWith", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                   TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY)}},
-            {"endsWith", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                 TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY)}},
-            {"includes", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                 TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY),
+            {"date", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(std::make_shared<TypeChecker::TupleTy>(std::vector<TypeChecker::TyPtr> {TypeChecker::INT_TY, TypeChecker::INT_TY, TypeChecker::INT_TY}))}},
+            {"sleep",std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::INT_TY, TypeChecker::VOID_TY)}},
+            {"charAt", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::INT_TY, TypeChecker::STRING_TY)}},
+            {"startsWith", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY)}},
+            {"endsWith", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY)}},
+            {"includes", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::BOOL_TY),
                                 getFunctionTy(TypeChecker::TUPLE_TY, TypeChecker::ANY_TY, TypeChecker::BOOL_TY),
                                 getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::BOOL_TY)}},
-            {"indexOf", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::INT_TY),
+            {"indexOf", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY, TypeChecker::INT_TY),
                                 getFunctionTy(TypeChecker::TUPLE_TY, TypeChecker::ANY_TY, TypeChecker::INT_TY),
                                 getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::INT_TY)}},
             {"length",
              std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::INT_TY),
                                                         getFunctionTy(TypeChecker::TUPLE_TY, TypeChecker::INT_TY),
                                                         getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::INT_TY),}},
-            {"replace",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,
-                                                                    TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
-            {"replaceAll",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,
-                                                                    TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
-            {"substring", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                  TypeChecker::STRING_TY, TypeChecker::INT_TY, TypeChecker::STRING_TY)}},
-            {"substring",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::INT_TY,
-                                                                    TypeChecker::INT_TY, TypeChecker::STRING_TY)}},
-            {"trim",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
-            {"lower",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
-            {"upper",
-             std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
-            {"split", std::vector<TypeChecker::FunctionTyPtr> {
-                              getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,
-                                            std::make_shared<TypeChecker::ArrayTy>(TypeChecker::STRING_TY))}},
+            {"replace",std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
+            {"replaceAll",std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
+            {"substring", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::INT_TY, TypeChecker::STRING_TY),
+                                                                   getFunctionTy(TypeChecker::STRING_TY, TypeChecker::INT_TY,TypeChecker::INT_TY, TypeChecker::STRING_TY)}},
+            {"trim",std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
+            {"lower",std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
+            {"upper",std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY)}},
+            {"split", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::STRING_TY, TypeChecker::STRING_TY,std::make_shared<TypeChecker::ArrayTy>(TypeChecker::STRING_TY))}},
             {"sort", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
             {"filter", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
             {"map", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
-            {"foreach", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::VOID_TY)}}};
+            {"foreach", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::VOID_TY)}},
+            {"append", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::VOID_TY)}},
+            {"remove", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::VOID_TY)}}};
 
     /* ========== Implementations ========== */
 
-    FlowController::CommanderInt parseIntAsInt(FlowController::CommanderInt number);
+    FlowController::CommanderIntPtr parseInt(FlowController::CommanderTypePtr intValue);
 
-    FlowController::CommanderInt parseFloatAsInt(FlowController::CommanderFloat number);
+    FlowController::CommanderFloatPtr parseFloat(FlowController::CommanderTypePtr floatValue);
 
-    FlowController::CommanderInt parseBoolAsInt(FlowController::CommanderBool value);
+    FlowController::CommanderBoolPtr parseBool(FlowController::CommanderTypePtr boolValue);
 
-    FlowController::CommanderInt parseStringAsInt(FlowController::CommanderString string);
+    FlowController::CommanderStringPtr toString(FlowController::CommanderTypePtr value);
 
-    FlowController::CommanderFloat parseIntAsFloat(FlowController::CommanderInt number);
+    FlowController::CommanderFloatPtr sqrt(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat parseFloatAsFloat(FlowController::CommanderFloat number);
+    FlowController::CommanderFloatPtr ln(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat parseBoolAsFloat(FlowController::CommanderBool value);
+    FlowController::CommanderFloatPtr log(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat parseStringAsFloat(FlowController::CommanderString string);
+    FlowController::CommanderFloatPtr abs(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderBool parseIntAsBool(FlowController::CommanderInt number);
+    FlowController::CommanderIntPtr floor(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderBool parseFloatAsBool(FlowController::CommanderFloat number);
+    FlowController::CommanderIntPtr ceil(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderBool parseBoolAsBool(FlowController::CommanderBool value);
+    FlowController::CommanderIntPtr round(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderBool parseStringAsBool(FlowController::CommanderString string);
+    FlowController::CommanderFloatPtr sin(FlowController::CommanderTypePtr numberValue);
 
-    void println(FlowController::CommanderString string);
+    FlowController::CommanderFloatPtr cos(FlowController::CommanderTypePtr numberValue);
 
-    void print(FlowController::CommanderString string);
+    FlowController::CommanderFloatPtr tan(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderString toString(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr csc(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat sqrt(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr sec(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat sqrt(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr cot(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat ln(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr sinh(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat ln(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr cosh(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat log(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr tanh(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat log(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr csch(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderInt abs(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr sech(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat abs(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr coth(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderInt floor(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr arcsin(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderInt floor(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr arccos(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderInt ceil(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr arctan(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderInt ceil(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr arccsc(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderInt round(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr arcsec(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderInt round(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr arccot(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat sin(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr arcsinh(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat sin(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr arccosh(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat cos(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr arctanh(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat cos(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr arccsch(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat tan(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr arcsech(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat tan(FlowController::CommanderFloat value);
+    FlowController::CommanderFloatPtr arccoth(FlowController::CommanderTypePtr numberValue);
 
-    FlowController::CommanderFloat csc(FlowController::CommanderInt value);
+    FlowController::CommanderFloatPtr randomFloat();
 
-    FlowController::CommanderFloat csc(FlowController::CommanderFloat value);
+    FlowController::CommanderIntPtr time();
 
-    FlowController::CommanderFloat sec(FlowController::CommanderInt value);
+    FlowController::CommanderTuplePtr date();
 
-    FlowController::CommanderFloat sec(FlowController::CommanderFloat value);
+    void sleep(FlowController::CommanderIntPtr timeToSleep);
 
-    FlowController::CommanderFloat cot(FlowController::CommanderInt value);
+    FlowController::CommanderStringPtr charAt(FlowController::CommanderStringPtr sourceString, FlowController::CommanderIntPtr index);
 
-    FlowController::CommanderFloat cot(FlowController::CommanderFloat value);
+    FlowController::CommanderBoolPtr startsWith(FlowController::CommanderStringPtr sourceString, FlowController::CommanderStringPtr expected);
 
-    FlowController::CommanderFloat sinh(FlowController::CommanderInt value);
+    FlowController::CommanderBoolPtr endsWith(FlowController::CommanderStringPtr sourceString, FlowController::CommanderStringPtr expected);
 
-    FlowController::CommanderFloat sinh(FlowController::CommanderFloat value);
+    FlowController::CommanderIntPtr length(FlowController::CommanderTypePtr source);
 
-    FlowController::CommanderFloat cosh(FlowController::CommanderInt value);
+    FlowController::CommanderStringPtr replace(FlowController::CommanderStringPtr sourceString, FlowController::CommanderStringPtr oldPhrase, FlowController::CommanderStringPtr newPhrase);
 
-    FlowController::CommanderFloat cosh(FlowController::CommanderFloat value);
+    FlowController::CommanderStringPtr replaceAll(FlowController::CommanderStringPtr sourceString, FlowController::CommanderStringPtr oldPhrase,FlowController::CommanderStringPtr newPhrase);
 
-    FlowController::CommanderFloat tanh(FlowController::CommanderInt value);
+    FlowController::CommanderStringPtr substring(FlowController::CommanderStringPtr sourceString, FlowController::CommanderIntPtr startingIndex);
 
-    FlowController::CommanderFloat tanh(FlowController::CommanderFloat value);
+    FlowController::CommanderStringPtr substring(FlowController::CommanderStringPtr sourceString, FlowController::CommanderIntPtr startingIndex, FlowController::CommanderIntPtr endingIndex);
 
-    FlowController::CommanderFloat csch(FlowController::CommanderInt value);
+    FlowController::CommanderStringPtr trim(FlowController::CommanderStringPtr sourceString);
 
-    FlowController::CommanderFloat csch(FlowController::CommanderFloat value);
+    FlowController::CommanderStringPtr lower(FlowController::CommanderStringPtr sourceString);
 
-    FlowController::CommanderFloat sech(FlowController::CommanderInt value);
+    FlowController::CommanderStringPtr upper(FlowController::CommanderStringPtr sourceString);
 
-    FlowController::CommanderFloat sech(FlowController::CommanderFloat value);
+    FlowController::CommanderArrayPtr split(FlowController::CommanderStringPtr sourceString, FlowController::CommanderStringPtr splitToken);
 
-    FlowController::CommanderFloat coth(FlowController::CommanderInt value);
+    FlowController::CommanderIntPtr indexOf(FlowController::CommanderTypePtr obj, FlowController::CommanderTypePtr data);
 
-    FlowController::CommanderFloat coth(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arcsin(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arcsin(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arccos(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arccos(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arctan(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arctan(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arccsc(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arccsc(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arcsec(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arcsec(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arccot(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arccot(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arcsinh(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arcsinh(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arccosh(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arccosh(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arctanh(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arctanh(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arccsch(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arccsch(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arcsech(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arcsech(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat arccoth(FlowController::CommanderInt value);
-
-    FlowController::CommanderFloat arccoth(FlowController::CommanderFloat value);
-
-    FlowController::CommanderFloat random();
-
-    FlowController::CommanderInt time();
-
-    FlowController::CommanderTuple date();
-
-    void sleep(FlowController::CommanderInt timeToSleep);
-
-    // STRING API METHODS
-    FlowController::CommanderString charAt(FlowController::CommanderInt index, FlowController::CommanderString sourceString);
-
-    FlowController::CommanderBool startsWith(FlowController::CommanderString expected,
-                                          FlowController::CommanderString sourceString);
-
-    FlowController::CommanderBool endsWith(FlowController::CommanderString expected,
-                                        FlowController::CommanderString sourceString);
-
-    FlowController::CommanderBool includes(FlowController::CommanderString expected,
-                                        FlowController::CommanderString sourceString);
-
-    FlowController::CommanderInt indexOf(FlowController::CommanderString expected, FlowController::CommanderString sourceString);
-
-    FlowController::CommanderInt length(FlowController::CommanderString sourceString);
-
-    FlowController::CommanderString replace(FlowController::CommanderString oldPhrase, FlowController::CommanderString newPhrase,
-                                         FlowController::CommanderString sourceString);
-
-    FlowController::CommanderString replaceAll(FlowController::CommanderString oldPhrase,
-                                            FlowController::CommanderString newPhrase,
-                                            FlowController::CommanderString sourceString);
-
-    FlowController::CommanderString substring(FlowController::CommanderInt startingIndex,
-                                           FlowController::CommanderString sourceString);
-
-    FlowController::CommanderString substring(FlowController::CommanderInt startingIndex,
-                                           FlowController::CommanderInt endingIndex,
-                                           FlowController::CommanderString sourceString);
-
-    FlowController::CommanderString trim(FlowController::CommanderString sourceString);
-
-    FlowController::CommanderString lower(FlowController::CommanderString sourceString);
-
-    FlowController::CommanderString upper(FlowController::CommanderString sourceString);
-
-    FlowController::CommanderArray<FlowController::CommanderString> split(FlowController::CommanderString splitToken,
-                                                                    FlowController::CommanderString sourceString);
-
-    FlowController::CommanderStringPtr toString(FlowController::CommanderTypePtr type);
-
-    FlowController::CommanderBoolPtr includes(FlowController::CommanderTuplePtr tuple, FlowController::CommanderTypePtr data);
-
-    FlowController::CommanderIntPtr indexOf(FlowController::CommanderTuplePtr tuple, FlowController::CommanderTypePtr data);
-
-    FlowController::CommanderIntPtr length(FlowController::CommanderTuplePtr tuple);
-
+    FlowController::CommanderBoolPtr includes(FlowController::CommanderTypePtr obj, FlowController::CommanderTypePtr data);
 
     FlowController::CommanderArrayPtr sort(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
 
@@ -433,34 +306,73 @@ namespace Function {
 
     FlowController::CommanderArrayPtr map(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
 
-    FlowController::CommanderTuplePtr foreach(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
+    void foreach(FlowController::CommanderArrayPtr array, FlowController::CommanderLambdaPtr function);
 
-    FlowController::CommanderBoolPtr includes(FlowController::CommanderArrayPtr array, FlowController::CommanderTypePtr data);
+    void append(FlowController::CommanderArrayPtr array, FlowController::CommanderTypePtr data);
 
-    FlowController::CommanderIntPtr indexOf(FlowController::CommanderArrayPtr array, FlowController::CommanderTypePtr data);
+    void remove(FlowController::CommanderArrayPtr array, FlowController::CommanderTypePtr data);
 
-    FlowController::CommanderIntPtr length(FlowController::CommanderArrayPtr array);
-
-
-    FlowController::CommanderStringPtr toString(FlowController::CommanderLambdaPtr function);
-
-    struct AnyCallable {
-        AnyCallable() {}
-        template<typename F>
-        AnyCallable(F&& fun) : AnyCallable(std::function(std::forward<F>(fun))) {}
-        template<typename Ret, typename... Args>
-        AnyCallable(std::function<Ret(Args...)> fun) : m_any(fun) {}
-        std::any m_any;
-    };
-
-
-    using functionType = std::function<FlowController::CommanderTypePtr(...)>;
     /**
      * TODO: Not sure which way we should do this yet
      * https://www.geeksforgeeks.org/passing-a-function-as-a-parameter-in-cpp/
      * https://stackoverflow.com/questions/45715219/store-functions-with-different-signatures-in-a-map
      */
-    //inline const std::unordered_map<std::string, std::vector<functionType>> functionImplementations {{"toString", std::vector<functionType>{*toString}}};
+    /*const std::unordered_map<std::string, std::any> functionImplementations {{"parseInt", parseInt},
+                           {"parseFloat", parseFloat},
+                           {"parseBool", parseBool},
+                           {"toString", toString},
+                           {"sqrt", sqrt},
+                           {"ln", ln},
+                           {"log", log},
+                           {"abs", abs},
+                           {"floor", floor},
+                           {"ceil", ceil},
+                           {"round", round},
+                           {"sin", sin},
+                           {"cos", cos},
+                           {"tan", tan},
+                           {"csc", csc},
+                           {"sec", sec},
+                           {"cot", cot},
+                           {"sinh", sinh},
+                           {"cosh", cosh},
+                           {"tanh", tanh},
+                           {"csch", csch},
+                           {"sech", sech},
+                           {"coth", coth},
+                           {"arcsin", arcsin},
+                           {"arccos", arccos},
+                           {"arctan", arctan},
+                           {"arccsc", arccsc},
+                           {"arcsec", arcsec},
+                           {"arccot", arccot},
+                           {"arcsinh", arcsinh},
+                           {"arccosh", arccosh},
+                           {"arctanh", arctanh},
+                           {"arccsch", arccsch},
+                           {"arcsech", arcsech},
+                           {"arccoth", arccoth},
+                           {"random", randomFloat},
+                           {"time", time},
+                           {"date", date},
+                           {"sleep", sleep},
+                           {"charAt", charAt},
+                           {"startsWith", startsWith},
+                           {"endsWith", endsWith},
+                           {"includes", includes},
+                           {"indexOf", indexOf},
+                           {"length", length},
+                           {"replace",replace},
+                           {"replaceAll",replaceAll},
+                           {"substring", substring},
+                           {"trim",trim},
+                           {"lower", lower},
+                           {"upper",upper},
+                           {"split", split},
+                           {"sort", sort},
+                           {"filter", filter},
+                           {"map", map},
+                           {"foreach", foreach}};*/
 
     /**
      * parseAsType() allows the user to parse the specified data as a specified type.
@@ -479,7 +391,7 @@ namespace Function {
     template<typename T>
     std::string parseAsString(T originalVal) {
         if (typeid(T) == typeid(bool)) {
-            if ((FlowController::CommanderInt)originalVal > 0) { return "true"; }
+            if (((FlowController::CommanderInt)originalVal).value > 0) { return "true"; }
             return "false";
         }
         return std::to_string(originalVal);
