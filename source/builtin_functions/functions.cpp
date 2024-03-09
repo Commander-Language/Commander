@@ -546,8 +546,9 @@ namespace Function {
         return std::make_shared<FlowController::CommanderTuple>(values);
     }
 
-    void sleep(FlowController::CommanderIntPtr timeToSleep) {
+    FlowController::CommanderTuplePtr sleep(FlowController::CommanderIntPtr timeToSleep) {
         std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleep->value));
+        return VOID;
     }
 
     FlowController::CommanderStringPtr charAt(FlowController::CommanderStringPtr sourceString,
@@ -707,19 +708,22 @@ namespace Function {
         // TODO: Implement
     }
 
-    void foreach(FlowController::CommanderArrayPtr array,
+    FlowController::CommanderTuplePtr foreach(FlowController::CommanderArrayPtr array,
                                               FlowController::CommanderLambdaPtr function) {
         // TODO: Implement
+        return VOID;
     }
 
-    void append(FlowController::CommanderArrayPtr array,
+    FlowController::CommanderTuplePtr append(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data) {
         array->values.push_back(data);
+        return VOID;
     }
 
-    void remove(FlowController::CommanderArrayPtr array,
+    FlowController::CommanderTuplePtr remove(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data) {
         array->values.push_back(data);
+        return VOID;
     }
 
-}
+}  // namespace Function

@@ -214,7 +214,7 @@ namespace TypeChecker {
         /**
          * @brief Alternate Constructor
          */
-         ArrayTy(bool any);
+        ArrayTy(bool any);
         /**
          * @brief Gets the type that the class represents
          *
