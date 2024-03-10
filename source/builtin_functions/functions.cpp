@@ -7,7 +7,10 @@
 
 namespace Function {
 
-    TypeChecker::FunctionTyPtr Function::getFunctionTy(TypeChecker::TyPtr arg) {
+    FlowController::CommanderTuplePtr VOID = std::make_shared<FlowController::CommanderTuple>(
+            std::vector<FlowController::CommanderTypePtr> {});
+
+    TypeChecker::FunctionTyPtr getFunctionTy(TypeChecker::TyPtr arg) {
         const std::vector<TypeChecker::TyPtr> params;
         return std::make_shared<TypeChecker::FunctionTy>(params, arg);
     }
@@ -675,7 +678,7 @@ namespace Function {
                                                + TypeChecker::typeToString(obj->getType()));
         }
         for (int i = 0; i < values.size(); i++) {
-            if (FlowController::equalOperation(values[i], data)) {
+            if (FlowController::equalOperation(values[i], data)->value) {
                 return std::make_shared<FlowController::CommanderInt>(i);
             }
         }
@@ -696,16 +699,19 @@ namespace Function {
     FlowController::CommanderArrayPtr sort(FlowController::CommanderArrayPtr array,
                                            FlowController::CommanderLambdaPtr function) {
         // TODO: Implement
+        return nullptr;
     }
 
     FlowController::CommanderArrayPtr filter(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderLambdaPtr function) {
         // TODO: Implement
+        return nullptr;
     }
 
     FlowController::CommanderArrayPtr map(FlowController::CommanderArrayPtr array,
                                           FlowController::CommanderLambdaPtr function) {
         // TODO: Implement
+        return nullptr;
     }
 
     FlowController::CommanderTuplePtr foreach(FlowController::CommanderArrayPtr array,

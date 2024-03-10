@@ -384,7 +384,7 @@ namespace TypeChecker {
             case Parser::API_CALL_EXPR: {
                 Parser::ApiCallExprNodePtr const exprNode = std::static_pointer_cast<Parser::ApiCallExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                exprNode->args->exprs.insert(exprNode->args->exprs.begin(), exprNode);
+                exprNode->args->exprs.insert(exprNode->args->exprs.begin(), exprNode->expression);
                 // TODO: Everything after this is pretty much the same as call expr, so perhaps put this code into it's
                 // own method
                 TyPtr type = typeCheck(exprNode->func);
@@ -393,19 +393,15 @@ namespace TypeChecker {
                     throw Util::CommanderException("Tried to call something that wasn't a function.");
                 }
                 std::vector<TyPtr> functionTypes;
-                if (exprNode->nodeType() == Parser::VARIABLE) {
-                    Parser::IdentVariableNodePtr const variablePtr
-                            = std::static_pointer_cast<Parser::IdentVariableNode>(exprNode->func);
-                    VarInfoPtr const functionInfo = _table.getVariable(variablePtr->varName);
-                    if (functionInfo->infoType() != FUNCTION_INFO) {
-                        // TODO: Improve error
-                        throw Util::CommanderException("Variable of name " + variablePtr->varName
-                                                       + " does not refer to a function.");
-                    }
-                    functionTypes = functionInfo->types;
-                } else {
-                    functionTypes.push_back(type);
+                Parser::IdentVariableNodePtr const variablePtr = std::static_pointer_cast<Parser::IdentVariableNode>(
+                        exprNode->func);
+                VarInfoPtr const functionInfo = _table.getVariable(variablePtr->varName);
+                if (functionInfo->infoType() != FUNCTION_INFO) {
+                    // TODO: Improve error
+                    throw Util::CommanderException("Variable of name " + variablePtr->varName
+                                                   + " does not refer to a function.");
                 }
+                functionTypes = functionInfo->types;
                 std::vector<TyPtr> argTypes;
                 for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;

@@ -591,7 +591,6 @@ namespace FlowController {
                 }
             }
             case Parser::PRE_INCREMENT: {
-                CommanderTypePtr const expr = _expr(unOp->expr);
                 // might need to set variable
                 if (unOp->variable != nullptr) {
                     auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
@@ -616,6 +615,7 @@ namespace FlowController {
                                                            + TypeChecker::typeToString(value->getType()));
                     }
                 }
+                CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
                         auto intType = std::static_pointer_cast<CommanderInt>(expr);

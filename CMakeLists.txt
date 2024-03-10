@@ -186,16 +186,12 @@ target_link_libraries(parserTests lexer parser type_checker GTest::gtest_main)
 gtest_discover_tests(parserTests)
 
 add_executable(typeCheckerTests tests/type_checker_tests.cpp)
-target_link_libraries(typeCheckerTests lexer parser type_checker GTest::gtest_main)
+target_link_libraries(typeCheckerTests lexer parser type_checker flow_controller GTest::gtest_main)
 gtest_discover_tests(typeCheckerTests)
 
 add_executable(symbolTableTests tests/symbol_table_tests.cpp)
 target_link_libraries(symbolTableTests symbol_table GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
-
-add_executable(builtinFunctionsTests tests/builtin_functions_tests.cpp)
-target_link_libraries(builtinFunctionsTests type_checker GTest::gtest_main)
-gtest_discover_tests(builtinFunctionsTests)
 
 add_executable(flowControllerTests tests/flow_controller_tests.cpp)
 target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner ncurses GTest::gtest_main)

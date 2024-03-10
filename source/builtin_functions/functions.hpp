@@ -9,6 +9,7 @@
 #include "source/flow_controller/operations.hpp"
 #include "source/flow_controller/types.hpp"
 #include "source/type_checker/type.hpp"
+#include "source/util/commander_exception.hpp"
 #include <chrono>
 #include <cmath>
 #include <functional>
@@ -21,8 +22,7 @@ namespace Function {
     /**
      * Value to return for functions that have void return types
      */
-    FlowController::CommanderTuplePtr VOID = std::make_shared<FlowController::CommanderTuple>(
-            std::vector<FlowController::CommanderTypePtr> {});
+    extern FlowController::CommanderTuplePtr VOID;
 
     /* ========== Type Maker ========== */
 
@@ -366,29 +366,6 @@ namespace Function {
 
     FlowController::CommanderTuplePtr remove(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data);
-
-    /**
-     * parseAsType() allows the user to parse the specified data as a specified type.
-     * @tparam T - The type of the original data
-     * @tparam U - The type of the data to parse as
-     * @param originalVal - The unmodified data to parse as type U
-     * @return - The original data parsed as type U (e.g. parseAsType<int, bool>(36) will convert 36 from an int to a
-     * boolean value)
-     */
-    template<typename T, typename U>
-    U parseAsType(T originalVal) {
-        return (U)originalVal;  // TODO: exceptions when string is passed in (or redirect to parseAsString /
-                                // parseStringAsType)
-    }
-
-    template<typename T>
-    std::string parseAsString(T originalVal) {
-        if (typeid(T) == typeid(bool)) {
-            if (((FlowController::CommanderInt)originalVal).value > 0) { return "true"; }
-            return "false";
-        }
-        return std::to_string(originalVal);
-    }
 }  // namespace Function
 
 #endif  // COMMANDER_FUNCTIONS_HPP

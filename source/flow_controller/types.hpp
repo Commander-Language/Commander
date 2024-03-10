@@ -5,7 +5,9 @@
 #ifndef COMMANDER_TYPES_REP_HPP
 #define COMMANDER_TYPES_REP_HPP
 
-#include "source/type_checker/type_checker.hpp"
+#include "source/parser/ast_node.hpp"
+#include "source/type_checker/type.hpp"
+#include <memory>
 #include <string>
 
 namespace FlowController {
