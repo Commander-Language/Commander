@@ -120,10 +120,14 @@ namespace TypeChecker {
 
     ArrayTy::ArrayTy(std::shared_ptr<Ty> type) : Ty(type == ANY_TY), baseType(std::move(type)) {}
 
+    ArrayTy::ArrayTy(bool any) : Ty(any) {}
+
     Type ArrayTy::getType() const { return Type::ARRAY; }
 
     FunctionTy::FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> retType)
         : Ty(false), parameters(std::move(params)), returnType(std::move(retType)) {}
+
+    FunctionTy::FunctionTy(bool any) : Ty(any) {}
 
     Type FunctionTy::getType() const { return Type::FUNCTION; }
 

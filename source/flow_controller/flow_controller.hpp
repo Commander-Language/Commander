@@ -175,6 +175,14 @@ namespace FlowController {
          * @param binOp The binary operator expression
          */
         CommanderTypePtr _binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp);
+
+        /**
+         * @brief Helper that calls a builtin function for a call/api-call expression, if it exists, otherwise returns
+         * nullptr
+         * @param node The call or api-call expression
+         * @return The results of the builtin function call, or nullptr if no builtin exists.
+         */
+        CommanderTypePtr _builtin(Parser::ExprNodePtr node);
     };
 
 }  // namespace FlowController
