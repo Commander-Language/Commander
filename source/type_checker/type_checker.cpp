@@ -138,7 +138,7 @@ namespace TypeChecker {
                 Parser::IndexExprNodePtr const exprNode = std::static_pointer_cast<Parser::IndexExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const exprType = typeCheck(exprNode->expr);
-                if (!exprType || exprType->getType() != Type::ARRAY || exprType->getType() != Type::TUPLE) {
+                if (!exprType || (exprType->getType() != Type::ARRAY && exprType->getType() != Type::TUPLE)) {
                     // TODO: Improve error
                     throw Util::CommanderException("Tried to index a type that isn't an array or tuple");
                 }
