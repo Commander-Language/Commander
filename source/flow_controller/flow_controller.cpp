@@ -194,15 +194,13 @@ namespace FlowController {
             case Parser::INDEX_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::IndexExprNode>(node);
                 const CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(expr->index));
-                auto baseExpr = expr->expr;
-                auto baseEval = _expr(baseExpr);
-                if (baseExpr->type->getType() == TypeChecker::ARRAY) {
-                    const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(_expr(baseExpr));
+                CommanderTypePtr dataStructure = _expr(expr->expr);
+                if (dataStructure->getType() == TypeChecker::ARRAY) {
+                    const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(dataStructure);
                     return array->values[index->value];
-                } else {
-                    const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(_expr(baseExpr));
-                    return tuple->values[index->value];
                 }
+                const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(dataStructure);
+                return tuple->values[index->value];
             }
             case Parser::TUPLE_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::TupleExprNode>(node);
