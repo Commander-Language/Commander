@@ -1,0 +1,2 @@
+x = parseBool(true);
+print x;
