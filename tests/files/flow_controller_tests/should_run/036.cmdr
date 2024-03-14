@@ -1,0 +1,2 @@
+x = parseFloat(false);
+print x;

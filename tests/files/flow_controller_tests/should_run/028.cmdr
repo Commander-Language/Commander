@@ -1,0 +1,2 @@
+x = parseInt("3");
+print x;
