@@ -4,6 +4,9 @@
 
 (PRGM) -> (STMTS)
 
+(STMT) -> [LCURLY] [RCURLY]
+(STMT) -> [LCURLY] (STMTS) [RCURLY]
+
 
 //  =================
 //  ||  Bindings:  ||
@@ -54,14 +57,14 @@
 (EXPR) -> [DECREMENT] (VARIABLE)
 (EXPR) -> [NOT] (EXPR)
 
+(EXPR) -> [MINUS] (EXPR)
+
 (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
 (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
 (EXPR) -> (EXPR) [DIVIDE] (EXPR)
 (EXPR) -> (EXPR) [MODULO] (EXPR)
 (EXPR) -> (EXPR) [ADD] (EXPR)
 (EXPR) -> (EXPR) [MINUS] (EXPR)
-
-(EXPR) -> [MINUS] (EXPR)
 
 (EXPR) -> (EXPR) [LESSER] (EXPR)
 (EXPR) -> (EXPR) [LESSER_EQUAL] (EXPR)
@@ -101,8 +104,7 @@
 
 (EXPR) -> [LSQUARE] [RSQUARE]
 (EXPR) -> [LSQUARE] (EXPRS) [RSQUARE]
-(EXPR) -> [LPAREN] [RPAREN]
-(EXPR) -> [LPAREN] (EXPRS) [RPAREN]
+(EXPR) -> [LCURLY] (EXPRS) [RCURLY]
 
 
 //  ==================
@@ -158,9 +160,6 @@
 (STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
 (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN] [SEMICOLON]
 
-(STMT) -> [LCURLY] [RCURLY]
-(STMT) -> [LCURLY] (STMTS) [RCURLY]
-
 (STMT) -> (CMD) [SEMICOLON]
 (STMT) -> (EXPR) [SEMICOLON]
 
@@ -191,8 +190,7 @@
 (TYPE) -> [LPAREN] [RPAREN] [LAMBDA] (TYPE)
 (TYPE) -> [LPAREN] (TYPES) [RPAREN] [LAMBDA] (TYPE)
 (TYPE) -> (TYPE) [LSQUARE] [RSQUARE]
-(TYPE) -> [LPAREN] [RPAREN]
-(TYPE) -> [LPAREN] (TYPES) [RPAREN]
+(TYPE) -> [LCURLY] (TYPES) [RCURLY]
 
 
 //  ==================

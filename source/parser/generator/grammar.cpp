@@ -151,6 +151,11 @@ namespace Parser {
 
                 //  (PRGM) -> (STMTS)
                 {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0)})}},
+                //  (STMT) -> [LCURLY] [RCURLY]
+                {{{ASTNodeType::STMT, {TokenType::LCURLY, TokenType::RCURLY}}, makeNode("ScopeStmt", {})}},
+                //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
+                {{{ASTNodeType::STMT, {TokenType::LCURLY, ASTNodeType::STMTS, TokenType::RCURLY}},
+                  makeNode("ScopeStmt", {castNode("Stmts", 1)})}},
 
 
                 //  =================
@@ -172,7 +177,7 @@ namespace Parser {
                 {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE, TokenType::COLON, TokenType::TYPE}},
                   makeNode("Binding", {tokenContents(1), "true", castNode("Type", 3)})}},
                 //  (BINDING) -> [VARIABLE] [COLON] (TYPE)
-                {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE, TokenType::COLON, TokenType::TYPE}},
+                {{{ASTNodeType::BINDING, {TokenType::VARIABLE, TokenType::COLON, TokenType::TYPE}},
                   makeNode("Binding", {tokenContents(0), "false", castNode("Type", 2)})}},
 
 
@@ -256,6 +261,11 @@ namespace Parser {
                 //  (EXPR) -> [NOT] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::NOT, ASTNodeType::EXPR}},
                   makeNode("UnOpExpr", {"UnOpType::NOT", castNode("Expr", 1)})}},
+                // Negate operation:
+                //  (EXPR) -> [MINUS] (EXPR)
+                {{{ASTNodeType::EXPR, {TokenType::MINUS, ASTNodeType::EXPR}},
+                  makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 1)})}},
+
 
                 //  Binary operations:
                 //  ------------------
@@ -281,12 +291,6 @@ namespace Parser {
                  //  (EXPR) -> (EXPR) [MINUS] (EXPR)
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MINUS, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::SUBTRACT", castNode("Expr", 2)})}},
-
-                // TODO: Figure out negate precedence
-                // Negate operation:
-                //  (EXPR) -> [MINUS] (EXPR)
-                {{{ASTNodeType::EXPR, {TokenType::MINUS, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 1)})}},
 
                 //  Comparison operations:
                 //  ----------------------
@@ -517,12 +521,6 @@ namespace Parser {
                     TokenType::RPAREN, TokenType::SEMICOLON}},
                   makeNode("DoWhileStmt", {castNode("Expr", 4), castNode("Stmt", 1)})}},
 
-                //  (STMT) -> [LCURLY] [RCURLY]
-                {{{ASTNodeType::STMT, {TokenType::LCURLY, TokenType::RCURLY}}, makeNode("ScopeStmt", {})}},
-                //  (STMT) -> [LCURLY] (STMTS) [RCURLY]
-                {{{ASTNodeType::STMT, {TokenType::LCURLY, ASTNodeType::STMTS, TokenType::RCURLY}},
-                  makeNode("ScopeStmt", {castNode("Stmts", 1)})}},
-
                 //  Arrays:
                 //  (EXPR) -> [LSQUARE] [RSQUARE]
                 {{{ASTNodeType::EXPR, {TokenType::LSQUARE, TokenType::RSQUARE}}, makeNode("ArrayExpr", {})}},
@@ -531,10 +529,8 @@ namespace Parser {
                   makeNode("ArrayExpr", {castNode("Exprs", 1)})}},
 
                 //  Tuples:
-                //  (EXPR) -> [LPAREN] [RPAREN]
-                {{{ASTNodeType::EXPR, {TokenType::LPAREN, TokenType::RPAREN}}, makeNode("TupleExpr", {})}},
-                //  (EXPR) -> [LPAREN] (EXPRS) [RPAREN]
-                {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::RPAREN}},
+                //  (EXPR) -> [LCURLY] (EXPRS) [RCURLY]
+                {{{ASTNodeType::EXPR, {TokenType::LCURLY, ASTNodeType::EXPRS, TokenType::RCURLY}},
                   makeNode("TupleExpr", {castNode("Exprs", 1)})}},
 
                 //  Functions:
@@ -652,11 +648,8 @@ namespace Parser {
                 //  (TYPE) -> (TYPE) [LSQUARE] [RSQUARE]
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LSQUARE, TokenType::RSQUARE}},
                   makeNode("ArrayType", {castNode("Type", 0)})}},
-                //  (TYPE) -> [LPAREN] [RPAREN]
-                {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN}},
-                  makeNode("TupleType", {makeNode("Types", {})})}},
-                //  (TYPE) -> [LPAREN] (TYPES) [RPAREN]
-                {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN}},
+                //  (TYPE) -> [LCURLY] (TYPES) [RCURLY]
+                {{{ASTNodeType::TYPE, {TokenType::LCURLY, ASTNodeType::TYPES, TokenType::RCURLY}},
                   makeNode("TupleType", {castNode("Types", 1)})}},
 
                 //  ==================
