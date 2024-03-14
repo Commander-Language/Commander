@@ -19,7 +19,7 @@ namespace Util {
      * @tparam ValueType The type of the map's values.
      * @tparam KeyHashType An invocable class (i.e., a functor class) for hashing the map's `KeyType`.
      */
-    template<typename KeyType, typename ValueType, typename KeyHashType = typename std::hash<KeyType>>
+    template<typename KeyType, typename ValueType, typename KeyHashType = std::hash<KeyType>>
     class GeneratedMap {
     public:
         /**
@@ -41,6 +41,13 @@ namespace Util {
          */
         ValueType& operator[](const KeyType& key);
 
+        /**
+         * @brief Reports the size of the map.
+         *
+         * @return The size of the map.
+         */
+        [[nodiscard]] std::size_t size() const;
+
     private:
         /**
          * @brief The generator function to use to generate uninitialized values.
@@ -52,18 +59,24 @@ namespace Util {
          * @brief The mapping of `KeyType` keys to `ValueType` values.
          * @details Uses an instance of `KeyHashType` to hash keys.
          */
-        std::unordered_map<KeyType, ValueType, KeyHashType> _map;
+        std::unordered_map<std::size_t, ValueType> _map;
     };
 
     template<typename KeyType, typename ValueType, typename KeyHashType>
-    GeneratedMap<KeyType, ValueType, KeyHashType>::GeneratedMap(GeneratedMap::GeneratorType generator)
+    GeneratedMap<KeyType, ValueType, KeyHashType>::GeneratedMap(GeneratorType generator)
         : _generator(std::move(generator)) {}
 
     template<typename KeyType, typename ValueType, typename KeyHashType>
     ValueType& GeneratedMap<KeyType, ValueType, KeyHashType>::operator[](const KeyType& key) {
-        if (_map.count(key) == 0) _map[key] = _generator(key);
+        const std::size_t hash = KeyHashType {}(key);
+        if (_map.count(hash) == 0) _map[hash] = _generator(key);
 
-        return _map[key];
+        return _map[hash];
+    }
+
+    template<typename KeyType, typename ValueType, typename KeyHashType>
+    std::size_t GeneratedMap<KeyType, ValueType, KeyHashType>::size() const {
+        return _map.size();
     }
 
 }  //  namespace Util
