@@ -140,12 +140,13 @@ add_library(lexer source/lexer/lexer.cpp source/util/commander_exception.cpp)
 add_executable(parseTableGenerator
         source/parser/generator/generator.cpp
         source/parser/generator/grammar.cpp
-        source/parser/generator/kernel.cpp
+        source/parser/generator/lr_item.cpp
 
         source/parser/ast_node.cpp
         source/parser/parser_action.cpp
 
         source/type_checker/type.cpp
+        source/util/thread_queue.cpp
 )
 target_link_libraries(parseTableGenerator lexer)
 
