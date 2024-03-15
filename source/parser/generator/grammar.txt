@@ -25,16 +25,16 @@
 //  ||  Commands:  ||
 //  =================
 
-(CMD) -> (CMD) [AMPERSAND]
-(CMD) -> (CMD) [PIPE] (CMD)
-(CMD) -> [TIMEOUT] [INTVAL] (CMD)
-
 (CMD) -> [CMDSTRINGVAL]
 (CMD) -> (STRING)
 (CMD) -> (CMDVARIABLE)
 (CMD) -> (CMD) [CMDSTRINGVAL]
 (CMD) -> (CMD) (STRING)
 (CMD) -> (CMD) (CMDVARIABLE)
+
+(CMD) -> (CMD) [AMPERSAND]
+(CMD) -> (CMD) [PIPE] (CMD)
+(CMD) -> [TIMEOUT] [INTVAL] (CMD)
 
 
 //  ====================

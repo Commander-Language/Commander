@@ -185,16 +185,6 @@ namespace Parser {
                 //  ||  Commands:  ||
                 //  =================
 
-                //  (CMD) -> (CMD) [AMPERSAND]
-                {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::AMPERSAND}},
-                  makeNode("AsyncCmd", {castNode("Cmd", 0)})}},
-                //  (CMD) -> (CMD) [PIPE] (CMD)
-                {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::PIPE, ASTNodeType::CMD}},
-                  makeNode("PipeCmd", {castNode("Cmd", 0), castNode("Cmd", 2)})}},
-                //  (CMD) -> [TIMEOUT] [INTVAL] (CMD)
-                {{{ASTNodeType::CMD, {TokenType::TIMEOUT, TokenType::INTVAL, ASTNodeType::CMD}},
-                  makeNode("TimeoutCmd", {callFunc("std::stoll", {tokenContents(1)}), castNode("Cmd", 2)})}},
-
                 //  (CMD) -> [CMDSTRINGVAL]
                 {{{ASTNodeType::CMD, {TokenType::CMDSTRINGVAL}},
                   makeNode("CmdCmd", {makeNode("String", {tokenContents(0)})})}},
@@ -212,6 +202,16 @@ namespace Parser {
                 //  (CMD) -> (CMD) [CMDVARIABLE]
                 {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::CMDVARIABLE}},
                   makeNode("CmdCmd", {castNode("Cmd", 0), makeNode("IdentVariable", {tokenContents(1)})})}},
+
+                //  (CMD) -> (CMD) [AMPERSAND]
+                {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::AMPERSAND}},
+                  makeNode("AsyncCmd", {castNode("Cmd", 0)})}},
+                //  (CMD) -> (CMD) [PIPE] (CMD)
+                {{{ASTNodeType::CMD, {ASTNodeType::CMD, TokenType::PIPE, ASTNodeType::CMD}},
+                  makeNode("PipeCmd", {castNode("Cmd", 0), castNode("Cmd", 2)})}},
+                //  (CMD) -> [TIMEOUT] [INTVAL] (CMD)
+                {{{ASTNodeType::CMD, {TokenType::TIMEOUT, TokenType::INTVAL, ASTNodeType::CMD}},
+                  makeNode("TimeoutCmd", {callFunc("std::stoll", {tokenContents(1)}), castNode("Cmd", 2)})}},
 
 
                 //  ====================
