@@ -8,8 +8,6 @@
 
 namespace Util {
 
-    bool usingNCurses = false;
-
     std::string getstring() {
         // https://stackoverflow.com/questions/26920261/read-a-string-with-ncurses-in-c
 
@@ -33,11 +31,13 @@ namespace Util {
         return input;
     }
 
-    std::string scan(const std::string &str) {
+    std::string scan(const std::string& str) {
         if (usingNCurses) {
+            print(str);
             std::string input = getstring();
             return input;
         } else {
+            std::cout << str;
             std::string input;
             std::cin >> input;
             return input;

@@ -284,8 +284,7 @@ namespace FlowController {
             case Parser::SCAN_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ScanExprNode>(node);
                 auto prompt = std::static_pointer_cast<CommanderString>(_expr(expr->prompt));
-                Util::scan(prompt->value);
-                //throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+                return std::make_shared<CommanderString>(Util::scan(prompt->value));
             }
             case Parser::READ_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ReadExprNode>(node);

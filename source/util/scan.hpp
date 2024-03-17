@@ -7,13 +7,12 @@
 #ifndef SCAN_HPP
 #define SCAN_HPP
 
+#include "print.hpp"
 #include <iostream>
 #include <ncurses.h>
 #include <string>
 
 namespace Util {
-
-    extern bool usingNCurses;
 
     std::string scan(const std::string& str);
     std::string getstring();
