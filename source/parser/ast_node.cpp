@@ -549,20 +549,16 @@ namespace Parser {
 
     BinOpExprNode::BinOpExprNode(const BindingNodePtr& leftBinding, BinOpType opType, ExprNodePtr rightExpr)
         : leftConstant(leftBinding->constant), leftType(std::move(leftBinding->type)),
-          leftVariable(std::make_shared<IdentVariableNode>(leftBinding->variable)), opType(opType),
+          leftExpr(std::make_shared<VarExprNode>(std::make_shared<IdentVariableNode>(leftBinding->variable))), opType(opType),
           rightExpr(std::move(rightExpr)) {}
 
     BinOpExprNode::BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr)
         : opType(opType), leftExpr(std::move(leftExpr)), rightExpr(std::move(rightExpr)), leftType(nullptr),
           leftConstant(false) {}
 
-    BinOpExprNode::BinOpExprNode(VariableNodePtr leftVariable, BinOpType opType, ExprNodePtr rightExpr)
-        : leftVariable(std::move(leftVariable)), opType(opType), rightExpr(std::move(rightExpr)), leftType(nullptr),
-          leftConstant(false) {}
-
     std::string BinOpExprNode::sExpression() const {
         return "(BinOpExprNode " + std::string(leftConstant ? "const " : "")
-             + (leftExpr == nullptr ? (ASTNodePtr)leftVariable : (ASTNodePtr)leftExpr)->sExpression() + " "
+             + leftExpr->sExpression() + " " + (leftType ? leftType->sExpression() + " " : "")
              + binOpToString(opType) + " " + rightExpr->sExpression() + getTypeString() + ")";
     }
 

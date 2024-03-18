@@ -368,28 +368,31 @@ namespace Parser {
 
                 //  Variable set:
                 //  -------------
-                //  (EXPR) -> (VARIABLE) [EXPONENTIATE_EQUALS] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
+                //  (EXPR) -> (EXPR) [EXPONENTIATE_EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr",
-                           {castNode("Variable", 0), "BinOpType::EXPONENTIATE_SET", castNode("Expr", 2)})}},
-                //  (EXPR) -> (VARIABLE) [MULTIPLY_EQUALS] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MULTIPLY_EQUALS, ASTNodeType::EXPR}},
-                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MULTIPLY_SET", castNode("Expr", 2)})}},
-                //  (EXPR) -> (VARIABLE) [DIVIDE_EQUALS] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::DIVIDE_EQUALS, ASTNodeType::EXPR}},
-                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::DIVIDE_SET", castNode("Expr", 2)})}},
-                //  (EXPR) -> (VARIABLE) [MODULO_EQUALS] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MODULO_EQUALS, ASTNodeType::EXPR}},
-                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::MODULO_SET", castNode("Expr", 2)})}},
-                //  (EXPR) -> (VARIABLE) [ADD_EQUALS] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::ADD_EQUALS, ASTNodeType::EXPR}},
-                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::ADD_SET", castNode("Expr", 2)})}},
-                //  (EXPR) -> (VARIABLE) [MINUS_EQUALS] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::MINUS_EQUALS, ASTNodeType::EXPR}},
-                  makeNode("BinOpExpr", {castNode("Variable", 0), "BinOpType::SUBTRACT_SET", castNode("Expr", 2)})}},
+                           {castNode("Expr", 0), "BinOpType::EXPONENTIATE_SET", castNode("Expr", 2)})}},
+                //  (EXPR) -> (EXPR) [MULTIPLY_EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY_EQUALS, ASTNodeType::EXPR}},
+                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MULTIPLY_SET", castNode("Expr", 2)})}},
+                //  (EXPR) -> (EXPR) [DIVIDE_EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DIVIDE_EQUALS, ASTNodeType::EXPR}},
+                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::DIVIDE_SET", castNode("Expr", 2)})}},
+                //  (EXPR) -> (EXPR) [MODULO_EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MODULO_EQUALS, ASTNodeType::EXPR}},
+                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MODULO_SET", castNode("Expr", 2)})}},
+                //  (EXPR) -> (EXPR) [ADD_EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::ADD_EQUALS, ASTNodeType::EXPR}},
+                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::ADD_SET", castNode("Expr", 2)})}},
+                //  (EXPR) -> (EXPR) [MINUS_EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MINUS_EQUALS, ASTNodeType::EXPR}},
+                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::SUBTRACT_SET", castNode("Expr", 2)})}},
                 //  (EXPR) -> (BINDING) [EQUALS] (EXPR)
                 {{{ASTNodeType::EXPR, {ASTNodeType::BINDING, TokenType::EQUALS, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Binding", 0), "BinOpType::SET", castNode("Expr", 2)})}},
+                //  (EXPR) -> (EXPR) [EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EQUALS, ASTNodeType::EXPR}},
+                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::SET", castNode("Expr", 2)})}},
 
                 //  Other:
                 //  ------
