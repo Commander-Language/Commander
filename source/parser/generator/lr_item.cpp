@@ -156,49 +156,64 @@ namespace std {
 
     std::size_t hash<Parser::Lr0ItemSet>::operator()(const Parser::Lr0ItemSet& lr0ItemSet) const noexcept {
         std::vector<std::size_t> hashes(lr0ItemSet.size());
-        {
-            std::size_t ind = 0;
-            Util::ThreadQueue threadQueue;
-            for (const auto& lr0Item : lr0ItemSet) {
-                std::size_t curInd = ind++;
-                threadQueue.add([curInd, lr0Item, &hashes] {
-                    constexpr std::hash<Parser::Lr0Item> hash;
-                    hashes[curInd] = hash(lr0Item);
-                });
-            }
+        std::size_t ind = 0;
+        for (const auto& lr0Item : lr0ItemSet) {
+            constexpr std::hash<Parser::Lr0Item> hash;
+            hashes[ind++] = hash(lr0Item);
         }
+        // {
+        //     std::size_t ind = 0;
+        //     Util::ThreadQueue threadQueue;
+        //     for (const auto& lr0Item : lr0ItemSet) {
+        //         std::size_t curInd = ind++;
+        //         threadQueue.add([curInd, lr0Item, &hashes] {
+        //             constexpr std::hash<Parser::Lr0Item> hash;
+        //             hashes[curInd] = hash(lr0Item);
+        //         });
+        //     }
+        // }
         return Util::combineHashes(hashes);
     }
 
     std::size_t hash<Parser::Lr1ItemSet>::operator()(const Parser::Lr1ItemSet& lr1ItemSet) const noexcept {
         std::vector<std::size_t> hashes(lr1ItemSet.size());
-        {
-            std::size_t ind = 0;
-            Util::ThreadQueue threadQueue;
-            for (const auto& lr1Item : lr1ItemSet) {
-                std::size_t curInd = ind++;
-                threadQueue.add([curInd, lr1Item, &hashes] {
-                    constexpr std::hash<Parser::Lr1Item> hash;
-                    hashes[curInd] = hash(lr1Item);
-                });
-            }
+        std::size_t ind = 0;
+        for (const auto& lr1Item : lr1ItemSet) {
+            constexpr std::hash<Parser::Lr1Item> hash;
+            hashes[ind++] = hash(lr1Item);
         }
+        // {
+        //     std::size_t ind = 0;
+        //     Util::ThreadQueue threadQueue;
+        //     for (const auto& lr1Item : lr1ItemSet) {
+        //         std::size_t curInd = ind++;
+        //         threadQueue.add([curInd, lr1Item, &hashes] {
+        //             constexpr std::hash<Parser::Lr1Item> hash;
+        //             hashes[curInd] = hash(lr1Item);
+        //         });
+        //     }
+        // }
         return Util::combineHashes(hashes);
     }
 
     std::size_t hash<set<Parser::LalrItem>>::operator()(const Parser::LalrItemSet& lalrItemSet) const noexcept {
         std::vector<std::size_t> hashes(lalrItemSet.size());
-        {
-            std::size_t ind = 0;
-            Util::ThreadQueue threadQueue;
-            for (const auto& lalrItem : lalrItemSet) {
-                std::size_t curInd = ind++;
-                threadQueue.add([curInd, lalrItem, &hashes] {
-                    constexpr std::hash<Parser::LalrItem> hash;
-                    hashes[curInd] = hash(lalrItem);
-                });
-            }
+        std::size_t ind = 0;
+        for (const auto& lalrItem : lalrItemSet) {
+            constexpr std::hash<Parser::LalrItem> hash;
+            hashes[ind++] = hash(lalrItem);
         }
+        // {
+        //     std::size_t ind = 0;
+        //     Util::ThreadQueue threadQueue;
+        //     for (const auto& lalrItem : lalrItemSet) {
+        //         std::size_t curInd = ind++;
+        //         threadQueue.add([curInd, lalrItem, &hashes] {
+        //             constexpr std::hash<Parser::LalrItem> hash;
+        //             hashes[curInd] = hash(lalrItem);
+        //         });
+        //     }
+        // }
         return Util::combineHashes(hashes);
     }
 

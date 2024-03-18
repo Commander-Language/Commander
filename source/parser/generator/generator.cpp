@@ -18,7 +18,6 @@
 #include <functional>
 #include <iostream>
 #include <set>
-#include <source/util/combine_hashes.hpp>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -27,61 +26,64 @@
 #include <utility>
 #include <vector>
 
+const std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+std::chrono::steady_clock::time_point lastTime = startTime;
+std::chrono::steady_clock::time_point curTime;
+const std::vector lengths {-21, 17, 15};
+template<typename ObjType>
+std::string stringVal(const ObjType thing) {
+    std::stringstream stream;
+    stream << thing;
+    return stream.str();
+}
+template<typename ObjType>
+std::string padString(const ObjType thing, const int width) {
+    const std::string val = stringVal(thing);
+    if (width < 0) { return val + std::string(std::max(0, -width - static_cast<int>(val.size())), ' '); }
+    return std::string(std::max(0, width - static_cast<int>(val.size())), ' ') + val;
+}
+void printOuterLine() {
+    std::size_t total = 4;
+    for (std::size_t ind = 0; ind < lengths.size(); ++ind) {
+        total += std::abs(lengths[ind]) + 4;
+        if (ind + 1 < lengths.size()) ++total;
+    }
+
+    std::cout << std::string(total, '=') << "\n";
+}
+void printInnerLine() {
+    std::cout << "||";
+    for (std::size_t ind = 0; ind < lengths.size(); ++ind) {
+        std::cout << std::string(std::abs(lengths[ind]) + 4, '-');
+        if (ind + 1 < lengths.size()) std::cout << "+";
+    }
+    std::cout << "||\n";
+}
+template<typename... ObjType>
+void printLine(const ObjType... args) {
+    std::cout << "||";
+    // ReSharper disable once CppDFAUnreadVariable
+    // ReSharper disable once CppDFAUnusedValue
+    std::size_t ind = 0;
+
+    (
+            [&](const auto arg) {
+                std::cout << "  " << padString(arg, lengths[ind++]) << "  ";
+                if (ind < lengths.size()) std::cout << "|";
+            }(args),
+            ...);
+
+    std::cout << "||\n";
+}
+void printTime(const std::string& name) {
+    curTime = std::chrono::steady_clock::now();
+    printLine(name, std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastTime).count(),
+              std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime).count());
+    lastTime = curTime;
+}
+
 namespace Parser {
     Generator::Generator() {
-        const std::chrono::steady_clock::time_point _startTime = std::chrono::steady_clock::now();
-        std::chrono::steady_clock::time_point _lastTime = _startTime;
-        std::chrono::steady_clock::time_point _curTime;
-        const std::vector _lengths {-21, 17, 15};
-        const auto stringVal = [](const auto thing) {
-            std::stringstream stream;
-            stream << thing;
-            return stream.str();
-        };
-        const auto padString = [&stringVal](const auto thing, const int width) {
-            const std::string val = stringVal(thing);
-            if (width < 0) { return val + std::string(std::max(0, -width - static_cast<int>(val.size())), ' '); }
-            return std::string(std::max(0, width - static_cast<int>(val.size())), ' ') + val;
-        };
-        const auto printOuterLine = [=] {
-            std::size_t total = 4;
-            for (std::size_t ind = 0; ind < _lengths.size(); ++ind) {
-                total += std::abs(_lengths[ind]) + 4;
-                if (ind + 1 < _lengths.size()) ++total;
-            }
-
-            std::cout << std::string(total, '=') << "\n";
-        };
-        const auto printInnerLine = [=] {
-            std::cout << "||";
-            for (std::size_t ind = 0; ind < _lengths.size(); ++ind) {
-                std::cout << std::string(std::abs(_lengths[ind]) + 4, '-');
-                if (ind + 1 < _lengths.size()) std::cout << "+";
-            }
-            std::cout << "||\n";
-        };
-        const auto printLine = [&](const auto... args) {
-            std::cout << "||";
-            // ReSharper disable once CppDFAUnreadVariable
-            // ReSharper disable once CppDFAUnusedValue
-            std::size_t ind = 0;
-
-            (
-                    [&](const auto arg) {
-                        std::cout << "  " << padString(arg, _lengths[ind++]) << "  ";
-                        if (ind < _lengths.size()) std::cout << "|";
-                    }(args),
-                    ...);
-
-            std::cout << "||\n";
-        };
-        const auto printTime = [&](const auto name) {
-            _curTime = std::chrono::steady_clock::now();
-            printLine(name, std::chrono::duration_cast<std::chrono::milliseconds>(_curTime - _lastTime).count(),
-                      std::chrono::duration_cast<std::chrono::milliseconds>(_curTime - _startTime).count());
-            _lastTime = _curTime;
-        };
-
         printOuterLine();
         printLine("Stage", "Elapsed time (ms)", "Total time (ms)");
         printOuterLine();
@@ -154,257 +156,21 @@ namespace Parser {
         // ||  1: Construct LR(0) sets  ||
         // ===============================
 
-        const std::unordered_map lr0ItemClosure {[&] {
-            std::unordered_map<Lr0Item, Lr0Kernel> closure;
+        const std::unordered_map lr0ItemClosure = _lr0ItemClosure(grammar.rules, &goalRule, nodeGenerators);
 
-            const auto calcClosure = [&](const Lr0Item& item) {
-                Lr0Closure itemClosure {item};
-
-                std::queue<Lr0Item> pending;
-                pending.push(item);
-
-                while (!pending.empty()) {
-                    const Lr0Item curItem = pending.front();
-                    pending.pop();
-
-                    if (curItem.index == curItem.rule->components.size()) continue;
-
-                    if (closure.count(curItem) > 0) {
-                        itemClosure.insert(closure[curItem].begin(), closure[curItem].end());
-                        continue;
-                    }
-
-                    const auto nextEntry = curItem.rule->components[curItem.index];
-                    if (nextEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
-                    for (const auto* generator : nodeGenerators.at(nextEntry.nodeType)) {
-                        Lr0Item newItem {generator, 0};
-                        if (itemClosure.insert(newItem).second) pending.push(newItem);
-                    }
-                }
-
-                closure[item] = itemClosure;
-            };
-
-            const auto handleRule = [&](const GrammarRule& rule) {
-                for (std::size_t ind = 0; ind <= rule.components.size(); ++ind) calcClosure({&rule, ind});
-            };
-
-            handleRule(goalRule);
-            for (const auto& rule : grammar.rules) handleRule(rule);
-
-            return closure;
-        }()};
-
-        const auto lr0SetClosure = [&](const Lr0Kernel& kernel) {
-            Lr0Closure closure {kernel};
-            for (const auto& item : kernel) {
-                const auto& itemClosure = lr0ItemClosure.at(item);
-                closure.insert(itemClosure.begin(), itemClosure.end());
-            }
-            return closure;
-        };
-
-        const std::unordered_map lr0StateNums {[&] {
-            std::unordered_map<Lr0Kernel, std::size_t> states;
-
-            const Lr0Kernel initialState {{&goalRule, 0}};
-            std::queue<Lr0Kernel> pending;
-            pending.push(initialState);
-            states[initialState] = 0;
-
-            while (!pending.empty()) {
-                const Lr0Kernel curState = std::move(pending.front());
-                pending.pop();
-
-                std::unordered_map<GrammarEntry, Lr0Kernel> nextKernels;
-
-                for (const auto& [rule, index] : lr0SetClosure(curState)) {
-                    if (index == rule->components.size()) continue;
-
-                    nextKernels[rule->components[index]].emplace(rule, index + 1);
-                }
-
-                for (const auto& [entry, nextState] : nextKernels) {
-                    if (states.count(nextState) == 0) {
-                        states[nextState] = states.size();
-                        pending.push(nextState);
-                    }
-                }
-            }
-
-            return states;
-        }()};
-        const std::vector lr0States {[&] {
-            std::vector<Lr0Kernel> states(lr0StateNums.size());
-
-            for (const auto& [kernel, stateNum] : lr0StateNums) states[stateNum] = kernel;
-
-            return states;
-        }()};
+        const std::unordered_map lr0States = _generateLr0States(lr0ItemClosure, &goalRule);
 
         printTime("1: LR(0) sets");
         printInnerLine();
 
 
-        // =======================================
-        // ||  2: Determine initial lookaheads  ||
-        // =======================================
+        // =================================================
+        // ||  2, 3: Initialize and Propagate lookaheads  ||
+        // =================================================
 
-        Util::GeneratedMap<Lr1Item, Lr1Closure> lr1ItemClosure {[&](const Lr1Item& lr1Item) {
-            Lr1Closure closure {lr1Item};
-            std::vector lr1Items {lr1Item};
+        Util::GeneratedMap lr1ItemClosure {_lr1ItemClosureGenerator(firstSet, nodeGenerators)};
 
-            for (std::size_t index = 0; index < lr1Items.size(); ++index) {
-                const Lr1Item& currentLr1Item = lr1Items[index];
-                if (currentLr1Item.index == currentLr1Item.rule->components.size()) continue;
-                const std::vector<GrammarEntry> remaining {currentLr1Item.rule->components.begin()
-                                                                   + static_cast<long>(currentLr1Item.index),
-                                                           currentLr1Item.rule->components.end()};
-                const GrammarEntry& currentItem = currentLr1Item.rule->components[currentLr1Item.index];
-                if (currentItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
-
-                const auto lookaheads = [&]() -> std::unordered_set<TokenType> {
-                    if (remaining.size() < 2) return {currentLr1Item.lookahead};
-
-                    if (remaining[1].grammarEntryType == GrammarEntry::TOKEN_TYPE) return {remaining[1].tokenType};
-                    return firstSet.at(remaining[1].nodeType);
-                }();
-
-                if (nodeGenerators.count(currentItem.nodeType) > 0) {
-                    for (const auto& production : nodeGenerators.at(currentItem.nodeType)) {
-                        for (const auto& lookahead : lookaheads) {
-                            const Lr1Item newLr1Item {production, 0, lookahead};
-                            if (closure.count(newLr1Item) > 0) continue;
-                            closure.insert(newLr1Item);
-                            lr1Items.push_back(newLr1Item);
-                        }
-                    }
-                }
-            }
-
-            return closure;
-        }};
-
-        std::unordered_map lalrStateNums {[&] {
-            std::unordered_map<Lr0Kernel, std::unordered_map<Lr0Item, std::unordered_set<TokenType>>> lookaheads;
-            for (std::size_t ind = 0; ind <= goalRule.components.size(); ++ind) {
-                const Lr0Item goalItem {&goalRule, ind};
-                lookaheads[{goalItem}][goalItem] = {TokenType::END_OF_FILE};
-            }
-
-            struct Propagation {
-                Lr0Kernel fromState;
-                Lr0Item fromItem;
-
-                Lr0Kernel toState;
-                Lr0Item toItem;
-
-                struct Hash {
-                    std::size_t operator()(const Propagation& propagation) const noexcept {
-                        return Util::combineHashes(propagation.fromState, propagation.fromItem, propagation.toState,
-                                                   propagation.toItem);
-                    }
-                };
-
-                bool operator==(const Propagation& other) const {
-                    return this->fromItem == other.fromItem && this->fromState == other.fromState
-                        && this->toState == other.toState;
-                }
-            };
-            std::unordered_set<Propagation, Propagation::Hash> propagations;
-
-            for (const auto& lr0Kernel : lr0States) {
-                const auto lr0State = lr0SetClosure(lr0Kernel);
-
-                for (const auto& item : lr0Kernel) {
-                    if (item.index == item.rule->components.size()) continue;
-
-                    constexpr auto specialLookahead = TokenType::END;
-                    const auto& specialClosure = lr1ItemClosure[{item, specialLookahead}];
-
-                    for (const auto& enclosed : specialClosure) {
-                        if (enclosed.index == enclosed.rule->components.size()) continue;
-
-                        const Lr0Item nextItem {enclosed.rule, enclosed.index + 1};
-
-                        const auto nextKernel = lr0Goto(lr0State, enclosed.rule->components[enclosed.index]);
-                        const auto nextStateNum = lr0StateNums.at(nextKernel);
-                        for (const auto& nextItem : nextKernel) {
-                            if (enclosed.lookahead == specialLookahead) {
-                                // Propagate lookaheads from `enclosed` to `nextItem` in `nextKernel`.
-                                propagations.insert({lr0Kernel, item, nextKernel, nextItem});
-                            } else {
-                                // Add `enclosed.lookahead` to `nextItem` in `nextKernel`.
-                                lookaheads[nextKernel][nextItem].insert(enclosed.lookahead);
-                            }
-                        }
-                    }
-                }
-            }
-
-            printTime("2: Initial lookaheads");
-            printInnerLine();
-
-
-            // ===============================
-            // ||  3: Propagate lookaheads  ||
-            // ===============================
-
-            int iteration = 0;
-            bool changed = true;
-            while (changed) {
-                std::cout << "--------------------------------------------------------------------------------\n"
-                          << "Iteration " << iteration++ << ":\n";
-                for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) {
-                    std::cout << "    - State " << stateNum << "/" << lr0States.size() - 1 << ":";
-                    std::cout << "\n";
-
-                    const auto& kernel = lr0States[stateNum];
-                    for (const auto& item : kernel) {
-                        //
-                        std::stringstream itemLookaheads;
-                        itemLookaheads << "{";
-                        for (const auto& lookahead : lookaheads[kernel][item])
-                            itemLookaheads << " " << GrammarEntry {lookahead};
-                        itemLookaheads << " }";
-                        std::cout << "        - " << padString(item, -50) << ": " << padString(itemLookaheads.str(), 80) << "\n";
-                    }
-                }
-
-                changed = false;
-                for (const auto& [fromState, fromItem, toState, toItem] : propagations) {
-                    const auto fromLookaheads = lookaheads[fromState][fromItem];
-                    auto& toLookaheads = lookaheads[toState][toItem];
-                    for (const auto fromLookahead : fromLookaheads) {
-                        if (toLookaheads.insert(fromLookahead).second) changed = true;
-                    }
-                }
-            }
-
-            exit(0);
-
-            std::unordered_map<LalrKernel, std::size_t> states;
-            //  . . .
-            for (const auto& [lr0Kernel, stateNum] : lr0StateNums) {
-                LalrKernel newKernel;
-                std::cout << "State " << stateNum << ":\n"
-                          << "    - LR(0) items:\n";
-                for (const auto& item : lr0States[stateNum]) std::cout << "        - " << item << "\n";
-                std::cout << "    - LALR(1) items:\n";
-                for (const auto& [lr0Item, itemLookaheads] : lookaheads[lr0Kernel]) {
-                    const LalrItem newItem {lr0Item, {itemLookaheads.begin(), itemLookaheads.end()}};
-                    std::cout << "        - " << newItem << "\n";
-                    newKernel.insert(newItem);
-                }
-                states[newKernel] = stateNum;
-            }
-            return states;
-        }()};
-        std::vector lalrStates {[&] {
-            std::vector<LalrKernel> states(lalrStateNums.size());
-            for (const auto& [kernel, stateNum] : lalrStateNums) states[stateNum] = kernel;
-            return states;
-        }()};
+        const std::unordered_map lalrStates = _generateLalrStates(lr0States, lr0ItemClosure, lr1ItemClosure, &goalRule);
 
         printTime("3: Apply lookaheads");
         printInnerLine();
@@ -414,38 +180,14 @@ namespace Parser {
         // ||  4: Compute table actions  ||
         // ================================
 
-        // TODO: This.
-        for (std::size_t ind = 0; ind < lalrStates.size(); ++ind) {
-            std::cout << "State " << ind + 1 << "/" << lalrStates.size() << ":\n";
-            for (const auto& item : lalrStates[ind]) std::cout << "    - " << item << "\n";
-        }
-
         printTime("4: Compute actions");
-
         printOuterLine();
+
+        _numStates = lalrStates.size();
 
         exit(0);
 
         /*
-
-        constexpr std::size_t colWidth = 10;
-        std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
-        std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
-        std::chrono::steady_clock::time_point curTime = std::chrono::steady_clock::now();
-        std::cout << "=====================================================\n"
-                  << "||     Stage     |  Elapsed time  |   Total time   ||\n"
-                  << "=====================================================\n"
-                  << "||  0: begin     "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastTime).count(), colWidth)
-                  << "ms  "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime).count(),
-                            colWidth)
-                  << "ms  ||\n"
-                  << "||---------------+----------------+----------------||\n";
-        lastTime = curTime;
-
         // Reports the set of all token types that can be the first of the given AST node type.
         const std::unordered_map firstSet {[&] {
             std::unordered_map<ASTNodeType, std::unordered_set<TokenType>> result;
@@ -481,18 +223,6 @@ namespace Parser {
 
             return result;
         }()};
-
-        curTime = std::chrono::steady_clock::now();
-        std::cout << "||  1: firstSet  "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastTime).count(), colWidth)
-                  << "ms  "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime).count(),
-                            colWidth)
-                  << "ms  ||\n"
-                  << "||---------------+----------------+----------------||\n";
-        lastTime = curTime;
 
         const std::unordered_map lr1ItemClosure {[&] {
             Util::SafePtr<std::unordered_map<Lr1Item, Lr1ItemSet>> closure;
@@ -555,18 +285,6 @@ namespace Parser {
 
             return static_cast<std::unordered_map<Lr1Item, Lr1ItemSet>>(*closure);
         }()};
-
-        curTime = std::chrono::steady_clock::now();
-        std::cout << "||  2: closure   "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastTime).count(), colWidth)
-                  << "ms  "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime).count(),
-                            colWidth)
-                  << "ms  ||\n"
-                  << "||---------------+----------------+----------------||\n";
-        lastTime = curTime;
 
         // const std::unordered_map lr1ItemClosure {[&] {
         //     SafePtr<std::unordered_set<LR1Item>> processed;
@@ -991,6 +709,236 @@ namespace Parser {
                << "        {}\n";
 
         output << foot;
+    }
+
+    bool Generator::Propagation::operator==(const Propagation& other) const {
+        return this->fromItem == other.fromItem && this->toItem == other.toItem && this->fromState == other.fromState
+            && this->toState == other.toState;
+    }
+
+    std::unordered_map<Lr0Item, Lr0Closure> Generator::_lr0ItemClosure(
+            const std::vector<GrammarRule>& grammarRules, const GrammarRule* goalRule,
+            const std::unordered_map<ASTNodeType, std::unordered_set<const GrammarRule*>>& nodeGenerators) {
+        std::unordered_map<Lr0Item, Lr0Kernel> closure;
+
+        const auto calcClosure = [&](const Lr0Item& item) {
+            Lr0Closure itemClosure {item};
+
+            std::queue<Lr0Item> pending;
+            pending.push(item);
+
+            while (!pending.empty()) {
+                const Lr0Item curItem = pending.front();
+                pending.pop();
+
+                if (curItem.index == curItem.rule->components.size()) continue;
+
+                if (closure.count(curItem) > 0) {
+                    itemClosure.insert(closure[curItem].begin(), closure[curItem].end());
+                    continue;
+                }
+
+                const auto nextEntry = curItem.rule->components[curItem.index];
+                if (nextEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
+                for (const auto* generator : nodeGenerators.at(nextEntry.nodeType)) {
+                    Lr0Item newItem {generator, 0};
+                    if (itemClosure.insert(newItem).second) pending.push(newItem);
+                }
+            }
+
+            closure[item] = itemClosure;
+        };
+
+        const auto calcRule = [&](const GrammarRule* rule) {
+            for (std::size_t ind = 0; ind <= rule->components.size(); ++ind) calcClosure({rule, ind});
+        };
+
+        calcRule(goalRule);
+        for (const auto& rule : grammarRules) calcRule(&rule);
+
+        return closure;
+    }
+
+    Lr0Closure Generator::_lr0SetClosure(const std::unordered_map<Lr0Item, Lr0Kernel>& lr0ItemClosure,
+                                         const Lr0Kernel& kernel) {
+        Lr0Closure closure {kernel};
+        for (const auto& item : kernel) {
+            const auto& itemClosure = lr0ItemClosure.at(item);
+            closure.insert(itemClosure.begin(), itemClosure.end());
+        }
+        return closure;
+    }
+
+    std::unordered_map<Lr0Kernel, std::size_t>
+    Generator::_generateLr0States(const std::unordered_map<Lr0Item, Lr0Kernel>& lr0ItemClosure,
+                                  const GrammarRule* goalRule) {
+        std::unordered_map<Lr0Kernel, std::size_t> states;
+
+        const Lr0Kernel initialState {{goalRule, 0}};
+        std::queue<Lr0Kernel> pending;
+        pending.push(initialState);
+        states[initialState] = 0;
+
+        while (!pending.empty()) {
+            const Lr0Kernel curState = std::move(pending.front());
+            pending.pop();
+
+            std::unordered_map<GrammarEntry, Lr0Kernel> nextKernels;
+
+            for (const auto& [rule, index] : _lr0SetClosure(lr0ItemClosure, curState)) {
+                if (index == rule->components.size()) continue;
+
+                nextKernels[rule->components[index]].emplace(rule, index + 1);
+            }
+
+            for (const auto& [entry, nextState] : nextKernels) {
+                if (states.count(nextState) == 0) {
+                    states[nextState] = states.size();
+                    pending.push(nextState);
+                }
+            }
+        }
+
+        return states;
+    }
+
+    std::function<Lr1Closure(const Lr1Item&)> Generator::_lr1ItemClosureGenerator(
+            const std::unordered_map<ASTNodeType, std::unordered_set<TokenType>>& firstSet,
+            const std::unordered_map<ASTNodeType, std::unordered_set<const GrammarRule*>>& nodeGenerators) {
+        return [&](const Lr1Item& lr1Item) {
+            Lr1Closure closure {lr1Item};
+            std::queue<Lr1Item> toExamine;
+            toExamine.push(lr1Item);
+
+            while (!toExamine.empty()) {
+                const auto curItem = toExamine.front();
+                toExamine.pop();
+
+                if (curItem.index == curItem.rule->components.size()) continue;
+
+                const auto nextEntry = curItem.rule->components[curItem.index];
+                if (nextEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
+
+                const auto lookaheads = [&, curItem]() -> std::unordered_set<TokenType> {
+                    if (curItem.index + 1 == curItem.rule->components.size()) return {curItem.lookahead};
+
+                    const auto followEntry = curItem.rule->components[curItem.index + 1];
+                    if (followEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) return {followEntry.tokenType};
+
+                    return firstSet.at(followEntry.nodeType);
+                }();
+
+                if (nodeGenerators.count(nextEntry.nodeType) == 0) continue;
+                for (const auto* generator : nodeGenerators.at(nextEntry.nodeType)) {
+                    for (const auto nextToken : lookaheads) {
+                        const Lr1Item newItem {generator, 0, nextToken};
+                        if (closure.insert(newItem).second) toExamine.push(newItem);
+                    }
+                }
+            }
+            return closure;
+        };
+    }
+
+    std::unordered_map<LalrKernel, std::size_t>
+    Generator::_generateLalrStates(const std::unordered_map<Lr0Kernel, std::size_t>& lr0States,
+                                   const std::unordered_map<Lr0Item, Lr0Closure>& lr0ItemClosure,
+                                   Util::GeneratedMap<Lr1Item, Lr1Closure>& lr1ItemClosure,
+                                   const GrammarRule* goalRule) {
+        std::unordered_map<Lr0Kernel, std::unordered_map<Lr0Item, std::unordered_set<TokenType>>> lookaheads;
+        std::mutex lookaheadsGuard;
+
+        for (std::size_t ind = 0; ind <= goalRule->components.size(); ++ind) {
+            const Lr0Item goalItem {goalRule, ind};
+            lookaheads[{goalItem}][goalItem] = {TokenType::END_OF_FILE};
+        }
+
+        std::unordered_set<Propagation, Propagation::Hash> propagations;
+        std::mutex propagationsGuard;
+
+        std::mutex lr1ItemClosureGuard;
+
+        const auto processKernel = [&](const Lr0Kernel& kernel) {
+            const auto lr0State = _lr0SetClosure(lr0ItemClosure, kernel);
+            std::unordered_set<Propagation, Propagation::Hash> propagationsBatch;
+            std::unordered_map<Lr0Kernel, std::unordered_map<Lr0Item, std::unordered_set<TokenType>>> lookaheadsBatch;
+
+            for (const auto& item : kernel) {
+                if (item.index == item.rule->components.size()) continue;
+
+                constexpr auto specialLookahead = TokenType::END;
+                const auto& specialClosure = [&] {
+                    const std::lock_guard lock(lr1ItemClosureGuard);
+                    return lr1ItemClosure[{item, specialLookahead}];
+                }();
+
+                for (const auto& enclosed : specialClosure) {
+                    if (enclosed.index == enclosed.rule->components.size()) continue;
+
+                    const auto nextKernel = lr0Goto(lr0State, enclosed.rule->components[enclosed.index]);
+
+                    const Lr0Item nextItem {enclosed.rule, enclosed.index + 1};
+
+                    if (enclosed.lookahead == specialLookahead) {
+                        // Propagate lookaheads from `enclosed` to `nextKernel[nextItem]`.
+                        propagationsBatch.insert({kernel, item, nextKernel, nextItem});
+                    } else {
+                        // Add `enclosed.lookahead` to `nextKernel[nextItem]`.
+                        lookaheadsBatch[nextKernel][nextItem].insert(enclosed.lookahead);
+                    }
+                }
+            }
+
+            {
+                const std::lock_guard lock(lookaheadsGuard);
+                for (const auto& [kernel, items] : lookaheadsBatch) {
+                    auto& lookaheadsEntry = lookaheads[kernel];
+                    for (const auto& [item, lookaheads] : items) {
+                        lookaheadsEntry[item].insert(lookaheads.begin(), lookaheads.end());
+                    }
+                }
+            }
+
+            {
+                const std::lock_guard lock(propagationsGuard);
+                propagations.insert(propagationsBatch.begin(), propagationsBatch.end());
+            }
+        };
+
+        Util::ThreadQueue jobs(1);
+        for (const auto& [lr0Kernel, stateNum] : lr0States) jobs.add(processKernel, lr0Kernel);
+        jobs.wait();
+
+        printTime("2: Initial lookaheads");
+        printInnerLine();
+
+
+        // ===============================
+        // ||  3: Propagate lookaheads  ||
+        // ===============================
+
+        bool changed = true;
+        while (changed) {
+            changed = false;
+            for (const auto& [fromState, fromItem, toState, toItem] : propagations) {
+                const auto fromLookaheads = lookaheads[fromState][fromItem];
+                auto& toLookaheads = lookaheads[toState][toItem];
+                for (const auto fromLookahead : fromLookaheads) {
+                    if (toLookaheads.insert(fromLookahead).second) changed = true;
+                }
+            }
+        }
+
+        std::unordered_map<LalrKernel, std::size_t> states;
+        for (const auto& [lr0Kernel, stateNum] : lr0States) {
+            LalrKernel newKernel;
+            for (const auto& [lr0Item, itemLookaheads] : lookaheads[lr0Kernel]) {
+                const LalrItem newItem {lr0Item, {itemLookaheads.begin(), itemLookaheads.end()}};
+                newKernel.insert(newItem);
+            }
+            states[newKernel] = stateNum;
+        }
+        return states;
     }
 
     std::string Generator::_join(const std::string& delimiter, const std::vector<std::string>& strings) {

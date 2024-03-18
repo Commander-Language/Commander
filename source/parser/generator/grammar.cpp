@@ -143,6 +143,21 @@ namespace Parser {
             return result;
         };
 
+        // return [](const std::vector<std::tuple<ASTNodeType, std::vector<GrammarEntry>>>& rules) {
+        //     std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>> result;
+        //     std::size_t prec = 1;
+        //     for (const auto& [nodeType, entries] : rules) result.push_back({{nodeType, entries, prec++}, ""});
+        //     return result;
+        // }({
+        //                //
+        //                    {ASTNodeType::STMT, {ASTNodeType::EXPR, TokenType::EQUALS, ASTNodeType::TYPE}},
+        //                    {ASTNodeType::STMT, {ASTNodeType::TYPE}},
+        //                    {ASTNodeType::EXPR, {TokenType::MULTIPLY, ASTNodeType::TYPE}},
+        //                    {ASTNodeType::EXPR, {TokenType::VARIABLE}},
+        //                    {ASTNodeType::TYPE, {ASTNodeType::EXPR}}
+        //                //
+        //        });
+
         return [](const std::vector<std::tuple<ASTNodeType, std::vector<GrammarEntry>>>& rules) {
             std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>> result;
             std::size_t prec = 1;

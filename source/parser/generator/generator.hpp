@@ -7,13 +7,17 @@
 #define GENERATOR_HPP
 
 #include "grammar.hpp"
+#include "lr_item.hpp"
 
 #include "source/lexer/lexer.hpp"
 #include "source/parser/ast_node.hpp"
+#include "source/util/combine_hashes.hpp"
+#include "source/util/generated_map.hpp"
 
 #include <ostream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace Parser {
@@ -54,6 +58,43 @@ namespace Parser {
         void generateSource(std::ostream& output) const;
 
     private:
+        struct Propagation {
+            Lr0Kernel fromState;
+            Lr0Item fromItem;
+
+            Lr0Kernel toState;
+            Lr0Item toItem;
+
+            struct Hash {
+                std::size_t operator()(const Propagation& propagation) const noexcept {
+                    return Util::combineHashes(propagation.fromState, propagation.fromItem, propagation.toState,
+                                               propagation.toItem);
+                }
+            };
+
+            bool operator==(const Propagation& other) const;
+        };
+
+        static std::unordered_map<Lr0Item, Lr0Closure>
+        _lr0ItemClosure(const std::vector<GrammarRule>& grammarRules, const GrammarRule* goalRule,
+                        const std::unordered_map<ASTNodeType, std::unordered_set<const GrammarRule*>>& nodeGenerators);
+
+        static Lr0Closure _lr0SetClosure(const std::unordered_map<Lr0Item, Lr0Kernel>& lr0ItemClosure,
+                                         const Lr0Kernel& kernel);
+
+        static std::unordered_map<Lr0Kernel, std::size_t>
+        _generateLr0States(const std::unordered_map<Lr0Item, Lr0Kernel>& lr0ItemClosure, const GrammarRule* goalRule);
+
+        static std::function<Lr1Closure(const Lr1Item&)> _lr1ItemClosureGenerator(
+                const std::unordered_map<ASTNodeType, std::unordered_set<TokenType>>& firstSet,
+                const std::unordered_map<ASTNodeType, std::unordered_set<const GrammarRule*>>& nodeGenerators);
+
+        static std::unordered_map<LalrKernel, std::size_t>
+        _generateLalrStates(const std::unordered_map<Lr0Kernel, std::size_t>& lr0States,
+                            const std::unordered_map<Lr0Item, Lr0Closure>& lr0ItemClosure,
+                            Util::GeneratedMap<Lr1Item, Lr1Closure>& lr1ItemClosure,
+                            const GrammarRule* goalRule);
+
         /**
          * @brief Joins the given items into a string with the given delimiter.
          *
