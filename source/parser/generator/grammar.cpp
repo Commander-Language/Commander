@@ -265,19 +265,19 @@ namespace Parser {
 
                 //  Unary operations:
                 //  Postfix:
-                //  (EXPR) -> (VARIABLE) [INCREMENT]
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::INCREMENT}},
-                  makeNode("UnOpExpr", {"UnOpType::POST_INCREMENT", castNode("Variable", 0)})}},
-                //  (EXPR) -> (VARIABLE) [DECREMENT]
-                {{{ASTNodeType::EXPR, {ASTNodeType::VARIABLE, TokenType::DECREMENT}},
-                  makeNode("UnOpExpr", {"UnOpType::POST_DECREMENT", castNode("Variable", 0)})}},
+                //  (EXPR) -> (EXPR) [INCREMENT]
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::INCREMENT}},
+                  makeNode("UnOpExpr", {"UnOpType::POST_INCREMENT", castNode("Expr", 0)})}},
+                //  (EXPR) -> (EXPR) [DECREMENT]
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DECREMENT}},
+                  makeNode("UnOpExpr", {"UnOpType::POST_DECREMENT", castNode("Expr", 0)})}},
                 //  Prefix:
-                //  (EXPR) -> [INCREMENT] (VARIABLE)
-                {{{ASTNodeType::EXPR, {TokenType::INCREMENT, ASTNodeType::VARIABLE}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_INCREMENT", castNode("Variable", 1)})}},
-                //  (EXPR) -> [DECREMENT] (VARIABLE)
-                {{{ASTNodeType::EXPR, {TokenType::DECREMENT, ASTNodeType::VARIABLE}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_DECREMENT", castNode("Variable", 1)})}},
+                //  (EXPR) -> [INCREMENT] (EXPR)
+                {{{ASTNodeType::EXPR, {TokenType::INCREMENT, ASTNodeType::EXPR}},
+                  makeNode("UnOpExpr", {"UnOpType::PRE_INCREMENT", castNode("Expr", 1)})}},
+                //  (EXPR) -> [DECREMENT] (EXPR)
+                {{{ASTNodeType::EXPR, {TokenType::DECREMENT, ASTNodeType::EXPR}},
+                  makeNode("UnOpExpr", {"UnOpType::PRE_DECREMENT", castNode("Expr", 1)})}},
                 //  (EXPR) -> [NOT] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::NOT, ASTNodeType::EXPR}},
                   makeNode("UnOpExpr", {"UnOpType::NOT", castNode("Expr", 1)})}},
@@ -370,8 +370,7 @@ namespace Parser {
                 //  -------------
                 //  (EXPR) -> (EXPR) [EXPONENTIATE_EQUALS] (EXPR)
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
-                  makeNode("BinOpExpr",
-                           {castNode("Expr", 0), "BinOpType::EXPONENTIATE_SET", castNode("Expr", 2)})}},
+                  makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EXPONENTIATE_SET", castNode("Expr", 2)})}},
                 //  (EXPR) -> (EXPR) [MULTIPLY_EQUALS] (EXPR)
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY_EQUALS, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MULTIPLY_SET", castNode("Expr", 2)})}},

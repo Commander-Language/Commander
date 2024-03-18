@@ -144,9 +144,7 @@ namespace TypeChecker {
                             "Tried to index an array or tuple with a different type than an int");
                 }
                 TyPtr const exprType = typeCheck(exprNode->expr);
-                if (!exprType) {
-                    return (exprNode->type = nullptr);
-                }
+                if (!exprType) { return (exprNode->type = nullptr); }
                 switch (exprType->getType()) {
                     case ARRAY: {
                         ArrayTyPtr arrayTy = std::static_pointer_cast<ArrayTy>(exprType);
@@ -210,16 +208,25 @@ namespace TypeChecker {
             case Parser::UNOP_EXPR: {
                 Parser::UnOpExprNodePtr const exprNode = std::static_pointer_cast<Parser::UnOpExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                bool const isVariable = exprNode->variable != nullptr;
-                TyPtr const expressionType = isVariable ? typeCheck(exprNode->variable) : typeCheck(exprNode->expr);
-                if (!expressionType) {
+                bool const isSet = exprNode->opType != Parser::NEGATE && exprNode->opType != Parser::NOT
+                                && (exprNode->expr->nodeType() == Parser::VAR_EXPR
+                                    || exprNode->expr->nodeType() == Parser::INDEX_EXPR);
+                bool const isTuple
+                        = exprNode->expr->nodeType() == Parser::INDEX_EXPR
+                       && std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type->getType()
+                                  == TUPLE;
+                TyPtr const expressionType = typeCheck(
+                        exprNode->expr->nodeType() == Parser::VAR_EXPR
+                                ? (Parser::ASTNodePtr)std::static_pointer_cast<Parser::VarExprNode>(exprNode->expr)
+                                          ->variable
+                                : (Parser::ASTNodePtr)exprNode->expr);
+                if (!expressionType && !isTuple) {
                     // TODO: Improve error
                     throw Util::CommanderException("Unknown type in unop expression.");
                 }
-                Type const type = expressionType->getType();
                 switch (exprNode->opType) {
                     case Parser::NOT:
-                        if (type != Type::BOOL) {
+                        if (expressionType->getType() != Type::BOOL) {
                             // TODO: Improve error
                             throw Util::CommanderException("Expected a bool in not operation.");
                         }
@@ -229,25 +236,30 @@ namespace TypeChecker {
                     case Parser::POST_INCREMENT:
                     case Parser::PRE_DECREMENT:
                     case Parser::POST_DECREMENT:
-                        if (type != Type::INT && type != Type::FLOAT) {
+                        if (!isTuple && expressionType->getType() != Type::INT
+                            && expressionType->getType() != Type::FLOAT) {
                             // TODO: Improve error
                             throw Util::CommanderException("Expected int or float in unop expression.");
                         }
                         if (exprNode->opType != Parser::NEGATE) {
-                            if (!isVariable) {
+                            if (!isSet) {
                                 // TODO: Improve error
                                 throw Util::CommanderException(
-                                        "Expected variable in decrement or increment operation.");
+                                        "Expected variable or index expression in decrement or increment operation.");
                             }
-                            Parser::IdentVariableNodePtr const varPtr
-                                    = std::static_pointer_cast<Parser::IdentVariableNode>(exprNode->variable);
-                            VarInfoPtr const varInfo = _table.getVariable(varPtr->varName);
-                            if (varInfo->constant) {
-                                // TODO: Improve error
-                                throw Util::CommanderException("Unable to increment or decrement constant variable.");
+                            if (exprNode->expr->nodeType() == Parser::VAR_EXPR) {
+                                Parser::IdentVariableNodePtr const varPtr
+                                        = std::static_pointer_cast<Parser::IdentVariableNode>(
+                                                std::static_pointer_cast<Parser::VarExprNode>(exprNode->expr)
+                                                        ->variable);
+                                VarInfoPtr const varInfo = _table.getVariable(varPtr->varName);
+                                if (varInfo->constant) {
+                                    // TODO: Improve error
+                                    throw Util::CommanderException(
+                                            "Unable to increment or decrement constant variable.");
+                                }
                             }
                         }
-
                         break;
                 }
                 return (exprNode->type = expressionType);
@@ -255,8 +267,13 @@ namespace TypeChecker {
             case Parser::BINOP_EXPR: {
                 Parser::BinOpExprNodePtr const exprNode = std::static_pointer_cast<Parser::BinOpExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                bool const isSet = exprNode->leftExpr->nodeType() == Parser::VAR_EXPR || exprNode->leftExpr->nodeType() == Parser::INDEX_EXPR;
-                TyPtr const leftTy = typeCheck(exprNode->leftExpr);
+                bool const isSet = exprNode->leftExpr->nodeType() == Parser::VAR_EXPR
+                                || exprNode->leftExpr->nodeType() == Parser::INDEX_EXPR;
+                TyPtr const leftTy = typeCheck(
+                        exprNode->leftExpr->nodeType() == Parser::VAR_EXPR
+                                ? (Parser::ASTNodePtr)std::static_pointer_cast<Parser::VarExprNode>(exprNode->leftExpr)
+                                          ->variable
+                                : (Parser::ASTNodePtr)exprNode->leftExpr);
                 TyPtr const rightTy = typeCheck(exprNode->rightExpr);
                 // Right type must be known in all operations
                 if (!rightTy) {
@@ -270,14 +287,15 @@ namespace TypeChecker {
                 bool const isString = rightType == Type::STRING;
                 bool areEqual = areTypesEqual(leftTy, rightTy);
                 bool areIntFloat = leftTy
-                                      && ((leftTy->getType() == Type::INT && isFloat)
-                                          || (leftTy->getType() == Type::FLOAT && isInt));
+                                && ((leftTy->getType() == Type::INT && isFloat)
+                                    || (leftTy->getType() == Type::FLOAT && isInt))
+                                && exprNode->leftExpr->nodeType() != Parser::INDEX_EXPR;
                 switch (exprNode->opType) {
                     case Parser::SET: {
                         if (!isSet) {
                             // TODO: Improve error
-                            throw Util::CommanderException(
-                                    "Invalid set expression; must have variable or index expression on left side of '='");
+                            throw Util::CommanderException("Invalid set expression; must have variable or index "
+                                                           "expression on left side of '='");
                         }
                         if (exprNode->leftType && !areTypesEqual(typeCheck(exprNode->leftType), rightTy)) {
                             // TODO: Improve error
@@ -285,7 +303,10 @@ namespace TypeChecker {
                                     "Expected one type, but got another, while setting a variable");
                         }
                         if (exprNode->leftExpr->nodeType() == Parser::VAR_EXPR) {
-                            Parser::IdentVariableNodePtr const varPtr = std::static_pointer_cast<Parser::IdentVariableNode>(std::static_pointer_cast<Parser::VarExprNode>(exprNode->leftExpr)->variable);
+                            Parser::IdentVariableNodePtr const varPtr
+                                    = std::static_pointer_cast<Parser::IdentVariableNode>(
+                                            std::static_pointer_cast<Parser::VarExprNode>(exprNode->leftExpr)
+                                                    ->variable);
                             if (leftTy) {
                                 VarInfoPtr const varInfo = _table.getVariable(varPtr->varName);
                                 if (varInfo->constant) {
@@ -296,7 +317,8 @@ namespace TypeChecker {
                             _table.addVariable(varPtr->varName,
                                                std::make_shared<VariableInfo>(exprNode->leftConstant, rightTy));
                         } else if (leftTy) {
-                            Parser::IndexExprNodePtr indexExpr = std::static_pointer_cast<Parser::IndexExprNode>(exprNode->leftExpr);
+                            Parser::IndexExprNodePtr indexExpr = std::static_pointer_cast<Parser::IndexExprNode>(
+                                    exprNode->leftExpr);
                             if (!areEqual && indexExpr->expr->type->getType() == ARRAY) {
                                 // TODO: Improve error
                                 throw Util::CommanderException("Array index cannot be set due to incompatible types.");
@@ -347,12 +369,18 @@ namespace TypeChecker {
                                 // TODO: Improve error
                                 throw Util::CommanderException("Variable is not initialized");
                             }
-                            if (_table.getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(std::static_pointer_cast<Parser::VarExprNode>(exprNode->leftExpr)->variable)->varName)->constant) {
+                            if (_table.getVariable(
+                                              std::static_pointer_cast<Parser::IdentVariableNode>(
+                                                      std::static_pointer_cast<Parser::VarExprNode>(exprNode->leftExpr)
+                                                              ->variable)
+                                                      ->varName)
+                                        ->constant) {
                                 // TODO: Improve error
                                 throw Util::CommanderException("Unable to update constant variable.");
                             }
                         } else if (!leftTy) {
-                            //This must be a non-empty tuple being indexed, so since we don't know the left ty, assume what it is based on right ty
+                            // This must be a non-empty tuple being indexed, so since we don't know the left ty, assume
+                            // what it is based on right ty
                             areIntFloat = isInt || isFloat;
                             areEqual = true;
                         }
@@ -675,9 +703,7 @@ namespace TypeChecker {
             case Parser::STRING_EXPRS: {
                 Parser::StringExprsNodePtr const stringsPtr = std::static_pointer_cast<Parser::StringExprsNode>(
                         astNode);
-                for (const Parser::ExprNodePtr& exprPtr : stringsPtr->expressions) {
-                    typeCheck(exprPtr);
-                }
+                for (const Parser::ExprNodePtr& exprPtr : stringsPtr->expressions) { typeCheck(exprPtr); }
                 return nullptr;
             }
             case Parser::INT_TYPE: {

@@ -78,7 +78,7 @@ namespace FlowController {
                 }
                 case Parser::TYPES:
                 case Parser::TYPE:
-                    //Ignore types
+                    // Ignore types
                     break;
                 case Parser::VARIABLE: {
                     _variable(std::static_pointer_cast<Parser::VariableNode>(node));
@@ -464,41 +464,13 @@ namespace FlowController {
     CommanderTypePtr FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            intType->value *= -1;
-                            _setVariable(varI->varName, intType);
-                            return intType;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            floatType->value *= -1.0F;
-                            _setVariable(varI->varName, floatType);
-                            return floatType;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type " + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-
                 CommanderTypePtr const expr = _expr(unOp->expr);
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        intType->value *= -1;
-                        return intType;
+                        return std::make_shared<CommanderInt>(-std::static_pointer_cast<CommanderInt>(expr)->value);
                     }
                     case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        floatType->value *= -1.0F;
-                        return floatType;
+                        return std::make_shared<CommanderFloat>(-std::static_pointer_cast<CommanderFloat>(expr)->value);
                     }
                     default:
                         throw Util::CommanderException("Trying to negate bad type "
@@ -507,200 +479,134 @@ namespace FlowController {
             }
             case Parser::NOT: {
                 auto expr = std::static_pointer_cast<CommanderBool>(_expr(unOp->expr));
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    auto boolType = std::static_pointer_cast<CommanderBool>(value);
-                    boolType->value = !boolType->value;
-                    _setVariable(varI->varName, boolType);
-                    return boolType;
-                }
                 switch (expr->getType()) {
                     case TypeChecker::BOOL: {
-                        auto boolType = std::static_pointer_cast<CommanderBool>(expr);
-                        boolType->value = !boolType->value;
-                        return boolType;
+                        return std::make_shared<CommanderBool>(!std::static_pointer_cast<CommanderBool>(expr)->value);
                     }
                     default:
                         throw Util::CommanderException("Trying to use ! operator on bad type "
                                                        + TypeChecker::typeToString(expr->getType()));
                 }
             }
-            case Parser::PRE_INCREMENT: {
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            intType->value++;
-                            _setVariable(varI->varName, intType);
-                            return intType;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            floatType->value++;
-                            _setVariable(varI->varName, floatType);
-                            return floatType;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                switch (expr->getType()) {
-                    case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        intType->value++;
-                        return intType;
-                    }
-                    case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        floatType->value++;
-                        return floatType;
-                    }
-                    default:
-                        throw Util::CommanderException("Trying to pre increment bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
-                }
-            }
-            case Parser::POST_INCREMENT: {
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            auto hold = std::make_shared<CommanderInt>(intType->value);
-                            intType->value++;
-                            _setVariable(varI->varName, intType);
-                            return hold;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                            floatType->value++;
-                            _setVariable(varI->varName, floatType);
-                            return hold;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                switch (expr->getType()) {
-                    case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        auto hold = std::make_shared<CommanderInt>(intType->value);
-                        intType->value++;
-                        return hold;
-                    }
-                    case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                        floatType->value++;
-                        return hold;
-                    }
-                    default:
-                        throw Util::CommanderException("Trying to post increment bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
-                }
-            }
-            case Parser::PRE_DECREMENT: {
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            intType->value--;
-                            _setVariable(varI->varName, intType);
-                            return intType;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            floatType->value--;
-                            _setVariable(varI->varName, floatType);
-                            return floatType;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                switch (expr->getType()) {
-                    case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        intType->value--;
-                        return intType;
-                    }
-                    case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        floatType->value--;
-                        return floatType;
-                    }
-                    default:
-                        throw Util::CommanderException("Trying to pre decrement bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
-                }
-            }
+            case Parser::PRE_INCREMENT:
+            case Parser::POST_INCREMENT:
+            case Parser::PRE_DECREMENT:
             case Parser::POST_DECREMENT: {
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
+                if (unOp->expr->nodeType() == Parser::VAR_EXPR) {
+                    std::string varName = std::static_pointer_cast<Parser::IdentVariableNode>(
+                                                  std::static_pointer_cast<Parser::VarExprNode>(unOp->expr)->variable)
+                                                  ->varName;
+                    auto value = _getVariable(varName);
                     switch (value->getType()) {
                         case TypeChecker::INT: {
                             auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            auto hold = std::make_shared<CommanderInt>(intType->value);
-                            intType->value--;
-                            _setVariable(varI->varName, intType);
-                            return hold;
+                            switch (unOp->opType) {
+                                case Parser::PRE_INCREMENT:
+                                case Parser::POST_INCREMENT:
+                                    intType->value++;
+                                    break;
+                                case Parser::PRE_DECREMENT:
+                                case Parser::POST_DECREMENT:
+                                    intType->value--;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            _setVariable(varName, intType);
+                            if (unOp->opType == Parser::POST_DECREMENT) {
+                                return std::make_shared<CommanderInt>(intType->value + 1);
+                            }
+                            if (unOp->opType == Parser::POST_INCREMENT) {
+                                return std::make_shared<CommanderInt>(intType->value - 1);
+                            }
+                            return intType;
                         }
                         case TypeChecker::FLOAT: {
                             auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                            floatType->value--;
-                            _setVariable(varI->varName, floatType);
-                            return hold;
+                            switch (unOp->opType) {
+                                case Parser::PRE_INCREMENT:
+                                case Parser::POST_INCREMENT:
+                                    floatType->value++;
+                                    break;
+                                case Parser::PRE_DECREMENT:
+                                case Parser::POST_DECREMENT:
+                                    floatType->value--;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            _setVariable(varName, floatType);
+                            if (unOp->opType == Parser::POST_DECREMENT) {
+                                return std::make_shared<CommanderFloat>(floatType->value + 1.0);
+                            }
+                            if (unOp->opType == Parser::POST_INCREMENT) {
+                                return std::make_shared<CommanderFloat>(floatType->value - 1.0);
+                            }
+                            return floatType;
                         }
                         default:
-                            throw Util::CommanderException("Trying to negate bad type "
+                            throw Util::CommanderException("Trying to increment or decrement bad type "
                                                            + TypeChecker::typeToString(value->getType()));
                     }
                 }
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                switch (expr->getType()) {
+                Parser::IndexExprNodePtr indexExpr = std::static_pointer_cast<Parser::IndexExprNode>(unOp->expr);
+                CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexExpr->index));
+                CommanderTypePtr dataStructure = _expr(indexExpr->expr);
+                std::vector<CommanderTypePtr>& values
+                        = dataStructure->getType() == TypeChecker::ARRAY
+                                ? std::static_pointer_cast<CommanderArray>(dataStructure)->values
+                                : std::static_pointer_cast<CommanderTuple>(dataStructure)->values;
+                CommanderTypePtr value = values[index->value];
+                switch (value->getType()) {
                     case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        auto hold = std::make_shared<CommanderInt>(intType->value);
-                        intType->value--;
-                        return hold;
+                        auto intType = std::static_pointer_cast<CommanderInt>(value);
+                        switch (unOp->opType) {
+                            case Parser::PRE_INCREMENT:
+                            case Parser::POST_INCREMENT:
+                                intType->value++;
+                                break;
+                            case Parser::PRE_DECREMENT:
+                            case Parser::POST_DECREMENT:
+                                intType->value--;
+                                break;
+                            default:
+                                break;
+                        }
+                        values[index->value] = intType;
+                        if (unOp->opType == Parser::POST_DECREMENT) {
+                            return std::make_shared<CommanderInt>(intType->value + 1);
+                        }
+                        if (unOp->opType == Parser::POST_INCREMENT) {
+                            return std::make_shared<CommanderInt>(intType->value - 1);
+                        }
+                        return intType;
                     }
                     case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                        floatType->value--;
-                        return hold;
+                        auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                        switch (unOp->opType) {
+                            case Parser::PRE_INCREMENT:
+                            case Parser::POST_INCREMENT:
+                                floatType->value++;
+                                break;
+                            case Parser::PRE_DECREMENT:
+                            case Parser::POST_DECREMENT:
+                                floatType->value--;
+                                break;
+                            default:
+                                break;
+                        }
+                        values[index->value] = floatType;
+                        if (unOp->opType == Parser::POST_DECREMENT) {
+                            return std::make_shared<CommanderFloat>(floatType->value + 1.0);
+                        }
+                        if (unOp->opType == Parser::POST_INCREMENT) {
+                            return std::make_shared<CommanderFloat>(floatType->value - 1.0);
+                        }
+                        return floatType;
                     }
                     default:
-                        throw Util::CommanderException("Trying to post decrement bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
+                        throw Util::CommanderException("Trying to increment or decrement bad type "
+                                                       + TypeChecker::typeToString(value->getType()));
                 }
             }
             default: {
@@ -801,7 +707,7 @@ namespace FlowController {
                 Parser::IndexExprNodePtr indexExpr = std::static_pointer_cast<Parser::IndexExprNode>(binOp->leftExpr);
                 CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexExpr->index));
                 CommanderTypePtr dataStructure = _expr(indexExpr->expr);
-                std::vector<CommanderTypePtr> values
+                std::vector<CommanderTypePtr>& values
                         = dataStructure->getType() == TypeChecker::ARRAY
                                 ? std::static_pointer_cast<CommanderArray>(dataStructure)->values
                                 : std::static_pointer_cast<CommanderTuple>(dataStructure)->values;

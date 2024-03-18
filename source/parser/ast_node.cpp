@@ -539,27 +539,23 @@ namespace Parser {
 
     UnOpExprNode::UnOpExprNode(UnOpType opType, ExprNodePtr expr) : opType(opType), expr(std::move(expr)) {}
 
-    UnOpExprNode::UnOpExprNode(UnOpType opType, VariableNodePtr variable)
-        : opType(opType), variable(std::move(variable)) {}
-
     std::string UnOpExprNode::sExpression() const {
-        return "(UnOpExprNode " + (expr == nullptr ? (ASTNodePtr)variable : (ASTNodePtr)expr)->sExpression() + " "
-             + unOpToString(opType) + getTypeString() + ")";
+        return "(UnOpExprNode " + expr->sExpression() + " " + unOpToString(opType) + getTypeString() + ")";
     }
 
     BinOpExprNode::BinOpExprNode(const BindingNodePtr& leftBinding, BinOpType opType, ExprNodePtr rightExpr)
         : leftConstant(leftBinding->constant), leftType(std::move(leftBinding->type)),
-          leftExpr(std::make_shared<VarExprNode>(std::make_shared<IdentVariableNode>(leftBinding->variable))), opType(opType),
-          rightExpr(std::move(rightExpr)) {}
+          leftExpr(std::make_shared<VarExprNode>(std::make_shared<IdentVariableNode>(leftBinding->variable))),
+          opType(opType), rightExpr(std::move(rightExpr)) {}
 
     BinOpExprNode::BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr)
         : opType(opType), leftExpr(std::move(leftExpr)), rightExpr(std::move(rightExpr)), leftType(nullptr),
           leftConstant(false) {}
 
     std::string BinOpExprNode::sExpression() const {
-        return "(BinOpExprNode " + std::string(leftConstant ? "const " : "")
-             + leftExpr->sExpression() + " " + (leftType ? leftType->sExpression() + " " : "")
-             + binOpToString(opType) + " " + rightExpr->sExpression() + getTypeString() + ")";
+        return "(BinOpExprNode " + std::string(leftConstant ? "const " : "") + leftExpr->sExpression() + " "
+             + (leftType ? leftType->sExpression() + " " : "") + binOpToString(opType) + " " + rightExpr->sExpression()
+             + getTypeString() + ")";
     }
 
     CallExprNode::CallExprNode(ExprNodePtr func) : func(std::move(func)), args(std::make_shared<ExprsNode>()) {}
