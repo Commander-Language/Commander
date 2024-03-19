@@ -85,7 +85,9 @@ namespace Parser {
 
     bool LalrItem::operator<(const LalrItem& other) const {
         if (this->index != other.index) return this->index < other.index;
-        if (this->lookaheads.size() != other.lookaheads.size()) return this->lookaheads < other.lookaheads;
+        if (this->lookaheads.size() != other.lookaheads.size()) {
+            return this->lookaheads.size() < other.lookaheads.size();
+        }
         for (std::size_t ind = 0; ind < this->lookaheads.size(); ++ind) {
             if (this->lookaheads[ind] != other.lookaheads[ind]) return this->lookaheads[ind] < other.lookaheads[ind];
         }
@@ -127,10 +129,11 @@ namespace Parser {
         for (std::size_t ind = lalrItem.index; ind < lalrItem.rule->components.size(); ++ind) {
             stream << " " << lalrItem.rule->components[ind];
         }
-        stream << " :: { ";
+        stream << " :: {";
         if (!lalrItem.lookaheads.empty()) {
             for (std::size_t ind = 0; ind < lalrItem.lookaheads.size(); ++ind) {
-                stream << GrammarEntry {lalrItem.lookaheads[ind]} << " ";
+                stream << GrammarEntry {lalrItem.lookaheads[ind]};
+                if (ind + 1 < lalrItem.lookaheads.size()) stream << " ";
             }
         }
         stream << "}}";

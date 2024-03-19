@@ -89,11 +89,10 @@ namespace Parser {
                 const std::unordered_map<ASTNodeType, std::unordered_set<TokenType>>& firstSet,
                 const std::unordered_map<ASTNodeType, std::unordered_set<const GrammarRule*>>& nodeGenerators);
 
-        static std::unordered_map<LalrKernel, std::size_t>
+        static std::vector<LalrKernel>
         _generateLalrStates(const std::unordered_map<Lr0Kernel, std::size_t>& lr0States,
                             const std::unordered_map<Lr0Item, Lr0Closure>& lr0ItemClosure,
-                            Util::GeneratedMap<Lr1Item, Lr1Closure>& lr1ItemClosure,
-                            const GrammarRule* goalRule);
+                            Util::GeneratedMap<Lr1Item, Lr1Closure>& lr1ItemClosure, const GrammarRule* goalRule);
 
         /**
          * @brief Joins the given items into a string with the given delimiter.

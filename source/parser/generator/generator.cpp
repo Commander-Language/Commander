@@ -170,7 +170,7 @@ namespace Parser {
 
         Util::GeneratedMap lr1ItemClosure {_lr1ItemClosureGenerator(firstSet, nodeGenerators)};
 
-        const std::unordered_map lalrStates = _generateLalrStates(lr0States, lr0ItemClosure, lr1ItemClosure, &goalRule);
+        const std::vector lalrStates = _generateLalrStates(lr0States, lr0ItemClosure, lr1ItemClosure, &goalRule);
 
         printTime("3: Apply lookaheads");
         printInnerLine();
@@ -180,359 +180,49 @@ namespace Parser {
         // ||  4: Compute table actions  ||
         // ================================
 
-        printTime("4: Compute actions");
-        printOuterLine();
-
         _numStates = lalrStates.size();
 
-        exit(0);
-
-        /*
-        // Reports the set of all token types that can be the first of the given AST node type.
-        const std::unordered_map firstSet {[&] {
-            std::unordered_map<ASTNodeType, std::unordered_set<TokenType>> result;
-
-            for (const auto& [nodeType, del] : nodeGenerators) {
-                std::unordered_set<ASTNodeType> visitedNodeTypes;
-                std::unordered_set<TokenType> tokenSet;
-
-                const std::function<void(const ASTNodeType&)> getFirstRec = [&](const ASTNodeType& curNodeType) {
-                    visitedNodeTypes.insert(curNodeType);
-
-                    if (nodeGenerators.count(curNodeType) > 0) {
-                        for (const auto& rule : nodeGenerators.at(curNodeType)) {
-                            const auto& firstItem = rule->components[0];
-
-                            if (firstItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
-                                tokenSet.insert(firstItem.tokenType);
-                                continue;
-                            }
-
-                            if (visitedNodeTypes.count(firstItem.nodeType) == 0) {
-                                visitedNodeTypes.insert(firstItem.nodeType);
-                                getFirstRec(firstItem.nodeType);
-                            }
-                        }
-                    }
-                };
-
-                getFirstRec(nodeType);
-
-                result[nodeType] = tokenSet;
-            }
-
-            return result;
-        }()};
-
-        const std::unordered_map lr1ItemClosure {[&] {
-            Util::SafePtr<std::unordered_map<Lr1Item, Lr1ItemSet>> closure;
-
-            Util::SafePtr<std::unordered_set<Lr1Item>> processed;
-            Util::ThreadQueue jobs;
-
-            const std::function<void(const GrammarRule*, TokenType)> handle = [&](const GrammarRule* const rule,
-                                                                                  const TokenType lookahead) {
-                for (std::size_t ind = 0; ind <= rule->components.size(); ++ind) {
-                    const Lr1Item item {rule, ind, lookahead};
-                    Lr1ItemSet itemClosure {item};
-                    std::queue<Lr1Item> toExamine;
-                    toExamine.push(item);
-
-                    while (!toExamine.empty()) {
-                        const auto curItem = toExamine.front();
-                        toExamine.pop();
-
-                        if (curItem.index == curItem.rule->components.size()) continue;
-
-                        const auto nextEntry = curItem.rule->components[curItem.index];
-                        if (nextEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
-
-                        const auto lookaheads = [&, curItem]() -> std::unordered_set<TokenType> {
-                            if (curItem.index + 1 == curItem.rule->components.size()) return {curItem.lookahead};
-
-                            const auto followEntry = curItem.rule->components[curItem.index + 1];
-                            if (followEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE)
-                                return {followEntry.tokenType};
-
-                            return firstSet.at(followEntry.nodeType);
-                        }();
-
-                        if (nodeGenerators.count(nextEntry.nodeType) == 0) continue;
-                        for (const auto* generator : nodeGenerators.at(nextEntry.nodeType)) {
-                            for (const auto nextToken : lookaheads) {
-                                const Lr1Item newItem {generator, 0, nextToken};
-
-                                if (itemClosure.count(newItem) > 0) continue;
-
-                                itemClosure.insert(newItem);
-                                toExamine.push(newItem);
-
-                                if (processed->count(newItem) > 0) continue;
-                                processed->insert(newItem);
-
-                                jobs.add(handle, generator, nextToken);
-                            }
-                        }
-                    }
-                    (*closure)[item] = itemClosure;
+        const auto lalrClosure = [&](const LalrKernel& lalrKernel) {
+            Lr1Closure closure;
+            for (const auto& lalrItem : lalrKernel) {
+                for (const auto lookahead : lalrItem.lookaheads) {
+                    const auto itemClosure = lr1ItemClosure[{lalrItem.rule, lalrItem.index, lookahead}];
+                    closure.insert(itemClosure.begin(), itemClosure.end());
                 }
-            };
-
-            processed->emplace(&goalRule, 0, TokenType::END_OF_FILE);
-            jobs.add(handle, &goalRule, TokenType::END_OF_FILE);
-
-            jobs.wait();
-
-            return static_cast<std::unordered_map<Lr1Item, Lr1ItemSet>>(*closure);
-        }()};
-
-        // const std::unordered_map lr1ItemClosure {[&] {
-        //     SafePtr<std::unordered_set<LR1Item>> processed;
-        //     std::queue<LR1Item> toProcess;
-        //     const auto process = [&](const GrammarRule* rule, const TokenType lookahead) {
-        //         const LR1Item newItem {rule, 0, lookahead};
-        //         if (processed->count(newItem) > 0) return;
-        //         if (!processed->insert(newItem).second) {
-        //             std::cerr << "[[" << newItem << "]]\n";
-        //             exit(1);
-        //         }
-        //
-        //         for (std::size_t ind = 0; ind <= rule->components.size(); ++ind) {
-        //             toProcess.emplace(rule, ind, lookahead);
-        //         }
-        //     };
-        //
-        //     process(&goalRule, TokenType::END_OF_FILE);
-        //
-        //     std::unordered_map<LR1Item, LR1ItemSet> closure;
-        //
-        //     while (!toProcess.empty()) {
-        //         const auto item = toProcess.front();
-        //         toProcess.pop();
-        //
-        //         std::cout << "\n--------------------------------------------------------------------------------\n";
-        //         std::cout << item << "  ||  " << toProcess.size() << "\n";
-        //
-        //         std::queue<LR1Item> toExamine;
-        //         toExamine.push(item);
-        //         closure[item] = {item};
-        //
-        //         while (!toExamine.empty()) {
-        //             const auto curItem = toExamine.front();
-        //             toExamine.pop();
-        //
-        //             std::cout << "    - " << curItem << "\n";
-        //
-        //             if (curItem.index == curItem.rule->components.size()) continue;
-        //
-        //             const auto nextEntry = curItem.rule->components[curItem.index];
-        //             if (nextEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
-        //
-        //             const auto lookaheads = [&, curItem]() -> std::unordered_set<TokenType> {
-        //                 if (curItem.index + 1 == curItem.rule->components.size()) return {curItem.lookahead};
-        //
-        //                 const auto followEntry = curItem.rule->components[curItem.index + 1];
-        //                 if (followEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) return {followEntry.tokenType};
-        //
-        //                 return firstSet.at(followEntry.nodeType);
-        //             }();
-        //
-        //             if (nodeGenerators.count(nextEntry.nodeType) == 0) continue;
-        //             for (const auto* generator : nodeGenerators.at(nextEntry.nodeType)) {
-        //                 for (const auto lookahead : lookaheads) {
-        //                     const LR1Item newItem {generator, 0, lookahead};
-        //
-        //                     if (closure[item].count(newItem) > 0) continue;
-        //
-        //                     std::cout << "        - " << newItem << "\n";
-        //
-        //                     if (!closure[item].insert(newItem).second) {
-        //                         std::cerr << "[[" << newItem << "]]\n";
-        //                         exit(1);
-        //                     }
-        //                     toExamine.push(newItem);
-        //                     process(generator, lookahead);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return closure;
-        // }()};
-
-        // const std::unordered_map lr1ItemClosure {[&] {
-        //     std::unordered_set<LR1Item> processed;
-        //     std::queue<LR1Item> toProcess;
-        //     const auto process = [&](const GrammarRule* rule, const TokenType lookahead) {
-        //         const LR1Item newItem {rule, 0, lookahead};
-        //         if (processed.count(newItem) > 0) return;
-        //         if (!processed.insert(newItem).second) {
-        //             std::cerr << "[[" << newItem << "]]\n";
-        //             exit(1);
-        //         }
-        //
-        //         for (std::size_t ind = 0; ind <= rule->components.size(); ++ind) {
-        //             toProcess.emplace(rule, ind, lookahead);
-        //         }
-        //     };
-        //
-        //     process(&goalRule, TokenType::END_OF_FILE);
-        //
-        //     std::unordered_map<LR1Item, LR1ItemSet> closure;
-        //
-        //     while (!toProcess.empty()) {
-        //         const auto item = toProcess.front();
-        //         toProcess.pop();
-        //
-        //         // std::cout <<
-        //         "\n--------------------------------------------------------------------------------\n";
-        //         // std::cout << item << "  ||  " << toProcess.size() << "\n";
-        //         std::cout << toProcess.size() << "\n";
-        //
-        //         std::queue<LR1Item> toExamine;
-        //         toExamine.push(item);
-        //         closure[item] = {item};
-        //
-        //         while (!toExamine.empty()) {
-        //             const auto curItem = toExamine.front();
-        //             toExamine.pop();
-        //
-        //             // std::cout << "    - " << curItem << "\n";
-        //
-        //             if (curItem.index == curItem.rule->components.size()) continue;
-        //
-        //             const auto nextEntry = curItem.rule->components[curItem.index];
-        //             if (nextEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
-        //
-        //             const auto lookaheads = [&, curItem]() -> std::unordered_set<TokenType> {
-        //                 if (curItem.index + 1 == curItem.rule->components.size()) return {curItem.lookahead};
-        //
-        //                 const auto followEntry = curItem.rule->components[curItem.index + 1];
-        //                 if (followEntry.grammarEntryType == GrammarEntry::TOKEN_TYPE) return {followEntry.tokenType};
-        //
-        //                 return firstSet.at(followEntry.nodeType);
-        //             }();
-        //
-        //             if (nodeGenerators.count(nextEntry.nodeType) == 0) continue;
-        //             for (const auto* generator : nodeGenerators.at(nextEntry.nodeType)) {
-        //                 for (const auto lookahead : lookaheads) {
-        //                     const LR1Item newItem {generator, 0, lookahead};
-        //
-        //                     if (closure[item].count(newItem) > 0) continue;
-        //
-        //                     // std::cout << "        - " << newItem << "\n";
-        //
-        //                     if (!closure[item].insert(newItem).second) {
-        //                         std::cerr << "[[" << newItem << "]]\n";
-        //                         exit(1);
-        //                     }
-        //                     toExamine.push(newItem);
-        //                     process(generator, lookahead);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return closure;
-        // }()};
-
-        // Util::GeneratedMap<LR1Item, LR1ItemSet> lr1ItemClosure {[&](const LR1Item& lr1Item) {
-        //     LR1ItemSet usedLr1Items {lr1Item};
-        //     std::vector lr1ItemVec {lr1Item};
-        //
-        //     for (std::size_t index = 0; index < lr1ItemVec.size(); ++index) {
-        //         const LR1Item& currentLR1Item = lr1ItemVec[index];
-        //         if (currentLR1Item.index == currentLR1Item.rule->components.size()) continue;
-        //         const std::vector<GrammarEntry> remaining {currentLR1Item.rule->components.begin()
-        //                                                            + static_cast<long>(currentLR1Item.index),
-        //                                                    currentLR1Item.rule->components.end()};
-        //         const GrammarEntry& currentItem = currentLR1Item.rule->components[currentLR1Item.index];
-        //         if (currentItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) continue;
-        //
-        //         const auto lookaheads = [&]() -> std::unordered_set<TokenType> {
-        //             if (remaining.size() < 2) return {currentLR1Item.lookahead};
-        //
-        //             if (remaining[1].grammarEntryType == GrammarEntry::TOKEN_TYPE) return {remaining[1].tokenType};
-        //             return firstSet.at(remaining[1].nodeType);
-        //         }();
-        //
-        //         if (nodeGenerators.count(currentItem.nodeType) > 0) {
-        //             for (const auto& production : nodeGenerators.at(currentItem.nodeType)) {
-        //                 for (const auto& lookahead : lookaheads) {
-        //                     const LR1Item newLR1Item {production, 0, lookahead};
-        //                     if (usedLr1Items.count(newLR1Item) > 0) continue;
-        //                     usedLr1Items.insert(newLR1Item);
-        //                     lr1ItemVec.push_back(newLR1Item);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return usedLr1Items;
-        // }};
-
-        Util::GeneratedMap<Lr1ItemSet, Lr1ItemSet> lr1SetClosure {[&](const Lr1ItemSet& items) {
-            Lr1ItemSet result;
-            for (const auto& item : items) {
-                // if (lr1ItemClosure.count(item) == 0) std::cerr << "<<<<" << item << ">>>>\n";
-                // result.insert(lr1ItemClosure.at(item).begin(), lr1ItemClosure.at(item).end());
             }
-            return result;
-        }};
-
-        std::unordered_set<std::size_t> lr1StateHashes;
-        Util::GeneratedMap<Lr0ItemSet, std::size_t> lr0StateNums {
-                [&](const Lr0ItemSet&) { return lr0StateNums.size(); }};
-
-        Util::GeneratedMap<Lr1ItemSet, std::size_t> lr1StateNums {[&](const Lr1ItemSet& lr1Items) {
-            Lr0ItemSet lr0Items;
-            for (const auto& lr1Item : lr1Items) lr0Items.insert(lr1Item);
-            return lr0StateNums[lr0Items];
-        }};
-
-        std::queue<Lr1ItemSet> statesToProcess;
-
-        const auto addState = [&](const Lr1ItemSet& lr1Items) {
-            const auto nextState = lr1SetClosure[lr1Items];
-            const std::size_t hash = std::hash<Lr1ItemSet> {}(nextState);
-            if (lr1StateHashes.count(hash) == 0) {
-                lr1StateHashes.insert(hash);
-                statesToProcess.push(nextState);
-            }
-            return lr1StateNums[nextState];
+            return closure;
         };
 
-        // const Lr1ItemSet initialState = lr1ItemClosure.at({&goalRule, 0, TokenType::END_OF_FILE});
-        // lr1StateHashes.insert(std::hash<Lr1ItemSet> {}(initialState));
-        // statesToProcess.push(initialState);
+        if (false) {
+            std::vector<Lr0Kernel> lr0StateVec(lr0States.size());
+            for (const auto& [kernel, stateNum] : lr0States) { lr0StateVec[stateNum] = kernel; }
+            for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) {
+                std::cout << "================================================================================\n"
+                          << "State " << stateNum << ":\n";
+                const auto& lr0Kernel = lr0StateVec[stateNum];
+                for (const auto& item : lr0Kernel) std::cout << "    - " << item << "\n";
+                std::cout << "    ----------------------------------------------------------------------------";
+                for (const auto& item : _lr0SetClosure(lr0ItemClosure, lr0Kernel)) {
+                    if (lr0Kernel.count(item) == 0) std::cout << "    - " << item << "\n";
+                }
+                std::cout << "\n\n";
+            }
+        }
 
-        curTime = std::chrono::steady_clock::now();
-        std::cout << "||  3: misc.     "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastTime).count(), colWidth)
-                  << "ms  "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime).count(),
-                            colWidth)
-                  << "ms  ||\n"
-                  << "||---------------+----------------+----------------||\n";
-        lastTime = curTime;
+        if (true) {
+            for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) {
+                std::cout << "================================================================================\n"
+                          << "State " << stateNum << ":\n";
+                for (const auto& item : lalrStates[stateNum]) std::cout << "    - " << item << "\n";
+            }
+        }
 
-        // std::cout <<
-        // "\n\n\n\n================================================================================\n\n\n\n";
+        const auto lr1StateNum = [&](const Lr1Kernel& lr1Kernel) {
+            const Lr0Kernel result {lr1Kernel.begin(), lr1Kernel.end()};
+            return lr0States.at(result);
+        };
 
-        while (!statesToProcess.empty()) {
-            const auto state = std::move(statesToProcess.front());
-            statesToProcess.pop();
-
-            const auto stateNum = lr1StateNums[state];
-
-            // std::cout << stateNum << "  ||  " << lr0StateNums.size() << "  ||  " << statesToProcess.size() << "\n";
-            // std::cout << "--------------------------------------------------------------------------------\n"
-            // << "State: " << stateNum << "\n"
-            // << "    " << state.size() << " LR(1) items:\n";
-            // for (const auto& item : state) std::cout << "        - " << item << "\n";
-
+        for (std::size_t stateNum = 0; stateNum < lalrStates.size(); ++stateNum) {
             struct ShiftAction {
                 Lr1ItemSet lr1Items;
                 std::size_t priority {0};
@@ -543,7 +233,10 @@ namespace Parser {
 
             std::unordered_map<ASTNodeType, Lr1ItemSet> gotoTable;
 
-            for (const auto& lr1Item : state) {
+            const auto& lalrKernel = lalrStates[stateNum];
+            const auto lr1Closure = lalrClosure(lalrKernel);
+
+            for (const auto& lr1Item : lr1Closure) {
                 if (lr1Item.index < lr1Item.rule->components.size()) {
                     const auto& nextItem = lr1Item.rule->components[lr1Item.index];
                     if (nextItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
@@ -568,12 +261,12 @@ namespace Parser {
             // we need to apply the different actions we have and the corresponding new states.
 
             // First, the "goto" table:
-            for (const auto& [nodeType, lr1Items] : gotoTable) _nextState[stateNum][nodeType] = addState(lr1Items);
+            for (const auto& [nodeType, lr1Items] : gotoTable) _nextState[stateNum][nodeType] = lr1StateNum(lr1Items);
 
             // Next, the "shift" actions:
             for (const auto& [tokenType, shiftAction] : shifts) {
                 _nextAction[stateNum][tokenType] = _pair("ParserAction::ActionType::SHIFT",
-                                                         std::to_string(addState(shiftAction.lr1Items)));
+                                                         std::to_string(lr1StateNum(shiftAction.lr1Items)));
             }
 
             // And, finally, the "reduce" actions:
@@ -588,21 +281,9 @@ namespace Parser {
                 }
             }
         }
-        _numStates = lr0StateNums.size();
 
-        curTime = std::chrono::steady_clock::now();
-        std::cout << "||  4: stateGen  "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastTime).count(), colWidth)
-                  << "ms  "
-                  << "|  "
-                  << getStr(std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime).count(),
-                            colWidth)
-                  << "ms  ||\n"
-                  << "=====================================================\n";
-
-        std::cout << "[[Total number of states: " << _numStates << "]]\n";
-        */
+        printTime("4: Compute actions");
+        printOuterLine();
     }
 
     void Generator::generateSource(std::ostream& output) const {
@@ -840,7 +521,7 @@ namespace Parser {
         };
     }
 
-    std::unordered_map<LalrKernel, std::size_t>
+    std::vector<LalrKernel>
     Generator::_generateLalrStates(const std::unordered_map<Lr0Kernel, std::size_t>& lr0States,
                                    const std::unordered_map<Lr0Item, Lr0Closure>& lr0ItemClosure,
                                    Util::GeneratedMap<Lr1Item, Lr1Closure>& lr1ItemClosure,
@@ -929,14 +610,17 @@ namespace Parser {
             }
         }
 
-        std::unordered_map<LalrKernel, std::size_t> states;
+        std::vector<LalrKernel> states(lr0States.size());
         for (const auto& [lr0Kernel, stateNum] : lr0States) {
             LalrKernel newKernel;
-            for (const auto& [lr0Item, itemLookaheads] : lookaheads[lr0Kernel]) {
-                const LalrItem newItem {lr0Item, {itemLookaheads.begin(), itemLookaheads.end()}};
+            const auto& kernelLookaheads = lookaheads[lr0Kernel];
+            for (const auto& lr0Item : lr0Kernel) {
+                const LalrItem newItem {lr0Item,
+                                        {kernelLookaheads.at(lr0Item).begin(), kernelLookaheads.at(lr0Item).end()}};
+                std::cout << newItem << " :: " << std::hash<LalrItem> {}(newItem) << "\n";
                 newKernel.insert(newItem);
             }
-            states[newKernel] = stateNum;
+            states[stateNum] = newKernel;
         }
         return states;
     }

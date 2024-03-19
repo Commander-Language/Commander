@@ -158,6 +158,7 @@ namespace Parser {
         //                //
         //        });
 
+        if (false)
         return [](const std::vector<std::tuple<ASTNodeType, std::vector<GrammarEntry>>>& rules) {
             std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>> result;
             std::size_t prec = 1;
