@@ -18,7 +18,7 @@
 (BINDING) -> [CONST] [VARIABLE]
 (BINDING) -> [VARIABLE]
 (BINDING) -> [CONST] [VARIABLE] [COLON] (TYPE)
-(BINDING) -> [VARIABLE] [COLON] (TYPE) xyz : int
+(BINDING) -> [VARIABLE] [COLON] (TYPE)
 
 
 //  =================
