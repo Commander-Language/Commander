@@ -4,6 +4,7 @@
 #include "source/util/thread_queue.hpp"
 
 #include <iostream>
+#include <unordered_set>
 
 namespace Parser {
 
@@ -66,32 +67,46 @@ namespace Parser {
 
     LalrItem::LalrItem() = default;
 
-    LalrItem::LalrItem(const Lr0Item& lr0Item, const std::vector<Lexer::TokenType>& lookaheads)
+    LalrItem::LalrItem(const Lr0Item& lr0Item, const std::set<Lexer::TokenType>& lookaheads)
         : Lr0Item(lr0Item), lookaheads(lookaheads) {}
 
-    LalrItem::LalrItem(const GrammarRule* rule, std::size_t index, const std::vector<Lexer::TokenType>& lookaheads)
+    LalrItem::LalrItem(const GrammarRule* rule, const std::size_t index, const std::set<Lexer::TokenType>& lookaheads)
         : Lr0Item(rule, index), lookaheads(lookaheads) {}
 
     bool LalrItem::operator==(const LalrItem& other) const {
         if (this->index != other.index) return false;
+        if (*this->rule != *other.rule) return false;
         if (this->lookaheads.size() != other.lookaheads.size()) return false;
-        for (std::size_t ind = 0; ind < this->lookaheads.size(); ++ind) {
-            if (this->lookaheads[ind] != other.lookaheads[ind]) return false;
+        if (this->lookaheads.empty()) return true;
+
+        auto thisIter = this->lookaheads.begin();
+        auto otherIter = other.lookaheads.begin();
+        while (true) {
+            if (thisIter == this->lookaheads.end()) return true;
+            if (*thisIter != *otherIter) return false;
+            ++thisIter;
+            ++otherIter;
         }
-        return true;
     }
 
     bool LalrItem::operator!=(const LalrItem& other) const { return !(*this == other); }
 
     bool LalrItem::operator<(const LalrItem& other) const {
         if (this->index != other.index) return this->index < other.index;
+        if (*this->rule != *other.rule) return *this->rule < *other.rule;
         if (this->lookaheads.size() != other.lookaheads.size()) {
             return this->lookaheads.size() < other.lookaheads.size();
         }
-        for (std::size_t ind = 0; ind < this->lookaheads.size(); ++ind) {
-            if (this->lookaheads[ind] != other.lookaheads[ind]) return this->lookaheads[ind] < other.lookaheads[ind];
+        if (this->lookaheads.empty()) return false;
+
+        auto thisIter = this->lookaheads.begin();
+        auto otherIter = other.lookaheads.begin();
+        while (true) {
+            if (thisIter == this->lookaheads.end()) return false;
+            if (*thisIter != *otherIter) return *thisIter < *otherIter;
+            ++thisIter;
+            ++otherIter;
         }
-        return false;
     }
 
     Lr0Kernel lr0Goto(const Lr0Closure& lr0State, const GrammarEntry nextEntry) {
@@ -131,9 +146,9 @@ namespace Parser {
         }
         stream << " :: {";
         if (!lalrItem.lookaheads.empty()) {
-            for (std::size_t ind = 0; ind < lalrItem.lookaheads.size(); ++ind) {
-                stream << GrammarEntry {lalrItem.lookaheads[ind]};
-                if (ind + 1 < lalrItem.lookaheads.size()) stream << " ";
+            for (auto iter = lalrItem.lookaheads.begin(); iter != lalrItem.lookaheads.end();) {
+                stream << GrammarEntry {*iter};
+                if (++iter != lalrItem.lookaheads.end()) stream << " ";
             }
         }
         stream << "}}";

@@ -49,9 +49,9 @@ namespace Parser {
     struct LalrItem : Lr0Item {
         LalrItem();
 
-        LalrItem(const Lr0Item& lr0Item, const std::vector<Lexer::TokenType>& lookaheads);
+        LalrItem(const Lr0Item& lr0Item, const std::set<Lexer::TokenType>& lookaheads);
 
-        LalrItem(const GrammarRule* rule, std::size_t index, const std::vector<Lexer::TokenType>& lookaheads);
+        LalrItem(const GrammarRule* rule, std::size_t index, const std::set<Lexer::TokenType>& lookaheads);
 
         bool operator==(const LalrItem& other) const;
 
@@ -61,7 +61,7 @@ namespace Parser {
 
         friend std::ostream& operator<<(std::ostream& stream, const LalrItem& lalrItem);
 
-        std::vector<Lexer::TokenType> lookaheads;
+        std::set<Lexer::TokenType> lookaheads;
     };
 
     using Lr0ItemSet = std::set<Lr0Item>;

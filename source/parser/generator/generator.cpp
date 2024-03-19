@@ -209,7 +209,7 @@ namespace Parser {
             }
         }
 
-        if (true) {
+        if (false) {
             for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) {
                 std::cout << "================================================================================\n"
                           << "State " << stateNum << ":\n";
@@ -222,14 +222,16 @@ namespace Parser {
             return lr0States.at(result);
         };
 
-        for (std::size_t stateNum = 0; stateNum < lalrStates.size(); ++stateNum) {
+        const auto getActions = [&](const std::size_t stateNum) {
+            std::cout << stateNum << "\n";
+
             struct ShiftAction {
                 Lr1ItemSet lr1Items;
                 std::size_t priority {0};
             };
             std::unordered_map<TokenType, ShiftAction> shifts;
 
-            std::unordered_map<TokenType, const GrammarRule*> reductions;
+            std::unordered_map<TokenType, std::vector<const GrammarRule*>> reductions;
 
             std::unordered_map<ASTNodeType, Lr1ItemSet> gotoTable;
 
@@ -250,10 +252,7 @@ namespace Parser {
                     }
                 } else {
                     // This LR(1) item is complete; we can do a "reduce" action.
-                    if (reductions.count(lr1Item.lookahead) == 0
-                        || lr1Item.rule->priority < reductions[lr1Item.lookahead]->priority) {
-                        reductions[lr1Item.lookahead] = lr1Item.rule;
-                    }
+                    reductions[lr1Item.lookahead].push_back(lr1Item.rule);
                 }
             }
 
@@ -270,7 +269,29 @@ namespace Parser {
             }
 
             // And, finally, the "reduce" actions:
-            for (const auto& [tokenType, grammarRule] : reductions) {
+            for (const auto& [tokenType, reduceRules] : reductions) {
+                if (shifts.count(tokenType) > 0) {
+                    std::cerr << "Warning: SHIFT/REDUCE conflict in state " << stateNum << " for token "
+                              << GrammarEntry {tokenType} << ":\n";
+                    for (const auto& nextItem : shifts[tokenType].lr1Items) std::cerr << "    - " << nextItem << "\n";
+                    std::cerr << "    ------------------------------------------------------------\n";
+                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
+                }
+
+                if (reduceRules.size() > 1) {
+                    std::cerr << "Warning: REDUCE/REDUCE conflict in state " << stateNum << " for token "
+                              << GrammarEntry {tokenType} << ":\n";
+                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
+                }
+
+                const auto* grammarRule = [&] {
+                    const auto* min = reduceRules[0];
+                    for (const auto& rule : reduceRules) {
+                        if (rule->priority < min->priority) min = rule;
+                    }
+                    return min;
+                }();
+
                 if (*grammarRule == goalRule) {
                     _nextAction[stateNum][tokenType] = "ParserAction::ActionType::ACCEPT";
                 } else {
@@ -280,7 +301,8 @@ namespace Parser {
                                                               grammar.reductions.at(*grammarRule), "; }}"});
                 }
             }
-        }
+        };
+        for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) getActions(stateNum);
 
         printTime("4: Compute actions");
         printOuterLine();
@@ -615,10 +637,7 @@ namespace Parser {
             LalrKernel newKernel;
             const auto& kernelLookaheads = lookaheads[lr0Kernel];
             for (const auto& lr0Item : lr0Kernel) {
-                const LalrItem newItem {lr0Item,
-                                        {kernelLookaheads.at(lr0Item).begin(), kernelLookaheads.at(lr0Item).end()}};
-                std::cout << newItem << " :: " << std::hash<LalrItem> {}(newItem) << "\n";
-                newKernel.insert(newItem);
+                newKernel.insert({lr0Item, {kernelLookaheads.at(lr0Item).begin(), kernelLookaheads.at(lr0Item).end()}});
             }
             states[stateNum] = newKernel;
         }
