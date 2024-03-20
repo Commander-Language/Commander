@@ -1,0 +1,2 @@
+x = true;
+print arcsin(x);

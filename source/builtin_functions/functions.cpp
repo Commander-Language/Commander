@@ -268,14 +268,14 @@ namespace Function {
     }
 
     FlowController::CommanderFloatPtr sech(FlowController::CommanderTypePtr numberValue) {
-        FlowController::CommanderFloatPtr val = sech(numberValue);
+        FlowController::CommanderFloatPtr val = cosh(numberValue);
         if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
     }
 
     FlowController::CommanderFloatPtr coth(FlowController::CommanderTypePtr numberValue) {
-        FlowController::CommanderFloatPtr val = coth(numberValue);
+        FlowController::CommanderFloatPtr val = tanh(numberValue);
         if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
