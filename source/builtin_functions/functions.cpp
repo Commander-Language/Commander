@@ -321,7 +321,7 @@ namespace Function {
             throw Util::CommanderException("Unable to take sech of type "
                                            + TypeChecker::typeToString(numberValue->getType()));
         }
-        FlowController::CommanderFloatPtr val = sech(numberValue);
+        FlowController::CommanderFloatPtr val = cosh(numberValue);
         val->value = 1.0 / val->value;
         return val;
     }
@@ -332,7 +332,7 @@ namespace Function {
             throw Util::CommanderException("Unable to take coth of type "
                                            + TypeChecker::typeToString(numberValue->getType()));
         }
-        FlowController::CommanderFloatPtr val = coth(numberValue);
+        FlowController::CommanderFloatPtr val = tanh(numberValue);
         val->value = 1.0 / val->value;
         return val;
     }
