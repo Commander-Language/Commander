@@ -221,28 +221,6 @@ namespace FlowController {
                 auto binaryOperation = std::static_pointer_cast<Parser::BinOpExprNode>(node);
                 return _binaryOp(binaryOperation);
             }
-            case Parser::CALL_EXPR: {
-                CommanderTypePtr returnValue = _builtin(node);
-                if (returnValue) { return returnValue; }
-                auto expr = std::static_pointer_cast<Parser::CallExprNode>(node);
-                auto function = std::static_pointer_cast<CommanderLambda>(_expr(expr->func));
-
-                _symbolTable.pushSymbolTable();  // new scope for function
-
-                int bindingIndex = 0;
-                for (auto& arg : expr->args->exprs) {
-                    // args and bindings should be lined up 1 to 1
-                    const CommanderTypePtr argValue = _expr(arg);
-                    std::string const argName = function->bindings->bindings[bindingIndex]->variable;
-                    _setVariable(argName, argValue);
-
-                    bindingIndex++;
-                }
-                returnValue = _stmt(function->body);
-
-                _symbolTable.popSymbolTable();  // remove function scope!
-                return returnValue;
-            }
             case Parser::LAMBDA_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::LambdaExprNode>(node);
                 return std::make_shared<CommanderLambda>(expr->bindings, expr->body);
@@ -251,24 +229,29 @@ namespace FlowController {
                 auto expr = std::static_pointer_cast<Parser::CmdExprNode>(node);
                 return _cmd(expr->cmd, true);
             }
+            case Parser::CALL_EXPR:
             case Parser::API_CALL_EXPR: {
                 CommanderTypePtr returnValue = _builtin(node);
                 if (returnValue) { return returnValue; }
-                auto callExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
-                auto expr = _expr(callExpr->expression);
-                auto function = std::static_pointer_cast<CommanderLambda>(
-                        _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(callExpr->func)->varName));
-
+                std::vector<Parser::ExprNodePtr> exprs;
+                std::shared_ptr<CommanderLambda> function;
+                if (node->nodeType() == Parser::CALL_EXPR) {
+                    auto expr = std::static_pointer_cast<Parser::CallExprNode>(node);
+                    exprs = expr->args->exprs;
+                    function = std::static_pointer_cast<CommanderLambda>(_expr(expr->func));
+                } else {
+                    auto callExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
+                    exprs = callExpr->args->exprs;
+                    function = std::static_pointer_cast<CommanderLambda>(
+                            _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(callExpr->func)->varName));
+                }
                 _symbolTable.pushSymbolTable();  // new scope for function
-                _setVariable(function->bindings->bindings[0]->variable, expr);
-                int bindingIndex = 1;
-                for (auto& arg : callExpr->args->exprs) {
+                int bindingIndex = 0;
+                for (auto& arg : exprs) {
                     // args and bindings should be lined up 1 to 1
                     const CommanderTypePtr argValue = _expr(arg);
-                    std::string const argName = function->bindings->bindings[bindingIndex]->variable;
+                    std::string const argName = function->bindings->bindings[bindingIndex++]->variable;
                     _setVariable(argName, argValue);
-
-                    bindingIndex++;
                 }
                 returnValue = _stmt(function->body);
 
@@ -760,8 +743,7 @@ namespace FlowController {
         } else if (node->nodeType() == Parser::API_CALL_EXPR) {
             Parser::ApiCallExprNodePtr apiExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
             name = std::static_pointer_cast<Parser::IdentVariableNode>(apiExpr->func)->varName;
-            args.push_back(apiExpr->expression);
-            args.insert(args.end(), apiExpr->args->exprs.begin(), apiExpr->args->exprs.end());
+            args = apiExpr->args->exprs;
         }
         if (name == "parseInt") { return Function::parseInt(_expr(args[0])); }
         if (name == "parseFloat") { return Function::parseFloat(_expr(args[0])); }
