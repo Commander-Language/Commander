@@ -1237,25 +1237,12 @@ namespace Parser {
         ExprNodePtr expr;
 
         /**
-         * @brief The variable being operated on.
-         */
-        VariableNodePtr variable;
-
-        /**
          * @brief Class constructor for a unary operation on an expression.
          *
          * @param opType The unary operation type being performed.
          * @param expr The expression on which the unary operation is being performed.
          */
         UnOpExprNode(UnOpType opType, ExprNodePtr expr);
-
-        /**
-         * @brief Class constructor for a unary operation on an expression.
-         *
-         * @param opType The unary operation type being performed.
-         * @param variable The variable on which the unary operation is being performed.
-         */
-        UnOpExprNode(UnOpType opType, VariableNodePtr variable);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1305,12 +1292,6 @@ namespace Parser {
         ExprNodePtr leftExpr;
 
         /**
-         * @brief The variable on the left-hand side of the operator,
-         *     for expressions that do set a variable.
-         */
-        VariableNodePtr leftVariable;
-
-        /**
          * @brief The expression on the right-hand side of the operator.
          */
         ExprNodePtr rightExpr;
@@ -1334,16 +1315,6 @@ namespace Parser {
          * @param rightExpr The expression on the right-hand side of the operator.
          */
         BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr);
-
-        /**
-         * @brief Class constructor.
-         * @details For binary operations that do set a variable.
-         *
-         * @param leftVariable The variable on the left-hand side of the operator.
-         * @param opType The type of operation being done.
-         * @param rightExpr The expression on the right-hand side of the operator.
-         */
-        BinOpExprNode(VariableNodePtr leftVariable, BinOpType opType, ExprNodePtr rightExpr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
