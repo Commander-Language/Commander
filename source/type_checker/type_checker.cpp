@@ -211,15 +211,16 @@ namespace TypeChecker {
                 bool const isSet = exprNode->opType != Parser::NEGATE && exprNode->opType != Parser::NOT
                                 && (exprNode->expr->nodeType() == Parser::VAR_EXPR
                                     || exprNode->expr->nodeType() == Parser::INDEX_EXPR);
-                bool const isTuple
-                        = exprNode->expr->nodeType() == Parser::INDEX_EXPR
-                       && std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type->getType()
-                                  == TUPLE;
                 TyPtr const expressionType = typeCheck(
                         exprNode->expr->nodeType() == Parser::VAR_EXPR
                                 ? (Parser::ASTNodePtr)std::static_pointer_cast<Parser::VarExprNode>(exprNode->expr)
                                           ->variable
                                 : (Parser::ASTNodePtr)exprNode->expr);
+                bool const isTuple
+                        = exprNode->expr->nodeType() == Parser::INDEX_EXPR
+                       && std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type &&
+                          std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type->getType()
+                                  == TUPLE;
                 if (!expressionType && !isTuple) {
                     // TODO: Improve error
                     throw Util::CommanderException("Unknown type in unop expression.");
