@@ -79,7 +79,6 @@ namespace Lexer {
         PIPE,
         PRINT,
         PRINTLN,
-        QUESTION,
         RCURLY,
         READ,
         RETURN,
@@ -90,11 +89,11 @@ namespace Lexer {
         STRING,
         STRINGLITERAL,
         STRINGVAL,
+        THEN,
         TIMEOUT,
         TO,
         TRUE,
         TYPE,
-        TYPEVARIABLE,
         UNKNOWN,
         VARIABLE,
         VOID,
@@ -200,7 +199,7 @@ namespace Lexer {
             {{"alias", ALIAS}, {"bool", BOOL},     {"break", BREAK}, {"const", CONST},   {"continue", CONTINUE},
              {"do", DO},       {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
              {"if", IF},       {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
-             {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"timeout", TIMEOUT},
+             {"read", READ},   {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"then", THEN}, {"timeout", TIMEOUT},
              {"to", TO},       {"true", TRUE},     {"type", TYPE},   {"void", VOID},     {"while", WHILE},
              {"write", WRITE}});
 
@@ -236,7 +235,6 @@ namespace Lexer {
                                                                         {"=", EQUALS},
                                                                         {"{", LCURLY},
                                                                         {"[", LSQUARE},
-                                                                        {"?", QUESTION},
                                                                         {"}", RCURLY},
                                                                         {"]", RSQUARE},
                                                                         {".", DOT}});
@@ -281,11 +279,9 @@ namespace Lexer {
      * @param position The position in the file
      * @param isCommand Tells whether a command is being lexed or not
      * @param isFirst Tells whether the token is the first token of a statement or not
-     * @param isTypeExpression Tells whether the token is part of a type expression
      * @returns The token, if it finds one
      */
-    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst,
-                      const bool& isTypeExpression);
+    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst);
 
     /**
      * @brief Helper for lexing a literal token, if it exists
@@ -360,10 +356,9 @@ namespace Lexer {
      * @param file The file contents being lexed
      * @param position The position in the file
      * @param isCommand Is the variable in a command (true if so, false otherwise)
-     * @param isType Is the variable in a type expression (true if so, false otherwise)
      * @returns The VARIABLE token if isCommand is true, or CMD_VARIABLE if false, if it finds one
      */
-    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand, bool isType);
+    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand);
 
     /**
      * @brief Lex a command string token, if it exists
@@ -442,10 +437,9 @@ namespace Lexer {
      * @param position The current position in the file
      * @param startToken The token that begins the expression
      * @param terminatingToken The token to look for to stop lexing the expression
-     * @param isTypeExpression Tells whether or not you are lexing a type expression
      */
     void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const TokenType& startToken,
-                       const TokenType& terminatingToken, bool isTypeExpression);
+                       const TokenType& terminatingToken);
 
 }  // namespace Lexer
 

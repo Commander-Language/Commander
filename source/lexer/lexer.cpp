@@ -126,8 +126,6 @@ namespace Lexer {
                 return "PRINT";
             case PRINTLN:
                 return "PRINTLN";
-            case QUESTION:
-                return "QUESTION";
             case RCURLY:
                 return "RCURLY";
             case READ:
@@ -148,6 +146,8 @@ namespace Lexer {
                 return "STRINGLITERAL";
             case STRINGVAL:
                 return "STRINGVAL";
+            case THEN:
+                return "THEN";
             case TIMEOUT:
                 return "TIMEOUT";
             case TO:
@@ -156,8 +156,6 @@ namespace Lexer {
                 return "TRUE";
             case TYPE:
                 return "TYPE";
-            case TYPEVARIABLE:
-                return "TYPEVARIABLE";
             case VARIABLE:
                 return "VARIABLE";
             case WHILE:
@@ -255,8 +253,7 @@ namespace Lexer {
         if (isBlockComment) { throw Util::CommanderException("Unterminated block comment", blockCommentPosition); }
     }
 
-    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst,
-                      const bool& isTypeExpression) {
+    TokenPtr lexToken(const std::string& file, FilePosition& position, bool& isCommand, const bool& isFirst) {
         TokenPtr token;
         if (!isCommand) {
             token = lexTokenLiteral(file, position);
@@ -287,7 +284,7 @@ namespace Lexer {
             return token;
         }
         if (!isCommand) {
-            token = lexVariable(file, position, false, isTypeExpression);
+            token = lexVariable(file, position, false);
             if (token) return token;
         }
         token = lexCommandString(file, position);
@@ -503,7 +500,7 @@ namespace Lexer {
                 token.subTokens.push_back(
                         std::make_shared<Token>(currentString.str(), STRINGLITERAL, currentStringPosition));
                 currentString.str("");
-                token.subTokens.push_back(lexVariable(file, position, false, false));
+                token.subTokens.push_back(lexVariable(file, position, false));
                 currentStringPosition = position;
                 continue;
             }
@@ -517,7 +514,7 @@ namespace Lexer {
                 token.subTokens.push_back(
                         std::make_shared<Token>(currentString.str(), STRINGLITERAL, currentStringPosition));
                 currentString.str("");
-                lexExpression(token.subTokens, file, position, LCURLY, RCURLY, false);
+                lexExpression(token.subTokens, file, position, LCURLY, RCURLY);
                 token.subTokens.pop_back();
                 currentStringPosition = position;
                 continue;
@@ -539,10 +536,10 @@ namespace Lexer {
         if (position.index + 1 >= file.length() || !isFirstVariableCharacter(file[position.index + 1])) { return {}; }
         position.index++;
         position.column++;
-        return lexVariable(file, position, true, false);
+        return lexVariable(file, position, true);
     }
 
-    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand, bool isType) {
+    TokenPtr lexVariable(const std::string& file, FilePosition& position, bool isCommand) {
         // First character of variable must be a letter or an underscore
         if (!isFirstVariableCharacter(file[position.index])) { return {}; }
         // Token is definitely a variable, so determine length/contents
@@ -552,8 +549,7 @@ namespace Lexer {
             builder << file[position.index++];
             position.column++;
         }
-        const Token token = {std::string(builder.str()), isCommand ? CMDVARIABLE : (isType ? TYPEVARIABLE : VARIABLE),
-                             startPosition};
+        const Token token = {std::string(builder.str()), isCommand ? CMDVARIABLE : VARIABLE,startPosition};
         return std::make_shared<Token>(token);
     }
 
@@ -607,7 +603,7 @@ namespace Lexer {
         if (position.index >= file.length()) {
             throw Util::CommanderException("Expected " + tokenTypeToString(type) + " token, but file ended.", position);
         }
-        const TokenPtr token = lexToken(file, position, isCommand, false, false);
+        const TokenPtr token = lexToken(file, position, isCommand, false);
         if (token->type != type) {
             throw Util::CommanderException("Expected " + tokenTypeToString(type) + " token, but found "
                                                    + tokenTypeToString(token->type) + " token.",
@@ -625,7 +621,7 @@ namespace Lexer {
         FilePosition commandPosition;
         skipWhitespace(file, position);
         while (position.index < file.length()) {
-            const TokenPtr token = lexToken(file, position, isCommand, isFirst, false);
+            const TokenPtr token = lexToken(file, position, isCommand, isFirst);
             tokens.push_back(token);
             if (token->type == STRINGVAL) {
                 const std::shared_ptr<StringToken> stringToken = std::static_pointer_cast<StringToken>(token);
@@ -669,7 +665,7 @@ namespace Lexer {
                     break;
                 }
                 const bool noSpace = indexBeforeSkip == position.index;
-                const TokenPtr nextToken = lexToken(file, position, isCommand, false, false);
+                const TokenPtr nextToken = lexToken(file, position, isCommand, false);
                 // Determine if the next token implies a variable (i.e. it is LPAREN, COLON, EQUALS, or an operation
                 // token).
                 if (nextToken->type == LPAREN || nextToken->type == COLON || nextToken->type == EQUALS
@@ -690,13 +686,6 @@ namespace Lexer {
                     position = token->position;
                 }
             }
-            // Look ahead for type
-            if (token->type == TYPE && isFirst) {
-                tokens.push_back(expectToken(VARIABLE, file, position, isCommand));
-                tokens.push_back(expectToken(EQUALS, file, position, isCommand));
-                lexExpression(tokens, file, position, UNKNOWN, terminatingToken, true);
-                return;
-            }
             // Look ahead for alias
             if (token->type == ALIAS && isFirst) {
                 tokens.push_back(expectToken(VARIABLE, file, position, isCommand));
@@ -711,9 +700,9 @@ namespace Lexer {
             // Look ahead for for-loop
             if (token->type == FOR && isFirst && !isCommand) {
                 tokens.push_back(expectToken(LPAREN, file, position, isCommand));
-                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON, false);
-                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON, false);
-                lexExpression(tokens, file, position, UNKNOWN, RPAREN, false);
+                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON);
+                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON);
+                lexExpression(tokens, file, position, UNKNOWN, RPAREN);
             }
             skipWhitespace(file, position);
             if ((token->type == ALIAS || token->type == TIMEOUT) && isFirst) { commandPosition = position; }
@@ -732,14 +721,14 @@ namespace Lexer {
     }
 
     void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const TokenType& startToken,
-                       const TokenType& terminatingToken, bool isTypeExpression) {
+                       const TokenType& terminatingToken) {
         const FilePosition startPosition = position;
         bool isCommand = false;
         FilePosition commandPosition;
         skipWhitespace(file, position);
         int stackptr = 0;
         while (position.index < file.length()) {
-            const TokenPtr token = lexToken(file, position, isCommand, false, isTypeExpression);
+            const TokenPtr token = lexToken(file, position, isCommand, false);
             if (token->type == BACKTICK) {
                 if (!isCommand) {
                     commandPosition = token->position;
