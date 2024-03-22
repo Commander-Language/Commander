@@ -728,7 +728,11 @@ namespace Function {
 
     FlowController::CommanderTuplePtr remove(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data) {
-        array->values.push_back(data);
+
+        auto iter = std::find(array->values.begin(), array->values.end(), data);
+        if(iter != array->values.end()) {
+            array->values.erase(iter);
+        }
         return VOID;
     }
 
