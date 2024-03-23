@@ -218,8 +218,8 @@ namespace TypeChecker {
                                 : (Parser::ASTNodePtr)exprNode->expr);
                 bool const isTuple
                         = exprNode->expr->nodeType() == Parser::INDEX_EXPR
-                       && std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type &&
-                          std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type->getType()
+                       && std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type
+                       && std::static_pointer_cast<Parser::IndexExprNode>(exprNode->expr)->expr->type->getType()
                                   == TUPLE;
                 if (!expressionType && !isTuple) {
                     // TODO: Improve error

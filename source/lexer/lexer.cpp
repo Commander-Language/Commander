@@ -549,7 +549,7 @@ namespace Lexer {
             builder << file[position.index++];
             position.column++;
         }
-        const Token token = {std::string(builder.str()), isCommand ? CMDVARIABLE : VARIABLE,startPosition};
+        const Token token = {std::string(builder.str()), isCommand ? CMDVARIABLE : VARIABLE, startPosition};
         return std::make_shared<Token>(token);
     }
 
