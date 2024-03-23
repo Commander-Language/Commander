@@ -1,5 +1,5 @@
 // Test basic functions, function calls, and string interpolate lex properly
-add(a : int,b:float):float {
+fn add(a : int,b:float):float {
     return a+b +1;
 };
 echo "a + b + 1 = ${add(1,a)}";

@@ -53,6 +53,7 @@ namespace Lexer {
         FALSE,
         FLOAT,
         FLOATVAL,
+        FN,
         FOR,
         GREATER,
         GREATER_EQUAL,
@@ -196,12 +197,12 @@ namespace Lexer {
      * Vector of string token literal pairs that are keywords
      */
     const std::vector<std::pair<std::string, TokenType>> keywords(
-            {{"alias", ALIAS},     {"bool", BOOL},     {"break", BREAK}, {"const", CONST},   {"continue", CONTINUE},
-             {"do", DO},           {"else", ELSE},     {"false", FALSE}, {"float", FLOAT},   {"for", FOR},
-             {"if", IF},           {"import", IMPORT}, {"int", INT},     {"print", PRINT},   {"println", PRINTLN},
-             {"read", READ},       {"return", RETURN}, {"scan", SCAN},   {"string", STRING}, {"then", THEN},
-             {"timeout", TIMEOUT}, {"to", TO},         {"true", TRUE},   {"type", TYPE},     {"void", VOID},
-             {"while", WHILE},     {"write", WRITE}});
+            {{"alias", ALIAS},     {"bool", BOOL},       {"break", BREAK},   {"const", CONST}, {"continue", CONTINUE},
+             {"do", DO},           {"else", ELSE},       {"false", FALSE},   {"float", FLOAT}, {"fn", FN},
+             {"for", FOR},         {"if", IF},           {"import", IMPORT}, {"int", INT},     {"print", PRINT},
+             {"println", PRINTLN}, {"read", READ},       {"return", RETURN}, {"scan", SCAN},   {"string", STRING},
+             {"then", THEN},       {"timeout", TIMEOUT}, {"to", TO},         {"true", TRUE},   {"type", TYPE},
+             {"void", VOID},       {"while", WHILE},     {"write", WRITE}});
 
     /**
      * Vector of string token literal pairs that are not keywords (order matters here; longest to shortest)

@@ -74,6 +74,8 @@ namespace Lexer {
                 return "FLOAT";
             case FLOATVAL:
                 return "FLOATVAL";
+            case FN:
+                return "FN";
             case FOR:
                 return "FOR";
             case GREATER:

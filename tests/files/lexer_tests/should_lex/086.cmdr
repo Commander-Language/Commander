@@ -1,4 +1,6 @@
 // Test weird whitespacing
+fn
+
 func
 
 (
