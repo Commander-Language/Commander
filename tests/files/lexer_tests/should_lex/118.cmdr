@@ -1,0 +1,2 @@
+//Should lex timeout
+timeout 40000 "Ping terminated after 40 seconds" ping http://google.com;

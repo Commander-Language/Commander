@@ -28,6 +28,7 @@ namespace Lexer {
         ALIAS,
         AMPERSAND,
         AND,
+        ASSERT,
         BACKTICK,
         BOOL,
         BREAK,
@@ -196,13 +197,15 @@ namespace Lexer {
     /**
      * Vector of string token literal pairs that are keywords
      */
-    const std::vector<std::pair<std::string, TokenType>> keywords(
-            {{"alias", ALIAS},     {"bool", BOOL},       {"break", BREAK},   {"const", CONST}, {"continue", CONTINUE},
-             {"do", DO},           {"else", ELSE},       {"false", FALSE},   {"float", FLOAT}, {"fn", FN},
-             {"for", FOR},         {"if", IF},           {"import", IMPORT}, {"int", INT},     {"print", PRINT},
-             {"println", PRINTLN}, {"read", READ},       {"return", RETURN}, {"scan", SCAN},   {"string", STRING},
-             {"then", THEN},       {"timeout", TIMEOUT}, {"to", TO},         {"true", TRUE},   {"type", TYPE},
-             {"void", VOID},       {"while", WHILE},     {"write", WRITE}});
+    const std::vector<std::pair<std::string, TokenType>>
+            keywords({{"alias", ALIAS},     {"assert", ASSERT},     {"bool", BOOL},       {"break", BREAK},
+                      {"const", CONST},     {"continue", CONTINUE}, {"do", DO},           {"else", ELSE},
+                      {"false", FALSE},     {"float", FLOAT},       {"fn", FN},           {"for", FOR},
+                      {"if", IF},           {"import", IMPORT},     {"int", INT},         {"print", PRINT},
+                      {"println", PRINTLN}, {"read", READ},         {"return", RETURN},   {"scan", SCAN},
+                      {"string", STRING},   {"then", THEN},         {"timeout", TIMEOUT}, {"to", TO},
+                      {"true", TRUE},       {"type", TYPE},         {"void", VOID},       {"while", WHILE},
+                      {"write", WRITE}});
 
     /**
      * Vector of string token literal pairs that are not keywords (order matters here; longest to shortest)
@@ -412,7 +415,8 @@ namespace Lexer {
     bool isIllegalCharacter(const char& character);
 
     /**
-     * @brief Helper function that gets the next token, and ensures its type is what is expected
+     * @brief Helper function that gets the next token, and ensures its type is what is expected, otherwise throws an
+     * error
      * @param type The type of token being expected
      * @param file The file being lexed
      * @param position The current position in the file
@@ -422,14 +426,22 @@ namespace Lexer {
     TokenPtr expectToken(const TokenType& type, const std::string& file, FilePosition& position, bool& isCommand);
 
     /**
+     * @brief Helper function for lookahead, to determine if the next token is what you expect
+     * @param type The type of token being expected
+     * @param file The file being lexed
+     * @param position The current position in the file
+     * @param isCommand Tells whether a command is being lexed or not
+     * @return True if the next token is what you expect, false otherwise
+     */
+    bool isNextToken(const TokenType& type, const std::string& file, FilePosition& position, bool& isCommand);
+
+    /**
      * @brief Helper function that lexes a statement
      * @param tokens The vector that will hold all the tokens
      * @param file The file being lexed
      * @param position The current position in the file
-     * @param terminatingToken The token to look for to stop lexing the expression
      */
-    void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position,
-                      const TokenType& terminatingToken);
+    void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position);
 
     /**
      * @brief Helper function that lexes an expression

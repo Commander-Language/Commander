@@ -1,0 +1,2 @@
+//Should lex assertions
+assert x && y, "x and y are not both true";

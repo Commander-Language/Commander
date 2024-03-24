@@ -1,0 +1,10 @@
+ASSERT 'assert' 1:1
+VARIABLE 'x' 1:8
+AND '&&' 1:10
+VARIABLE 'y' 1:13
+COMMA ',' 1:14
+STRINGVAL '"' 1:16
+STRINGLITERAL 'x and y are not both true' 1:17
+ENDSTRINGVAL '"' 1:42
+SEMICOLON ';' 1:43
+END_OF_FILE 1:44

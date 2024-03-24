@@ -1,0 +1,9 @@
+TIMEOUT 'timeout' 1:1
+INTVAL '40000' 1:9
+STRINGVAL '"' 1:15
+STRINGLITERAL 'Ping terminated after 40 seconds' 1:16
+ENDSTRINGVAL '"' 1:48
+CMDSTRINGVAL 'ping' 1:50
+CMDSTRINGVAL 'http://google.com' 1:55
+SEMICOLON ';' 1:72
+END_OF_FILE 1:73

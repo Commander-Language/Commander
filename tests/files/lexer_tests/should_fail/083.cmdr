@@ -1,0 +1,2 @@
+//Should not parse since no int
+timeout "hi" echo;

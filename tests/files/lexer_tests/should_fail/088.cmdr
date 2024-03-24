@@ -1,0 +1,2 @@
+//Should not parse due to missing while
+do echo hi; (true);

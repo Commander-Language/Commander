@@ -24,6 +24,8 @@ namespace Lexer {
                 return "AMPERSAND";
             case AND:
                 return "AND";
+            case ASSERT:
+                return "ASSERT";
             case BACKTICK:
                 return "BACKTICK";
             case BOOL:
@@ -195,7 +197,7 @@ namespace Lexer {
         FilePosition position = {filePath, 1, 1, 0};
         skipWhitespace(file, position);
         while (position.index < file.length()) {
-            lexStatement(tokens, file, position, SEMICOLON);
+            lexStatement(tokens, file, position);
             skipWhitespace(file, position);
         }
         // ASCII character 5 is the EOF character
@@ -614,8 +616,16 @@ namespace Lexer {
         return token;
     }
 
-    void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position,
-                      const TokenType& terminatingToken) {
+    bool isNextToken(const TokenType& type, const std::string& file, FilePosition& position, bool& isCommand) {
+        FilePosition originalPosition = position;
+        skipWhitespace(file, position);
+        if (position.index >= file.length()) { return false; }
+        const TokenPtr token = lexToken(file, position, isCommand, false);
+        position = originalPosition;
+        return token->type == type;
+    }
+
+    void lexStatement(TokenList& tokens, const std::string& file, FilePosition& position) {
         bool isCommand = false;
         bool isBacktickCommand = false;
         bool isFirst = true;
@@ -629,8 +639,8 @@ namespace Lexer {
                 const std::shared_ptr<StringToken> stringToken = std::static_pointer_cast<StringToken>(token);
                 tokens.insert(tokens.end(), stringToken->subTokens.begin(), stringToken->subTokens.end());
             }
-            if (token->type == terminatingToken && isBacktickCommand) { break; }
-            if (token->type == terminatingToken) { return; }
+            if (token->type == SEMICOLON && isBacktickCommand) { break; }
+            if (token->type == SEMICOLON) { return; }
             // Lex scope
             if (token->type == LCURLY) {
                 skipWhitespace(file, position);
@@ -639,7 +649,7 @@ namespace Lexer {
                         tokens.push_back(expectToken(RCURLY, file, position, isCommand));
                         return;
                     }
-                    lexStatement(tokens, file, position, SEMICOLON);
+                    lexStatement(tokens, file, position);
                     skipWhitespace(file, position);
                 }
                 throw Util::CommanderException("Unterminated scope", token->position);
@@ -694,17 +704,40 @@ namespace Lexer {
                 tokens.push_back(expectToken(EQUALS, file, position, isCommand));
                 isCommand = true;
             }
+            // Look ahead for functions
+            if (token->type == FN && isFirst) {
+                tokens.push_back(expectToken(VARIABLE, file, position, isCommand));
+                lexExpression(tokens, file, position, LPAREN, RPAREN);
+                lexStatement(tokens, file, position);
+                return;
+            }
             // Look ahead for timeout
             if (token->type == TIMEOUT && isFirst) {
                 tokens.push_back(expectToken(INTVAL, file, position, isCommand));
-                isCommand = true;
+                if (isNextToken(STRINGVAL, file, position, isCommand)) {
+                    tokens.push_back(expectToken(STRINGVAL, file, position, isCommand));
+                }
+                lexStatement(tokens, file, position);
+                return;
             }
-            // Look ahead for for-loop
-            if (token->type == FOR && isFirst && !isCommand) {
-                tokens.push_back(expectToken(LPAREN, file, position, isCommand));
-                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON);
-                lexExpression(tokens, file, position, UNKNOWN, SEMICOLON);
-                lexExpression(tokens, file, position, UNKNOWN, RPAREN);
+            // Look ahead for else
+            if (token->type == ELSE && isFirst) {
+                lexStatement(tokens, file, position);
+                return;
+            }
+            // Look ahead for do
+            if (token->type == DO && isFirst) {
+                lexStatement(tokens, file, position);
+                tokens.push_back(expectToken(WHILE, file, position, isCommand));
+                lexExpression(tokens, file, position, LPAREN, RPAREN);
+                tokens.push_back(expectToken(SEMICOLON, file, position, isCommand));
+                return;
+            }
+            // Look ahead for for-loop, if, and while
+            if ((token->type == FOR || token->type == IF || token->type == WHILE) && isFirst) {
+                lexExpression(tokens, file, position, LPAREN, RPAREN);
+                lexStatement(tokens, file, position);
+                return;
             }
             skipWhitespace(file, position);
             if ((token->type == ALIAS || token->type == TIMEOUT) && isFirst) { commandPosition = position; }
@@ -714,12 +747,11 @@ namespace Lexer {
             throw Util::CommanderException("Command was not terminated with a backtick", commandPosition);
         }
         if (isCommand) {
-            throw Util::CommanderException("Command was not terminated with " + tokenTypeToString(terminatingToken)
-                                                   + " token",
+            throw Util::CommanderException("Command was not terminated with " + tokenTypeToString(SEMICOLON) + " token",
                                            commandPosition);
         }
-        throw Util::CommanderException(
-                "Statement was not terminated with " + tokenTypeToString(terminatingToken) + " token", startPosition);
+        throw Util::CommanderException("Statement was not terminated with " + tokenTypeToString(SEMICOLON) + " token",
+                                       startPosition);
     }
 
     void lexExpression(TokenList& tokens, const std::string& file, FilePosition& position, const TokenType& startToken,

@@ -1,0 +1,2 @@
+//Should lex function command
+fn hello(a, b) echo hi;

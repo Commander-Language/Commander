@@ -1,0 +1,2 @@
+//Should not parse due to missing semicolon
+while (true) echo hi
