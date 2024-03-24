@@ -212,11 +212,6 @@ namespace Parser {
                 {{{ASTNodeType::ASYNC_CMD, {ASTNodeType::BASIC_CMD, TokenType::AMPERSAND}},
                   makeNode("AsyncCmd", {castNode("BasicCmd", 0)})}},
 
-                //  (CMD) -> (PIPE_CMD)
-                //  (CMD) -> (ASYNC_CMD)
-                //  (CMD) -> (BASIC_CMD)
-                //  No need to do anything here since basic, async, and pipes inherit from cmd
-
 
                 //  ================
                 //  ||  Lvalues:  ||
@@ -274,9 +269,15 @@ namespace Parser {
                 //  (EXPR) -> [LPAREN] (EXPR) [RPAREN]
                 {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
                   "productionList[1].node"}},
-                // (EXPR) -> [BACKTICK] (CMD) [BACKTICK]
-                {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::CMD, TokenType::BACKTICK}},
-                  makeNode("CmdExpr", {castNode("Cmd", 1)})}},
+                // (EXPR) -> [BACKTICK] (ASYNC_CMD) [BACKTICK]
+                {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::ASYNC_CMD, TokenType::BACKTICK}},
+                  makeNode("CmdExpr", {castNode("AsyncCmd", 1)})}},
+                // (EXPR) -> [BACKTICK] (PIPE_CMD) [BACKTICK]
+                {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::PIPE_CMD, TokenType::BACKTICK}},
+                  makeNode("CmdExpr", {castNode("PipeCmd", 1)})}},
+                // (EXPR) -> [BACKTICK] (BASIC_CMD) [BACKTICK]
+                {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::BASIC_CMD, TokenType::BACKTICK}},
+                  makeNode("CmdExpr", {castNode("BasicCmd", 1)})}},
 
                 //  (EXPR) -> (EXPR) [LSQUARE] (EXPR) [RSQUARE]
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LSQUARE, ASTNodeType::EXPR, TokenType::RSQUARE}},
@@ -410,11 +411,8 @@ namespace Parser {
                 {{{ASTNodeType::EXPR, {ASTNodeType::BINDING, TokenType::EQUALS, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Binding", 0), "BinOpType::SET", castNode("Expr", 2)})}},
 
-                //  (EXPR) -> (INDEX_LVALUE)
-                {{{ASTNodeType::EXPR, {ASTNodeType::INDEX_LVALUE}},
-                  makeNode("IndexExpr", {castNode("IndexLValue", 0)})}},
-                //  (EXPR) -> (VAR_LVALUE)
-                {{{ASTNodeType::EXPR, {ASTNodeType::VAR_LVALUE}}, makeNode("VarExpr", {castNode("VarLValue", 0)})}},
+                //  (EXPR) -> (LVALUE)
+                {{{ASTNodeType::EXPR, {ASTNodeType::LVALUE}}, makeNode("LValueExpr", {castNode("LValue", 0)})}},
 
                 //  (EXPR) -> [IF] (EXPR) [THEN] (EXPR) [ELSE] (EXPR)
                 {{{ASTNodeType::EXPR,
@@ -548,10 +546,21 @@ namespace Parser {
                     TokenType::RPAREN, TokenType::SEMICOLON}},
                   makeNode("WriteStmt", {castNode("Expr", 2), castNode("Expr", 4)})}},
 
-                //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (CMD) [SEMICOLON]
+                //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (ASYNC_CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT,
-                   {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::CMD, TokenType::SEMICOLON}},
-                  makeNode("AliasStmt", {tokenContents(1), castNode("Cmd", 3)})}},
+                   {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::ASYNC_CMD,
+                    TokenType::SEMICOLON}},
+                  makeNode("AliasStmt", {tokenContents(1), castNode("AsyncCmd", 3)})}},
+                //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (PIPE_CMD) [SEMICOLON]
+                {{{ASTNodeType::STMT,
+                   {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::PIPE_CMD,
+                    TokenType::SEMICOLON}},
+                  makeNode("AliasStmt", {tokenContents(1), castNode("PipeCmd", 3)})}},
+                //  (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (BASIC_CMD) [SEMICOLON]
+                {{{ASTNodeType::STMT,
+                   {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::BASIC_CMD,
+                    TokenType::SEMICOLON}},
+                  makeNode("AliasStmt", {tokenContents(1), castNode("BasicCmd", 3)})}},
 
                 //  (STMT) -> [TYPE] [VARIABLE] [EQUALS] (TYPE) [SEMICOLON]
                 {{{ASTNodeType::STMT,
@@ -629,9 +638,15 @@ namespace Parser {
                 //  (STMT) -> [CONTINUE] [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::CONTINUE, TokenType::SEMICOLON}}, makeNode("ContinueStmt", {})}},
 
-                //  (STMT) -> (CMD) [SEMICOLON]
-                {{{ASTNodeType::STMT, {ASTNodeType::CMD, TokenType::SEMICOLON}},
-                  makeNode("CmdStmt", {castNode("Cmd", 0)})}},
+                //  (STMT) -> (ASYNC_CMD) [SEMICOLON]
+                {{{ASTNodeType::STMT, {ASTNodeType::ASYNC_CMD, TokenType::SEMICOLON}},
+                  makeNode("CmdStmt", {castNode("AsyncCmd", 0)})}},
+                //  (STMT) -> (PIPE_CMD) [SEMICOLON]
+                {{{ASTNodeType::STMT, {ASTNodeType::PIPE_CMD, TokenType::SEMICOLON}},
+                  makeNode("CmdStmt", {castNode("PipeCmd", 0)})}},
+                //  (STMT) -> (BASIC_CMD) [SEMICOLON]
+                {{{ASTNodeType::STMT, {ASTNodeType::BASIC_CMD, TokenType::SEMICOLON}},
+                  makeNode("CmdStmt", {castNode("BasicCmd", 0)})}},
                 //  (STMT) -> (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {ASTNodeType::EXPR, TokenType::SEMICOLON}},
                   makeNode("ExprStmt", {castNode("Expr", 0)})}},

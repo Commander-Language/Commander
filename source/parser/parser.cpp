@@ -69,12 +69,11 @@ namespace Parser {
             case STRING:
             case STRING_EXPRS:
             case TYPES:
-                return type;
             case CMD:
             case BASIC_CMD:
             case PIPE_CMD:
             case ASYNC_CMD:
-                return CMD;
+                return type;
             case LVALUE:
             case VAR_LVALUE:
             case INDEX_LVALUE:
@@ -85,6 +84,7 @@ namespace Parser {
             case STRING_EXPR:
             case BOOL_EXPR:
             case VAR_EXPR:
+            case LVALUE_EXPR:
             case ARRAY_EXPR:
             case INDEX_EXPR:
             case TUPLE_EXPR:

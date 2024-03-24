@@ -35,6 +35,7 @@ namespace Parser {
         STRING_EXPR,
         BOOL_EXPR,
         VAR_EXPR,
+        LVALUE_EXPR,
         ARRAY_EXPR,
         INDEX_EXPR,
         TUPLE_EXPR,
@@ -608,6 +609,13 @@ namespace Parser {
          *
          * @param literal The string literal.
          */
+        StringNode();
+
+        /**
+         * @brief Class constructor from a string literal.
+         *
+         * @param literal The string literal.
+         */
         StringNode(std::string literal);
 
         /**
@@ -1114,6 +1122,44 @@ namespace Parser {
      *
      */
     using VarExprNodePtr = std::shared_ptr<VarExprNode>;
+
+    /**
+     * @brief An LValue reference expression AST node.
+     *
+     */
+    class LValueExprNode : public ExprNode {
+    public:
+        /**
+         * The referenced expression.
+         */
+        ExprNodePtr expr;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param lvalue The lvalue to reference.
+         */
+        LValueExprNode(const LValueNodePtr& lvalue);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `LVALUE_EXPR` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an variable expression node.
+     *
+     */
+    using LValueExprNodePtr = std::shared_ptr<LValueExprNode>;
 
     /**
      * @brief An array literal expression node.

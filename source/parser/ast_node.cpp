@@ -41,6 +41,8 @@ namespace Parser {
                 return "BOOL_EXPR";
             case VAR_EXPR:
                 return "VAR_EXPR";
+            case LVALUE_EXPR:
+                return "LVALUE_EXPR";
             case ARRAY_EXPR:
                 return "ARRAY_EXPR";
             case INDEX_EXPR:
@@ -314,6 +316,8 @@ namespace Parser {
 
     ASTNodeType VarExprNode::nodeType() const { return ASTNodeType::VAR_EXPR; }
 
+    ASTNodeType LValueExprNode::nodeType() const { return ASTNodeType::LVALUE_EXPR; }
+
     ASTNodeType ArrayExprNode::nodeType() const { return ASTNodeType::ARRAY_EXPR; }
 
     ASTNodeType IndexExprNode::nodeType() const { return ASTNodeType::INDEX_EXPR; }
@@ -429,6 +433,8 @@ namespace Parser {
         return builder.str();
     }
 
+    StringNode::StringNode() : literal("") {}
+
     StringNode::StringNode(std::string literal) : literal(std::move(literal)) {}
 
     StringNode::StringNode(StringExprsNodePtr exprs) : expressions(std::move(exprs)) {}
@@ -530,6 +536,18 @@ namespace Parser {
     VarExprNode::VarExprNode(const VarLValueNodePtr& lvalue) : variable(lvalue->variable) {}
 
     std::string VarExprNode::sExpression() const { return "(VarExprNode " + variable + getTypeString() + ")"; }
+
+    LValueExprNode::LValueExprNode(const LValueNodePtr& lvalue) {
+        if (lvalue->nodeType() == VAR_LVALUE) {
+            expr = std::make_shared<VarExprNode>(std::static_pointer_cast<VarLValueNode>(lvalue));
+        } else {
+            expr = std::make_shared<IndexExprNode>(std::static_pointer_cast<IndexLValueNode>(lvalue));
+        }
+    }
+
+    std::string LValueExprNode::sExpression() const {
+        return "(LValueExprNode " + expr->sExpression() + getTypeString() + ")";
+    }
 
     ArrayExprNode::ArrayExprNode() : expressions(std::make_shared<ExprsNode>()) {}
 
