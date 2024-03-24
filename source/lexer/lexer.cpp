@@ -707,6 +707,7 @@ namespace Lexer {
             // Look ahead for functions
             if (token->type == FN && isFirst) {
                 tokens.push_back(expectToken(VARIABLE, file, position, isCommand));
+                tokens.push_back(expectToken(LPAREN, file, position, isCommand));
                 lexExpression(tokens, file, position, LPAREN, RPAREN);
                 lexStatement(tokens, file, position);
                 return;
@@ -715,7 +716,10 @@ namespace Lexer {
             if (token->type == TIMEOUT && isFirst) {
                 tokens.push_back(expectToken(INTVAL, file, position, isCommand));
                 if (isNextToken(STRINGVAL, file, position, isCommand)) {
-                    tokens.push_back(expectToken(STRINGVAL, file, position, isCommand));
+                    TokenPtr token = expectToken(STRINGVAL, file, position, isCommand);
+                    tokens.push_back(token);
+                    const std::shared_ptr<StringToken> stringToken = std::static_pointer_cast<StringToken>(token);
+                    tokens.insert(tokens.end(), stringToken->subTokens.begin(), stringToken->subTokens.end());
                 }
                 lexStatement(tokens, file, position);
                 return;
@@ -729,12 +733,14 @@ namespace Lexer {
             if (token->type == DO && isFirst) {
                 lexStatement(tokens, file, position);
                 tokens.push_back(expectToken(WHILE, file, position, isCommand));
+                tokens.push_back(expectToken(LPAREN, file, position, isCommand));
                 lexExpression(tokens, file, position, LPAREN, RPAREN);
                 tokens.push_back(expectToken(SEMICOLON, file, position, isCommand));
                 return;
             }
             // Look ahead for for-loop, if, and while
             if ((token->type == FOR || token->type == IF || token->type == WHILE) && isFirst) {
+                tokens.push_back(expectToken(LPAREN, file, position, isCommand));
                 lexExpression(tokens, file, position, LPAREN, RPAREN);
                 lexStatement(tokens, file, position);
                 return;
