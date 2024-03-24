@@ -7,6 +7,7 @@
 #ifndef AST_NODE_HPP
 #define AST_NODE_HPP
 
+#include "source/lexer/lexer.hpp"
 #include "source/type_checker/type.hpp"
 #include <cstdint>
 #include <memory>
@@ -23,10 +24,12 @@ namespace Parser {
         BINDING,
         BINDINGS,
         CMD,
-        CMD_CMD,
+        BASIC_CMD,
         PIPE_CMD,
         ASYNC_CMD,
-        TIMEOUT_CMD,
+        LVALUE,
+        VAR_LVALUE,
+        INDEX_LVALUE,
         INT_EXPR,
         FLOAT_EXPR,
         STRING_EXPR,
@@ -52,6 +55,8 @@ namespace Parser {
         WHILE_STMT,
         DO_WHILE_STMT,
         RETURN_STMT,
+        BREAK_STMT,
+        CONTINUE_STMT,
         SCOPE_STMT,
         CMD_STMT,
         EXPR_STMT,
@@ -62,6 +67,8 @@ namespace Parser {
         WRITE_STMT,
         TYPE_STMT,
         FUNCTION_STMT,
+        TIMEOUT_STMT,
+        ASSERT_STMT,
         STMT,
         STMTS,
         STRING,
@@ -75,8 +82,7 @@ namespace Parser {
         FUNCTION_TYPE,
         VARIABLE_TYPE,
         TYPE,
-        TYPES,
-        VARIABLE
+        TYPES
     };
 
     /**
@@ -140,6 +146,11 @@ namespace Parser {
      */
     class ASTNode {
     public:
+        /**
+         * File position of the AST node
+         */
+        Lexer::FilePosition filePosition;
+
         /**
          * @brief Class destructor.
          * @details Necessary because this is a pure virtual class.
@@ -369,6 +380,31 @@ namespace Parser {
      *
      */
     using CmdNodePtr = std::shared_ptr<CmdNode>;
+
+    /**
+     * @brief An Lvalue node.
+     *
+     */
+    class LValueNode : public ASTNode {
+    public:
+        /**
+         * @brief The type of the node
+         */
+        TypeChecker::TyPtr type;
+        /**
+         * @brief Gets the string representation of the type
+         *
+         * @return The string representation of the type
+         */
+        [[nodiscard]] std::string getTypeString() const;
+    };
+
+    /**
+     * @brief A smart pointer to a command node.
+     *
+     */
+    using LValueNodePtr = std::shared_ptr<LValueNode>;
+
 
     /**
      * @brief An expression AST node.
@@ -663,16 +699,6 @@ namespace Parser {
      */
     using PrgmNodePtr = std::shared_ptr<PrgmNode>;
 
-    /**
-     * @brief A variable AST node.
-     */
-    class VariableNode : public ASTNode {};
-    /**
-     * @brief A pointer to a variable node.
-     *
-     */
-    using VariableNodePtr = std::shared_ptr<VariableNode>;
-
 
     //  =================
     //  ||  Commands:  ||
@@ -682,7 +708,7 @@ namespace Parser {
      * @brief A regular command AST node.
      *
      */
-    class CmdCmdNode : public CmdNode {
+    class BasicCmdNode : public CmdNode {
     public:
         /**
          * @brief The list of arguments for the command, consisting of variable expression nodes and string nodes.
@@ -694,15 +720,15 @@ namespace Parser {
          *
          * @param argument The first argument of the command.
          */
-        CmdCmdNode(ASTNodePtr argument);
+        BasicCmdNode(ASTNodePtr argument);
 
         /**
-         * @brief Class constructor from a command, plus one more argument.
+         * @brief Class constructor from two commands
          *
-         * @param command The first command.
-         * @param argument The next argument of the command.
+         * @param first The first command.
+         * @param second The second command.
          */
-        CmdCmdNode(CmdNodePtr command, ASTNodePtr argument);
+        BasicCmdNode(const std::shared_ptr<BasicCmdNode>& first, const std::shared_ptr<BasicCmdNode>& second);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -714,7 +740,7 @@ namespace Parser {
         /**
          * @brief Reports the type of this command node.
          *
-         * @return `CMD_CMD` always.
+         * @return `BASIC_CMD` always.
          */
         [[nodiscard]] ASTNodeType nodeType() const override;
     };
@@ -722,7 +748,7 @@ namespace Parser {
      * @brief A pointer to a command node.
      *
      */
-    using CmdCmdNodePtr = std::shared_ptr<CmdCmdNode>;
+    using BasicCmdNodePtr = std::shared_ptr<BasicCmdNode>;
 
     /**
      * @brief An asynchronous command AST node.
@@ -761,50 +787,6 @@ namespace Parser {
      *
      */
     using AsyncCmdNodePtr = std::shared_ptr<AsyncCmdNode>;
-
-    /**
-     * @brief A timeout command AST node.
-     *
-     */
-    class TimeoutCmdNode : public CmdNode {
-    public:
-        /**
-         * @brief Timeout in milliseconds
-         */
-        int64_t timeout;
-
-        /**
-         * @brief The command to run
-         */
-        CmdNodePtr cmd;
-
-        /**
-         * @brief Class constructor.
-         *
-         * @param timeout Timeout in milliseconds
-         * @param cmd The command to run
-         */
-        TimeoutCmdNode(int64_t timeout, CmdNodePtr cmd);
-
-        /**
-         * @brief Gets the string representation of the node as an s-expression
-         *
-         * @return The s-expression string of the node
-         */
-        [[nodiscard]] std::string sExpression() const override;
-
-        /**
-         * @brief Reports the type of this command node.
-         *
-         * @return `TIMEOUT_CMD` always.
-         */
-        [[nodiscard]] ASTNodeType nodeType() const override;
-    };
-    /**
-     * @brief A pointer to a timeout command node.
-     *
-     */
-    using TimeoutCmdNodePtr = std::shared_ptr<TimeoutCmdNode>;
 
     /**
      * @brief A pipe between two command nodes.
@@ -849,6 +831,91 @@ namespace Parser {
      *
      */
     using PipeCmdNodePtr = std::shared_ptr<PipeCmdNode>;
+
+
+    //  ================
+    //  ||  Lvalues:  ||
+    //  ================
+
+    /**
+     * @brief An AST node representing variable that can be set
+     */
+    class VarLValueNode : public LValueNode {
+    public:
+        /**
+         * The variable of the node
+         */
+        std::string variable;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param variable The variable of this AST node.
+         */
+        VarLValueNode(std::string variable);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `VAR_LVALUE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to the VarLValue node
+     *
+     */
+    using VarLValueNodePtr = std::shared_ptr<VarLValueNode>;
+
+    /**
+     * @brief An AST node representing an index value that can be set
+     */
+    class IndexLValueNode : public LValueNode {
+    public:
+        /**
+         * The expression being indexed
+         */
+        LValueNodePtr lvalue;
+
+        /**
+         * The expression that make up the index
+         */
+        ExprNodePtr index;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param lvalue The lvalue which we are indexing
+         * @param index The index inside the square brackets.
+         */
+        IndexLValueNode(LValueNodePtr lvalue, ExprNodePtr index);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this command node.
+         *
+         * @return `INDEX_LVALUE` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to the IndexLValue node
+     *
+     */
+    using IndexLValueNodePtr = std::shared_ptr<IndexLValueNode>;
 
 
     //  ====================
@@ -1012,14 +1079,21 @@ namespace Parser {
         /**
          * The referenced variable.
          */
-        VariableNodePtr variable;
+        std::string variable;
 
         /**
          * @brief Class constructor.
          *
          * @param variable The variable to reference.
          */
-        VarExprNode(VariableNodePtr variable);
+        VarExprNode(std::string variable);
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param lvalue The variable lvalue to reference.
+         */
+        VarExprNode(const VarLValueNodePtr& lvalue);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1099,6 +1173,13 @@ namespace Parser {
          * The expression that make up the array index
          */
         ExprNodePtr index;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param indexLValue The lvalue to make into an expression
+         */
+        IndexExprNode(IndexLValueNodePtr indexLValue);
 
         /**
          * @brief Class constructor.
@@ -1232,17 +1313,17 @@ namespace Parser {
         UnOpType opType;
 
         /**
-         * @brief The expression being operated on.
+         * @brief The node being operated on, either an lvalue or expr.
          */
-        ExprNodePtr expr;
+        ASTNodePtr node;
 
         /**
          * @brief Class constructor for a unary operation on an expression.
          *
          * @param opType The unary operation type being performed.
-         * @param expr The expression on which the unary operation is being performed.
+         * @param node The node on which the unary operation is being performed.
          */
-        UnOpExprNode(UnOpType opType, ExprNodePtr expr);
+        UnOpExprNode(UnOpType opType, ASTNodePtr node);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1275,46 +1356,24 @@ namespace Parser {
         BinOpType opType;
 
         /**
-         * @brief Tells whether the left variable is a constant if setting a variable with a binding
+         * @brief The node on the left (could be expr, lvalue, or binding)
          */
-        bool leftConstant;
-
-        /**
-         * @brief The type on the left-hand side of the operator,
-         *     for expressions that set a variable with a binding.
-         */
-        TypeNodePtr leftType;
-
-        /**
-         * @brief The expression on the left-hand side of the operator,
-         *     for expressions that don't set a variable.
-         */
-        ExprNodePtr leftExpr;
+        ASTNodePtr left;
 
         /**
          * @brief The expression on the right-hand side of the operator.
          */
-        ExprNodePtr rightExpr;
-
-        /**
-         * @brief Class constructor.
-         * @details For binary operations set a variable.
-         *
-         * @param leftBinding The binding on the left-hand side of the operator.
-         * @param opType The type of operation being done.
-         * @param rightExpr The expression on the right-hand side of the operator.
-         */
-        BinOpExprNode(const BindingNodePtr& leftBinding, BinOpType opType, ExprNodePtr rightExpr);
+        ExprNodePtr right;
 
         /**
          * @brief Class constructor.
          * @details For binary operations that don't set a variable.
          *
-         * @param leftExpr The expression on the left-hand side of the operator.
+         * @param left The node on the left-hand side of the operator.
          * @param opType The type of operation being done.
-         * @param rightExpr The expression on the right-hand side of the operator.
+         * @param right The expression on the right-hand side of the operator.
          */
-        BinOpExprNode(ExprNodePtr leftExpr, BinOpType opType, ExprNodePtr rightExpr);
+        BinOpExprNode(ASTNodePtr left, BinOpType opType, ExprNodePtr right);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1401,7 +1460,7 @@ namespace Parser {
         /**
          * @brief The function to call
          */
-        VariableNodePtr func;
+        std::string func;
 
         /**
          * @brief The arguments to pass into the function
@@ -1414,7 +1473,7 @@ namespace Parser {
          * @param expression The expression being called on
          * @param func The function to call
          */
-        ApiCallExprNode(ExprNodePtr expression, VariableNodePtr func);
+        ApiCallExprNode(ExprNodePtr expression, std::string func);
 
         /**
          * @brief Class constructor.
@@ -1423,7 +1482,7 @@ namespace Parser {
          * @param func The function to call
          * @param args The arguments for the function call.
          */
-        ApiCallExprNode(ExprNodePtr expression, VariableNodePtr func, ExprsNodePtr args);
+        ApiCallExprNode(ExprNodePtr expression, std::string func, ExprsNodePtr args);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1871,6 +1930,68 @@ namespace Parser {
     using ReturnStmtNodePtr = std::shared_ptr<ReturnStmtNode>;
 
     /**
+     * @brief A break statement.
+     */
+    class BreakStmtNode : public StmtNode {
+    public:
+        /**
+         * @brief Class constructor.
+         *
+         */
+        BreakStmtNode() = default;
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `BREAK_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a break statement node.
+     *
+     */
+    using BreakStmtNodePtr = std::shared_ptr<BreakStmtNode>;
+
+    /**
+     * @brief A continue statement.
+     */
+    class ContinueStmtNode : public StmtNode {
+    public:
+        /**
+         * @brief Class constructor.
+         *
+         */
+        ContinueStmtNode() = default;
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `CONTINUE_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a continue statement node.
+     *
+     */
+    using ContinueStmtNodePtr = std::shared_ptr<ContinueStmtNode>;
+
+    /**
      * @brief A new scope statement.
      *
      */
@@ -2300,6 +2421,100 @@ namespace Parser {
      */
     using FunctionStmtNodePtr = std::shared_ptr<FunctionStmtNode>;
 
+    /**
+     * @brief A timeout statement AST node.
+     *
+     */
+    class TimeoutStmtNode : public StmtNode {
+    public:
+        /**
+         * @brief Timeout in milliseconds
+         */
+        int64_t timeout;
+
+        /**
+         * @brief Timeout message
+         */
+        StringNodePtr message;
+
+        /**
+         * @brief The statement to run
+         */
+        StmtNodePtr stmt;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param timeout Timeout in milliseconds
+         * @param message The timeout message
+         * @param stmt The statement to run
+         */
+        TimeoutStmtNode(const int64_t& timeout, StringNodePtr message, StmtNodePtr stmt);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `TIMEOUT_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to a timeout statement node.
+     *
+     */
+    using TimeoutStmtNodePtr = std::shared_ptr<TimeoutStmtNode>;
+
+    /**
+     * @brief An assert statement AST node.
+     *
+     */
+    class AssertStmtNode : public StmtNode {
+    public:
+        /**
+         * @brief Boolean expr to assert
+         */
+        ExprNodePtr expr;
+
+        /**
+         * @brief Assert message
+         */
+        StringNodePtr message;
+
+        /**
+         * @brief Class constructor.
+         *
+         * @param expr The expression to assert
+         * @param message The assert message
+         */
+        AssertStmtNode(ExprNodePtr expr, StringNodePtr message);
+
+        /**
+         * @brief Gets the string representation of the node as an s-expression
+         *
+         * @return The s-expression string of the node
+         */
+        [[nodiscard]] std::string sExpression() const override;
+
+        /**
+         * @brief Reports the type of this statement node.
+         *
+         * @return `ASSERT_STMT` always.
+         */
+        [[nodiscard]] ASTNodeType nodeType() const override;
+    };
+    /**
+     * @brief A pointer to an assert statement node.
+     *
+     */
+    using AssertStmtNodePtr = std::shared_ptr<AssertStmtNode>;
+
     //  ==============
     //  ||  Types:  ||
     //  ==============
@@ -2515,6 +2730,11 @@ namespace Parser {
         TypesNodePtr subtypes;
 
         /**
+         * @brief Default constructor.
+         */
+        TupleTypeNode();
+
+        /**
          * @brief Class constructor.
          *
          * @param subtypes The type of each of the tuple's items.
@@ -2591,49 +2811,6 @@ namespace Parser {
      *
      */
     using FunctionTypeNodePtr = std::shared_ptr<FunctionTypeNode>;
-
-
-    //  ==================
-    //  ||  Variables:  ||
-    //  ==================
-
-    /**
-     * @brief A variable made of just an identifier.
-     */
-    class IdentVariableNode : public VariableNode {
-    public:
-        /**
-         * @brief The name of the variable.
-         *
-         */
-        std::string varName;
-
-        /**
-         * @brief Class constructor.
-         *
-         * @param varName The name of the variable.
-         */
-        IdentVariableNode(std::string varName);
-
-        /**
-         * @brief Reports the type of this program node.
-         *
-         * @return `VARIABLE` always.
-         */
-        [[nodiscard]] ASTNodeType nodeType() const override;
-
-        /**
-         * @brief Gets the string representation of the node as an s-expression
-         *
-         * @return The s-expression string of the node
-         */
-        [[nodiscard]] std::string sExpression() const override;
-    };
-    /**
-     * @brief A pointer to an identity variable node.
-     *
-     */
-    using IdentVariableNodePtr = std::shared_ptr<IdentVariableNode>;
 
 }  //  namespace Parser
 
