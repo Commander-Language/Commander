@@ -2,8 +2,7 @@ CMDSTRINGVAL 'echo' 2:1
 STRINGVAL '"' 2:6
 STRINGLITERAL 'int float bool string array tuple funciton echo "Hello, World!"
         length() [] () &  | alias = const while do for if else + - / %  ** += -=
-        /= %= **= "UT" + "AH" ' 2:7
-STRINGLITERAL ' fn (x) -> {return 0;} scan read \\ // ln"' 4:38
+        /= %= **= "UT" + "AH"  fn (x) -> {return 0;} scan read \\ // ln"' 2:7
 ENDSTRINGVAL '"' 4:83
 SEMICOLON ';' 4:84
 END_OF_FILE 5:1

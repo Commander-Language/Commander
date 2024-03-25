@@ -517,10 +517,15 @@ namespace Lexer {
                 }
                 token.subTokens.push_back(
                         std::make_shared<Token>(currentString.str(), STRINGLITERAL, currentStringPosition));
-                currentString.str("");
+                size_t numTokens = token.subTokens.size();
                 lexExpression(token.subTokens, file, position, LCURLY, RCURLY);
                 token.subTokens.pop_back();
-                currentStringPosition = position;
+                if (numTokens == token.subTokens.size()) {
+                    token.subTokens.pop_back();
+                } else {
+                    currentString.str("");
+                    currentStringPosition = position;
+                }
                 continue;
             }
             currentString << character;
