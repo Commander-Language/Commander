@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (AsyncCmdNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))))
+	(CmdStmtNode (AsyncCmdNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))))

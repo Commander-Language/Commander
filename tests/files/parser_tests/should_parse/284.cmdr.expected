@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (ApiCallExprNode (FloatExprNode 2.400000) (IdentVariableNode toString) (ExprsNode)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (ApiCallExprNode (FloatExprNode 2.400000) (IdentVariableNode toString) (ExprsNode)))))

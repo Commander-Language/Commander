@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (IndexExprNode (TupleExprNode (ExprsNode (UnOpExprNode (BoolExprNode false) NOT) (BinOpExprNode (IntExprNode 3) EXPONENTIATE (IntExprNode 2)) (BinOpExprNode (FloatExprNode 3.100000) SUBTRACT (FloatExprNode 0.100000)))) (BinOpExprNode (VarExprNode (IdentVariableNode x)) ADD (IntExprNode 2))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (IndexExprNode (TupleExprNode (ExprsNode (UnOpExprNode (BoolExprNode false) NOT) (BinOpExprNode (IntExprNode 3) EXPONENTIATE (IntExprNode 2)) (BinOpExprNode (FloatExprNode 3.100000) SUBTRACT (FloatExprNode 0.100000)))) (BinOpExprNode (LValueExprNode (VarExprNode x)) ADD (IntExprNode 2))))))

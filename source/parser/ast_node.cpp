@@ -585,8 +585,8 @@ namespace Parser {
         : condition(std::move(condition)), trueExpr(std::move(trueExpr)), falseExpr(std::move(falseExpr)) {}
 
     std::string TernaryExprNode::sExpression() const {
-        return "(TernaryExprNode " + condition->sExpression() + trueExpr->sExpression() + falseExpr->sExpression()
-             + getTypeString() + ")";
+        return "(TernaryExprNode " + condition->sExpression() + " " + trueExpr->sExpression() + " "
+             + falseExpr->sExpression() + getTypeString() + ")";
     }
 
     UnOpExprNode::UnOpExprNode(UnOpType opType, ASTNodePtr node) : opType(opType), node(std::move(node)) {}

@@ -1,4 +1,4 @@
 // Test that functions parse properly without specified return type
-foo(a,b,c){
+fn foo(a,b,c){
     echo $"a + b + c = {a + b + c}";
 }

@@ -1,4 +1,4 @@
 // Test that lambda expressions parses without types
-nada = (x,y) -> {
+nada = fn (x,y) -> {
     print($"x+y={x+y}");
-}
+};

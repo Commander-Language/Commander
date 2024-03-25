@@ -1,2 +1,2 @@
 (PrgmNode
-	(ImportStmtNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'my')) (VarExprNode (IdentVariableNode x)) (StringExpressionNode (StringNode 'name.')) (VarExprNode (IdentVariableNode ext)) (StringExpressionNode (StringNode ''))))))
+	(ImportStmtNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'my')) (LValueExprNode (VarExprNode x)) (StringExpressionNode (StringNode 'name.')) (LValueExprNode (VarExprNode ext)) (StringExpressionNode (StringNode ''))))))

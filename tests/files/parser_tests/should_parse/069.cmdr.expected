@@ -1,0 +1,2 @@
+(PrgmNode
+	(TimeoutStmtNode 40000 (StringNode '') (CmdStmtNode (BasicCmdNode (StringNode 'ping') (StringNode 'http://google.com')))))

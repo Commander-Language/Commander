@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SUBTRACT_SET (BinOpExprNode (VarExprNode (IdentVariableNode a)) SUBTRACT (UnOpExprNode (VarExprNode (IdentVariableNode b)) NEGATE)))))
+	(ExprStmtNode (BinOpExprNode (VarLValueNode x) SUBTRACT_SET (BinOpExprNode (VarLValueNode a) SUBTRACT (UnOpExprNode (VarLValueNode b) NEGATE)))))
