@@ -52,6 +52,13 @@ namespace TypeChecker {
          */
         VariableTablePtr popScope();
 
+        /**
+         * Gets the type of a variable
+         * @param varName The variable
+         * @return The type
+         */
+        TyPtr getVarType(const std::string& varName);
+
     private:
         VariableTable _table;
     };
