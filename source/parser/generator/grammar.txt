@@ -49,6 +49,8 @@ LA: (PIPE_CMD) -> (BASIC_CMD) [PIPE] (BASIC_CMD)
 //  ||  Expressions:  ||
 //  ====================
 
+(EXPR) -> [LPAREN] (EXPR) [RPAREN]
+
 (EXPRS) -> (EXPR)
 (EXPRS) -> (EXPRS) [COMMA] (EXPR)
 
@@ -65,7 +67,6 @@ LA: (PIPE_CMD) -> (BASIC_CMD) [PIPE] (BASIC_CMD)
 
 (EXPR) -> (STRING)
 
-(EXPR) -> [LPAREN] (EXPR) [RPAREN]
 (EXPR) -> [BACKTICK] (ASYNC_CMD) [BACKTICK]
 (EXPR) -> [BACKTICK] (PIPE_CMD) [BACKTICK]
 (EXPR) -> [BACKTICK] (BASIC_CMD) [BACKTICK]
@@ -211,10 +212,10 @@ LA: (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
 //  ||  Types:  ||
 //  ==============
 
+(TYPE) -> [LPAREN] (TYPE) [RPAREN]
+
 (TYPES) -> (TYPE)
 (TYPES) -> (TYPES) [COMMA] (TYPE)
-
-(TYPE) -> [LPAREN] (TYPE) [RPAREN]
 
 (TYPE) -> [INT]
 (TYPE) -> [FLOAT]

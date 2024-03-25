@@ -726,7 +726,11 @@ namespace Parser {
 
     ImportStmtNode::ImportStmtNode(StringNodePtr filePath) : filePath(std::move(filePath)) {}
 
-    std::string ImportStmtNode::sExpression() const { return "(ImportStmtNode " + filePath->sExpression() + ")"; }
+    std::string ImportStmtNode::sExpression() const {
+        std::stringstream builder;
+        for (ASTNodePtr node : prgm) { builder << " " + node->sExpression(); }
+        return "(ImportStmtNode " + filePath->sExpression() + builder.str() + ")";
+    }
 
     PrintStmtNode::PrintStmtNode(ExprNodePtr expression) : expression(std::move(expression)) {}
 

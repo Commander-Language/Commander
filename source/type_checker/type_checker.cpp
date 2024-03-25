@@ -153,7 +153,7 @@ namespace TypeChecker {
                         }
                         if (exprNode->index->nodeType() == Parser::INT_EXPR) {
                             int64_t index = std::static_pointer_cast<Parser::IntExprNode>(exprNode->index)->value;
-                            if (tupleTy->contentTypes.size() >= index) {
+                            if (tupleTy->contentTypes.size() <= index) {
                                 // TODO: Improve error
                                 throw Util::CommanderException("Index out of bounds on tuple");
                             }
@@ -624,6 +624,23 @@ namespace TypeChecker {
                     throw Util::CommanderException(
                             "Expected a string file path for import statement, but got something else.");
                 }
+                Parser::StringNodePtr currentNode = stmtNode->filePath;
+                while (!currentNode->isLiteral()) {
+                    if (currentNode->expressions->expressions.size() != 1) {
+                        // TODO: Improve error
+                        throw Util::CommanderException(
+                                "Expected string literal for import statement, but got an interpolated string");
+                    }
+                    currentNode = std::static_pointer_cast<Parser::StringExprNode>(
+                                          currentNode->expressions->expressions[0])
+                                          ->stringNode;
+                }
+                std::string filePath = currentNode->literal;
+                Lexer::TokenList tokens;
+                Lexer::tokenize(tokens, filePath);
+                Parser::Parser parser;
+                stmtNode->prgm = parser.parse(tokens);
+                typeCheck(stmtNode->prgm);
                 return nullptr;
             }
             case Parser::PRINT_STMT: {

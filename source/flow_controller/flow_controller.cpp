@@ -389,8 +389,9 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
             }
             case Parser::IMPORT_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                auto stmt = std::static_pointer_cast<Parser::ImportStmtNode>(node);
+                runtime(stmt->prgm);
+                return nullptr;
             }
             case Parser::PRINT_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::PrintStmtNode>(node);

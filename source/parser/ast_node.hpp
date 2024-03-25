@@ -2211,6 +2211,11 @@ namespace Parser {
         StringNodePtr filePath;
 
         /**
+         * The ASTNodeList of nodes to evaluate for the given file
+         */
+        ASTNodeList prgm;
+
+        /**
          * @brief Class constructor.
          *
          * @param filePath The string that evaluates to a file path

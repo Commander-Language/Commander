@@ -229,6 +229,10 @@ namespace Parser {
                 //  ||  Expressions:  ||
                 //  ====================
 
+                //  (EXPR) -> [LPAREN] (EXPR) [RPAREN]
+                {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
+                  "productionList[1].node"}},
+
                 //  (EXPRS) -> (EXPR)
                 {{{ASTNodeType::EXPRS, {ASTNodeType::EXPR}}, makeNode("Exprs", {castNode("Expr", 0)})}},
                 //  (EXPRS) -> (EXPRS) [COMMA] (EXPR)
@@ -266,9 +270,6 @@ namespace Parser {
                 //  (EXPR) -> (STRING)
                 {{{ASTNodeType::EXPR, {ASTNodeType::STRING}}, makeNode("StringExpr", {castNode("String", 0)})}},
 
-                //  (EXPR) -> [LPAREN] (EXPR) [RPAREN]
-                {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
-                  "productionList[1].node"}},
                 // (EXPR) -> [BACKTICK] (ASYNC_CMD) [BACKTICK]
                 {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::ASYNC_CMD, TokenType::BACKTICK}},
                   makeNode("CmdExpr", {castNode("AsyncCmd", 1)})}},
@@ -670,15 +671,15 @@ namespace Parser {
                 //  ||  Types:  ||
                 //  ==============
 
+                //  (TYPE) -> [LPAREN] (TYPE) [RPAREN]
+                {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPE, TokenType::RPAREN}},
+                  "productionList[1].node"}},
+
                 //  (TYPES) -> (TYPE)
                 {{{ASTNodeType::TYPES, {ASTNodeType::TYPE}}, makeNode("Types", {castNode("Type", 0)})}},
                 //  (TYPES) -> (TYPES) [COMMA] (TYPE)
                 {{{ASTNodeType::TYPES, {ASTNodeType::TYPES, TokenType::COMMA, ASTNodeType::EXPR}},
                   makeNode("Types", {castNode("Types", 0), castNode("Type", 2)})}},
-
-                //  (TYPE) -> [LPAREN] (TYPE) [RPAREN]
-                {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPE, TokenType::RPAREN}},
-                  "productionList[1].node"}},
 
                 //  (TYPE) -> [INT]
                 {{{ASTNodeType::TYPE, {TokenType::INT}}, makeNode("IntType", {})}},

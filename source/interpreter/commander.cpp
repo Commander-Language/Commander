@@ -45,7 +45,6 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
         }*/
         return;
     }
-
     controller.runtime(nodes);
 }
 
