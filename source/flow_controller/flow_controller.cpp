@@ -172,6 +172,10 @@ namespace FlowController {
                 CommanderTypePtr value = _getVariable(expr->variable);
                 return value;
             }
+            case Parser::LVALUE_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::LValueExprNode>(node);
+                return _expr(expr->expr);
+            }
             case Parser::ARRAY_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ArrayExprNode>(node);
                 std::vector<CommanderTypePtr> array;
