@@ -740,8 +740,17 @@ namespace FlowController {
         std::vector<Parser::ExprNodePtr> args;
         if (node->nodeType() == Parser::CALL_EXPR) {
             Parser::CallExprNodePtr callExpr = std::static_pointer_cast<Parser::CallExprNode>(node);
-            if (callExpr->func->nodeType() != Parser::VAR_EXPR) { return nullptr; }
-            name = std::static_pointer_cast<Parser::VarExprNode>(callExpr->func)->variable;
+            if (callExpr->func->nodeType() != Parser::VAR_EXPR
+                && (callExpr->func->nodeType() != Parser::LVALUE_EXPR
+                    || std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr->nodeType()
+                               != Parser::VAR_EXPR)) {
+                return nullptr;
+            }
+            name = callExpr->func->nodeType() == Parser::VAR_EXPR
+                         ? std::static_pointer_cast<Parser::VarExprNode>(callExpr->func)->variable
+                         : std::static_pointer_cast<Parser::VarExprNode>(
+                                   std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr)
+                                   ->variable;
             args = callExpr->args->exprs;
         } else if (node->nodeType() == Parser::API_CALL_EXPR) {
             Parser::ApiCallExprNodePtr apiExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);

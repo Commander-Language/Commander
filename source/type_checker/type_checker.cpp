@@ -402,13 +402,20 @@ namespace TypeChecker {
                     throw Util::CommanderException("Tried to call something that wasn't a function.");
                 }
                 std::vector<TyPtr> functionTypes;
-                if (exprNode->func->nodeType() == Parser::VAR_EXPR) {
-                    Parser::VarExprNodePtr const varExprPtr = std::static_pointer_cast<Parser::VarExprNode>(
-                            exprNode->func);
-                    VarInfoPtr const functionInfo = _table.getVariable(varExprPtr->variable);
+                if (exprNode->func->nodeType() == Parser::VAR_EXPR
+                    || (exprNode->func->nodeType() == Parser::LVALUE_EXPR
+                        && std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr->nodeType()
+                                   == Parser::VAR_EXPR)) {
+                    std::string varName
+                            = exprNode->func->nodeType() == Parser::VAR_EXPR
+                                    ? std::static_pointer_cast<Parser::VarExprNode>(exprNode->func)->variable
+                                    : std::static_pointer_cast<Parser::VarExprNode>(
+                                              std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr)
+                                              ->variable;
+                    VarInfoPtr const functionInfo = _table.getVariable(varName);
                     if (functionInfo->infoType() != FUNCTION_INFO) {
                         // TODO: Improve error
-                        throw Util::CommanderException("Variable of name " + varExprPtr->variable
+                        throw Util::CommanderException("Variable of name " + varName
                                                        + " does not refer to a function.");
                     }
                     functionTypes = functionInfo->types;
