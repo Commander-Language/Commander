@@ -193,38 +193,12 @@ namespace Parser {
             return closure;
         };
 
-        if (false) {
-            std::vector<Lr0Kernel> lr0StateVec(lr0States.size());
-            for (const auto& [kernel, stateNum] : lr0States) { lr0StateVec[stateNum] = kernel; }
-            for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) {
-                std::cout << "================================================================================\n"
-                          << "State " << stateNum << ":\n";
-                const auto& lr0Kernel = lr0StateVec[stateNum];
-                for (const auto& item : lr0Kernel) std::cout << "    - " << item << "\n";
-                std::cout << "    ----------------------------------------------------------------------------";
-                for (const auto& item : _lr0SetClosure(lr0ItemClosure, lr0Kernel)) {
-                    if (lr0Kernel.count(item) == 0) std::cout << "    - " << item << "\n";
-                }
-                std::cout << "\n\n";
-            }
-        }
-
-        if (false) {
-            for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) {
-                std::cout << "================================================================================\n"
-                          << "State " << stateNum << ":\n";
-                for (const auto& item : lalrStates[stateNum]) std::cout << "    - " << item << "\n";
-            }
-        }
-
         const auto lr1StateNum = [&](const Lr1Kernel& lr1Kernel) {
             const Lr0Kernel result {lr1Kernel.begin(), lr1Kernel.end()};
             return lr0States.at(result);
         };
 
         const auto getActions = [&](const std::size_t stateNum) {
-            std::cout << stateNum << "\n";
-
             struct ShiftAction {
                 Lr1ItemSet lr1Items;
                 std::size_t priority {0};
@@ -243,9 +217,11 @@ namespace Parser {
                     const auto& nextItem = lr1Item.rule->components[lr1Item.index];
                     if (nextItem.grammarEntryType == GrammarEntry::TOKEN_TYPE) {
                         // We need to do a "shift" action.
+                        shifts[nextItem.tokenType].priority = shifts.count(nextItem.tokenType) == 0
+                                                                    ? lr1Item.rule->priority
+                                                                    : std::min(shifts[nextItem.tokenType].priority,
+                                                                               lr1Item.rule->priority);
                         shifts[nextItem.tokenType].lr1Items.emplace(lr1Item.rule, lr1Item.index + 1, lr1Item.lookahead);
-                        shifts[nextItem.tokenType].priority = std::min(shifts[nextItem.tokenType].priority,
-                                                                       lr1Item.rule->priority);
                     } else {
                         // We need to do a "goto" action.
                         gotoTable[nextItem.nodeType].emplace(lr1Item.rule, lr1Item.index + 1, lr1Item.lookahead);
@@ -270,20 +246,6 @@ namespace Parser {
 
             // And, finally, the "reduce" actions:
             for (const auto& [tokenType, reduceRules] : reductions) {
-                if (shifts.count(tokenType) > 0) {
-                    std::cerr << "Warning: SHIFT/REDUCE conflict in state " << stateNum << " for token "
-                              << GrammarEntry {tokenType} << ":\n";
-                    for (const auto& nextItem : shifts[tokenType].lr1Items) std::cerr << "    - " << nextItem << "\n";
-                    std::cerr << "    ------------------------------------------------------------\n";
-                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
-                }
-
-                if (reduceRules.size() > 1) {
-                    std::cerr << "Warning: REDUCE/REDUCE conflict in state " << stateNum << " for token "
-                              << GrammarEntry {tokenType} << ":\n";
-                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
-                }
-
                 const auto* grammarRule = [&] {
                     const auto* min = reduceRules[0];
                     for (const auto& rule : reduceRules) {
@@ -291,6 +253,23 @@ namespace Parser {
                     }
                     return min;
                 }();
+
+                if (shifts.count(tokenType) > 0) {
+                    std::cerr << "Warning: SHIFT/REDUCE conflict in state " << stateNum << " for token "
+                              << GrammarEntry {tokenType} << ":\n";
+                    const Lr0Kernel lr0Items {shifts[tokenType].lr1Items.begin(), shifts[tokenType].lr1Items.end()};
+                    for (const auto& nextItem : lr0Items) std::cerr << "    - " << nextItem << "\n";
+                    std::cerr << "    ------------------------------------------------------------\n";
+                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
+
+                    if (grammarRule->priority >= shifts[tokenType].priority) continue;
+                }
+
+                if (reduceRules.size() > 1) {
+                    std::cerr << "Warning: REDUCE/REDUCE conflict in state " << stateNum << " for token "
+                              << GrammarEntry {tokenType} << ":\n";
+                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
+                }
 
                 if (*grammarRule == goalRule) {
                     _nextAction[stateNum][tokenType] = "ParserAction::ActionType::ACCEPT";
