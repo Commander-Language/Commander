@@ -8,11 +8,12 @@
 
 namespace TypeChecker {
 
-    TypeChecker::TypeChecker() {
+    TypeChecker::TypeChecker(Parser::Parser& parser) {
         for (const auto& pair : Function::functionTypes) {
             _table.addVariable(pair.first, std::make_shared<FunctionInfo>(
                                                    std::vector<TyPtr> {pair.second.begin(), pair.second.end()}));
         }
+        _parser = parser;
     }
 
     void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
@@ -638,8 +639,7 @@ namespace TypeChecker {
                 std::string filePath = currentNode->literal;
                 Lexer::TokenList tokens;
                 Lexer::tokenize(tokens, filePath);
-                Parser::Parser parser;
-                stmtNode->prgm = parser.parse(tokens);
+                stmtNode->prgm = _parser.parse(tokens);
                 typeCheck(stmtNode->prgm);
                 return nullptr;
             }

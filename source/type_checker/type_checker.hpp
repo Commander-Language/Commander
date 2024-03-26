@@ -19,8 +19,18 @@ namespace TypeChecker {
      *
      */
     class TypeChecker {
+    private:
+        /**
+         * Parser used for import statements
+         */
+        Parser::Parser _parser;
+
     public:
-        TypeChecker();             // Default Constructor
+        /**
+         * Constructor
+         * @param parser The parser to be used for import statements
+         */
+        TypeChecker(Parser::Parser& parser);
         ~TypeChecker() = default;  // Default Destructor
 
         /**
