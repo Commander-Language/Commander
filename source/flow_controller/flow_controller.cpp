@@ -109,14 +109,21 @@ namespace FlowController {
     CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr& node, bool saveInfo) {
         std::vector<std::string> args;
         const bool isBackground = node->nodeType() == Parser::ASYNC_CMD;
-        const Parser::CmdNodePtr command = node->nodeType() == Parser::ASYNC_CMD
-                                                 ? std::static_pointer_cast<Parser::AsyncCmdNode>(node)->cmd
-                                                 : node;
-        switch (command->nodeType()) {
+        switch (node->nodeType()) {
             case Parser::BASIC_CMD: {
                 auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(node);
                 args = _parseArguments(cmd->arguments);
 
+                // Run the command
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
+                                                                !isBackground && saveInfo);
+                auto jobResult = _runCommand(job);
+                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
+            }
+            case Parser::ASYNC_CMD: {
+                auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
+                auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(asyncCmd->cmd);
+                args = _parseArguments(cmd->arguments);
                 // Run the command
                 auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
                                                                 !isBackground && saveInfo);
