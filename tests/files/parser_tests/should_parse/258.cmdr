@@ -1,2 +1,2 @@
-//Should parse empty statement
-;
+//Should parse assertion
+assert 3 < 4, "This should not happen";

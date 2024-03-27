@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (CmdCmdNode (StringNode 'cd') (StringNode '../tmp/hello'))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'cd') (StringNode '../tmp/hello'))))

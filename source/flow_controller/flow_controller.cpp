@@ -48,7 +48,10 @@ namespace FlowController {
                     _bindings(std::static_pointer_cast<Parser::BindingsNode>(node));
                     break;
                 }
-                case Parser::CMD: {
+                case Parser::CMD:
+                case Parser::BASIC_CMD:
+                case Parser::PIPE_CMD:
+                case Parser::ASYNC_CMD: {
                     _cmd(std::static_pointer_cast<Parser::CmdNode>(node));
                     break;
                 }
@@ -78,12 +81,11 @@ namespace FlowController {
                 }
                 case Parser::TYPES:
                 case Parser::TYPE:
-                    // Ignore types
+                case Parser::STRING_EXPRS:
+                case Parser::LVALUE:
+                    // Ignore these ones. Types are handled in type checker, and lvalues and string exprs are handle in
+                    // _expr
                     break;
-                case Parser::VARIABLE: {
-                    _variable(std::static_pointer_cast<Parser::VariableNode>(node));
-                    break;
-                }
                 default: {
                     throw Util::CommanderException("Flow Controller: Encountered unknown node type");
                 }
@@ -106,15 +108,25 @@ namespace FlowController {
 
     CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr& node, bool saveInfo) {
         std::vector<std::string> args;
-
+        const bool isBackground = node->nodeType() == Parser::ASYNC_CMD;
         switch (node->nodeType()) {
-            case Parser::CMD_CMD: {
-                auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+            case Parser::BASIC_CMD: {
+                auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(node);
                 args = _parseArguments(cmd->arguments);
 
                 // Run the command
-                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, false,
-                                                                saveInfo);
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
+                                                                !isBackground && saveInfo);
+                auto jobResult = _runCommand(job);
+                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
+            }
+            case Parser::ASYNC_CMD: {
+                auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
+                auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(asyncCmd->cmd);
+                args = _parseArguments(cmd->arguments);
+                // Run the command
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
+                                                                !isBackground && saveInfo);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
@@ -123,31 +135,19 @@ namespace FlowController {
                 const std::vector<std::vector<std::string>> pipeArgs;
                 std::vector<JobRunner::ProcessPtr> processes;
 
-                std::vector<Parser::CmdCmdNodePtr> jobs;
+                std::vector<Parser::BasicCmdNodePtr> jobs;
                 _getJobs(pipeCmd, jobs);
 
                 std::vector<std::string> pArgs;
                 for (const auto& job : jobs) {
                     pArgs = _parseArguments(job->arguments);
-                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL, false,
-                                                                        saveInfo);
+                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL,
+                                                                        isBackground, !isBackground && saveInfo);
                     processes.emplace_back(process);
                 }
 
                 auto pipeline = std::make_shared<JobRunner::Process>(processes);
                 auto jobResult = _runCommand(pipeline);
-                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
-            }
-            case Parser::ASYNC_CMD: {
-                auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
-                auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(asyncCmd->cmd);
-                // Parse the arguments
-                args = _parseArguments(cmd->arguments);
-
-                // Run the command
-                // Note: hard-coded false for async command because we shouldn't save info for an async command
-                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, true, false);
-                auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             default:
@@ -176,9 +176,12 @@ namespace FlowController {
             }
             case Parser::VAR_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::VarExprNode>(node);
-                CommanderTypePtr value = _getVariable(
-                        std::static_pointer_cast<Parser::IdentVariableNode>(expr->variable)->varName);
+                CommanderTypePtr value = _getVariable(expr->variable);
                 return value;
+            }
+            case Parser::LVALUE_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::LValueExprNode>(node);
+                return _expr(expr->expr);
             }
             case Parser::ARRAY_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ArrayExprNode>(node);
@@ -242,8 +245,7 @@ namespace FlowController {
                 } else {
                     auto callExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
                     exprs = callExpr->args->exprs;
-                    function = std::static_pointer_cast<CommanderLambda>(
-                            _getVariable(std::static_pointer_cast<Parser::IdentVariableNode>(callExpr->func)->varName));
+                    function = std::static_pointer_cast<CommanderLambda>(_getVariable(callExpr->func));
                 }
                 _symbolTable.pushSymbolTable();  // new scope for function
                 int bindingIndex = 0;
@@ -394,18 +396,19 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
             }
             case Parser::IMPORT_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                auto stmt = std::static_pointer_cast<Parser::ImportStmtNode>(node);
+                runtime(stmt->prgm);
+                return nullptr;
             }
             case Parser::PRINT_STMT: {
-                auto expr = std::static_pointer_cast<Parser::PrintStmtNode>(node);
-                const CommanderTypePtr value = _expr(expr->expression);
+                auto stmt = std::static_pointer_cast<Parser::PrintStmtNode>(node);
+                const CommanderTypePtr value = _expr(stmt->expression);
                 Util::print(value->getStringRepresentation());
                 return nullptr;
             }
             case Parser::PRINTLN_STMT: {
-                auto expr = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
-                const CommanderTypePtr value = _expr(expr->expression);
+                auto stmt = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
+                const CommanderTypePtr value = _expr(stmt->expression);
                 Util::println(value->getStringRepresentation());
                 return nullptr;
             }
@@ -419,6 +422,21 @@ namespace FlowController {
             case Parser::TYPE_STMT:
                 // Ignore type statements
                 return nullptr;
+            case Parser::BREAK_STMT:
+                // TODO: Implement
+                return nullptr;
+            case Parser::CONTINUE_STMT:
+                // TODO: Implement
+                return nullptr;
+            case Parser::TIMEOUT_STMT:
+                // TODO: Implement
+                return nullptr;
+            case Parser::ASSERT_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::AssertStmtNode>(node);
+                const CommanderBoolPtr value = std::static_pointer_cast<CommanderBool>(_expr(stmt->expr));
+                if (!value->value) { throw Util::CommanderException("Assertion Error: " + _string(stmt->message)); }
+                return nullptr;
+            }
             case Parser::FUNCTION_STMT: {
                 // TODO: Implement
                 throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
@@ -427,7 +445,6 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
             }
         }
-        return nullptr;
     }
 
     void FlowController::_stmts(const Parser::StmtsNodePtr& nodes) {
@@ -442,12 +459,10 @@ namespace FlowController {
         return stringResult;
     }
 
-    void FlowController::_variable(const Parser::VariableNodePtr&) {}
-
     CommanderTypePtr FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
-                CommanderTypePtr const expr = _expr(unOp->expr);
+                CommanderTypePtr const expr = _expr(std::static_pointer_cast<Parser::ExprNode>(unOp->node));
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
                         return std::make_shared<CommanderInt>(-std::static_pointer_cast<CommanderInt>(expr)->value);
@@ -461,7 +476,8 @@ namespace FlowController {
                 }
             }
             case Parser::NOT: {
-                auto expr = std::static_pointer_cast<CommanderBool>(_expr(unOp->expr));
+                auto expr = std::static_pointer_cast<CommanderBool>(
+                        _expr(std::static_pointer_cast<Parser::ExprNode>(unOp->node)));
                 switch (expr->getType()) {
                     case TypeChecker::BOOL: {
                         return std::make_shared<CommanderBool>(!std::static_pointer_cast<CommanderBool>(expr)->value);
@@ -475,10 +491,8 @@ namespace FlowController {
             case Parser::POST_INCREMENT:
             case Parser::PRE_DECREMENT:
             case Parser::POST_DECREMENT: {
-                if (unOp->expr->nodeType() == Parser::VAR_EXPR) {
-                    std::string varName = std::static_pointer_cast<Parser::IdentVariableNode>(
-                                                  std::static_pointer_cast<Parser::VarExprNode>(unOp->expr)->variable)
-                                                  ->varName;
+                if (unOp->node->nodeType() == Parser::VAR_LVALUE) {
+                    std::string varName = std::static_pointer_cast<Parser::VarLValueNode>(unOp->node)->variable;
                     auto value = _getVariable(varName);
                     switch (value->getType()) {
                         case TypeChecker::INT: {
@@ -532,9 +546,9 @@ namespace FlowController {
                                                            + TypeChecker::typeToString(value->getType()));
                     }
                 }
-                Parser::IndexExprNodePtr indexExpr = std::static_pointer_cast<Parser::IndexExprNode>(unOp->expr);
-                CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexExpr->index));
-                CommanderTypePtr dataStructure = _expr(indexExpr->expr);
+                Parser::IndexLValueNodePtr indexLValue = std::static_pointer_cast<Parser::IndexLValueNode>(unOp->node);
+                CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexLValue->index));
+                CommanderTypePtr dataStructure = _expr(std::make_shared<Parser::IndexExprNode>(indexLValue));
                 std::vector<CommanderTypePtr>& values
                         = dataStructure->getType() == TypeChecker::ARRAY
                                 ? std::static_pointer_cast<CommanderArray>(dataStructure)->values
@@ -599,50 +613,50 @@ namespace FlowController {
     }
 
     CommanderTypePtr FlowController::_binaryOp(Parser::BinOpExprNodePtr& binOp) {
-        CommanderTypePtr right = _expr(binOp->rightExpr);
+        CommanderTypePtr right = _expr(binOp->right);
 
         switch (binOp->opType) {
             case Parser::LESSER: {
-                return lesserOperation(_expr(binOp->leftExpr), right);
+                return lesserOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::GREATER: {
-                return greaterOperation(_expr(binOp->leftExpr), right);
+                return greaterOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::EQUAL: {
-                return equalOperation(_expr(binOp->leftExpr), right);
+                return equalOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::NOT_EQUAL: {
-                return notEqualOperation(_expr(binOp->leftExpr), right);
+                return notEqualOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::LESSER_EQUAL: {
-                return lesserEqualOperation(_expr(binOp->leftExpr), right);
+                return lesserEqualOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::GREATER_EQUAL: {
-                return greaterEqualOperation(_expr(binOp->leftExpr), right);
+                return greaterEqualOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::MODULO: {
-                return moduloOperation(_expr(binOp->leftExpr), right);
+                return moduloOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::DIVIDE: {
-                return divideOperation(_expr(binOp->leftExpr), right);
+                return divideOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::MULTIPLY: {
-                return multiplyOperation(_expr(binOp->leftExpr), right);
+                return multiplyOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::SUBTRACT: {
-                return subtractOperation(_expr(binOp->leftExpr), right);
+                return subtractOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::ADD: {
-                return addOperation(_expr(binOp->leftExpr), right);
+                return addOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::EXPONENTIATE: {
-                return exponentiateOperation(_expr(binOp->leftExpr), right);
+                return exponentiateOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::AND: {
-                return andOperation(_expr(binOp->leftExpr), right);
+                return andOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::OR: {
-                return orOperation(_expr(binOp->leftExpr), right);
+                return orOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::SET:
             case Parser::ADD_SET:
@@ -651,11 +665,10 @@ namespace FlowController {
             case Parser::DIVIDE_SET:
             case Parser::MODULO_SET:
             case Parser::EXPONENTIATE_SET: {
-                if (binOp->leftExpr->nodeType() == Parser::VAR_EXPR) {
-                    std::string varName
-                            = std::static_pointer_cast<Parser::IdentVariableNode>(
-                                      std::static_pointer_cast<Parser::VarExprNode>(binOp->leftExpr)->variable)
-                                      ->varName;
+                if (binOp->left->nodeType() == Parser::VAR_LVALUE || binOp->left->nodeType() == Parser::BINDING) {
+                    std::string varName = binOp->left->nodeType() == Parser::VAR_LVALUE
+                                                ? std::static_pointer_cast<Parser::VarLValueNode>(binOp->left)->variable
+                                                : std::static_pointer_cast<Parser::BindingNode>(binOp->left)->variable;
                     if (binOp->opType == Parser::SET) {
                         _setVariable(varName, right);
                         return right;
@@ -687,9 +700,9 @@ namespace FlowController {
                     _setVariable(varName, result);
                     return result;
                 }
-                Parser::IndexExprNodePtr indexExpr = std::static_pointer_cast<Parser::IndexExprNode>(binOp->leftExpr);
-                CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexExpr->index));
-                CommanderTypePtr dataStructure = _expr(indexExpr->expr);
+                Parser::IndexLValueNodePtr indexLValue = std::static_pointer_cast<Parser::IndexLValueNode>(binOp->left);
+                CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexLValue->index));
+                CommanderTypePtr dataStructure = _expr(std::make_shared<Parser::IndexExprNode>(indexLValue));
                 std::vector<CommanderTypePtr>& values
                         = dataStructure->getType() == TypeChecker::ARRAY
                                 ? std::static_pointer_cast<CommanderArray>(dataStructure)->values
@@ -735,14 +748,21 @@ namespace FlowController {
         std::vector<Parser::ExprNodePtr> args;
         if (node->nodeType() == Parser::CALL_EXPR) {
             Parser::CallExprNodePtr callExpr = std::static_pointer_cast<Parser::CallExprNode>(node);
-            if (callExpr->func->nodeType() != Parser::VAR_EXPR) { return nullptr; }
-            name = std::static_pointer_cast<Parser::IdentVariableNode>(
-                           std::static_pointer_cast<Parser::VarExprNode>(callExpr->func)->variable)
-                           ->varName;
+            if (callExpr->func->nodeType() != Parser::VAR_EXPR
+                && (callExpr->func->nodeType() != Parser::LVALUE_EXPR
+                    || std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr->nodeType()
+                               != Parser::VAR_EXPR)) {
+                return nullptr;
+            }
+            name = callExpr->func->nodeType() == Parser::VAR_EXPR
+                         ? std::static_pointer_cast<Parser::VarExprNode>(callExpr->func)->variable
+                         : std::static_pointer_cast<Parser::VarExprNode>(
+                                   std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr)
+                                   ->variable;
             args = callExpr->args->exprs;
         } else if (node->nodeType() == Parser::API_CALL_EXPR) {
             Parser::ApiCallExprNodePtr apiExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
-            name = std::static_pointer_cast<Parser::IdentVariableNode>(apiExpr->func)->varName;
+            name = apiExpr->func;
             args = apiExpr->args->exprs;
         }
         if (name == "parseInt") { return Function::parseInt(_expr(args[0])); }
@@ -891,12 +911,12 @@ namespace FlowController {
         return result;
     }
 
-    void FlowController::_getJobs(const Parser::CmdNodePtr& head, std::vector<Parser::CmdCmdNodePtr>& jobs) {
+    void FlowController::_getJobs(const Parser::CmdNodePtr& head, std::vector<Parser::BasicCmdNodePtr>& jobs) {
         if (head == nullptr) return;
 
-        // leaf nodes are cmd_cmd nodes
-        if (head->nodeType() == Parser::CMD_CMD) {
-            jobs.emplace_back(std::static_pointer_cast<Parser::CmdCmdNode>(head));
+        // leaf nodes are basic_cmd nodes
+        if (head->nodeType() == Parser::BASIC_CMD) {
+            jobs.emplace_back(std::static_pointer_cast<Parser::BasicCmdNode>(head));
             return;
         }
 
@@ -905,7 +925,7 @@ namespace FlowController {
             _getJobs(tmp->leftCmd, jobs);
             // in current state of parser,
             // right cmds are always leaf nodes
-            jobs.emplace_back(std::static_pointer_cast<Parser::CmdCmdNode>(tmp->rightCmd));
+            jobs.emplace_back(std::static_pointer_cast<Parser::BasicCmdNode>(tmp->rightCmd));
         }
     }
 }  // namespace FlowController

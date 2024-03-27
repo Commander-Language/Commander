@@ -1,4 +1,4 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode tup) SET (TupleExprNode (ExprsNode (IntExprNode 1) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '2'))))) (FloatExprNode 3.000000)))))
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode length) SET (ApiCallExprNode (VarExprNode (IdentVariableNode tup)) (IdentVariableNode length) (ExprsNode))))
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode second) SET (IndexExprNode (VarExprNode (IdentVariableNode tup)) (IntExprNode 1)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode tup) SET (TupleExprNode (ExprsNode (IntExprNode 1) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '2'))))) (FloatExprNode 3.000000)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode length) SET (ApiCallExprNode (LValueExprNode (VarExprNode tup)) length (ExprsNode))))
+	(ExprStmtNode (BinOpExprNode (BindingNode second) SET (LValueExprNode (IndexExprNode (VarExprNode tup) (IntExprNode 1))))))

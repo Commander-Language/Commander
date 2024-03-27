@@ -181,7 +181,8 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("288.cmdr", "288.cmdr.expected"), std::make_tuple("289.cmdr", "289.cmdr.expected"),
                 std::make_tuple("290.cmdr", "290.cmdr.expected"), std::make_tuple("291.cmdr", "291.cmdr.expected"),
                 std::make_tuple("292.cmdr", "292.cmdr.expected"), std::make_tuple("293.cmdr", "293.cmdr.expected"),
-                std::make_tuple("294.cmdr", "294.cmdr.expected"), std::make_tuple("295.cmdr", "295.cmdr.expected")));
+                std::make_tuple("294.cmdr", "294.cmdr.expected"), std::make_tuple("295.cmdr", "295.cmdr.expected"),
+                std::make_tuple("296.cmdr", "296.cmdr.expected"), std::make_tuple("297.cmdr", "297.cmdr.expected")));
 
 /**
  * Creates test suite, with list of all the files that need to be parsed that are expected to fail (as a result of a

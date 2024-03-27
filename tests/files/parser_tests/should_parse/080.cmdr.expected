@@ -1,0 +1,4 @@
+(PrgmNode
+	(IfStmtNode (BinOpExprNode (IntExprNode 5) EQUAL (IndexExprNode (TupleExprNode (ExprsNode (IntExprNode 6) (IndexExprNode (BinOpExprNode (IntExprNode 7) ADD (IntExprNode 8)) (IntExprNode 0)))) (IntExprNode 1))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'true')))))))) (IfStmtNode (BinOpExprNode (IntExprNode 5) NOT_EQUAL (IndexExprNode (TupleExprNode (ExprsNode (IntExprNode 6) (IndexExprNode (BinOpExprNode (IntExprNode 7) ADD (IntExprNode 8)) (IntExprNode 0)))) (IntExprNode 1))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'false')))))))))))

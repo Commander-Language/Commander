@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode bigNumber) SET (FloatExprNode inf))))
+	(ExprStmtNode (BinOpExprNode (BindingNode bigNumber) SET (FloatExprNode inf))))

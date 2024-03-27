@@ -1,0 +1,2 @@
+//Should not parse due to missing semicolon
+if (true) echo hi else echo bye

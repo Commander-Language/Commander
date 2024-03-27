@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (TupleExprNode (ExprsNode (IntExprNode 1) (FloatExprNode 2.000000)))))
+	(ExprStmtNode (BinOpExprNode (IndexLValueNode (VarLValueNode a) (IntExprNode 1)) SET (IntExprNode 3))))

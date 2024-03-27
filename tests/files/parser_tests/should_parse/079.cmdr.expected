@@ -1,0 +1,5 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (IntExprNode 7) ADD (IntExprNode 8))))
+	(ExprStmtNode (BinOpExprNode (BindingNode y) SET (BinOpExprNode (IntExprNode 7) ADD (IntExprNode 8))))
+	(ExprStmtNode (BinOpExprNode (BindingNode z) SET (TupleExprNode (ExprsNode (BinOpExprNode (IntExprNode 5) ADD (IntExprNode 6)) (BinOpExprNode (IntExprNode 7) ADD (IntExprNode 8))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode xyz) SET (TupleExprNode (ExprsNode (LValueExprNode (VarExprNode x)) (TupleExprNode (ExprsNode (LValueExprNode (VarExprNode y)) (LValueExprNode (VarExprNode z)))) (LValueExprNode (VarExprNode z)))))))

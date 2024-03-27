@@ -1,5 +1,5 @@
 (PrgmNode
 	(IfStmtNode (BoolExprNode true) (ScopeStmtNode (StmtsNode
-	(CmdStmtNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'if')))))))) (IfStmtNode (BoolExprNode true) (ScopeStmtNode (StmtsNode
-	(CmdStmtNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'else if')))))))) (ScopeStmtNode (StmtsNode
-	(CmdStmtNode (CmdCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'else')))))))))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'if')))))))) (IfStmtNode (BoolExprNode true) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'else if')))))))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'else')))))))))))

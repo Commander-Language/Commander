@@ -1,2 +1,2 @@
 //Should parse ternary expression
-x = ((((x < y) ? x : y) ? a : b) ? c : d) ? e : f;
+x = if (if (if (if (x < y) then x else y) then a else b) then c else d) then e else f;

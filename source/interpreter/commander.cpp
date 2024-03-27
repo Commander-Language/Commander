@@ -45,7 +45,6 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
         }*/
         return;
     }
-
     controller.runtime(nodes);
 }
 
@@ -54,7 +53,7 @@ int main(int argc, char** argv) {
     for (int i = 1; i < argc; i++) { arguments.emplace_back(argv[i]); }
     try {
         Parser::Parser parser;
-        TypeChecker::TypeChecker typeChecker;
+        TypeChecker::TypeChecker typeChecker(parser);
         FlowController::FlowController controller;
         if (hasArgument(arguments, "-f")) {
             std::string file = getArgumentValue(arguments, "-f");

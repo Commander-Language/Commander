@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode isTrue) SET (BoolExprNode true))))
+	(ExprStmtNode (BinOpExprNode (BindingNode isTrue) SET (BoolExprNode true))))

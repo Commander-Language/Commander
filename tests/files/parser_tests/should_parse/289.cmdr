@@ -1,2 +1,2 @@
 //Should parse api toString() on function
-x = ((a, b) -> a + b).toString();
+x = (fn (a, b) -> a + b).toString();

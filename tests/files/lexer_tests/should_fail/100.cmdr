@@ -1,0 +1,2 @@
+//Should not parse due to missing lparen
+while true) echo hi;

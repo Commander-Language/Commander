@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (VarExprNode (IdentVariableNode x)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (LValueExprNode (VarExprNode x)))))

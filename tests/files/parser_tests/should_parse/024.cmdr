@@ -1,2 +1,2 @@
 // Test that ternary operators parse properly
-num = true ? 1 : 2;
+num = if true then 1 else 2;

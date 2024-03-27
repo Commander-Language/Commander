@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode const (IdentVariableNode _abc123_) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '_abc123_'))))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode const _abc123_) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '_abc123_'))))))))

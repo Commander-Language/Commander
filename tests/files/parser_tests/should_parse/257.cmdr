@@ -1,14 +1,7 @@
 //Should parse for loop
 for (i = 0; i < 10; i++) {
     for (j: int=0; j < i; ++j) {
-        for ({
-            k = -1;
-            m = 5;
-        } i < 10 && j > i || k == m; {
-          i++;
-          j += i;
-          k *= j--;
-        }) {
+        for (k = -1; i < 10 && j > i || k == m; k *= j--) {
             echo "hi";
         }
     }

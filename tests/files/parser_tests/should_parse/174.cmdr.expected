@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (BinOpExprNode (VarExprNode (IdentVariableNode a)) EQUAL (VarExprNode (IdentVariableNode b))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (LValueExprNode (VarExprNode a)) EQUAL (LValueExprNode (VarExprNode b))))))

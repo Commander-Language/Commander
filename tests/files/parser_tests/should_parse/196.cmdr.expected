@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (BinOpExprNode (BinOpExprNode (VarExprNode (IdentVariableNode a)) OR (BinOpExprNode (VarExprNode (IdentVariableNode b)) AND (VarExprNode (IdentVariableNode c)))) OR (VarExprNode (IdentVariableNode d))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode a)) OR (BinOpExprNode (LValueExprNode (VarExprNode b)) AND (LValueExprNode (VarExprNode c)))) OR (LValueExprNode (VarExprNode d))))))

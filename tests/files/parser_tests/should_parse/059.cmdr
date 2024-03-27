@@ -1,4 +1,4 @@
 // Test that lambdas parse with return type included
-nada = (x,y) : int -> {
+nada = fn (x,y) : int -> {
     return x + y;
-}
+};

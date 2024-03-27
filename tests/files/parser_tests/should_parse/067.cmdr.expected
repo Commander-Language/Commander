@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode fileContents) SET (ReadExprNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'myfile.txt')))))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode fileContents) SET (ReadExprNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'myfile.txt')))))))))
