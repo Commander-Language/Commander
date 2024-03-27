@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (BasicCmdNode (IdentVariableNode myVar) (StringNode '-l'))))
+	(CmdStmtNode (BasicCmdNode (VarExprNode myVar) (StringNode '-l'))))

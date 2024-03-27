@@ -1,4 +1,4 @@
 (PrgmNode
 	(IfStmtNode (BoolExprNode true) (ScopeStmtNode (StmtsNode
-	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'hi'))))) (IfStmtNode (IndexExprNode (TupleExprNode (ExprsNode (BoolExprNode true) (BoolExprNode false))) (IntExprNode 1)) (ScopeStmtNode (StmtsNode
-	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'adios')))))))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'hi'))))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'adios')))))))

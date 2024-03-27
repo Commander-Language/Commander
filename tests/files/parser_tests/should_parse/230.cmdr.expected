@@ -1,0 +1,2 @@
+(PrgmNode
+	(TimeoutStmtNode 5000 (StringNode '') (CmdStmtNode (AsyncCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'git') (StringNode 'clone') (StringNode 'myurl.com')) | (BasicCmdNode (StringNode 'echo') (StringNode 'hello')))))))

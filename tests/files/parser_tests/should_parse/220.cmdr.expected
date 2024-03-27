@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CmdExprNode (BasicCmdNode (StringNode 'cd') (IdentVariableNode filepath) (StringNode '-p') (IdentVariableNode random) (IdentVariableNode var) (IdentVariableNode two) (StringNode '--hello'))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CmdExprNode (BasicCmdNode (StringNode 'cd') (VarExprNode filepath) (StringNode '-p') (VarExprNode random) (VarExprNode var) (VarExprNode two) (StringNode '--hello'))))))

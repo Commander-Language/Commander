@@ -1,2 +1,3 @@
-//Should parse empty statements
-;;;;;;;;;;
+//Should parse assertion
+x = true;
+assert x;

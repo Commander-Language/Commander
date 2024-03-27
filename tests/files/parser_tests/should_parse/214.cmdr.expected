@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (BasicCmdNode (StringNode 'cd') (IdentVariableNode filepath) (StringNode '-p') (IdentVariableNode random) (IdentVariableNode var) (IdentVariableNode two) (StringNode '--hello'))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'cd') (VarExprNode filepath) (StringNode '-p') (VarExprNode random) (VarExprNode var) (VarExprNode two) (StringNode '--hello'))))

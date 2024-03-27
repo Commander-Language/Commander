@@ -1,2 +1,2 @@
 //Should parse timeout commands
-timeout 5000 git clone myurl.com & | echo hello &;
+timeout 5000 git clone myurl.com | echo hello &;

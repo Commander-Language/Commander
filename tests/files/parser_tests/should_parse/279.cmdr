@@ -1,2 +1,2 @@
 //Should parse string interpolation
-"echo" 'add = ${(a, b) -> a + b}' + $'true or $x? = {if parseBoolean(`read answer.txt`[0]) then "is ${(true)}" else 'false'}';
+"echo" 'add = ${fn (a, b) -> a + b}' + $'true or $x? = {if parseBoolean(`read answer.txt`[0]) then "is ${(true)}" else 'false'}';

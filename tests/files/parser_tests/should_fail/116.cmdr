@@ -1,2 +1,2 @@
 //Should not parse
-x void = 4;
+hello() { hi; };
