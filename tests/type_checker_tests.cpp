@@ -141,5 +141,6 @@ TEST_P(TypeCheckerFailTests, ShouldNotTypeCheckFile) {
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
+    typeChecker = TypeChecker::TypeChecker(parser);
     return RUN_ALL_TESTS();
 }
