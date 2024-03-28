@@ -10,6 +10,7 @@
 #include "source/parser/ast_node.hpp"
 
 #include "source/util/generated_map.hpp"
+#include "source/util/safe_ptr.hpp"
 #include "source/util/thread_queue.hpp"
 
 #include <cstddef>
@@ -25,8 +26,69 @@
 #include <utility>
 #include <vector>
 
+const std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+std::chrono::steady_clock::time_point lastTime = startTime;
+std::chrono::steady_clock::time_point curTime;
+const std::vector lengths {-21, 17, 15};
+template<typename ObjType>
+std::string stringVal(const ObjType thing) {
+    std::stringstream stream;
+    stream << thing;
+    return stream.str();
+}
+template<typename ObjType>
+std::string padString(const ObjType thing, const int width) {
+    const std::string val = stringVal(thing);
+    if (width < 0) { return val + std::string(std::max(0, -width - static_cast<int>(val.size())), ' '); }
+    return std::string(std::max(0, width - static_cast<int>(val.size())), ' ') + val;
+}
+void printOuterLine() {
+    std::size_t total = 4;
+    for (std::size_t ind = 0; ind < lengths.size(); ++ind) {
+        total += std::abs(lengths[ind]) + 4;
+        if (ind + 1 < lengths.size()) ++total;
+    }
+
+    std::cout << std::string(total, '=') << "\n";
+}
+void printInnerLine() {
+    std::cout << "||";
+    for (std::size_t ind = 0; ind < lengths.size(); ++ind) {
+        std::cout << std::string(std::abs(lengths[ind]) + 4, '-');
+        if (ind + 1 < lengths.size()) std::cout << "+";
+    }
+    std::cout << "||\n";
+}
+template<typename... ObjType>
+void printLine(const ObjType... args) {
+    std::cout << "||";
+    // ReSharper disable once CppDFAUnreadVariable
+    // ReSharper disable once CppDFAUnusedValue
+    std::size_t ind = 0;
+
+    (
+            [&](const auto arg) {
+                std::cout << "  " << padString(arg, lengths[ind++]) << "  ";
+                if (ind < lengths.size()) std::cout << "|";
+            }(args),
+            ...);
+
+    std::cout << "||\n";
+}
+void printTime(const std::string& name) {
+    curTime = std::chrono::steady_clock::now();
+    printLine(name, std::chrono::duration_cast<std::chrono::milliseconds>(curTime - lastTime).count(),
+              std::chrono::duration_cast<std::chrono::milliseconds>(curTime - startTime).count());
+    lastTime = curTime;
+}
+
 namespace Parser {
     Generator::Generator() {
+        printOuterLine();
+        printLine("Stage", "Elapsed time (ms)", "Total time (ms)");
+        printOuterLine();
+
+
         // ================
         // ||  0: Setup  ||
         // ================
@@ -86,6 +148,9 @@ namespace Parser {
             return result;
         }()};
 
+        printTime("0: misc. setup");
+        printInnerLine();
+
 
         // ===============================
         // ||  1: Construct LR(0) sets  ||
@@ -95,6 +160,9 @@ namespace Parser {
 
         const std::unordered_map lr0States = _generateLr0States(lr0ItemClosure, &goalRule);
 
+        printTime("1: LR(0) sets");
+        printInnerLine();
+
 
         // =================================================
         // ||  2, 3: Initialize and Propagate lookaheads  ||
@@ -103,6 +171,9 @@ namespace Parser {
         Util::GeneratedMap lr1ItemClosure {_lr1ItemClosureGenerator(firstSet, nodeGenerators)};
 
         const std::vector lalrStates = _generateLalrStates(lr0States, lr0ItemClosure, lr1ItemClosure, &goalRule);
+
+        printTime("3: Apply lookaheads");
+        printInnerLine();
 
 
         // ================================
@@ -211,6 +282,9 @@ namespace Parser {
             }
         };
         for (std::size_t stateNum = 0; stateNum < lr0States.size(); ++stateNum) getActions(stateNum);
+
+        printTime("4: Compute actions");
+        printOuterLine();
     }
 
     void Generator::generateSource(std::ostream& output) const {
@@ -516,6 +590,9 @@ namespace Parser {
         Util::ThreadQueue jobs(1);
         for (const auto& [lr0Kernel, stateNum] : lr0States) jobs.add(processKernel, lr0Kernel);
         jobs.wait();
+
+        printTime("2: Initial lookaheads");
+        printInnerLine();
 
 
         // ===============================
