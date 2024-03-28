@@ -111,5 +111,6 @@ TEST_P(FlowControllerFailTests, ShouldFailRun) {
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
+    typeChecker = TypeChecker::TypeChecker(parser);
     return RUN_ALL_TESTS();
 }

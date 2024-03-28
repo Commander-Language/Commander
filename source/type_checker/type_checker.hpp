@@ -23,7 +23,7 @@ namespace TypeChecker {
         /**
          * Parser used for import statements
          */
-        Parser::Parser _parser;
+        std::shared_ptr<Parser::Parser> _parser;
 
     public:
         /**
