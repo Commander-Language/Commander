@@ -1,0 +1,3 @@
+(PrgmNode
+	(ForStmtNode (CallExprNode (LValueExprNode (VarExprNode add)) (ExprsNode (LValueExprNode (VarExprNode a)) (LValueExprNode (VarExprNode b)))) (CallExprNode (LValueExprNode (VarExprNode isTrue)) (ExprsNode (LValueExprNode (VarExprNode a)) (LValueExprNode (VarExprNode b)))) (CallExprNode (LValueExprNode (VarExprNode subtract)) (ExprsNode (LValueExprNode (VarExprNode b)) (LValueExprNode (VarExprNode a)))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))))))

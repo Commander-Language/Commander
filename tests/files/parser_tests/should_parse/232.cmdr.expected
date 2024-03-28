@@ -1,0 +1,3 @@
+(PrgmNode
+	(AliasStmtNode all (BasicCmdNode (StringNode 'ls') (StringNode '-a')))
+	(CmdStmtNode (AsyncCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'all')) | (BasicCmdNode (StringNode 'grep') (StringNode 'myDir'))))))

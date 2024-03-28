@@ -1,0 +1,4 @@
+//Should parse break statements
+while (true) {
+	break;
+}

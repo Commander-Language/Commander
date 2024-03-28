@@ -1,5 +1,5 @@
 //Test types
-func(
+fn func(
     a:  int,
     b:  float,
     c : bool,

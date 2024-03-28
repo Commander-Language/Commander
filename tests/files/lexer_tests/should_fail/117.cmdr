@@ -1,0 +1,2 @@
+//Should not parse due to unterminated scope
+do {echo hi; while (true);

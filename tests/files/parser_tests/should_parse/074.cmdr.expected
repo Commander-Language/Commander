@@ -1,0 +1,2 @@
+(PrgmNode
+	(CmdStmtNode (PipeCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'cd') (StringNode '..')) | (BasicCmdNode (StringNode 'ls') (StringNode '-a'))) | (BasicCmdNode (StringNode 'grep') (StringNode 'text')))))

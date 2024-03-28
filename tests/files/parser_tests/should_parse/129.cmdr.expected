@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (BinOpExprNode (VarExprNode (IdentVariableNode x)) EXPONENTIATE (VarExprNode (IdentVariableNode x))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (LValueExprNode (VarExprNode x)) EXPONENTIATE (LValueExprNode (VarExprNode x))))))

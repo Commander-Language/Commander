@@ -1,2 +1,2 @@
 //Test precedence
-x = !(x < !(y == z <= !(!!x));
+x = !(x < !(y == z <= !(!!x)));

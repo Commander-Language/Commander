@@ -1,5 +1,6 @@
-VARIABLE 'func' 2:1
-LPAREN '(' 2:5
+FN 'fn' 2:1
+VARIABLE 'func' 2:4
+LPAREN '(' 2:8
 VARIABLE 'a' 3:5
 COLON ':' 3:6
 INT 'int' 3:9

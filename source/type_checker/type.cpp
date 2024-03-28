@@ -65,6 +65,7 @@ namespace TypeChecker {
         if (!type1 || !type2) { return false; }
         Type const typ = type1->getType();
         if (typ != type2->getType()) { return false; }
+        if (type1->any() || type2->any()) { return true; }
         switch (typ) {
             case ARRAY: {
                 std::shared_ptr<ArrayTy> const ty1 = std::static_pointer_cast<ArrayTy>(type1);

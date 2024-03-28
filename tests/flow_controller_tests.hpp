@@ -25,7 +25,7 @@ Parser::Parser parser;
 /**
  * Type checker used in the tests (initialized here to prevent initializing it for every test)
  */
-TypeChecker::TypeChecker typeChecker;
+TypeChecker::TypeChecker typeChecker(parser);
 
 /**
  * Flow controller used in the tests (initialized here to prevent initializing it for every test)

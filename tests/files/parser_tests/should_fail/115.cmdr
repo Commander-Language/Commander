@@ -1,2 +1,2 @@
 //Should not parse
-x const = 4;
+timeout echo hi;

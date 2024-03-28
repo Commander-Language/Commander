@@ -1,1 +1,3 @@
-(PrgmNode)
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BoolExprNode true)))
+	(AssertStmtNode (LValueExprNode (VarExprNode x)) (StringNode '')))

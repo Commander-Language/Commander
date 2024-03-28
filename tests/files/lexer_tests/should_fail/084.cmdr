@@ -1,0 +1,2 @@
+//Should not parse since no semicolon
+timeout 40000 echo

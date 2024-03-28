@@ -1,0 +1,4 @@
+//Should parse continue statements
+while (true) {
+	continue;
+}

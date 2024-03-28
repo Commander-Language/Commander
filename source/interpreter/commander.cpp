@@ -5,22 +5,44 @@
 #include <iostream>
 #include <ncurses.h>
 
+bool hasArgument(std::vector<std::string>& arguments, std::string argument) {
+    return std::find(arguments.begin(), arguments.end(), argument) != arguments.end();
+}
+
+std::string getArgumentValue(std::vector<std::string>& arguments, std::string argument) {
+    auto iter = std::find(arguments.begin(), arguments.end(), argument);
+    return iter != arguments.end() && ++iter != arguments.end() ? *iter : "";
+}
+
 void interpretFile(std::string& fileName, std::vector<std::string>& arguments, Parser::Parser& parser,
                    TypeChecker::TypeChecker& typeChecker, FlowController::FlowController& controller) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, fileName);
-    if (std::find(arguments.begin(), arguments.end(), "-l") != arguments.end()) {
+    if (hasArgument(arguments, "-l")) {
         for (const Lexer::TokenPtr& token : tokens) Util::println(token->toString());
         return;
     }
     Parser::ASTNodeList nodes = parser.parse(tokens);
-    if (std::find(arguments.begin(), arguments.end(), "-p") != arguments.end()) {
+    if (hasArgument(arguments, "-p")) {
         for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
     typeChecker.typeCheck(nodes);
-    if (std::find(arguments.begin(), arguments.end(), "-t") != arguments.end()) {
+    if (hasArgument(arguments, "-t")) {
         for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
+        return;
+    }
+    if (hasArgument(arguments, "-b")) {
+        std::string outFile = getArgumentValue(arguments, "-o");
+        if (outFile.empty()) { outFile = "bash-out.sh"; }
+        // TODO: Implement bash transpiler
+        /*BashTranspiler::BashTranspiler transpiler;
+        std::string bashOutput = transpiler.transpile(nodes);
+        if (Util::usingNCurses) {
+            Util::println(bashOutput);
+        } else {
+            Util::writeToFile(bashOutput, outFile);
+        }*/
         return;
     }
     controller.runtime(nodes);
@@ -31,12 +53,11 @@ int main(int argc, char** argv) {
     for (int i = 1; i < argc; i++) { arguments.emplace_back(argv[i]); }
     try {
         Parser::Parser parser;
-        TypeChecker::TypeChecker typeChecker;
+        TypeChecker::TypeChecker typeChecker(parser);
         FlowController::FlowController controller;
-        auto fileIterator = std::find(arguments.begin(), arguments.end(), "-f");
-        if (fileIterator++ != arguments.end()) {
-            if (fileIterator == arguments.end()) { throw Util::CommanderException("No file name provided."); }
-            std::string file = *fileIterator;
+        if (hasArgument(arguments, "-f")) {
+            std::string file = getArgumentValue(arguments, "-f");
+            if (file.empty()) { throw Util::CommanderException("No file provided for -f flag"); }
             interpretFile(file, arguments, parser, typeChecker, controller);
             return 0;
         }

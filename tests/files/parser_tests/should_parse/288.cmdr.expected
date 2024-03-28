@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (ApiCallExprNode (TupleExprNode (ExprsNode (IntExprNode 1) (BoolExprNode true) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))) (IdentVariableNode toString) (ExprsNode)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (ApiCallExprNode (TupleExprNode (ExprsNode (IntExprNode 1) (BoolExprNode true) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))) toString (ExprsNode)))))

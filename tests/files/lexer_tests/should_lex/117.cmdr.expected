@@ -1,0 +1,4 @@
+ASSERT 'assert' 2:1
+TRUE 'true' 2:8
+SEMICOLON ';' 2:12
+END_OF_FILE 2:13

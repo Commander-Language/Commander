@@ -1,0 +1,3 @@
+(PrgmNode
+	(ForStmtNode (BinOpExprNode (IndexLValueNode (VarLValueNode b) (IntExprNode 1)) SET (IntExprNode 3)) (BoolExprNode false) (BinOpExprNode (IndexLValueNode (VarLValueNode a) (IntExprNode 1)) ADD_SET (IntExprNode 2)) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))))))

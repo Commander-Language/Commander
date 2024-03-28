@@ -1,0 +1,2 @@
+(PrgmNode
+	(TimeoutStmtNode 5000 (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Could not clone')))) (CmdStmtNode (AsyncCmdNode (BasicCmdNode (StringNode 'git') (StringNode 'clone') (StringNode 'myurl.com'))))))

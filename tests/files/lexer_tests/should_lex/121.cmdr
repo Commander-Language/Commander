@@ -1,0 +1,2 @@
+//Should lex while command
+while (true) echo hi;
