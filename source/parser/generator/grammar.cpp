@@ -26,15 +26,17 @@ namespace Parser {
         : grammarEntryType(NODE_TYPE), tokenType(), nodeType(nodeType) {}
 
     bool GrammarEntry::operator==(const GrammarEntry& other) const {
-        constexpr std::hash<GrammarEntry> hash;
-        return hash(*this) == hash(other);
+        if (this->grammarEntryType != other.grammarEntryType) return false;
+        if (this->grammarEntryType == TOKEN_TYPE) return this->tokenType == other.tokenType;
+        return this->nodeType == other.nodeType;
     }
 
     bool GrammarEntry::operator!=(const GrammarEntry& other) const { return !(*this == other); }
 
     bool GrammarEntry::operator<(const GrammarEntry& other) const {
-        constexpr std::hash<GrammarEntry> hash;
-        return hash(*this) < hash(other);
+        if (this->grammarEntryType != other.grammarEntryType) return this->grammarEntryType < other.grammarEntryType;
+        if (this->grammarEntryType == TOKEN_TYPE) return this->tokenType < other.tokenType;
+        return this->nodeType < other.nodeType;
     }
 
     std::ostream& operator<<(std::ostream& stream, const GrammarEntry& grammarEntry) {

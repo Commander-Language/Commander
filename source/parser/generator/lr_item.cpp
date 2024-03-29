@@ -9,7 +9,6 @@
 #include "source/util/thread_queue.hpp"
 
 #include <iostream>
-#include <unordered_set>
 
 namespace Parser {
 
@@ -161,50 +160,3 @@ namespace Parser {
     }
 
 }  // namespace Parser
-
-namespace std {
-
-    std::size_t hash<Parser::Lr0Item>::operator()(const Parser::Lr0Item& lr0Item) const noexcept {
-        return Util::combineHashes(*lr0Item.rule, lr0Item.index);
-    }
-
-    std::size_t hash<Parser::Lr1Item>::operator()(const Parser::Lr1Item& lr1Item) const noexcept {
-        return Util::combineHashes(*lr1Item.rule, lr1Item.index, lr1Item.lookahead);
-    }
-
-    std::size_t hash<Parser::LalrItem>::operator()(const Parser::LalrItem& lalrItem) const noexcept {
-        const std::vector<std::size_t> lookaheads {lalrItem.lookaheads.begin(), lalrItem.lookaheads.end()};
-        return Util::combineHashes(*lalrItem.rule, lalrItem.index, Util::combineHashes(lookaheads));
-    }
-
-    std::size_t hash<Parser::Lr0ItemSet>::operator()(const Parser::Lr0ItemSet& lr0ItemSet) const noexcept {
-        std::vector<std::size_t> hashes(lr0ItemSet.size());
-        std::size_t ind = 0;
-        for (const auto& lr0Item : lr0ItemSet) {
-            constexpr std::hash<Parser::Lr0Item> hash;
-            hashes[ind++] = hash(lr0Item);
-        }
-        return Util::combineHashes(hashes);
-    }
-
-    std::size_t hash<Parser::Lr1ItemSet>::operator()(const Parser::Lr1ItemSet& lr1ItemSet) const noexcept {
-        std::vector<std::size_t> hashes(lr1ItemSet.size());
-        std::size_t ind = 0;
-        for (const auto& lr1Item : lr1ItemSet) {
-            constexpr std::hash<Parser::Lr1Item> hash;
-            hashes[ind++] = hash(lr1Item);
-        }
-        return Util::combineHashes(hashes);
-    }
-
-    std::size_t hash<set<Parser::LalrItem>>::operator()(const Parser::LalrItemSet& lalrItemSet) const noexcept {
-        std::vector<std::size_t> hashes(lalrItemSet.size());
-        std::size_t ind = 0;
-        for (const auto& lalrItem : lalrItemSet) {
-            constexpr std::hash<Parser::LalrItem> hash;
-            hashes[ind++] = hash(lalrItem);
-        }
-        return Util::combineHashes(hashes);
-    }
-
-}  // namespace std

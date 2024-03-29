@@ -8,7 +8,7 @@
 #define GENERATED_MAP_HPP
 
 #include <functional>
-#include <unordered_map>
+#include <map>
 
 namespace Util {
 
@@ -17,9 +17,8 @@ namespace Util {
      *
      * @tparam KeyType The type of the map's keys.
      * @tparam ValueType The type of the map's values.
-     * @tparam KeyHashType An invocable class (i.e., a functor class) for hashing the map's `KeyType`.
      */
-    template<typename KeyType, typename ValueType, typename KeyHashType = std::hash<KeyType>>
+    template<typename KeyType, typename ValueType>
     class GeneratedMap {
     public:
         /**
@@ -57,25 +56,22 @@ namespace Util {
 
         /**
          * @brief The mapping of `KeyType` keys to `ValueType` values.
-         * @details Uses an instance of `KeyHashType` to hash keys.
          */
-        std::unordered_map<std::size_t, ValueType> _map;
+        std::map<KeyType, ValueType> _map;
     };
 
-    template<typename KeyType, typename ValueType, typename KeyHashType>
-    GeneratedMap<KeyType, ValueType, KeyHashType>::GeneratedMap(GeneratorType generator)
-        : _generator(std::move(generator)) {}
+    template<typename KeyType, typename ValueType>
+    GeneratedMap<KeyType, ValueType>::GeneratedMap(GeneratorType generator) : _generator(std::move(generator)) {}
 
-    template<typename KeyType, typename ValueType, typename KeyHashType>
-    ValueType& GeneratedMap<KeyType, ValueType, KeyHashType>::operator[](const KeyType& key) {
-        const std::size_t hash = KeyHashType {}(key);
-        if (_map.count(hash) == 0) _map[hash] = _generator(key);
+    template<typename KeyType, typename ValueType>
+    ValueType& GeneratedMap<KeyType, ValueType>::operator[](const KeyType& key) {
+        if (_map.count(key) == 0) _map[key] = _generator(key);
 
-        return _map[hash];
+        return _map[key];
     }
 
-    template<typename KeyType, typename ValueType, typename KeyHashType>
-    std::size_t GeneratedMap<KeyType, ValueType, KeyHashType>::size() const {
+    template<typename KeyType, typename ValueType>
+    std::size_t GeneratedMap<KeyType, ValueType>::size() const {
         return _map.size();
     }
 
