@@ -1,11 +1,11 @@
 //Should parse index expressions as variables
-a[i] = 1
-a[i] += 1
-a[i] -= 1
-a[i] *= 1
-a[i] /= 1
-a[i] %= 1
-a[i] **= 1
+a[i] = 1;
+a[i] += 1;
+a[i] -= 1;
+a[i] *= 1;
+a[i] /= 1;
+a[i] %= 1;
+a[i] **= 1;
 x = a[i]++;
 x = a[i]--;
 x = ++a[i];
