@@ -279,11 +279,11 @@ namespace Parser {
         });
 
         const std::string foot = _join("\n", {
-              "    ParserAction ParseTable::getNextAction(ParseTable::StateNum stateNum, TokenType TokenType) {",
-              "        return _nextAction[stateNum][TokenType];",
+              "    ParserAction ParseTable::getNextAction(const ParseTable::StateNum stateNum, const TokenType tokenType) {",
+              "        return _nextAction[stateNum][tokenType];",
               "    }",
               "",
-              "    ParseTable::StateNum ParseTable::getNextState(ParseTable::StateNum stateNum, ASTNodeType nodeType) {",
+              "    ParseTable::StateNum ParseTable::getNextState(const ParseTable::StateNum stateNum, const ASTNodeType nodeType) {",
               "        return _nextState[stateNum][nodeType];",
               "    }",
               "",
