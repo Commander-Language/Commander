@@ -761,8 +761,8 @@ namespace Parser {
           returnType(std::move(returnType)) {}
 
     std::string FunctionStmtNode::sExpression() const {
-        return "(FunctionStmtNode " + name + " " + bindings->sExpression() + " " + returnType->sExpression() + " "
-             + body->sExpression() + ")";
+        return "(FunctionStmtNode " + name + " " + bindings->sExpression()
+             + (returnType ? " " + returnType->sExpression() : "") + " " + body->sExpression() + ")";
     }
 
     TimeoutStmtNode::TimeoutStmtNode(const int64_t& timeout, StringNodePtr message, Parser::StmtNodePtr stmt)

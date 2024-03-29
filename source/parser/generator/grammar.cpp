@@ -310,8 +310,8 @@ namespace Parser {
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EXPONENTIATE", castNode("Expr", 2)})}},
 
                 // (Shared precedence)
-                {// LA: (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
-                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY, ASTNodeType::EXPR}},
+                // LA: (EXPR) -> (EXPR) [MULTIPLY] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::MULTIPLY, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::MULTIPLY", castNode("Expr", 2)})},
                  // LA: (EXPR) -> (EXPR) [DIVIDE] (EXPR)
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DIVIDE, ASTNodeType::EXPR}},
@@ -329,8 +329,8 @@ namespace Parser {
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::SUBTRACT", castNode("Expr", 2)})}},
 
                 // (Shared precedence)
-                {// LA: (EXPR) -> (EXPR) [LESSER] (EXPR)
-                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER, ASTNodeType::EXPR}},
+                // LA: (EXPR) -> (EXPR) [LESSER] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::LESSER", castNode("Expr", 2)})},
                  // LA: (EXPR) -> (EXPR) [LESSER_EQUAL] (EXPR)
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LESSER_EQUAL, ASTNodeType::EXPR}},
@@ -343,8 +343,8 @@ namespace Parser {
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::GREATER_EQUAL", castNode("Expr", 2)})}},
 
                 // (Shared precedence)
-                {// LA: (EXPR) -> (EXPR) [DOUBLE_EQUALS] (EXPR)
-                 {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DOUBLE_EQUALS, ASTNodeType::EXPR}},
+                // LA: (EXPR) -> (EXPR) [DOUBLE_EQUALS] (EXPR)
+                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::DOUBLE_EQUALS, ASTNodeType::EXPR}},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EQUAL", castNode("Expr", 2)})},
                  // LA: (EXPR) -> (EXPR) [NOT_EQUALS] (EXPR)
                  {{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::NOT_EQUALS, ASTNodeType::EXPR}},
