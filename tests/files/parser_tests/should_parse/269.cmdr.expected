@@ -1,0 +1,4 @@
+(PrgmNode
+	(IfStmtNode (BoolExprNode true) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'hi'))))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'adios')))))))

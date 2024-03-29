@@ -5,26 +5,47 @@
 #include <iostream>
 #include <ncurses.h>
 
+bool hasArgument(std::vector<std::string>& arguments, std::string argument) {
+    return std::find(arguments.begin(), arguments.end(), argument) != arguments.end();
+}
+
+std::string getArgumentValue(std::vector<std::string>& arguments, std::string argument) {
+    auto iter = std::find(arguments.begin(), arguments.end(), argument);
+    return iter != arguments.end() && ++iter != arguments.end() ? *iter : "";
+}
+
 void interpretFile(std::string& fileName, std::vector<std::string>& arguments, Parser::Parser& parser,
-                   TypeChecker::TypeChecker& typeChecker) {
+                   TypeChecker::TypeChecker& typeChecker, FlowController::FlowController& controller) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, fileName);
-    if (std::find(arguments.begin(), arguments.end(), "-l") != arguments.end()) {
+    if (hasArgument(arguments, "-l")) {
         for (const Lexer::TokenPtr& token : tokens) Util::println(token->toString());
         return;
     }
     Parser::ASTNodeList nodes = parser.parse(tokens);
-    if (std::find(arguments.begin(), arguments.end(), "-p") != arguments.end()) {
+    if (hasArgument(arguments, "-p")) {
         for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
     typeChecker.typeCheck(nodes);
-    if (std::find(arguments.begin(), arguments.end(), "-t") != arguments.end()) {
+    if (hasArgument(arguments, "-t")) {
         for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
-    FlowController::FlowController controller(nodes);
-    controller.runtime();
+    if (hasArgument(arguments, "-b")) {
+        std::string outFile = getArgumentValue(arguments, "-o");
+        if (outFile.empty()) { outFile = "bash-out.sh"; }
+        // TODO: Implement bash transpiler
+        /*BashTranspiler::BashTranspiler transpiler;
+        std::string bashOutput = transpiler.transpile(nodes);
+        if (Util::usingNCurses) {
+            Util::println(bashOutput);
+        } else {
+            Util::writeToFile(bashOutput, outFile);
+        }*/
+        return;
+    }
+    controller.runtime(nodes);
 }
 
 int main(int argc, char** argv) {
@@ -32,12 +53,12 @@ int main(int argc, char** argv) {
     for (int i = 1; i < argc; i++) { arguments.emplace_back(argv[i]); }
     try {
         Parser::Parser parser;
-        TypeChecker::TypeChecker typeChecker;
-        auto fileIterator = std::find(arguments.begin(), arguments.end(), "-f");
-        if (fileIterator++ != arguments.end()) {
-            if (fileIterator == arguments.end()) { throw Util::CommanderException("No file name provided."); }
-            std::string file = *fileIterator;
-            interpretFile(file, arguments, parser, typeChecker);
+        TypeChecker::TypeChecker typeChecker(parser);
+        FlowController::FlowController controller;
+        if (hasArgument(arguments, "-f")) {
+            std::string file = getArgumentValue(arguments, "-f");
+            if (file.empty()) { throw Util::CommanderException("No file provided for -f flag"); }
+            interpretFile(file, arguments, parser, typeChecker, controller);
             return 0;
         }
         Util::usingNCurses = true;
@@ -74,12 +95,14 @@ int main(int argc, char** argv) {
                             std::ofstream tmp(tmpFileName);
                             tmp << currentLine;
                             tmp.close();  // close file here to save changes
-                            interpretFile(tmpFileName, arguments, parser, typeChecker);
+                            interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
                             std::remove(tmpFileName.c_str());
                         } catch (const Util::CommanderException& err) { Util::println(err.what()); }
                     }
                     idx = 0;
+                    if (getcurx(stdscr) > 0) { Util::print("\n"); }
                     Util::print(">> ");
+
                     if (lines.empty() || lines.back() != currentLine) { lines.push_back(currentLine); }
                     line = (int)lines.size();
                     currentLine.clear();

@@ -33,19 +33,14 @@ namespace FlowController {
          * @brief Class Constructor
          * @param nodes An AST
          */
-        FlowController(Parser::ASTNodeList& nodes);
+        FlowController();
 
         /**
          * @brief Evaluate the AST nodes
          */
-        void runtime();
+        void runtime(const Parser::ASTNodeList& nodes);
 
     private:
-        /**
-         * @brief The AST nodes in a list
-         */
-        Parser::ASTNodeList _nodes;
-
         /**
          * @brief The symbol table
          */
@@ -104,7 +99,7 @@ namespace FlowController {
          * @param node A node in the PipeCmdNode tree
          * @param jobs The vector to place the jobs in
          */
-        void _getJobs(const Parser::CmdNodePtr& node, std::vector<Parser::CmdCmdNodePtr>& jobs);
+        void _getJobs(const Parser::CmdNodePtr& node, std::vector<Parser::BasicCmdNodePtr>& jobs);
 
         /**
          * @brief Helper to interpret cmd nodes
@@ -153,23 +148,6 @@ namespace FlowController {
         std::string _string(const Parser::StringNodePtr& node);
 
         /**
-         * @brief Helper to interpret types nodes
-         * @param types The types to interpret
-         */
-        void _types(const Parser::TypesNodePtr& types);
-
-        /**
-         * @brief Helper to interpret type nodes
-         */
-        void _type(const Parser::TypeNodePtr&);
-
-        /**
-         * @brief Helper to interpret variable nodes
-         * @param node The variable node
-         */
-        void _variable(const Parser::VariableNodePtr& node);
-
-        /**
          * @brief Helper to interpret unary operations
          * @param unOp The unary operator expression
          */
@@ -180,6 +158,14 @@ namespace FlowController {
          * @param binOp The binary operator expression
          */
         CommanderTypePtr _binaryOp(std::shared_ptr<Parser::BinOpExprNode>& binOp);
+
+        /**
+         * @brief Helper that calls a builtin function for a call/api-call expression, if it exists, otherwise returns
+         * nullptr
+         * @param node The call or api-call expression
+         * @return The results of the builtin function call, or nullptr if no builtin exists.
+         */
+        CommanderTypePtr _builtin(Parser::ExprNodePtr node);
     };
 
 }  // namespace FlowController

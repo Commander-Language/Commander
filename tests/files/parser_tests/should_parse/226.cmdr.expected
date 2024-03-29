@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CmdExprNode (AsyncCmdNode (PipeCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'netstat') (StringNode '-tlnp')) | (BasicCmdNode (StringNode 'grep') (StringNode '8080'))) | (BasicCmdNode (StringNode 'echo') (StringNode 'hi'))))))))

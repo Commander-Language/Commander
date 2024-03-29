@@ -1,0 +1,2 @@
+//Should not lex since no variable
+fn () -> hi;

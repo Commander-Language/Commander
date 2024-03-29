@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode const _abc123_) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '_abc123_'))))))))

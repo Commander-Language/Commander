@@ -1,2 +1,2 @@
 //Should not parse due to incorrect piping
-x = `echo hi` || `git clone myurl.com`;
+x = `echo hi` | `git clone myurl.com`;

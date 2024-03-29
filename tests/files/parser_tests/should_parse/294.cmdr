@@ -1,0 +1,5 @@
+//Should parse types with variables
+type a = (string, string);
+type b = a[];
+type c = b;
+type d = (a, b, c)[];

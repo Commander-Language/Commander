@@ -1,0 +1,2 @@
+//Should not parse
+x:  -> float = (a) -> 3.0;

@@ -1,0 +1,3 @@
+(PrgmNode
+	(ForStmtNode (BinOpExprNode (BindingNode x) SET (IntExprNode 0)) (BinOpExprNode (LValueExprNode (VarExprNode x)) LESSER (IntExprNode 0)) (UnOpExprNode (VarLValueNode x) POST_INCREMENT) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Hello World!'))))))))))

@@ -1,6 +1,6 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (StringExpressionNode (StringNode "This
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'This
 is
 a
 multi-line
-string")))))
+string'))))))))

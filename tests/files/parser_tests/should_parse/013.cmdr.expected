@@ -1,2 +1,2 @@
 (PrgmNode
-	(CallExprNode add (VarExprNode a) (VarExprNode b)))
+	(ExprStmtNode (CallExprNode (LValueExprNode (VarExprNode add)) (ExprsNode (LValueExprNode (VarExprNode a)) (LValueExprNode (VarExprNode b))))))

@@ -1,0 +1,3 @@
+(PrgmNode
+	(ForStmtNode (CmdExprNode (BasicCmdNode (StringNode 'echo') (VarExprNode hi))) (CallExprNode (LValueExprNode (VarExprNode parseBoolean)) (ExprsNode (IndexExprNode (CmdExprNode (BasicCmdNode (StringNode 'echo') (StringNode 'hi'))) (IntExprNode 0)))) (CmdExprNode (BasicCmdNode (StringNode 'git') (StringNode 'clone') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'myurl')))))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))))))

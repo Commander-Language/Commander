@@ -10,8 +10,8 @@ void runFile(const std::string& filePath) {
     Lexer::tokenize(tokens, filePath);
     Parser::ASTNodeList nodes = parser.parse(tokens);
     typeChecker.typeCheck(nodes);
-    FlowController::FlowController controller(nodes);
-    controller.runtime();
+    FlowController::FlowController controller;
+    controller.runtime(nodes);
 }
 
 /**
@@ -81,8 +81,13 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
 
     // Run
-    FlowController::FlowController controller(nodes);
-    controller.runtime();
+    try {
+        controller.runtime(nodes);
+    } catch (std::exception e) {
+        std::cout.rdbuf(old);
+        std::cout << "Flow Controller Error: " << e.what() << "\n";
+        FAIL();
+    }
 
     // Get output
     std::cout.rdbuf(old);

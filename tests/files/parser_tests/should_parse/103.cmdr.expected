@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (UnOpExprNode (UnOpExprNode (VarLValueNode x) POST_DECREMENT) NEGATE))))

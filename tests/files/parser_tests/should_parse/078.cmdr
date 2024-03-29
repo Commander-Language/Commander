@@ -1,5 +1,5 @@
 //Test bindings parse correctly
-func(
+fn func(
     a:  int,
     b:  float,
     c : bool,

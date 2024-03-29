@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Hi')) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'There$')) (CmdExprNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Sum$')) (BinOpExprNode (IntExprNode 3) ADD (IntExprNode 4)) (StringExpressionNode (StringNode '')))))) (StringExpressionNode (StringNode ''))))) (StringExpressionNode (StringNode ''))))))))

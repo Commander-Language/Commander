@@ -1,1 +1,2 @@
-(PrgmNode)
+(PrgmNode
+	(AssertStmtNode (BinOpExprNode (IntExprNode 3) LESSER (IntExprNode 4)) (StringNode (StringExprsNode (StringExpressionNode (StringNode 'This should not happen'))))))

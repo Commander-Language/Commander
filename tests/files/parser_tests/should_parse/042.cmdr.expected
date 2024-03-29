@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) MODULO_SET (VarExprNode (IdentVariableNode y)))))
+	(ExprStmtNode (BinOpExprNode (VarLValueNode x) MODULO_SET (LValueExprNode (VarExprNode y)))))

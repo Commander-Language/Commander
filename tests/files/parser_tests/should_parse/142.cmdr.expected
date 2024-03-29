@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (UnOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode a)) DIVIDE (UnOpExprNode (LValueExprNode (VarExprNode b)) NOT)) NEGATE) MULTIPLY (UnOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode c)) MODULO (BinOpExprNode (UnOpExprNode (LValueExprNode (VarExprNode d)) NOT) MULTIPLY (LValueExprNode (VarExprNode e)))) NEGATE)))))

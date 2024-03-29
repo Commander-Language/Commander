@@ -1,7 +1,7 @@
 //Test modulo with ints
-x = 100 % 2;
-print x;
+x = 100 % 51;
+println x;
 x %= 9;
-print x;
+println x;
 x = x % 2;
-print x;
+println x;

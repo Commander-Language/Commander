@@ -1,2 +1,2 @@
 //Should parse ternary expression
-x = `echo hi`[1] ? `git clone myurl.com`[0] : `echo bye`[2];
+x = if `echo hi`[1] then `git clone myurl.com`[0] else `echo bye`[2];

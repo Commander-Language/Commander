@@ -1,2 +1,2 @@
 (PrgmNode
-	(VarStmtNode isTuple (TupleExprNode )))
+	(ExprStmtNode (BinOpExprNode (BindingNode isTuple) SET (TupleExprNode (ExprsNode)))))

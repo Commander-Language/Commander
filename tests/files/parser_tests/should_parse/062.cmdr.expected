@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (CmdCmdNode (StringNode "x+y"))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'x+y'))))

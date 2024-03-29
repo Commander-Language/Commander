@@ -169,7 +169,7 @@ add_library(flow_controller source/flow_controller/flow_controller.cpp source/ut
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
-add_library(job_runner source/job_runner/job_runner.cpp source/job_runner/builtins/builtins.hpp ${builtins})
+add_library(job_runner source/job_runner/job_runner.cpp source/util/print.cpp ${builtins})
 
 add_executable(commander source/interpreter/commander.cpp)
 
@@ -187,21 +187,17 @@ target_link_libraries(parserTests lexer parser type_checker GTest::gtest_main)
 gtest_discover_tests(parserTests)
 
 add_executable(typeCheckerTests tests/type_checker_tests.cpp)
-target_link_libraries(typeCheckerTests lexer parser type_checker GTest::gtest_main)
+target_link_libraries(typeCheckerTests lexer parser type_checker flow_controller GTest::gtest_main)
 gtest_discover_tests(typeCheckerTests)
 
 add_executable(symbolTableTests tests/symbol_table_tests.cpp)
 target_link_libraries(symbolTableTests symbol_table GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
 
-add_executable(builtinFunctionsTests tests/builtin_functions_tests.cpp)
-target_link_libraries(builtinFunctionsTests type_checker GTest::gtest_main)
-gtest_discover_tests(builtinFunctionsTests)
-
 add_executable(flowControllerTests tests/flow_controller_tests.cpp)
-target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table GTest::gtest_main ncurses)
+target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner ncurses GTest::gtest_main)
 gtest_discover_tests(flowControllerTests)
 
 add_executable(jobRunnerTests tests/job_runner_tests.cpp)
-target_link_libraries(jobRunnerTests lexer job_runner GTest::gtest_main)
+target_link_libraries(jobRunnerTests lexer job_runner ncurses GTest::gtest_main)
 gtest_discover_tests(jobRunnerTests)

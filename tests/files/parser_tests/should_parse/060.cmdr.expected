@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode nada) SET (LambdaExprNode (BindingsNode (BindingNode x) (BindingNode y)) (ScopeStmtNode (StmtsNode
+	(PrintStmtNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'x+y=')) (BinOpExprNode (LValueExprNode (VarExprNode x)) ADD (LValueExprNode (VarExprNode y))) (StringExpressionNode (StringNode ''))))))))))))

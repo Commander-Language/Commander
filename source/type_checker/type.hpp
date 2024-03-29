@@ -15,34 +15,6 @@
 #include <vector>
 
 namespace TypeChecker {
-
-    /**
-     * @brief A Commander int representation
-     */
-    using CommanderInt = int64_t;
-    /**
-     * @brief A Commander float representation
-     */
-    using CommanderFloat = double;
-    /**
-     * @brief A Commander bool representation
-     */
-    using CommanderBool = bool;
-    /**
-     * @brief A Commander string representation
-     */
-    using CommanderString = std::string;
-    template<typename TType>
-    /**
-     * @brief A Commander array representation
-     */
-    using CommanderArray = std::vector<TType>;
-    /**
-     * @brief A Commander tuple representation
-     */
-    using CommanderTuple = std::vector<std::any>;
-
-
     /**
      * @brief Enumeration of all possible (base) types in Commander
      *
@@ -240,6 +212,10 @@ namespace TypeChecker {
          */
         ArrayTy(std::shared_ptr<Ty> type);
         /**
+         * @brief Alternate Constructor
+         */
+        ArrayTy(bool any);
+        /**
          * @brief Gets the type that the class represents
          *
          * @return `ARRAY` always.
@@ -266,6 +242,10 @@ namespace TypeChecker {
          */
         FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> retType);
         /**
+         * @brief Alternate Constructor
+         */
+        FunctionTy(bool any);
+        /**
          * @brief Gets the type that the class represents
          *
          * @return `FUNCTION` always.
@@ -290,6 +270,9 @@ namespace TypeChecker {
     const FloatTyPtr FLOAT_TY = std::make_shared<FloatTy>();
     const BoolTyPtr BOOL_TY = std::make_shared<BoolTy>();
     const StringTyPtr STRING_TY = std::make_shared<StringTy>();
+    const TupleTyPtr TUPLE_TY = std::make_shared<TupleTy>(true);
+    const ArrayTyPtr ARRAY_TY = std::make_shared<ArrayTy>(true);
+    const FunctionTyPtr FUNCTION_TY = std::make_shared<FunctionTy>(true);
     const TyPtr ANY_TY = nullptr;
 
 

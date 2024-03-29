@@ -47,7 +47,7 @@ namespace FlowController {
      * @param right The right side of the binary operation
      * @return The value of doing the operation (as a Commander Type)
      */
-    CommanderTypePtr equalOperation(const CommanderTypePtr& left, const CommanderTypePtr& right);
+    CommanderBoolPtr equalOperation(const CommanderTypePtr& left, const CommanderTypePtr& right);
 
     /**
      * @brief Implementation of the not-equal operator !=
@@ -55,7 +55,7 @@ namespace FlowController {
      * @param right The right side of the binary operation
      * @return The value of doing the operation (as a Commander Type)
      */
-    CommanderTypePtr notEqualOperation(const CommanderTypePtr& left, const CommanderTypePtr& right);
+    CommanderBoolPtr notEqualOperation(const CommanderTypePtr& left, const CommanderTypePtr& right);
 
     /**
      * @brief Implementation of the and operator &&

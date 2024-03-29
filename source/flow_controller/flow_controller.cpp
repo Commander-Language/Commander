@@ -2,10 +2,12 @@
  * @file flow_controller.cpp
  * @brief Implements the Flow Controller and runtime
  *
- * Node Helper Functions:
- *      TODO: Finish the following:  _type,
  * Statements:
- *      TODO: Finish the following: If, Alias
+ *      TODO: Finish the following: Alias
+ */
+
+/*
+ * add(a, b, c) return a + b;
  */
 
 #include "source/flow_controller/flow_controller.hpp"
@@ -31,12 +33,12 @@ namespace FlowController {
     //  ==========================
     //  ||    Flow Controller   ||
     //  ==========================
-    FlowController::FlowController(Parser::ASTNodeList& nodes) : _nodes(std::move(nodes)) {
+    FlowController::FlowController() {
         _symbolTable.pushSymbolTable();  // push in the global scope
     }
 
-    void FlowController::runtime() {
-        for (auto& node : _nodes) {
+    void FlowController::runtime(const Parser::ASTNodeList& nodes) {
+        for (auto& node : nodes) {
             switch (getAbstractNodeType(node->nodeType())) {
                 case Parser::BINDING: {
                     _binding(std::static_pointer_cast<Parser::BindingNode>(node));
@@ -46,7 +48,10 @@ namespace FlowController {
                     _bindings(std::static_pointer_cast<Parser::BindingsNode>(node));
                     break;
                 }
-                case Parser::CMD: {
+                case Parser::CMD:
+                case Parser::BASIC_CMD:
+                case Parser::PIPE_CMD:
+                case Parser::ASYNC_CMD: {
                     _cmd(std::static_pointer_cast<Parser::CmdNode>(node));
                     break;
                 }
@@ -74,21 +79,13 @@ namespace FlowController {
                     _string(std::static_pointer_cast<Parser::StringNode>(node));
                     break;
                 }
-                case Parser::STRING_EXPRS: {
-                    // TODO: Handle string expressions
-                }
-                case Parser::TYPES: {
-                    _types(std::static_pointer_cast<Parser::TypesNode>(node));
+                case Parser::TYPES:
+                case Parser::TYPE:
+                case Parser::STRING_EXPRS:
+                case Parser::LVALUE:
+                    // Ignore these ones. Types are handled in type checker, and lvalues and string exprs are handle in
+                    // _expr
                     break;
-                }
-                case Parser::TYPE: {
-                    _type(std::static_pointer_cast<Parser::TypeNode>(node));
-                    break;
-                }
-                case Parser::VARIABLE: {
-                    _variable(std::static_pointer_cast<Parser::VariableNode>(node));
-                    break;
-                }
                 default: {
                     throw Util::CommanderException("Flow Controller: Encountered unknown node type");
                 }
@@ -111,15 +108,25 @@ namespace FlowController {
 
     CommanderTypePtr FlowController::_cmd(const Parser::CmdNodePtr& node, bool saveInfo) {
         std::vector<std::string> args;
-
+        const bool isBackground = node->nodeType() == Parser::ASYNC_CMD;
         switch (node->nodeType()) {
-            case Parser::CMD_CMD: {
-                auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(node);
+            case Parser::BASIC_CMD: {
+                auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(node);
                 args = _parseArguments(cmd->arguments);
 
                 // Run the command
-                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, false,
-                                                                saveInfo);
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
+                                                                !isBackground && saveInfo);
+                auto jobResult = _runCommand(job);
+                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
+            }
+            case Parser::ASYNC_CMD: {
+                auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
+                auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(asyncCmd->cmd);
+                args = _parseArguments(cmd->arguments);
+                // Run the command
+                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
+                                                                !isBackground && saveInfo);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
@@ -128,31 +135,19 @@ namespace FlowController {
                 const std::vector<std::vector<std::string>> pipeArgs;
                 std::vector<JobRunner::ProcessPtr> processes;
 
-                std::vector<Parser::CmdCmdNodePtr> jobs;
+                std::vector<Parser::BasicCmdNodePtr> jobs;
                 _getJobs(pipeCmd, jobs);
 
                 std::vector<std::string> pArgs;
                 for (const auto& job : jobs) {
                     pArgs = _parseArguments(job->arguments);
-                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL, false,
-                                                                        saveInfo);
+                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL,
+                                                                        isBackground, !isBackground && saveInfo);
                     processes.emplace_back(process);
                 }
 
                 auto pipeline = std::make_shared<JobRunner::Process>(processes);
                 auto jobResult = _runCommand(pipeline);
-                return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
-            }
-            case Parser::ASYNC_CMD: {
-                auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(node);
-                auto cmd = std::static_pointer_cast<Parser::CmdCmdNode>(asyncCmd->cmd);
-                // Parse the arguments
-                args = _parseArguments(cmd->arguments);
-
-                // Run the command
-                // Note: hard-coded false for async command because we shouldn't save info for an async command
-                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, true, false);
-                auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
             default:
@@ -181,9 +176,12 @@ namespace FlowController {
             }
             case Parser::VAR_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::VarExprNode>(node);
-                CommanderTypePtr value = _getVariable(
-                        std::static_pointer_cast<Parser::IdentVariableNode>(expr->variable)->varName);
+                CommanderTypePtr value = _getVariable(expr->variable);
                 return value;
+            }
+            case Parser::LVALUE_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::LValueExprNode>(node);
+                return _expr(expr->expr);
             }
             case Parser::ARRAY_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ArrayExprNode>(node);
@@ -194,15 +192,13 @@ namespace FlowController {
             case Parser::INDEX_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::IndexExprNode>(node);
                 const CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(expr->index));
-                auto baseExpr = expr->expr;
-                auto baseEval = _expr(baseExpr);
-                if (baseExpr->type->getType() == TypeChecker::ARRAY) {
-                    const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(_expr(baseExpr));
+                CommanderTypePtr dataStructure = _expr(expr->expr);
+                if (dataStructure->getType() == TypeChecker::ARRAY) {
+                    const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(dataStructure);
                     return array->values[index->value];
-                } else {
-                    const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(_expr(baseExpr));
-                    return tuple->values[index->value];
                 }
+                const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(dataStructure);
+                return tuple->values[index->value];
             }
             case Parser::TUPLE_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::TupleExprNode>(node);
@@ -228,26 +224,6 @@ namespace FlowController {
                 auto binaryOperation = std::static_pointer_cast<Parser::BinOpExprNode>(node);
                 return _binaryOp(binaryOperation);
             }
-            case Parser::CALL_EXPR: {
-                auto expr = std::static_pointer_cast<Parser::CallExprNode>(node);
-                auto function = std::static_pointer_cast<CommanderLambda>(_expr(expr->func));
-
-                _symbolTable.pushSymbolTable();  // new scope for function
-
-                int bindingIndex = 0;
-                for (auto& arg : expr->args->exprs) {
-                    // args and bindings should be lined up 1 to 1
-                    CommanderTypePtr argValue = _expr(arg);
-                    std::string const argName = function->bindings->bindings[bindingIndex]->variable;
-                    _setVariable(argName, argValue);
-
-                    bindingIndex++;
-                }
-                CommanderTypePtr returnValue = _stmt(function->body);
-
-                _symbolTable.popSymbolTable();  // remove function scope!
-                return returnValue;
-            }
             case Parser::LAMBDA_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::LambdaExprNode>(node);
                 return std::make_shared<CommanderLambda>(expr->bindings, expr->body);
@@ -256,9 +232,33 @@ namespace FlowController {
                 auto expr = std::static_pointer_cast<Parser::CmdExprNode>(node);
                 return _cmd(expr->cmd, true);
             }
+            case Parser::CALL_EXPR:
             case Parser::API_CALL_EXPR: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+                CommanderTypePtr returnValue = _builtin(node);
+                if (returnValue) { return returnValue; }
+                std::vector<Parser::ExprNodePtr> exprs;
+                std::shared_ptr<CommanderLambda> function;
+                if (node->nodeType() == Parser::CALL_EXPR) {
+                    auto expr = std::static_pointer_cast<Parser::CallExprNode>(node);
+                    exprs = expr->args->exprs;
+                    function = std::static_pointer_cast<CommanderLambda>(_expr(expr->func));
+                } else {
+                    auto callExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
+                    exprs = callExpr->args->exprs;
+                    function = std::static_pointer_cast<CommanderLambda>(_getVariable(callExpr->func));
+                }
+                _symbolTable.pushSymbolTable();  // new scope for function
+                int bindingIndex = 0;
+                for (auto& arg : exprs) {
+                    // args and bindings should be lined up 1 to 1
+                    const CommanderTypePtr argValue = _expr(arg);
+                    std::string const argName = function->bindings->bindings[bindingIndex++]->variable;
+                    _setVariable(argName, argValue);
+                }
+                returnValue = _stmt(function->body);
+
+                _symbolTable.popSymbolTable();  // remove function scope!
+                return returnValue;
             }
             case Parser::SCAN_EXPR: {
                 // TODO: Implement
@@ -376,6 +376,14 @@ namespace FlowController {
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
+                if (Util::usingNCurses) {
+                    auto returnInfo = _cmd(cmd->command, true);
+                    auto tuple = std::static_pointer_cast<CommanderTuple>(returnInfo);
+
+                    Util::print(tuple->values[0]->getStringRepresentation());
+                    Util::print(tuple->values[1]->getStringRepresentation());
+                    return returnInfo;
+                }
                 return _cmd(cmd->command);
             }
                 // Util::println(std::to_string(std::any_cast<TypeChecker::CommanderBool>(value)));
@@ -388,63 +396,20 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
             }
             case Parser::IMPORT_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                auto stmt = std::static_pointer_cast<Parser::ImportStmtNode>(node);
+                runtime(stmt->prgm);
+                return nullptr;
             }
             case Parser::PRINT_STMT: {
-                auto expr = std::static_pointer_cast<Parser::PrintStmtNode>(node);
-                const CommanderTypePtr value = _expr(expr->expression);
-                switch (expr->expression->type->getType()) {
-                    case TypeChecker::INT:
-                        Util::print(std::static_pointer_cast<CommanderInt>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::FLOAT:
-                        Util::print(std::static_pointer_cast<CommanderFloat>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::BOOL:
-                        Util::print(std::static_pointer_cast<CommanderBool>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::TUPLE:
-                        Util::print(std::static_pointer_cast<CommanderTuple>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::ARRAY:
-                        Util::print(std::static_pointer_cast<CommanderArray>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::FUNCTION:
-                        Util::print(std::static_pointer_cast<CommanderLambda>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::STRING:
-                        Util::print(std::static_pointer_cast<CommanderString>(value)->getStringRepresentation());
-                        break;
-                }
+                auto stmt = std::static_pointer_cast<Parser::PrintStmtNode>(node);
+                const CommanderTypePtr value = _expr(stmt->expression);
+                Util::print(value->getStringRepresentation());
                 return nullptr;
             }
             case Parser::PRINTLN_STMT: {
-                auto expr = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
-                const CommanderTypePtr value = _expr(expr->expression);
-                switch (expr->expression->type->getType()) {
-                    case TypeChecker::INT:
-                        Util::println(std::static_pointer_cast<CommanderInt>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::FLOAT:
-                        Util::println(std::static_pointer_cast<CommanderFloat>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::BOOL:
-                        Util::println(std::static_pointer_cast<CommanderBool>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::TUPLE:
-                        Util::println(std::static_pointer_cast<CommanderTuple>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::ARRAY:
-                        Util::println(std::static_pointer_cast<CommanderArray>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::FUNCTION:
-                        Util::println(std::static_pointer_cast<CommanderLambda>(value)->getStringRepresentation());
-                        break;
-                    case TypeChecker::STRING:
-                        Util::println(std::static_pointer_cast<CommanderString>(value)->getStringRepresentation());
-                        break;
-                }
+                auto stmt = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
+                const CommanderTypePtr value = _expr(stmt->expression);
+                Util::println(value->getStringRepresentation());
                 return nullptr;
             }
             case Parser::WRITE_STMT: {
@@ -454,9 +419,23 @@ namespace FlowController {
                 Util::writeToFile(data->value, path->value);
                 return nullptr;
             }
-            case Parser::TYPE_STMT: {
+            case Parser::TYPE_STMT:
+                // Ignore type statements
+                return nullptr;
+            case Parser::BREAK_STMT:
                 // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                return nullptr;
+            case Parser::CONTINUE_STMT:
+                // TODO: Implement
+                return nullptr;
+            case Parser::TIMEOUT_STMT:
+                // TODO: Implement
+                return nullptr;
+            case Parser::ASSERT_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::AssertStmtNode>(node);
+                const CommanderBoolPtr value = std::static_pointer_cast<CommanderBool>(_expr(stmt->expr));
+                if (!value->value) { throw Util::CommanderException("Assertion Error: " + _string(stmt->message)); }
+                return nullptr;
             }
             case Parser::FUNCTION_STMT: {
                 // TODO: Implement
@@ -466,7 +445,6 @@ namespace FlowController {
                 throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
             }
         }
-        return nullptr;
     }
 
     void FlowController::_stmts(const Parser::StmtsNodePtr& nodes) {
@@ -481,55 +459,16 @@ namespace FlowController {
         return stringResult;
     }
 
-    void FlowController::_types(const Parser::TypesNodePtr& node) {
-        for (auto& type : node->types) { _type(type); }
-    }
-
-    void FlowController::_type(const Parser::TypeNodePtr& node) {
-        // TODO: Implement
-    }
-
-    void FlowController::_variable(const Parser::VariableNodePtr&) {}
-
     CommanderTypePtr FlowController::_unaryOp(std::shared_ptr<Parser::UnOpExprNode>& unOp) {
         switch (unOp->opType) {
             case Parser::NEGATE: {
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            intType->value *= -1;
-                            _setVariable(varI->varName, intType);
-                            return intType;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            floatType->value *= -1.0F;
-                            _setVariable(varI->varName, floatType);
-                            return floatType;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-
-                CommanderTypePtr const expr = _expr(unOp->expr);
+                CommanderTypePtr const expr = _expr(std::static_pointer_cast<Parser::ExprNode>(unOp->node));
                 switch (expr->getType()) {
                     case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        intType->value *= -1;
-                        return intType;
+                        return std::make_shared<CommanderInt>(-std::static_pointer_cast<CommanderInt>(expr)->value);
                     }
                     case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        floatType->value *= -1.0F;
-                        return floatType;
+                        return std::make_shared<CommanderFloat>(-std::static_pointer_cast<CommanderFloat>(expr)->value);
                     }
                     default:
                         throw Util::CommanderException("Trying to negate bad type "
@@ -537,201 +476,134 @@ namespace FlowController {
                 }
             }
             case Parser::NOT: {
-                auto expr = std::static_pointer_cast<CommanderBool>(_expr(unOp->expr));
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    auto boolType = std::static_pointer_cast<CommanderBool>(value);
-                    boolType->value = !boolType->value;
-                    _setVariable(varI->varName, boolType);
-                    return boolType;
-                }
+                auto expr = std::static_pointer_cast<CommanderBool>(
+                        _expr(std::static_pointer_cast<Parser::ExprNode>(unOp->node)));
                 switch (expr->getType()) {
                     case TypeChecker::BOOL: {
-                        auto boolType = std::static_pointer_cast<CommanderBool>(expr);
-                        boolType->value = !boolType->value;
-                        return boolType;
+                        return std::make_shared<CommanderBool>(!std::static_pointer_cast<CommanderBool>(expr)->value);
                     }
                     default:
                         throw Util::CommanderException("Trying to use ! operator on bad type "
                                                        + TypeChecker::typeToString(expr->getType()));
                 }
             }
-            case Parser::PRE_INCREMENT: {
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            intType->value++;
-                            _setVariable(varI->varName, intType);
-                            return intType;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            floatType->value++;
-                            _setVariable(varI->varName, floatType);
-                            return floatType;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-                switch (expr->getType()) {
-                    case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        intType->value++;
-                        return intType;
-                    }
-                    case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        floatType->value++;
-                        return floatType;
-                    }
-                    default:
-                        throw Util::CommanderException("Trying to pre increment bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
-                }
-            }
-            case Parser::POST_INCREMENT: {
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            auto hold = std::make_shared<CommanderInt>(intType->value);
-                            intType->value++;
-                            _setVariable(varI->varName, intType);
-                            return hold;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                            floatType->value++;
-                            _setVariable(varI->varName, floatType);
-                            return hold;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                switch (expr->getType()) {
-                    case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        auto hold = std::make_shared<CommanderInt>(intType->value);
-                        intType->value++;
-                        return hold;
-                    }
-                    case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                        floatType->value++;
-                        return hold;
-                    }
-                    default:
-                        throw Util::CommanderException("Trying to post increment bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
-                }
-            }
-            case Parser::PRE_DECREMENT: {
-                // might need to set variable
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
-                    switch (value->getType()) {
-                        case TypeChecker::INT: {
-                            auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            intType->value--;
-                            _setVariable(varI->varName, intType);
-                            return intType;
-                        }
-                        case TypeChecker::FLOAT: {
-                            auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            floatType->value--;
-                            _setVariable(varI->varName, floatType);
-                            return floatType;
-                        }
-                        default:
-                            throw Util::CommanderException("Trying to negate bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
-                    }
-                }
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                switch (expr->getType()) {
-                    case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        intType->value--;
-                        return intType;
-                    }
-                    case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        floatType->value--;
-                        return floatType;
-                    }
-                    default:
-                        throw Util::CommanderException("Trying to pre decrement bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
-                }
-            }
+            case Parser::PRE_INCREMENT:
+            case Parser::POST_INCREMENT:
+            case Parser::PRE_DECREMENT:
             case Parser::POST_DECREMENT: {
-                if (unOp->variable != nullptr) {
-                    auto var = std::static_pointer_cast<Parser::VariableNode>(unOp->variable);
-                    auto varI = std::static_pointer_cast<Parser::IdentVariableNode>(var);
-                    auto value = _getVariable(varI->varName);
-
+                if (unOp->node->nodeType() == Parser::VAR_LVALUE) {
+                    std::string varName = std::static_pointer_cast<Parser::VarLValueNode>(unOp->node)->variable;
+                    auto value = _getVariable(varName);
                     switch (value->getType()) {
                         case TypeChecker::INT: {
                             auto intType = std::static_pointer_cast<CommanderInt>(value);
-                            auto hold = std::make_shared<CommanderInt>(intType->value);
-                            intType->value--;
-                            _setVariable(varI->varName, intType);
-                            return hold;
+                            switch (unOp->opType) {
+                                case Parser::PRE_INCREMENT:
+                                case Parser::POST_INCREMENT:
+                                    intType->value++;
+                                    break;
+                                case Parser::PRE_DECREMENT:
+                                case Parser::POST_DECREMENT:
+                                    intType->value--;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            _setVariable(varName, intType);
+                            if (unOp->opType == Parser::POST_DECREMENT) {
+                                return std::make_shared<CommanderInt>(intType->value + 1);
+                            }
+                            if (unOp->opType == Parser::POST_INCREMENT) {
+                                return std::make_shared<CommanderInt>(intType->value - 1);
+                            }
+                            return intType;
                         }
                         case TypeChecker::FLOAT: {
                             auto floatType = std::static_pointer_cast<CommanderFloat>(value);
-                            auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                            floatType->value--;
-                            _setVariable(varI->varName, floatType);
-                            return hold;
+                            switch (unOp->opType) {
+                                case Parser::PRE_INCREMENT:
+                                case Parser::POST_INCREMENT:
+                                    floatType->value++;
+                                    break;
+                                case Parser::PRE_DECREMENT:
+                                case Parser::POST_DECREMENT:
+                                    floatType->value--;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            _setVariable(varName, floatType);
+                            if (unOp->opType == Parser::POST_DECREMENT) {
+                                return std::make_shared<CommanderFloat>(floatType->value + 1.0);
+                            }
+                            if (unOp->opType == Parser::POST_INCREMENT) {
+                                return std::make_shared<CommanderFloat>(floatType->value - 1.0);
+                            }
+                            return floatType;
                         }
                         default:
-                            throw Util::CommanderException("Trying to negate bad type "
+                            throw Util::CommanderException("Trying to increment or decrement bad type "
                                                            + TypeChecker::typeToString(value->getType()));
                     }
                 }
-                CommanderTypePtr const expr = _expr(unOp->expr);
-                switch (expr->getType()) {
+                Parser::IndexLValueNodePtr indexLValue = std::static_pointer_cast<Parser::IndexLValueNode>(unOp->node);
+                CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexLValue->index));
+                CommanderTypePtr dataStructure = _expr(std::make_shared<Parser::IndexExprNode>(indexLValue));
+                std::vector<CommanderTypePtr>& values
+                        = dataStructure->getType() == TypeChecker::ARRAY
+                                ? std::static_pointer_cast<CommanderArray>(dataStructure)->values
+                                : std::static_pointer_cast<CommanderTuple>(dataStructure)->values;
+                CommanderTypePtr value = values[index->value];
+                switch (value->getType()) {
                     case TypeChecker::INT: {
-                        auto intType = std::static_pointer_cast<CommanderInt>(expr);
-                        auto hold = std::make_shared<CommanderInt>(intType->value);
-                        intType->value--;
-                        return hold;
+                        auto intType = std::static_pointer_cast<CommanderInt>(value);
+                        switch (unOp->opType) {
+                            case Parser::PRE_INCREMENT:
+                            case Parser::POST_INCREMENT:
+                                intType->value++;
+                                break;
+                            case Parser::PRE_DECREMENT:
+                            case Parser::POST_DECREMENT:
+                                intType->value--;
+                                break;
+                            default:
+                                break;
+                        }
+                        values[index->value] = intType;
+                        if (unOp->opType == Parser::POST_DECREMENT) {
+                            return std::make_shared<CommanderInt>(intType->value + 1);
+                        }
+                        if (unOp->opType == Parser::POST_INCREMENT) {
+                            return std::make_shared<CommanderInt>(intType->value - 1);
+                        }
+                        return intType;
                     }
                     case TypeChecker::FLOAT: {
-                        auto floatType = std::static_pointer_cast<CommanderFloat>(expr);
-                        auto hold = std::make_shared<CommanderFloat>(floatType->value);
-                        floatType->value--;
-                        return hold;
+                        auto floatType = std::static_pointer_cast<CommanderFloat>(value);
+                        switch (unOp->opType) {
+                            case Parser::PRE_INCREMENT:
+                            case Parser::POST_INCREMENT:
+                                floatType->value++;
+                                break;
+                            case Parser::PRE_DECREMENT:
+                            case Parser::POST_DECREMENT:
+                                floatType->value--;
+                                break;
+                            default:
+                                break;
+                        }
+                        values[index->value] = floatType;
+                        if (unOp->opType == Parser::POST_DECREMENT) {
+                            return std::make_shared<CommanderFloat>(floatType->value + 1.0);
+                        }
+                        if (unOp->opType == Parser::POST_INCREMENT) {
+                            return std::make_shared<CommanderFloat>(floatType->value - 1.0);
+                        }
+                        return floatType;
                     }
                     default:
-                        throw Util::CommanderException("Trying to post decrement bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
+                        throw Util::CommanderException("Trying to increment or decrement bad type "
+                                                       + TypeChecker::typeToString(value->getType()));
                 }
             }
             default: {
@@ -741,101 +613,262 @@ namespace FlowController {
     }
 
     CommanderTypePtr FlowController::_binaryOp(Parser::BinOpExprNodePtr& binOp) {
-        CommanderTypePtr right = _expr(binOp->rightExpr);
-
-        CommanderTypePtr left;
-        Parser::IdentVariableNodePtr variable;
-        if (binOp->leftExpr != nullptr) left = _expr(binOp->leftExpr);
-        else
-            variable = std::static_pointer_cast<Parser::IdentVariableNode>(binOp->leftVariable);
+        CommanderTypePtr right = _expr(binOp->right);
 
         switch (binOp->opType) {
             case Parser::LESSER: {
-                return lesserOperation(left, right);
+                return lesserOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::GREATER: {
-                return greaterOperation(left, right);
+                return greaterOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::EQUAL: {
-                return equalOperation(left, right);
+                return equalOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::NOT_EQUAL: {
-                return notEqualOperation(left, right);
+                return notEqualOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::LESSER_EQUAL: {
-                return lesserEqualOperation(left, right);
+                return lesserEqualOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::GREATER_EQUAL: {
-                return greaterEqualOperation(left, right);
+                return greaterEqualOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::MODULO: {
-                return moduloOperation(left, right);
+                return moduloOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::DIVIDE: {
-                return divideOperation(left, right);
+                return divideOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::MULTIPLY: {
-                return multiplyOperation(left, right);
+                return multiplyOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::SUBTRACT: {
-                return subtractOperation(left, right);
+                return subtractOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::ADD: {
-                return addOperation(left, right);
+                return addOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::EXPONENTIATE: {
-                return exponentiateOperation(left, right);
+                return exponentiateOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::AND: {
-                return andOperation(left, right);
+                return andOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
             case Parser::OR: {
-                return orOperation(left, right);
+                return orOperation(_expr(std::static_pointer_cast<Parser::ExprNode>(binOp->left)), right);
             }
-            case Parser::SET: {
-                _setVariable(variable->varName, right);
-                return right;
-            }
-            case Parser::ADD_SET: {
-                CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                CommanderTypePtr result = addOperation(leftVar, right);
-                _setVariable(variable->varName, result);
-                return result;
-            }
-            case Parser::SUBTRACT_SET: {
-                CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                CommanderTypePtr result = subtractOperation(leftVar, right);
-                _setVariable(variable->varName, result);
-                return result;
-            }
-            case Parser::MULTIPLY_SET: {
-                CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                CommanderTypePtr result = multiplyOperation(leftVar, right);
-                _setVariable(variable->varName, result);
-                return result;
-            }
-            case Parser::DIVIDE_SET: {
-                CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                CommanderTypePtr result = divideOperation(leftVar, right);
-                _setVariable(variable->varName, result);
-                return result;
-            }
-            case Parser::MODULO_SET: {
-                CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                CommanderTypePtr result = moduloOperation(leftVar, right);
-                _setVariable(variable->varName, result);
-                return result;
-            }
+            case Parser::SET:
+            case Parser::ADD_SET:
+            case Parser::SUBTRACT_SET:
+            case Parser::MULTIPLY_SET:
+            case Parser::DIVIDE_SET:
+            case Parser::MODULO_SET:
             case Parser::EXPONENTIATE_SET: {
-                CommanderTypePtr const leftVar = _getVariable(variable->varName);
-                CommanderTypePtr result = exponentiateOperation(leftVar, right);
-                _setVariable(variable->varName, result);
+                if (binOp->left->nodeType() == Parser::VAR_LVALUE || binOp->left->nodeType() == Parser::BINDING) {
+                    std::string varName = binOp->left->nodeType() == Parser::VAR_LVALUE
+                                                ? std::static_pointer_cast<Parser::VarLValueNode>(binOp->left)->variable
+                                                : std::static_pointer_cast<Parser::BindingNode>(binOp->left)->variable;
+                    if (binOp->opType == Parser::SET) {
+                        _setVariable(varName, right);
+                        return right;
+                    }
+                    CommanderTypePtr result;
+                    CommanderTypePtr const leftVar = _getVariable(varName);
+                    switch (binOp->opType) {
+                        case Parser::ADD_SET:
+                            result = addOperation(leftVar, right);
+                            break;
+                        case Parser::SUBTRACT_SET:
+                            result = subtractOperation(leftVar, right);
+                            break;
+                        case Parser::MULTIPLY_SET:
+                            result = multiplyOperation(leftVar, right);
+                            break;
+                        case Parser::DIVIDE_SET:
+                            result = divideOperation(leftVar, right);
+                            break;
+                        case Parser::MODULO_SET:
+                            result = moduloOperation(leftVar, right);
+                            break;
+                        case Parser::EXPONENTIATE_SET:
+                            result = exponentiateOperation(leftVar, right);
+                            break;
+                        default:
+                            break;
+                    }
+                    _setVariable(varName, result);
+                    return result;
+                }
+                Parser::IndexLValueNodePtr indexLValue = std::static_pointer_cast<Parser::IndexLValueNode>(binOp->left);
+                CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexLValue->index));
+                CommanderTypePtr dataStructure = _expr(std::make_shared<Parser::IndexExprNode>(indexLValue));
+                std::vector<CommanderTypePtr>& values
+                        = dataStructure->getType() == TypeChecker::ARRAY
+                                ? std::static_pointer_cast<CommanderArray>(dataStructure)->values
+                                : std::static_pointer_cast<CommanderTuple>(dataStructure)->values;
+                if (binOp->opType == Parser::SET) {
+                    values[index->value] = right;
+                    return right;
+                }
+                CommanderTypePtr result;
+                switch (binOp->opType) {
+                    case Parser::ADD_SET:
+                        result = addOperation(values[index->value], right);
+                        break;
+                    case Parser::SUBTRACT_SET:
+                        result = subtractOperation(values[index->value], right);
+                        break;
+                    case Parser::MULTIPLY_SET:
+                        result = multiplyOperation(values[index->value], right);
+                        break;
+                    case Parser::DIVIDE_SET:
+                        result = divideOperation(values[index->value], right);
+                        break;
+                    case Parser::MODULO_SET:
+                        result = moduloOperation(values[index->value], right);
+                        break;
+                    case Parser::EXPONENTIATE_SET:
+                        result = exponentiateOperation(values[index->value], right);
+                        break;
+                    default:
+                        break;
+                }
+                values[index->value] = result;
                 return result;
             }
             default: {
                 throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
             }
         }
+    }
+
+    CommanderTypePtr FlowController::_builtin(Parser::ExprNodePtr node) {
+        std::string name;
+        std::vector<Parser::ExprNodePtr> args;
+        if (node->nodeType() == Parser::CALL_EXPR) {
+            Parser::CallExprNodePtr callExpr = std::static_pointer_cast<Parser::CallExprNode>(node);
+            if (callExpr->func->nodeType() != Parser::VAR_EXPR
+                && (callExpr->func->nodeType() != Parser::LVALUE_EXPR
+                    || std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr->nodeType()
+                               != Parser::VAR_EXPR)) {
+                return nullptr;
+            }
+            name = callExpr->func->nodeType() == Parser::VAR_EXPR
+                         ? std::static_pointer_cast<Parser::VarExprNode>(callExpr->func)->variable
+                         : std::static_pointer_cast<Parser::VarExprNode>(
+                                   std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr)
+                                   ->variable;
+            args = callExpr->args->exprs;
+        } else if (node->nodeType() == Parser::API_CALL_EXPR) {
+            Parser::ApiCallExprNodePtr apiExpr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
+            name = apiExpr->func;
+            args = apiExpr->args->exprs;
+        }
+        if (name == "parseInt") { return Function::parseInt(_expr(args[0])); }
+        if (name == "parseFloat") { return Function::parseFloat(_expr(args[0])); }
+        if (name == "parseBool") { return Function::parseBool(_expr(args[0])); }
+        if (name == "toString") { return Function::toString(_expr(args[0])); }
+        if (name == "sqrt") { return Function::sqrt(_expr(args[0])); }
+        if (name == "ln") { return Function::ln(_expr(args[0])); }
+        if (name == "log") { return Function::log(_expr(args[0])); }
+        if (name == "abs") { return Function::abs(_expr(args[0])); }
+        if (name == "floor") { return Function::floor(_expr(args[0])); }
+        if (name == "ceil") { return Function::ceil(_expr(args[0])); }
+        if (name == "round") { return Function::round(_expr(args[0])); }
+        if (name == "sin") { return Function::sin(_expr(args[0])); }
+        if (name == "cos") { return Function::cos(_expr(args[0])); }
+        if (name == "tan") { return Function::tan(_expr(args[0])); }
+        if (name == "csc") { return Function::csc(_expr(args[0])); }
+        if (name == "sec") { return Function::sec(_expr(args[0])); }
+        if (name == "cot") { return Function::cot(_expr(args[0])); }
+        if (name == "sinh") { return Function::sinh(_expr(args[0])); }
+        if (name == "cosh") { return Function::cosh(_expr(args[0])); }
+        if (name == "tanh") { return Function::tanh(_expr(args[0])); }
+        if (name == "csch") { return Function::csch(_expr(args[0])); }
+        if (name == "sech") { return Function::sech(_expr(args[0])); }
+        if (name == "coth") { return Function::coth(_expr(args[0])); }
+        if (name == "arcsin") { return Function::arcsin(_expr(args[0])); }
+        if (name == "arccos") { return Function::arccos(_expr(args[0])); }
+        if (name == "arctan") { return Function::arctan(_expr(args[0])); }
+        if (name == "arccsc") { return Function::arccsc(_expr(args[0])); }
+        if (name == "arcsec") { return Function::arcsec(_expr(args[0])); }
+        if (name == "arccot") { return Function::arccot(_expr(args[0])); }
+        if (name == "arcsinh") { return Function::arcsinh(_expr(args[0])); }
+        if (name == "arccosh") { return Function::arccosh(_expr(args[0])); }
+        if (name == "arctanh") { return Function::arctanh(_expr(args[0])); }
+        if (name == "arccsch") { return Function::arccsch(_expr(args[0])); }
+        if (name == "arcsech") { return Function::arcsech(_expr(args[0])); }
+        if (name == "arccoth") { return Function::arccoth(_expr(args[0])); }
+        if (name == "random") { return Function::randomFloat(); }
+        if (name == "time") { return Function::time(); }
+        if (name == "date") { return Function::date(); }
+        if (name == "sleep") { return Function::sleep(std::static_pointer_cast<CommanderInt>(_expr(args[0]))); }
+        if (name == "charAt") {
+            return Function::charAt(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                    std::static_pointer_cast<CommanderInt>(_expr(args[1])));
+        }
+        if (name == "startsWith") {
+            return Function::startsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[1])));
+        }
+        if (name == "endsWith") {
+            return Function::endsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                      std::static_pointer_cast<CommanderString>(_expr(args[1])));
+        }
+        if (name == "includes") { return Function::includes(_expr(args[0]), _expr(args[1])); }
+        if (name == "indexOf") { return Function::indexOf(_expr(args[0]), _expr(args[1])); }
+        if (name == "length") { return Function::length(_expr(args[0])); }
+        if (name == "replace") {
+            return Function::replace(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                     std::static_pointer_cast<CommanderString>(_expr(args[1])),
+                                     std::static_pointer_cast<CommanderString>(_expr(args[2])));
+        }
+        if (name == "replaceAll") {
+            return Function::replaceAll(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[1])),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[2])));
+        }
+        if (name == "substring") {
+            if (args.size() == 2) {
+                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])));
+            } else {
+                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[2])));
+            }
+        }
+        if (name == "trim") { return Function::trim(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
+        if (name == "lower") { return Function::lower(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
+        if (name == "upper") { return Function::upper(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
+        if (name == "split") {
+            return Function::split(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                   std::static_pointer_cast<CommanderString>(_expr(args[1])));
+        }
+        if (name == "sort") {
+            return Function::sort(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                  std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+        }
+        if (name == "filter") {
+            return Function::filter(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                    std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+        }
+        if (name == "map") {
+            return Function::map(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                 std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+        }
+        if (name == "foreach") {
+            return Function::foreach(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                     std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+        }
+        if (name == "append") {
+            return Function::append(std::static_pointer_cast<CommanderArray>(_expr(args[0])), _expr(args[1]));
+        }
+        if (name == "remove") {
+            return Function::remove(std::static_pointer_cast<CommanderArray>(_expr(args[0])), _expr(args[1]));
+        }
+        return nullptr;
     }
 
     //  ==========================
@@ -878,12 +911,12 @@ namespace FlowController {
         return result;
     }
 
-    void FlowController::_getJobs(const Parser::CmdNodePtr& head, std::vector<Parser::CmdCmdNodePtr>& jobs) {
+    void FlowController::_getJobs(const Parser::CmdNodePtr& head, std::vector<Parser::BasicCmdNodePtr>& jobs) {
         if (head == nullptr) return;
 
-        // leaf nodes are cmd_cmd nodes
-        if (head->nodeType() == Parser::CMD_CMD) {
-            jobs.emplace_back(std::static_pointer_cast<Parser::CmdCmdNode>(head));
+        // leaf nodes are basic_cmd nodes
+        if (head->nodeType() == Parser::BASIC_CMD) {
+            jobs.emplace_back(std::static_pointer_cast<Parser::BasicCmdNode>(head));
             return;
         }
 
@@ -892,7 +925,7 @@ namespace FlowController {
             _getJobs(tmp->leftCmd, jobs);
             // in current state of parser,
             // right cmds are always leaf nodes
-            jobs.emplace_back(std::static_pointer_cast<Parser::CmdCmdNode>(tmp->rightCmd));
+            jobs.emplace_back(std::static_pointer_cast<Parser::BasicCmdNode>(tmp->rightCmd));
         }
     }
 }  // namespace FlowController

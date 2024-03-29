@@ -1,2 +1,2 @@
 //Test precedence
-x = --x--;
+x = -x--;

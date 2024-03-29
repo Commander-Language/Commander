@@ -1,5 +1,5 @@
 //Test simple variable assignment with ints
 x = 3;
 y = x;
-print x;
-print y;
+println x;
+println y;

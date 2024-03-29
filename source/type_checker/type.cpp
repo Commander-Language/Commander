@@ -65,6 +65,7 @@ namespace TypeChecker {
         if (!type1 || !type2) { return false; }
         Type const typ = type1->getType();
         if (typ != type2->getType()) { return false; }
+        if (type1->any() || type2->any()) { return true; }
         switch (typ) {
             case ARRAY: {
                 std::shared_ptr<ArrayTy> const ty1 = std::static_pointer_cast<ArrayTy>(type1);
@@ -120,10 +121,14 @@ namespace TypeChecker {
 
     ArrayTy::ArrayTy(std::shared_ptr<Ty> type) : Ty(type == ANY_TY), baseType(std::move(type)) {}
 
+    ArrayTy::ArrayTy(bool any) : Ty(any) {}
+
     Type ArrayTy::getType() const { return Type::ARRAY; }
 
     FunctionTy::FunctionTy(std::vector<std::shared_ptr<Ty>> params, std::shared_ptr<Ty> retType)
         : Ty(false), parameters(std::move(params)), returnType(std::move(retType)) {}
+
+    FunctionTy::FunctionTy(bool any) : Ty(any) {}
 
     Type FunctionTy::getType() const { return Type::FUNCTION; }
 

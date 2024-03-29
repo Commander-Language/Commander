@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode val) SET (BinOpExprNode (FloatExprNode 1.000000) NOT_EQUAL (IntExprNode 2)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode val) SET (BinOpExprNode (FloatExprNode 1.000000) NOT_EQUAL (IntExprNode 2)))))

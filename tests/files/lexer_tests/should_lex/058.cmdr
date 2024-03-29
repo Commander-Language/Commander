@@ -1,3 +1,3 @@
 // Test that lambdas lex with return type included
-nada = (x,y) : int -> {
+nada = fn (x,y) : int -> {
 }

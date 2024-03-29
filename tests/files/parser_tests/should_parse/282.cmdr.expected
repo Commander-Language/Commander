@@ -1,0 +1,9 @@
+(PrgmNode
+	(ScopeStmtNode (StmtsNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (IntExprNode 5)))
+	(ScopeStmtNode (StmtsNode
+	(ExprStmtNode (BinOpExprNode (BindingNode y) SET (LValueExprNode (VarExprNode x))))
+	(ScopeStmtNode (StmtsNode
+	(ExprStmtNode (BinOpExprNode (BindingNode z) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '')) (BinOpExprNode (LValueExprNode (VarExprNode x)) ADD (LValueExprNode (VarExprNode y))) (StringExpressionNode (StringNode '')))))))
+	(ScopeStmtNode (StmtsNode
+	(PrintStmtNode (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode x)) ADD (LValueExprNode (VarExprNode y))) ADD (LValueExprNode (VarExprNode z)))))))))))))

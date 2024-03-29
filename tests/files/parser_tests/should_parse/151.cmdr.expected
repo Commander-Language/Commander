@@ -1,2 +1,2 @@
 (PrgmNode
-	(ExprStmtNode (BinOpExprNode (IdentVariableNode x) SET (BinOpExprNode (VarExprNode (IdentVariableNode a)) ADD (BinOpExprNode (VarExprNode (IdentVariableNode b)) MULTIPLY (VarExprNode (IdentVariableNode c)))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (LValueExprNode (VarExprNode a)) ADD (BinOpExprNode (LValueExprNode (VarExprNode b)) MULTIPLY (LValueExprNode (VarExprNode c)))))))

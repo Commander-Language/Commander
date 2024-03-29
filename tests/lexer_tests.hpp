@@ -82,26 +82,38 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("102.cmdr", "102.cmdr.expected"), std::make_tuple("103.cmdr", "103.cmdr.expected"),
                 std::make_tuple("104.cmdr", "104.cmdr.expected"), std::make_tuple("105.cmdr", "105.cmdr.expected"),
                 std::make_tuple("106.cmdr", "106.cmdr.expected"), std::make_tuple("107.cmdr", "107.cmdr.expected"),
-                std::make_tuple("108.cmdr", "108.cmdr.expected")));
+                std::make_tuple("108.cmdr", "108.cmdr.expected"), std::make_tuple("109.cmdr", "109.cmdr.expected"),
+                std::make_tuple("110.cmdr", "110.cmdr.expected"), std::make_tuple("111.cmdr", "111.cmdr.expected"),
+                std::make_tuple("112.cmdr", "112.cmdr.expected"), std::make_tuple("113.cmdr", "113.cmdr.expected"),
+                std::make_tuple("114.cmdr", "114.cmdr.expected"), std::make_tuple("115.cmdr", "115.cmdr.expected"),
+                std::make_tuple("116.cmdr", "116.cmdr.expected"), std::make_tuple("117.cmdr", "117.cmdr.expected"),
+                std::make_tuple("118.cmdr", "118.cmdr.expected"), std::make_tuple("119.cmdr", "119.cmdr.expected"),
+                std::make_tuple("120.cmdr", "120.cmdr.expected"), std::make_tuple("121.cmdr", "121.cmdr.expected"),
+                std::make_tuple("122.cmdr", "122.cmdr.expected")));
 
 /**
  * Creates test suite, with list of all the files that need to be lexed that are expected to fail (as a result of a
  * CommanderException being thrown)
  */
-INSTANTIATE_TEST_SUITE_P(LexerTestFiles, LexerFailTests,
-                         ::testing::Values("000.cmdr", "001.cmdr", "002.cmdr", "003.cmdr", "004.cmdr", "005.cmdr",
-                                           "006.cmdr", "007.cmdr", "008.cmdr", "009.cmdr", "010.cmdr", "011.cmdr",
-                                           "012.cmdr", "013.cmdr", "014.cmdr", "015.cmdr", "016.cmdr", "017.cmdr",
-                                           "018.cmdr", "019.cmdr", "020.cmdr", "021.cmdr", "022.cmdr", "023.cmdr",
-                                           "024.cmdr", "025.cmdr", "026.cmdr", "027.cmdr", "028.cmdr", "029.cmdr",
-                                           "030.cmdr", "031.cmdr", "032.cmdr", "033.cmdr", "034.cmdr", "035.cmdr",
-                                           "036.cmdr", "037.cmdr", "038.cmdr", "039.cmdr", "040.cmdr", "041.cmdr",
-                                           "042.cmdr", "043.cmdr", "044.cmdr", "045.cmdr", "046.cmdr", "047.cmdr",
-                                           "048.cmdr", "049.cmdr", "050.cmdr", "051.cmdr", "052.cmdr", "053.cmdr",
-                                           "054.cmdr", "055.cmdr", "056.cmdr", "057.cmdr", "058.cmdr", "059.cmdr",
-                                           "060.cmdr", "061.cmdr", "062.cmdr", "063.cmdr", "064.cmdr", "065.cmdr",
-                                           "066.cmdr", "067.cmdr", "068.cmdr", "069.cmdr", "070.cmdr", "071.cmdr",
-                                           "072.cmdr", "073.cmdr", "074.cmdr", "075.cmdr", "076.cmdr", "077.cmdr"));
+INSTANTIATE_TEST_SUITE_P(
+        LexerTestFiles, LexerFailTests,
+        ::testing::Values("000.cmdr", "001.cmdr", "002.cmdr", "003.cmdr", "004.cmdr", "005.cmdr", "006.cmdr",
+                          "007.cmdr", "008.cmdr", "009.cmdr", "010.cmdr", "011.cmdr", "012.cmdr", "013.cmdr",
+                          "014.cmdr", "015.cmdr", "016.cmdr", "017.cmdr", "018.cmdr", "019.cmdr", "020.cmdr",
+                          "021.cmdr", "022.cmdr", "023.cmdr", "024.cmdr", "025.cmdr", "026.cmdr", "027.cmdr",
+                          "028.cmdr", "029.cmdr", "030.cmdr", "031.cmdr", "032.cmdr", "033.cmdr", "034.cmdr",
+                          "035.cmdr", "036.cmdr", "037.cmdr", "038.cmdr", "039.cmdr", "040.cmdr", "041.cmdr",
+                          "042.cmdr", "043.cmdr", "044.cmdr", "045.cmdr", "046.cmdr", "047.cmdr", "048.cmdr",
+                          "049.cmdr", "050.cmdr", "051.cmdr", "052.cmdr", "053.cmdr", "054.cmdr", "055.cmdr",
+                          "056.cmdr", "057.cmdr", "058.cmdr", "059.cmdr", "060.cmdr", "061.cmdr", "062.cmdr",
+                          "063.cmdr", "064.cmdr", "065.cmdr", "066.cmdr", "067.cmdr", "068.cmdr", "069.cmdr",
+                          "070.cmdr", "071.cmdr", "072.cmdr", "073.cmdr", "074.cmdr", "075.cmdr", "076.cmdr",
+                          "077.cmdr", "078.cmdr", "079.cmdr", "080.cmdr", "081.cmdr", "082.cmdr", "083.cmdr",
+                          "084.cmdr", "085.cmdr", "086.cmdr", "087.cmdr", "088.cmdr", "089.cmdr", "090.cmdr",
+                          "091.cmdr", "092.cmdr", "093.cmdr", "094.cmdr", "095.cmdr", "096.cmdr", "097.cmdr",
+                          "098.cmdr", "099.cmdr", "100.cmdr", "101.cmdr", "102.cmdr", "103.cmdr", "104.cmdr",
+                          "105.cmdr", "106.cmdr", "107.cmdr", "108.cmdr", "109.cmdr", "110.cmdr", "111.cmdr",
+                          "112.cmdr", "113.cmdr", "114.cmdr", "115.cmdr", "116.cmdr", "117.cmdr", "118.cmdr"));
 
 /**
  * @brief Takes in the list of tokens, and ensures they match what is contained in the expected output string

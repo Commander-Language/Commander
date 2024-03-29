@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (LValueExprNode (IndexExprNode (VarExprNode x) (LValueExprNode (IndexExprNode (VarExprNode x) (LValueExprNode (IndexExprNode (IndexExprNode (IndexExprNode (VarExprNode x) (LValueExprNode (VarExprNode x))) (LValueExprNode (VarExprNode x))) (LValueExprNode (IndexExprNode (VarExprNode x) (LValueExprNode (IndexExprNode (VarExprNode x) (LValueExprNode (VarExprNode x)))))))))))))))

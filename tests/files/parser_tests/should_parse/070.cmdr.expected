@@ -1,0 +1,4 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode arr) SET (ArrayExprNode (ExprsNode (IntExprNode 1) (IntExprNode 2) (IntExprNode 3)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode length) SET (ApiCallExprNode (LValueExprNode (VarExprNode arr)) length (ExprsNode))))
+	(ExprStmtNode (BinOpExprNode (BindingNode second) SET (LValueExprNode (IndexExprNode (VarExprNode arr) (IntExprNode 1))))))

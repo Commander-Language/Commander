@@ -1,0 +1,2 @@
+//Should not lex since missing open paren no variable
+fn hi) hi;

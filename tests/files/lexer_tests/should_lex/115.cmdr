@@ -1,0 +1,2 @@
+//Should lex for loop command
+for (i=1; i < 10; i++) echo hi;

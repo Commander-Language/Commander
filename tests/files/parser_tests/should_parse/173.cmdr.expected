@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (IndexExprNode (BinOpExprNode (UnOpExprNode (LValueExprNode (VarExprNode c)) NEGATE) MULTIPLY (LValueExprNode (VarExprNode a))) (IntExprNode 1)) LESSER (IndexExprNode (BinOpExprNode (IndexExprNode (BinOpExprNode (LValueExprNode (VarExprNode b)) ADD (LValueExprNode (VarExprNode c))) (BinOpExprNode (LValueExprNode (VarExprNode d)) LESSER (LValueExprNode (VarExprNode e)))) GREATER_EQUAL (LValueExprNode (VarExprNode f))) (IntExprNode 1))))))

@@ -1,0 +1,3 @@
+(PrgmNode
+	(DoWhileStmtNode (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode i)) LESSER (IntExprNode 2)) OR (IndexExprNode (TupleExprNode (ExprsNode (BoolExprNode true) (BoolExprNode false))) (IntExprNode 1))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Hi'))))))))))

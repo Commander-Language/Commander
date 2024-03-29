@@ -1,0 +1,6 @@
+(PrgmNode
+	(IfStmtNode (BoolExprNode true) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'hi'))))) (IfStmtNode (IndexExprNode (TupleExprNode (ExprsNode (BoolExprNode true) (BoolExprNode false))) (IntExprNode 1)) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'there'))))) (IfStmtNode (BoolExprNode false) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'bye'))))) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'adios')))))))))

@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode statement) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'UTAH IS ')) (CallExprNode (LValueExprNode (VarExprNode getCoolWord)) (ExprsNode)) (StringExpressionNode (StringNode '!'))))))))

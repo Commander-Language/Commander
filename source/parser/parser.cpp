@@ -69,20 +69,22 @@ namespace Parser {
             case STRING:
             case STRING_EXPRS:
             case TYPES:
-            case VARIABLE:
-                return type;
             case CMD:
-            case CMD_CMD:
+            case BASIC_CMD:
             case PIPE_CMD:
             case ASYNC_CMD:
-            case TIMEOUT_CMD:
-                return CMD;
+                return type;
+            case LVALUE:
+            case VAR_LVALUE:
+            case INDEX_LVALUE:
+                return LVALUE;
             case EXPR:
             case INT_EXPR:
             case FLOAT_EXPR:
             case STRING_EXPR:
             case BOOL_EXPR:
             case VAR_EXPR:
+            case LVALUE_EXPR:
             case ARRAY_EXPR:
             case INDEX_EXPR:
             case TUPLE_EXPR:
@@ -102,6 +104,8 @@ namespace Parser {
             case WHILE_STMT:
             case DO_WHILE_STMT:
             case RETURN_STMT:
+            case BREAK_STMT:
+            case CONTINUE_STMT:
             case SCOPE_STMT:
             case CMD_STMT:
             case EXPR_STMT:
@@ -112,6 +116,8 @@ namespace Parser {
             case WRITE_STMT:
             case TYPE_STMT:
             case FUNCTION_STMT:
+            case TIMEOUT_STMT:
+            case ASSERT_STMT:
                 return STMT;
             case TYPE:
             case INT_TYPE:
@@ -121,6 +127,7 @@ namespace Parser {
             case ARRAY_TYPE:
             case TUPLE_TYPE:
             case FUNCTION_TYPE:
+            case VARIABLE_TYPE:
                 return TYPE;
         }
         return PRGM;

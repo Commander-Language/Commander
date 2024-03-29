@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (LValueExprNode (VarExprNode a)) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT_EQUAL (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (UnOpExprNode (LValueExprNode (VarExprNode b)) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT) NOT)))))

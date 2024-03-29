@@ -1,2 +1,2 @@
 (PrgmNode
-	(CmdStmtNode (CmdCmdNode (StringNode "echo") (StringNode "Hello") (StringNode "World"))))
+	(CmdStmtNode (BasicCmdNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'echo')))) (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Hello')))) (StringNode (StringExprsNode (StringExpressionNode (StringNode 'World')))))))

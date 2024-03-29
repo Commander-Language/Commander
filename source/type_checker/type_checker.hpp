@@ -19,8 +19,18 @@ namespace TypeChecker {
      *
      */
     class TypeChecker {
+    private:
+        /**
+         * Parser used for import statements
+         */
+        Parser::Parser _parser;
+
     public:
-        TypeChecker();             // Default Constructor
+        /**
+         * Constructor
+         * @param parser The parser to be used for import statements
+         */
+        TypeChecker(Parser::Parser& parser);
         ~TypeChecker() = default;  // Default Destructor
 
         /**
@@ -51,6 +61,13 @@ namespace TypeChecker {
          * @brief Pops top scope of variables off the stack
          */
         VariableTablePtr popScope();
+
+        /**
+         * Gets the type of a variable
+         * @param varName The variable
+         * @return The type
+         */
+        TyPtr getVarType(const std::string& varName);
 
     private:
         VariableTable _table;
