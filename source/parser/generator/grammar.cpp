@@ -171,10 +171,10 @@ namespace Parser {
                   makeNode("Bindings", {castNode("Bindings", 0), castNode("Binding", 2)})}},
 
                 // (BINDING) -> [CONST] [VARIABLE] [COLON] (TYPE)
-                {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE, TokenType::COLON, TokenType::TYPE}},
+                {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE, TokenType::COLON, ASTNodeType::TYPE}},
                   makeNode("Binding", {tokenContents(1), "true", castNode("Type", 3)})}},
                 // (BINDING) -> [VARIABLE] [COLON] (TYPE)
-                {{{ASTNodeType::BINDING, {TokenType::VARIABLE, TokenType::COLON, TokenType::TYPE}},
+                {{{ASTNodeType::BINDING, {TokenType::VARIABLE, TokenType::COLON, ASTNodeType::TYPE}},
                   makeNode("Binding", {tokenContents(0), "false", castNode("Type", 2)})}},
                 // (BINDING) -> [CONST] [VARIABLE]
                 {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE}},
