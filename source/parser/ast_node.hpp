@@ -150,7 +150,14 @@ namespace Parser {
         /**
          * File position of the AST node
          */
-        Lexer::FilePosition filePosition;
+        Lexer::FilePosition position;
+
+        /**
+         * Constructor that sets position
+         *
+         * @param position The position of the node
+         */
+        ASTNode(Lexer::FilePosition position);
 
         /**
          * @brief Class destructor.
@@ -201,6 +208,14 @@ namespace Parser {
          * @brief The type of the node
          */
         TypeChecker::TyPtr type;
+
+        /**
+         * Constructor that sets position
+         *
+         * @param position The position of the node
+         */
+        TypeNode(Lexer::FilePosition position);
+
         /**
          * @brief Gets the string representation of the type
          *
@@ -223,8 +238,10 @@ namespace Parser {
     public:
         /**
          * @brief Default constructor
+         *
+         * @param position The position of the node
          */
-        TypesNode() = default;
+        TypesNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor from a single expression.
@@ -291,11 +308,13 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param variable The name of the bound variable.
          * @param constant Tells whether the variable is constant or not (default is false)
          * @param type The type of the bound variable. (Defaults to `nullptr`.)
          */
-        BindingNode(std::string variable, bool constant = false, TypeNodePtr type = nullptr);
+        BindingNode(Lexer::FilePosition position, std::string variable, bool constant = false,
+                    TypeNodePtr type = nullptr);
 
         /**
          * @brief Reports the type of this binding node.
@@ -326,8 +345,10 @@ namespace Parser {
     public:
         /**
          * @brief Default class constructor
+         *
+         * @param position The position of the node
          */
-        BindingsNode() = default;
+        BindingsNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor from a single binding.
@@ -374,7 +395,15 @@ namespace Parser {
      * @brief A command node.
      *
      */
-    class CmdNode : public ASTNode {};
+    class CmdNode : public ASTNode {
+    public:
+        /**
+         * Constructor that sets position
+         *
+         * @param position The position of the node
+         */
+        CmdNode(Lexer::FilePosition position);
+    };
 
     /**
      * @brief A smart pointer to a command node.
@@ -392,6 +421,14 @@ namespace Parser {
          * @brief The type of the node
          */
         TypeChecker::TyPtr type;
+
+        /**
+         * Constructor that sets position
+         *
+         * @param position The position of the node
+         */
+        LValueNode(Lexer::FilePosition position);
+
         /**
          * @brief Gets the string representation of the type
          *
@@ -417,6 +454,14 @@ namespace Parser {
          * @brief The type of the node
          */
         TypeChecker::TyPtr type;
+
+        /**
+         * Constructor that sets position
+         *
+         * @param position The position of the node
+         */
+        ExprNode(Lexer::FilePosition position);
+
         /**
          * @brief Gets the string representation of the type
          *
@@ -439,8 +484,10 @@ namespace Parser {
     public:
         /**
          * @brief Default constructor
+         *
+         * @param position The position of the node
          */
-        ExprsNode() = default;
+        ExprsNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor from a single expression.
@@ -487,7 +534,15 @@ namespace Parser {
      * @brief A statement AST node.
      *
      */
-    class StmtNode : public ASTNode {};
+    class StmtNode : public ASTNode {
+    public:
+        /**
+         * Constructor that sets position
+         *
+         * @param position The position of the node
+         */
+        StmtNode(Lexer::FilePosition position);
+    };
 
     /**
      * @brief A pointer to a statement node.
@@ -504,8 +559,10 @@ namespace Parser {
     public:
         /**
          * @brief Default constructor.
+         *
+         * @param position The position of the node
          */
-        StmtsNode() = default;
+        StmtsNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor from a single statement.
@@ -558,18 +615,21 @@ namespace Parser {
         /**
          * @brief Class constructor from a string literal.
          *
+         * @param position The position of the node
          * @param literal The string literal.
          */
-        StringExprsNode(std::string literal);
+        StringExprsNode(Lexer::FilePosition position, std::string literal);
 
         /**
          * @brief Class constructor from a literal, expression, and another existing list
          *
+         * @param position The position of the node
          * @param literal The string literal.
          * @param expr The additional expression
          * @param exprs The list of string expressions
          */
-        StringExprsNode(std::string literal, ExprNodePtr expr, const std::shared_ptr<StringExprsNode>& exprs);
+        StringExprsNode(Lexer::FilePosition position, std::string literal, ExprNodePtr expr,
+                        const std::shared_ptr<StringExprsNode>& exprs);
 
         /**
          * @brief Reports the type of this string node.
@@ -607,23 +667,18 @@ namespace Parser {
         /**
          * @brief Class constructor from a string literal.
          *
+         * @param position The position of the node
          * @param literal The string literal.
          */
-        StringNode();
-
-        /**
-         * @brief Class constructor from a string literal.
-         *
-         * @param literal The string literal.
-         */
-        StringNode(std::string literal);
+        StringNode(Lexer::FilePosition position, std::string literal);
 
         /**
          * @brief Class constructor from a list of string expressions
          *
+         * @param position The position of the node
          * @param exprs The list of string expressions
          */
-        StringNode(StringExprsNodePtr exprs);
+        StringNode(Lexer::FilePosition position, StringExprsNodePtr exprs);
 
         /**
          * @brief The string literal if it is a literal string
@@ -672,13 +727,6 @@ namespace Parser {
          * @brief All the statements in the program
          */
         StmtsNodePtr stmts;
-
-        /**
-         * @brief Class constructor.
-         *
-         * @param stmts The statements that make up the program.
-         */
-        PrgmNode();
 
         /**
          * @brief Class constructor.
@@ -858,9 +906,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param variable The variable of this AST node.
          */
-        VarLValueNode(std::string variable);
+        VarLValueNode(Lexer::FilePosition position, std::string variable);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -944,9 +993,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param value The value of this AST node.
          */
-        IntExprNode(int64_t value);
+        IntExprNode(Lexer::FilePosition position, int64_t value);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -981,9 +1031,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param value The value of this AST node.
          */
-        FloatExprNode(double value);
+        FloatExprNode(Lexer::FilePosition position, double value);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1054,9 +1105,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param value The value of this AST node.
          */
-        BoolExprNode(bool value);
+        BoolExprNode(Lexer::FilePosition position, bool value);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1092,9 +1144,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param variable The variable to reference.
          */
-        VarExprNode(std::string variable);
+        VarExprNode(Lexer::FilePosition position, std::string variable);
 
         /**
          * @brief Class constructor.
@@ -1174,15 +1227,18 @@ namespace Parser {
 
         /**
          * @brief Default constructor.
+         *
+         * @param position The position of the node
          */
-        ArrayExprNode();
+        ArrayExprNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param expressions The elements that go inside the array.
          */
-        ArrayExprNode(ExprsNodePtr expressions);
+        ArrayExprNode(Lexer::FilePosition position, ExprsNodePtr expressions);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1268,15 +1324,18 @@ namespace Parser {
 
         /**
          * @brief Default constructor.
+         *
+         * @param position The position of the node
          */
-        TupleExprNode();
+        TupleExprNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param expressions The elements that go inside the tuple.
          */
-        TupleExprNode(ExprsNodePtr expressions);
+        TupleExprNode(Lexer::FilePosition position, ExprsNodePtr expressions);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1322,11 +1381,13 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param condition The condition to evaluate.
          * @param trueExpr The expression to evaluate if the condition was true.
          * @param falseExpr The expression to evaluate if the condition was false.
          */
-        TernaryExprNode(ExprNodePtr condition, ExprNodePtr trueExpr, ExprNodePtr falseExpr);
+        TernaryExprNode(Lexer::FilePosition position, ExprNodePtr condition, ExprNodePtr trueExpr,
+                        ExprNodePtr falseExpr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1366,10 +1427,11 @@ namespace Parser {
         /**
          * @brief Class constructor for a unary operation on an expression.
          *
+         * @param position The position of the node
          * @param opType The unary operation type being performed.
          * @param node The node on which the unary operation is being performed.
          */
-        UnOpExprNode(UnOpType opType, ASTNodePtr node);
+        UnOpExprNode(Lexer::FilePosition position, UnOpType opType, ASTNodePtr node);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1574,36 +1636,42 @@ namespace Parser {
         /**
          * @brief Class constructor with a statement body (the default) and no bindings
          *
+         * @param position The position of the node
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        LambdaExprNode(StmtNodePtr body, TypeNodePtr returnType = nullptr);
+        LambdaExprNode(Lexer::FilePosition position, StmtNodePtr body, TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Class constructor with a return type for lambdas with just an expression for the body and no bindings.
          *
+         * @param position The position of the node
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        LambdaExprNode(ExprNodePtr body, TypeNodePtr returnType = nullptr);
+        LambdaExprNode(Lexer::FilePosition position, ExprNodePtr body, TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Class constructor with a statement body (the default).
          *
+         * @param position The position of the node
          * @param bindings The bindings (arguments) of the function.
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        LambdaExprNode(BindingsNodePtr bindings, StmtNodePtr body, TypeNodePtr returnType = nullptr);
+        LambdaExprNode(Lexer::FilePosition position, BindingsNodePtr bindings, StmtNodePtr body,
+                       TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Class constructor with a return type for lambdas with just an expression for the body.
          *
+         * @param position The position of the node
          * @param bindings The bindings (arguments) of the function.
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        LambdaExprNode(BindingsNodePtr bindings, ExprNodePtr body, TypeNodePtr returnType = nullptr);
+        LambdaExprNode(Lexer::FilePosition position, BindingsNodePtr bindings, ExprNodePtr body,
+                       TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1634,9 +1702,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param cmd The command to run.
          */
-        CmdExprNode(CmdNodePtr cmd);
+        CmdExprNode(Lexer::FilePosition position, CmdNodePtr cmd);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1677,9 +1746,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param expression The string expression that evaluates to a prompt for the user
          */
-        ScanExprNode(ExprNodePtr prompt);
+        ScanExprNode(Lexer::FilePosition position, ExprNodePtr prompt);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1715,9 +1785,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param filePath The string expression that evaluates to a file path
          */
-        ReadExprNode(ExprNodePtr filePath);
+        ReadExprNode(Lexer::FilePosition position, ExprNodePtr filePath);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1768,11 +1839,13 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param condition The condition to test.
          * @param trueStmt The statements to evaluate if true.
          * @param falseStmt The statement to evaluate if false.
          */
-        IfStmtNode(ExprNodePtr condition, StmtNodePtr trueStmt, StmtNodePtr falseStmt = nullptr);
+        IfStmtNode(Lexer::FilePosition position, ExprNodePtr condition, StmtNodePtr trueStmt,
+                   StmtNodePtr falseStmt = nullptr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1823,12 +1896,14 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param initial The initialization statement in the parentheses.
          * @param condition The condition to test in the parentheses.
          * @param update The variable-update expression in the parentheses.
          * @param body The body of the loop.
          */
-        ForStmtNode(StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update, StmtNodePtr body);
+        ForStmtNode(Lexer::FilePosition position, StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update,
+                    StmtNodePtr body);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1869,10 +1944,11 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param condition The condition to test.
          * @param body The body of the loop.
          */
-        WhileStmtNode(ExprNodePtr condition, StmtNodePtr body);
+        WhileStmtNode(Lexer::FilePosition position, ExprNodePtr condition, StmtNodePtr body);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1913,10 +1989,11 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param condition The condition to test.
          * @param body The body of the loop.
          */
-        DoWhileStmtNode(ExprNodePtr condition, StmtNodePtr body);
+        DoWhileStmtNode(Lexer::FilePosition position, ExprNodePtr condition, StmtNodePtr body);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1946,9 +2023,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param retExpr The expression that's evaluated and returned.
          */
-        ReturnStmtNode(ExprNodePtr retExpr);
+        ReturnStmtNode(Lexer::FilePosition position, ExprNodePtr retExpr);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1983,8 +2061,9 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          */
-        BreakStmtNode() = default;
+        BreakStmtNode(Lexer::FilePosition position);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2014,8 +2093,9 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          */
-        ContinueStmtNode() = default;
+        ContinueStmtNode(Lexer::FilePosition position);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2050,15 +2130,18 @@ namespace Parser {
 
         /**
          * @brief Default constructor.
+         *
+         * @param position The position of the node
          */
-        ScopeStmtNode();
+        ScopeStmtNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param stmts The body of the scope.
          */
-        ScopeStmtNode(StmtsNodePtr stmts);
+        ScopeStmtNode(Lexer::FilePosition position, StmtsNodePtr stmts);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2174,10 +2257,11 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param variable The new alias name.
          * @param command The alias's command.
          */
-        AliasStmtNode(std::string alias, BasicCmdNodePtr command);
+        AliasStmtNode(Lexer::FilePosition position, std::string alias, BasicCmdNodePtr command);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2218,9 +2302,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param filePath The string that evaluates to a file path
          */
-        ImportStmtNode(StringNodePtr filePath);
+        ImportStmtNode(Lexer::FilePosition position, StringNodePtr filePath);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2256,9 +2341,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param expression The expression that gets printed out
          */
-        PrintStmtNode(ExprNodePtr expression);
+        PrintStmtNode(Lexer::FilePosition position, ExprNodePtr expression);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2294,9 +2380,10 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param expression The expression that gets printed out
          */
-        PrintlnStmtNode(ExprNodePtr expression);
+        PrintlnStmtNode(Lexer::FilePosition position, ExprNodePtr expression);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2337,10 +2424,11 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param fileData The expression that gets written to the file
          * @param filePath The expression that evaluates to a string file path
          */
-        WriteStmtNode(ExprNodePtr fileData, ExprNodePtr filePath);
+        WriteStmtNode(Lexer::FilePosition position, ExprNodePtr fileData, ExprNodePtr filePath);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2381,10 +2469,11 @@ namespace Parser {
         /**
          * Class constructor.
          *
+         * @param position The position of the node
          * @param alias The type alias name
          * @param type The type
          */
-        TypeStmtNode(std::string alias, TypeNodePtr type);
+        TypeStmtNode(Lexer::FilePosition position, std::string alias, TypeNodePtr type);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2435,21 +2524,24 @@ namespace Parser {
         /**
          * @brief Class constructor with a statement body (the default), and no bindings
          *
+         * @param position The position of the node
          * @param name The name of the function
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        FunctionStmtNode(std::string name, StmtNodePtr body, TypeNodePtr returnType = nullptr);
+        FunctionStmtNode(Lexer::FilePosition position, std::string name, StmtNodePtr body,
+                         TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Class constructor with a statement body (the default).
          *
+         * @param position The position of the node
          * @param name The name of the function
          * @param bindings The bindings (arguments) of the function.
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        FunctionStmtNode(std::string name, BindingsNodePtr bindings, StmtNodePtr body,
+        FunctionStmtNode(Lexer::FilePosition position, std::string name, BindingsNodePtr bindings, StmtNodePtr body,
                          TypeNodePtr returnType = nullptr);
 
         /**
@@ -2496,11 +2588,12 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param timeout Timeout in milliseconds
          * @param message The timeout message
          * @param stmt The statement to run
          */
-        TimeoutStmtNode(const int64_t& timeout, StringNodePtr message, StmtNodePtr stmt);
+        TimeoutStmtNode(Lexer::FilePosition position, const int64_t& timeout, StringNodePtr message, StmtNodePtr stmt);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2541,10 +2634,11 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param expr The expression to assert
          * @param message The assert message
          */
-        AssertStmtNode(ExprNodePtr expr, StringNodePtr message);
+        AssertStmtNode(Lexer::FilePosition position, ExprNodePtr expr, StringNodePtr message);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2578,8 +2672,10 @@ namespace Parser {
     public:
         /**
          * @brief Default Constructor
+         *
+         * @param position The position of the node
          */
-        IntTypeNode() = default;
+        IntTypeNode(Lexer::FilePosition position);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2609,8 +2705,10 @@ namespace Parser {
     public:
         /**
          * @brief Default Constructor
+         *
+         * @param position The position of the node
          */
-        FloatTypeNode() = default;
+        FloatTypeNode(Lexer::FilePosition position);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2640,8 +2738,10 @@ namespace Parser {
     public:
         /**
          * @brief Default Constructor
+         *
+         * @param position The position of the node
          */
-        BoolTypeNode() = default;
+        BoolTypeNode(Lexer::FilePosition position);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2671,8 +2771,10 @@ namespace Parser {
     public:
         /**
          * @brief Default Constructor
+         *
+         * @param position The position of the node
          */
-        StringTypeNode() = default;
+        StringTypeNode(Lexer::FilePosition position);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2707,9 +2809,10 @@ namespace Parser {
 
         /**
          * @brief Constructor
+         * @param position The position of the node
          * @param name
          */
-        VariableTypeNode(std::string name);
+        VariableTypeNode(Lexer::FilePosition position, std::string name);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2745,6 +2848,7 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param subtype The type of the array's items.
          */
         ArrayTypeNode(TypeNodePtr subtype);
@@ -2782,15 +2886,18 @@ namespace Parser {
 
         /**
          * @brief Default constructor.
+         *
+         * @param position The position of the node
          */
-        TupleTypeNode();
+        TupleTypeNode(Lexer::FilePosition position);
 
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param subtypes The type of each of the tuple's items.
          */
-        TupleTypeNode(TypesNodePtr subtypes);
+        TupleTypeNode(Lexer::FilePosition position, TypesNodePtr subtypes);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -2831,17 +2938,19 @@ namespace Parser {
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param returnType The return type
          */
-        FunctionTypeNode(TypeNodePtr returnType);
+        FunctionTypeNode(Lexer::FilePosition position, TypeNodePtr returnType);
 
         /**
          * @brief Class constructor.
          *
+         * @param position The position of the node
          * @param params The type of each of the function's params
          * @param returnType The return type
          */
-        FunctionTypeNode(TypesNodePtr params, TypeNodePtr returnType);
+        FunctionTypeNode(Lexer::FilePosition position, TypesNodePtr params, TypeNodePtr returnType);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
