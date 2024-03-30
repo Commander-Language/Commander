@@ -141,6 +141,11 @@ namespace Parser {
         const auto tokenContents = [](const std::size_t index) -> std::string {
             return "productionList[" + std::to_string(index) + "].token->contents";
         };
+        const auto tokenPosition = [](const std::size_t index) -> std::string {
+            return "productionList[" + std::to_string(index) + "].token->position";
+        };
+        const std::string firstTokenPosition = tokenPosition(0);
+        const std::string firstNodePosition = "productionList[0].node->position";
         const auto flatten =
                 [&](const std::vector<std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>>>& rules)
                 -> std::vector<std::tuple<GrammarRule, Grammar::NodeConstructor>> {
@@ -165,10 +170,11 @@ namespace Parser {
                 {{{ASTNodeType::PRGM, {ASTNodeType::STMTS}}, makeNode("Prgm", {castNode("Stmts", 0)})}},
 
                 // (STMT) -> [LCURLY] [RCURLY]
-                {{{ASTNodeType::STMT, {TokenType::LCURLY, TokenType::RCURLY}}, makeNode("ScopeStmt", {})}},
+                {{{ASTNodeType::STMT, {TokenType::LCURLY, TokenType::RCURLY}},
+                  makeNode("ScopeStmt", {firstTokenPosition})}},
                 // (STMT) -> [LCURLY] (STMTS) [RCURLY]
                 {{{ASTNodeType::STMT, {TokenType::LCURLY, ASTNodeType::STMTS, TokenType::RCURLY}},
-                  makeNode("ScopeStmt", {castNode("Stmts", 1)})}},
+                  makeNode("ScopeStmt", {firstTokenPosition, castNode("Stmts", 1)})}},
 
 
                 // =================
@@ -183,15 +189,16 @@ namespace Parser {
 
                 // (BINDING) -> [CONST] [VARIABLE] [COLON] (TYPE)
                 {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE, TokenType::COLON, ASTNodeType::TYPE}},
-                  makeNode("Binding", {tokenContents(1), "true", castNode("Type", 3)})}},
+                  makeNode("Binding", {firstTokenPosition, tokenContents(1), "true", castNode("Type", 3)})}},
                 // (BINDING) -> [VARIABLE] [COLON] (TYPE)
                 {{{ASTNodeType::BINDING, {TokenType::VARIABLE, TokenType::COLON, ASTNodeType::TYPE}},
-                  makeNode("Binding", {tokenContents(0), "false", castNode("Type", 2)})}},
+                  makeNode("Binding", {firstTokenPosition, tokenContents(0), "false", castNode("Type", 2)})}},
                 // (BINDING) -> [CONST] [VARIABLE]
                 {{{ASTNodeType::BINDING, {TokenType::CONST, TokenType::VARIABLE}},
-                  makeNode("Binding", {tokenContents(1), "true"})}},
+                  makeNode("Binding", {firstTokenPosition, tokenContents(1), "true"})}},
                 // (BINDING) -> [VARIABLE]
-                {{{ASTNodeType::BINDING, {TokenType::VARIABLE}}, makeNode("Binding", {tokenContents(0)})}},
+                {{{ASTNodeType::BINDING, {TokenType::VARIABLE}},
+                  makeNode("Binding", {firstTokenPosition, tokenContents(0)})}},
 
 
                 // =================
@@ -200,10 +207,10 @@ namespace Parser {
 
                 // (BASIC_CMD) -> [CMDSTRINGVAL]
                 {{{ASTNodeType::BASIC_CMD, {TokenType::CMDSTRINGVAL}},
-                  makeNode("BasicCmd", {makeNode("String", {tokenContents(0)})})}},
+                  makeNode("BasicCmd", {makeNode("String", {firstTokenPosition, tokenContents(0)})})}},
                 // (BASIC_CMD) -> [CMDVARIABLE]
                 {{{ASTNodeType::BASIC_CMD, {TokenType::CMDVARIABLE}},
-                  makeNode("BasicCmd", {makeNode("VarExpr", {tokenContents(0)})})}},
+                  makeNode("BasicCmd", {makeNode("VarExpr", {firstTokenPosition, tokenContents(0)})})}},
                 // (BASIC_CMD) -> (STRING)
                 {{{ASTNodeType::BASIC_CMD, {ASTNodeType::STRING}}, makeNode("BasicCmd", {castNode("String", 0)})}},
                 // LA: (BASIC_CMD) -> (BASIC_CMD) (BASIC_CMD)
@@ -230,7 +237,8 @@ namespace Parser {
                 // ================
 
                 // (LVALUE) -> [VARIABLE]
-                {{{ASTNodeType::LVALUE, {TokenType::VARIABLE}}, makeNode("VarLValue", {tokenContents(0)})}},
+                {{{ASTNodeType::LVALUE, {TokenType::VARIABLE}},
+                  makeNode("VarLValue", {firstTokenPosition, tokenContents(0)})}},
                 // (LVALUE) -> (LVALUE) [LSQUARE] (EXPR) [RSQUARE]
                 {{{ASTNodeType::LVALUE,
                    {ASTNodeType::LVALUE, TokenType::LSQUARE, ASTNodeType::EXPR, TokenType::RSQUARE}},
@@ -270,27 +278,27 @@ namespace Parser {
 
                 // (EXPR) -> [INTVAL]
                 {{{ASTNodeType::EXPR, {TokenType::INTVAL}},
-                  makeNode("IntExpr", {callFunc("std::stoll", {tokenContents(0)})})}},
+                  makeNode("IntExpr", {firstTokenPosition, callFunc("std::stoll", {tokenContents(0)})})}},
                 // (EXPR) -> [FLOATVAL]
                 {{{ASTNodeType::EXPR, {TokenType::FLOATVAL}},
-                  makeNode("FloatExpr", {callFunc("std::stold", {tokenContents(0)})})}},
+                  makeNode("FloatExpr", {firstTokenPosition, callFunc("std::stold", {tokenContents(0)})})}},
                 // (EXPR) -> [TRUE]
-                {{{ASTNodeType::EXPR, {TokenType::TRUE}}, makeNode("BoolExpr", {"true"})}},
+                {{{ASTNodeType::EXPR, {TokenType::TRUE}}, makeNode("BoolExpr", {firstTokenPosition, "true"})}},
                 // (EXPR) -> [FALSE]
-                {{{ASTNodeType::EXPR, {TokenType::FALSE}}, makeNode("BoolExpr", {"false"})}},
+                {{{ASTNodeType::EXPR, {TokenType::FALSE}}, makeNode("BoolExpr", {firstTokenPosition, "false"})}},
 
                 // (EXPR) -> (STRING)
                 {{{ASTNodeType::EXPR, {ASTNodeType::STRING}}, makeNode("StringExpr", {castNode("String", 0)})}},
 
                 // (EXPR) -> [BACKTICK] (ASYNC_CMD) [BACKTICK]
                 {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::ASYNC_CMD, TokenType::BACKTICK}},
-                  makeNode("CmdExpr", {castNode("AsyncCmd", 1)})}},
+                  makeNode("CmdExpr", {firstTokenPosition, castNode("AsyncCmd", 1)})}},
                 // (EXPR) -> [BACKTICK] (PIPE_CMD) [BACKTICK]
                 {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::PIPE_CMD, TokenType::BACKTICK}},
-                  makeNode("CmdExpr", {castNode("PipeCmd", 1)})}},
+                  makeNode("CmdExpr", {firstTokenPosition, castNode("PipeCmd", 1)})}},
                 // (EXPR) -> [BACKTICK] (BASIC_CMD) [BACKTICK]
                 {{{ASTNodeType::EXPR, {TokenType::BACKTICK, ASTNodeType::BASIC_CMD, TokenType::BACKTICK}},
-                  makeNode("CmdExpr", {castNode("BasicCmd", 1)})}},
+                  makeNode("CmdExpr", {firstTokenPosition, castNode("BasicCmd", 1)})}},
 
                 // (EXPR) -> (EXPR) [LSQUARE] (EXPR) [RSQUARE]
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LSQUARE, ASTNodeType::EXPR, TokenType::RSQUARE}},
@@ -298,23 +306,23 @@ namespace Parser {
 
                 // (EXPR) -> (LVALUE) [INCREMENT]
                 {{{ASTNodeType::EXPR, {ASTNodeType::LVALUE, TokenType::INCREMENT}},
-                  makeNode("UnOpExpr", {"UnOpType::POST_INCREMENT", castNode("LValue", 0)})}},
+                  makeNode("UnOpExpr", {firstNodePosition, "UnOpType::POST_INCREMENT", castNode("LValue", 0)})}},
                 // (EXPR) -> (LVALUE) [DECREMENT]
                 {{{ASTNodeType::EXPR, {ASTNodeType::LVALUE, TokenType::DECREMENT}},
-                  makeNode("UnOpExpr", {"UnOpType::POST_DECREMENT", castNode("LValue", 0)})}},
+                  makeNode("UnOpExpr", {firstNodePosition, "UnOpType::POST_DECREMENT", castNode("LValue", 0)})}},
                 // (EXPR) -> [INCREMENT] (LVALUE)
                 {{{ASTNodeType::EXPR, {TokenType::INCREMENT, ASTNodeType::LVALUE}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_INCREMENT", castNode("LValue", 1)})}},
+                  makeNode("UnOpExpr", {firstTokenPosition, "UnOpType::PRE_INCREMENT", castNode("LValue", 1)})}},
                 // (EXPR) -> [DECREMENT] (LVALUE)
                 {{{ASTNodeType::EXPR, {TokenType::DECREMENT, ASTNodeType::LVALUE}},
-                  makeNode("UnOpExpr", {"UnOpType::PRE_DECREMENT", castNode("LValue", 1)})}},
+                  makeNode("UnOpExpr", {firstTokenPosition, "UnOpType::PRE_DECREMENT", castNode("LValue", 1)})}},
 
                 // (EXPR) -> [NOT] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::NOT, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::NOT", castNode("Expr", 1)})}},
+                  makeNode("UnOpExpr", {firstTokenPosition, "UnOpType::NOT", castNode("Expr", 1)})}},
                 // (EXPR) -> [MINUS] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::MINUS, ASTNodeType::EXPR}},
-                  makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 1)})}},
+                  makeNode("UnOpExpr", {firstTokenPosition, "UnOpType::NEGATE", castNode("Expr", 1)})}},
 
                 // RA: (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
                 {{{ASTNodeType::EXPR,
@@ -372,34 +380,36 @@ namespace Parser {
 
                 // (EXPR) -> [SCAN] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::SCAN, ASTNodeType::EXPR}},
-                  makeNode("ScanExpr", {castNode("Expr", 1)})}},
+                  makeNode("ScanExpr", {firstTokenPosition, castNode("Expr", 1)})}},
                 // (EXPR) -> [SCAN] [LPAREN] (EXPR) [RPAREN]
                 {{{ASTNodeType::EXPR, {TokenType::SCAN, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
-                  makeNode("ScanExpr", {castNode("Expr", 2)})}},
+                  makeNode("ScanExpr", {firstTokenPosition, castNode("Expr", 2)})}},
                 // (EXPR) -> [READ] (EXPR)
                 {{{ASTNodeType::EXPR, {TokenType::READ, ASTNodeType::EXPR}},
-                  makeNode("ReadExpr", {castNode("Expr", 1)})}},
+                  makeNode("ReadExpr", {firstTokenPosition, castNode("Expr", 1)})}},
                 // (EXPR) -> [READ] [LPAREN] (EXPR) [RPAREN]
                 {{{ASTNodeType::EXPR, {TokenType::READ, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN}},
-                  makeNode("ReadExpr", {castNode("Expr", 2)})}},
+                  makeNode("ReadExpr", {firstTokenPosition, castNode("Expr", 2)})}},
 
                 // (EXPR) -> [LSQUARE] [RSQUARE]
-                {{{ASTNodeType::EXPR, {TokenType::LSQUARE, TokenType::RSQUARE}}, makeNode("ArrayExpr", {})}},
+                {{{ASTNodeType::EXPR, {TokenType::LSQUARE, TokenType::RSQUARE}},
+                  makeNode("ArrayExpr", {firstTokenPosition})}},
                 // (EXPR) -> [LSQUARE] (EXPRS) [RSQUARE]
                 {{{ASTNodeType::EXPR, {TokenType::LSQUARE, ASTNodeType::EXPRS, TokenType::RSQUARE}},
-                  makeNode("ArrayExpr", {castNode("Exprs", 1)})}},
+                  makeNode("ArrayExpr", {firstTokenPosition, castNode("Exprs", 1)})}},
                 // (EXPR) -> [LSQUARE] (EXPRS) [COMMA] [RSQUARE]
                 {{{ASTNodeType::EXPR, {TokenType::LSQUARE, ASTNodeType::EXPRS, TokenType::COMMA, TokenType::RSQUARE}},
-                  makeNode("ArrayExpr", {castNode("Exprs", 1)})}},
+                  makeNode("ArrayExpr", {firstTokenPosition, castNode("Exprs", 1)})}},
 
                 // (EXPR) -> [LPAREN] [RPAREN]
-                {{{ASTNodeType::EXPR, {TokenType::LPAREN, TokenType::RPAREN}}, makeNode("TupleExpr", {})}},
+                {{{ASTNodeType::EXPR, {TokenType::LPAREN, TokenType::RPAREN}},
+                  makeNode("TupleExpr", {firstTokenPosition})}},
                 // (EXPR) -> [LPAREN] (EXPRS) [RPAREN]
                 {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::RPAREN}},
-                  makeNode("TupleExpr", {castNode("Exprs", 1)})}},
+                  makeNode("TupleExpr", {firstTokenPosition, castNode("Exprs", 1)})}},
                 // (EXPR) -> [LPAREN] (EXPRS) [COMMA] [RPAREN]
                 {{{ASTNodeType::EXPR, {TokenType::LPAREN, ASTNodeType::EXPRS, TokenType::COMMA, TokenType::RPAREN}},
-                  makeNode("TupleExpr", {castNode("Exprs", 1)})}},
+                  makeNode("TupleExpr", {firstTokenPosition, castNode("Exprs", 1)})}},
 
                 // LA: (EXPR) -> (LVALUE) [EXPONENTIATE_EQUALS] (EXPR)
                 {{{ASTNodeType::EXPR, {ASTNodeType::LVALUE, TokenType::EXPONENTIATE_EQUALS, ASTNodeType::EXPR}},
@@ -433,7 +443,8 @@ namespace Parser {
                 {{{ASTNodeType::EXPR,
                    {TokenType::IF, ASTNodeType::EXPR, TokenType::THEN, ASTNodeType::EXPR, TokenType::ELSE,
                     ASTNodeType::EXPR}},
-                  makeNode("TernaryExpr", {castNode("Expr", 1), castNode("Expr", 3), castNode("Expr", 5)})}},
+                  makeNode("TernaryExpr",
+                           {firstTokenPosition, castNode("Expr", 1), castNode("Expr", 3), castNode("Expr", 5)})}},
 
 
                 // ==================
@@ -444,63 +455,67 @@ namespace Parser {
                 // (STMT) -> [FN] [VARIABLE] [LPAREN] [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FN, TokenType::VARIABLE, TokenType::LPAREN, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("FunctionStmt", {tokenContents(1), castNode("Stmt", 4)})}},
+                  makeNode("FunctionStmt", {firstTokenPosition, tokenContents(1), castNode("Stmt", 4)})}},
                 // (STMT) -> [FN] [VARIABLE] [LPAREN] (BINDINGS) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FN, TokenType::VARIABLE, TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN,
                     ASTNodeType::STMT}},
-                  makeNode("FunctionStmt", {tokenContents(1), castNode("Bindings", 3), castNode("Stmt", 5)})}},
+                  makeNode("FunctionStmt",
+                           {firstTokenPosition, tokenContents(1), castNode("Bindings", 3), castNode("Stmt", 5)})}},
                 // (STMT) -> [FN] [VARIABLE] [LPAREN] [RPAREN] [COLON] (TYPE) (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FN, TokenType::VARIABLE, TokenType::LPAREN, TokenType::RPAREN, TokenType::COLON,
                     ASTNodeType::TYPE, ASTNodeType::STMT}},
-                  makeNode("FunctionStmt", {tokenContents(1), castNode("Stmt", 6), castNode("Type", 5)})}},
+                  makeNode("FunctionStmt",
+                           {firstTokenPosition, tokenContents(1), castNode("Stmt", 6), castNode("Type", 5)})}},
                 // (STMT) -> [FN] [VARIABLE] [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FN, TokenType::VARIABLE, TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN,
                     TokenType::COLON, ASTNodeType::TYPE, ASTNodeType::STMT}},
-                  makeNode("FunctionStmt",
-                           {tokenContents(1), castNode("Bindings", 3), castNode("Stmt", 7), castNode("Type", 6)})}},
+                  makeNode("FunctionStmt", {firstTokenPosition, tokenContents(1), castNode("Bindings", 3),
+                                            castNode("Stmt", 7), castNode("Type", 6)})}},
 
                 // (EXPR) -> [FN] [LPAREN] [RPAREN] [LAMBDA] (EXPR)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::EXPR}},
-                  makeNode("LambdaExpr", {castNode("Expr", 4)})}},
+                  makeNode("LambdaExpr", {firstTokenPosition, castNode("Expr", 4)})}},
                 // (EXPR) -> [FN] [LPAREN] (BINDINGS) [RPAREN] [LAMBDA] (EXPR)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::LAMBDA,
                     ASTNodeType::EXPR}},
-                  makeNode("LambdaExpr", {castNode("Bindings", 2), castNode("Expr", 5)})}},
+                  makeNode("LambdaExpr", {firstTokenPosition, castNode("Bindings", 2), castNode("Expr", 5)})}},
                 // (EXPR) -> [FN] [LPAREN] [RPAREN] [COLON] (TYPE) [LAMBDA] (EXPR)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, TokenType::RPAREN, TokenType::COLON, ASTNodeType::TYPE,
                     TokenType::LAMBDA, ASTNodeType::EXPR}},
-                  makeNode("LambdaExpr", {castNode("Expr", 6), castNode("Type", 4)})}},
+                  makeNode("LambdaExpr", {firstTokenPosition, castNode("Expr", 6), castNode("Type", 4)})}},
                 // (EXPR) -> [FN] [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) [LAMBDA] (EXPR)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::COLON,
                     ASTNodeType::TYPE, TokenType::LAMBDA, ASTNodeType::EXPR}},
-                  makeNode("LambdaExpr", {castNode("Bindings", 2), castNode("Expr", 7), castNode("Type", 5)})}},
+                  makeNode("LambdaExpr",
+                           {firstTokenPosition, castNode("Bindings", 2), castNode("Expr", 7), castNode("Type", 5)})}},
 
                 // (EXPR) -> [FN] [LPAREN] [RPAREN] [LAMBDA] (STMT)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Stmt", 4)})}},
+                  makeNode("LambdaExpr", {firstTokenPosition, castNode("Stmt", 4)})}},
                 // (EXPR) -> [FN] [LPAREN] (BINDINGS) [RPAREN] [LAMBDA] (STMT)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::LAMBDA,
                     ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Bindings", 2), castNode("Stmt", 5)})}},
+                  makeNode("LambdaExpr", {firstTokenPosition, castNode("Bindings", 2), castNode("Stmt", 5)})}},
                 // (EXPR) -> [FN] [LPAREN] [RPAREN] [COLON] (TYPE) [LAMBDA] (STMT)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, TokenType::RPAREN, TokenType::COLON, ASTNodeType::TYPE,
                     TokenType::LAMBDA, ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Stmt", 6), castNode("Type", 4)})}},
+                  makeNode("LambdaExpr", {firstTokenPosition, castNode("Stmt", 6), castNode("Type", 4)})}},
                 // (EXPR) -> [FN] [LPAREN] (BINDINGS) [RPAREN] [COLON] (TYPE) [LAMBDA] (STMT)
                 {{{ASTNodeType::EXPR,
                    {TokenType::FN, TokenType::LPAREN, ASTNodeType::BINDINGS, TokenType::RPAREN, TokenType::COLON,
                     ASTNodeType::TYPE, TokenType::LAMBDA, ASTNodeType::STMT}},
-                  makeNode("LambdaExpr", {castNode("Bindings", 2), castNode("Stmt", 7), castNode("Type", 5)})}},
+                  makeNode("LambdaExpr",
+                           {firstTokenPosition, castNode("Bindings", 2), castNode("Stmt", 7), castNode("Type", 5)})}},
 
 
                 // ===================
@@ -515,143 +530,152 @@ namespace Parser {
 
                 // (STMT) -> [TIMEOUT] [INTVAL] (STRING) (STMT)
                 {{{ASTNodeType::STMT, {TokenType::TIMEOUT, TokenType::INTVAL, ASTNodeType::STRING, ASTNodeType::STMT}},
-                  makeNode("TimeoutStmt",
-                           {callFunc("std::stoll", {tokenContents(1)}), castNode("String", 2), castNode("Stmt", 3)})}},
+                  makeNode("TimeoutStmt", {firstTokenPosition, callFunc("std::stoll", {tokenContents(1)}),
+                                           castNode("String", 2), castNode("Stmt", 3)})}},
                 // (STMT) -> [TIMEOUT] [INTVAL] (STMT)
                 {{{ASTNodeType::STMT, {TokenType::TIMEOUT, TokenType::INTVAL, ASTNodeType::STMT}},
-                  makeNode("TimeoutStmt", {callFunc("std::stoll", {tokenContents(1)}), makeNode("String", {""}),
-                                           castNode("Stmt", 2)})}},
+                  makeNode("TimeoutStmt", {firstTokenPosition, callFunc("std::stoll", {tokenContents(1)}),
+                                           makeNode("String", {tokenPosition(2), ""}), castNode("Stmt", 2)})}},
                 // (STMT) -> [IMPORT] (STRING) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::IMPORT, ASTNodeType::STRING, TokenType::SEMICOLON}},
-                  makeNode("ImportStmt", {castNode("String", 1)})}},
+                  makeNode("ImportStmt", {firstTokenPosition, castNode("String", 1)})}},
                 // (STMT) -> [ASSERT] (EXPR) [COMMA] (STRING) [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::ASSERT, ASTNodeType::EXPR, TokenType::COMMA, ASTNodeType::STRING, TokenType::SEMICOLON}},
-                  makeNode("AssertStmt", {castNode("Expr", 1), castNode("String", 3)})}},
+                  makeNode("AssertStmt", {firstTokenPosition, castNode("Expr", 1), castNode("String", 3)})}},
                 // (STMT) -> [ASSERT] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::ASSERT, ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                  makeNode("AssertStmt", {castNode("Expr", 1), makeNode("String", {""})})}},
+                  makeNode("AssertStmt",
+                           {firstTokenPosition, castNode("Expr", 1), makeNode("String", {tokenPosition(2), ""})})}},
 
                 // (STMT) -> [RETURN] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::RETURN, ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                  makeNode("ReturnStmt", {castNode("Expr", 1)})}},
+                  makeNode("ReturnStmt", {firstTokenPosition, castNode("Expr", 1)})}},
 
                 // (STMT) -> [PRINT] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::PRINT, ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                  makeNode("PrintStmt", {castNode("Expr", 1)})}},
+                  makeNode("PrintStmt", {firstTokenPosition, castNode("Expr", 1)})}},
                 // (STMT) -> [PRINT] [LPAREN] (EXPR) [RPAREN] [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::PRINT, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, TokenType::SEMICOLON}},
-                  makeNode("PrintStmt", {castNode("Expr", 2)})}},
+                  makeNode("PrintStmt", {firstTokenPosition, castNode("Expr", 2)})}},
                 // (STMT) -> [PRINTLN] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::PRINTLN, ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                  makeNode("PrintlnStmt", {castNode("Expr", 1)})}},
+                  makeNode("PrintlnStmt", {firstTokenPosition, castNode("Expr", 1)})}},
                 // (STMT) -> [PRINTLN] [LPAREN] (EXPR) [RPAREN] [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::PRINTLN, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, TokenType::SEMICOLON}},
-                  makeNode("PrintlnStmt", {castNode("Expr", 2)})}},
+                  makeNode("PrintlnStmt", {firstTokenPosition, castNode("Expr", 2)})}},
 
                 // (STMT) -> [WRITE] (EXPR) [TO] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::WRITE, ASTNodeType::EXPR, TokenType::TO, ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                  makeNode("WriteStmt", {castNode("Expr", 1), castNode("Expr", 3)})}},
+                  makeNode("WriteStmt", {firstTokenPosition, castNode("Expr", 1), castNode("Expr", 3)})}},
                 // (STMT) -> [WRITE] [LPAREN] (EXPR) [COMMA] (EXPR) [RPAREN] [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::WRITE, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::COMMA, ASTNodeType::EXPR,
                     TokenType::RPAREN, TokenType::SEMICOLON}},
-                  makeNode("WriteStmt", {castNode("Expr", 2), castNode("Expr", 4)})}},
+                  makeNode("WriteStmt", {firstTokenPosition, castNode("Expr", 2), castNode("Expr", 4)})}},
 
                 // (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (ASYNC_CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::ASYNC_CMD,
                     TokenType::SEMICOLON}},
-                  makeNode("AliasStmt", {tokenContents(1), castNode("AsyncCmd", 3)})}},
+                  makeNode("AliasStmt", {firstTokenPosition, tokenContents(1), castNode("AsyncCmd", 3)})}},
                 // (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (PIPE_CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::PIPE_CMD,
                     TokenType::SEMICOLON}},
-                  makeNode("AliasStmt", {tokenContents(1), castNode("PipeCmd", 3)})}},
+                  makeNode("AliasStmt", {firstTokenPosition, tokenContents(1), castNode("PipeCmd", 3)})}},
                 // (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (BASIC_CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::BASIC_CMD,
                     TokenType::SEMICOLON}},
-                  makeNode("AliasStmt", {tokenContents(1), castNode("BasicCmd", 3)})}},
+                  makeNode("AliasStmt", {firstTokenPosition, tokenContents(1), castNode("BasicCmd", 3)})}},
 
                 // (STMT) -> [TYPE] [VARIABLE] [EQUALS] (TYPE) [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::TYPE, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::TYPE, TokenType::SEMICOLON}},
-                  makeNode("TypeStmt", {tokenContents(1), castNode("Type", 3)})}},
+                  makeNode("TypeStmt", {firstTokenPosition, tokenContents(1), castNode("Type", 3)})}},
 
                 // LA: (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT) [ELSE] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::IF, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT,
                     TokenType::ELSE, ASTNodeType::STMT}},
-                  makeNode("IfStmt", {castNode("Expr", 2), castNode("Stmt", 4), castNode("Stmt", 6)})}},
+                  makeNode("IfStmt",
+                           {firstTokenPosition, castNode("Expr", 2), castNode("Stmt", 4), castNode("Stmt", 6)})}},
                 // (STMT) -> [IF] [LPAREN] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::IF, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("IfStmt", {castNode("Expr", 2), castNode("Stmt", 4)})}},
+                  makeNode("IfStmt", {firstTokenPosition, castNode("Expr", 2), castNode("Stmt", 4)})}},
 
                 // (STMT) -> [FOR] [LPAREN] [SEMICOLON] [SEMICOLON] [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, TokenType::SEMICOLON, TokenType::RPAREN,
                     ASTNodeType::STMT}},
                   // Note: while statement is used here for simplicity, no need to use a for loop for this case
-                  makeNode("WhileStmt", {makeNode("BoolExpr", {"true"}), castNode("Stmt", 5)})}},
+                  makeNode("WhileStmt", {firstTokenPosition, makeNode("BoolExpr", {tokenPosition(3), "true"}),
+                                         castNode("Stmt", 5)})}},
                 // (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] [SEMICOLON] [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, TokenType::SEMICOLON,
                     TokenType::RPAREN, ASTNodeType::STMT}},
                   makeNode("ForStmt",
-                           {castNode("Stmt", 2), makeNode("BoolExpr", {"true"}), "nullptr", castNode("Stmt", 6)})}},
+                           {firstTokenPosition, castNode("Stmt", 2), makeNode("BoolExpr", {tokenPosition(4), "true"}),
+                            "nullptr", castNode("Stmt", 6)})}},
                 // (STMT) -> [FOR] [LPAREN] [SEMICOLON] (EXPR) [SEMICOLON] [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, ASTNodeType::EXPR, TokenType::SEMICOLON,
                     TokenType::RPAREN, ASTNodeType::STMT}},
                   // Note: while statement is used here for simplicity, no need to use a for loop for this case
-                  makeNode("WhileStmt", {castNode("Expr", 3), castNode("Stmt", 6)})}},
+                  makeNode("WhileStmt", {firstTokenPosition, castNode("Expr", 3), castNode("Stmt", 6)})}},
                 // (STMT) -> [FOR] [LPAREN] [SEMICOLON] [SEMICOLON] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, TokenType::SEMICOLON, ASTNodeType::EXPR,
                     TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("ForStmt",
-                           {"nullptr", makeNode("BoolExpr", {"true"}), castNode("Stmt", 4), castNode("Stmt", 6)})}},
+                  makeNode("ForStmt", {firstTokenPosition, "nullptr", makeNode("BoolExpr", {tokenPosition(3), "true"}),
+                                       castNode("Stmt", 4), castNode("Stmt", 6)})}},
                 // (STMT) -> [FOR] [LPAREN] [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, TokenType::SEMICOLON, ASTNodeType::EXPR, TokenType::SEMICOLON,
                     ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("ForStmt", {"nullptr", castNode("Expr", 3), castNode("Stmt", 5), castNode("Stmt", 7)})}},
+                  makeNode("ForStmt", {firstTokenPosition, "nullptr", castNode("Expr", 3), castNode("Stmt", 5),
+                                       castNode("Stmt", 7)})}},
                 // (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] [SEMICOLON] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, TokenType::SEMICOLON,
                     ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("ForStmt", {castNode("Stmt", 2), makeNode("BoolExpr", {"true"}), castNode("Stmt", 5),
-                                       castNode("Stmt", 7)})}},
+                  makeNode("ForStmt",
+                           {firstTokenPosition, castNode("Stmt", 2), makeNode("BoolExpr", {tokenPosition(4), "true"}),
+                            castNode("Stmt", 5), castNode("Stmt", 7)})}},
                 // (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, ASTNodeType::EXPR,
                     TokenType::SEMICOLON, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("ForStmt", {castNode("Stmt", 2), castNode("Expr", 4), "nullptr", castNode("Stmt", 7)})}},
+                  makeNode("ForStmt", {firstTokenPosition, castNode("Stmt", 2), castNode("Expr", 4), "nullptr",
+                                       castNode("Stmt", 7)})}},
                 // (STMT) -> [FOR] [LPAREN] (EXPR) [SEMICOLON] (EXPR) [SEMICOLON] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::FOR, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::SEMICOLON, ASTNodeType::EXPR,
                     TokenType::SEMICOLON, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("ForStmt",
-                           {castNode("Stmt", 2), castNode("Expr", 4), castNode("Stmt", 6), castNode("Stmt", 8)})}},
+                  makeNode("ForStmt", {firstTokenPosition, castNode("Stmt", 2), castNode("Expr", 4),
+                                       castNode("Stmt", 6), castNode("Stmt", 8)})}},
                 // (STMT) -> [WHILE] [LPAREN] (EXPR) [RPAREN] (STMT)
                 {{{ASTNodeType::STMT,
                    {TokenType::WHILE, TokenType::LPAREN, ASTNodeType::EXPR, TokenType::RPAREN, ASTNodeType::STMT}},
-                  makeNode("WhileStmt", {castNode("Expr", 2), castNode("Stmt", 4)})}},
+                  makeNode("WhileStmt", {firstTokenPosition, castNode("Expr", 2), castNode("Stmt", 4)})}},
                 // (STMT) -> [DO] (STMT) [WHILE] [LPAREN] (EXPR) [RPAREN] [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::DO, ASTNodeType::STMT, TokenType::WHILE, TokenType::LPAREN, ASTNodeType::EXPR,
                     TokenType::RPAREN, TokenType::SEMICOLON}},
-                  makeNode("DoWhileStmt", {castNode("Expr", 4), castNode("Stmt", 1)})}},
+                  makeNode("DoWhileStmt", {firstTokenPosition, castNode("Expr", 4), castNode("Stmt", 1)})}},
 
                 // (STMT) -> [BREAK] [SEMICOLON]
-                {{{ASTNodeType::STMT, {TokenType::BREAK, TokenType::SEMICOLON}}, makeNode("BreakStmt", {})}},
+                {{{ASTNodeType::STMT, {TokenType::BREAK, TokenType::SEMICOLON}},
+                  makeNode("BreakStmt", {firstTokenPosition})}},
                 // (STMT) -> [CONTINUE] [SEMICOLON]
-                {{{ASTNodeType::STMT, {TokenType::CONTINUE, TokenType::SEMICOLON}}, makeNode("ContinueStmt", {})}},
+                {{{ASTNodeType::STMT, {TokenType::CONTINUE, TokenType::SEMICOLON}},
+                  makeNode("ContinueStmt", {firstTokenPosition})}},
 
                 // (STMT) -> (ASYNC_CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT, {ASTNodeType::ASYNC_CMD, TokenType::SEMICOLON}},
@@ -673,13 +697,14 @@ namespace Parser {
 
                 // (STRING_EXPRS) -> [STRINGLITERAL]
                 {{{ASTNodeType::STRING_EXPRS, {TokenType::STRINGLITERAL}},
-                  makeNode("StringExprs", {tokenContents(0)})}},
+                  makeNode("StringExprs", {firstTokenPosition, tokenContents(0)})}},
                 // (STRING_EXPRS) -> (STRING_EXPRS) (EXPR) [STRINGLITERAL]
                 {{{ASTNodeType::STRING_EXPRS, {ASTNodeType::STRING_EXPRS, ASTNodeType::EXPR, TokenType::STRINGLITERAL}},
-                  makeNode("StringExprs", {tokenContents(2), castNode("Expr", 1), castNode("StringExprs", 0)})}},
+                  makeNode("StringExprs",
+                           {tokenPosition(2), tokenContents(2), castNode("Expr", 1), castNode("StringExprs", 0)})}},
                 // (STRING) -> [STRINGVAL] (STRING_EXPRS) [ENDSTRINGVAL]
                 {{{ASTNodeType::STRING, {TokenType::STRINGVAL, ASTNodeType::STRING_EXPRS, TokenType::ENDSTRINGVAL}},
-                  makeNode("String", {castNode("StringExprs", 1)})}},
+                  makeNode("String", {firstTokenPosition, castNode("StringExprs", 1)})}},
 
                 // ==============
                 // ||  Types:  ||
@@ -696,41 +721,41 @@ namespace Parser {
                   makeNode("Types", {castNode("Types", 0), castNode("Type", 2)})}},
 
                 // (TYPE) -> [INT]
-                {{{ASTNodeType::TYPE, {TokenType::INT}}, makeNode("IntType", {})}},
+                {{{ASTNodeType::TYPE, {TokenType::INT}}, makeNode("IntType", {firstTokenPosition})}},
                 // (TYPE) -> [FLOAT]
-                {{{ASTNodeType::TYPE, {TokenType::FLOAT}}, makeNode("FloatType", {})}},
+                {{{ASTNodeType::TYPE, {TokenType::FLOAT}}, makeNode("FloatType", {firstTokenPosition})}},
                 // (TYPE) -> [BOOL]
-                {{{ASTNodeType::TYPE, {TokenType::BOOL}}, makeNode("BoolType", {})}},
+                {{{ASTNodeType::TYPE, {TokenType::BOOL}}, makeNode("BoolType", {firstTokenPosition})}},
                 // (TYPE) -> [STRING]
-                {{{ASTNodeType::TYPE, {TokenType::STRING}}, makeNode("StringType", {})}},
+                {{{ASTNodeType::TYPE, {TokenType::STRING}}, makeNode("StringType", {firstTokenPosition})}},
                 // (TYPE) -> [VOID]
-                {{{ASTNodeType::TYPE, {TokenType::VOID}}, makeNode("TupleType", {makeNode("Types", {})})}},
+                {{{ASTNodeType::TYPE, {TokenType::VOID}},
+                  makeNode("TupleType", {firstTokenPosition, makeNode("Types", {firstTokenPosition})})}},
                 // (TYPE) -> [VARIABLE]
-                {{{ASTNodeType::TYPE, {TokenType::VARIABLE}}, makeNode("VariableType", {tokenContents(0)})}},
+                {{{ASTNodeType::TYPE, {TokenType::VARIABLE}},
+                  makeNode("VariableType", {firstTokenPosition, tokenContents(0)})}},
 
-                // (TYPE) -> (TYPE) [LAMBDA] (TYPE)
-                {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LAMBDA, ASTNodeType::TYPE}},
-                  makeNode("FunctionType", {makeNode("Types", {castNode("Type", 0)}), castNode("Type", 2)})}},
                 // (TYPE) -> [LPAREN] [RPAREN] [LAMBDA] (TYPE)
                 {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::TYPE}},
-                  makeNode("FunctionType", {castNode("Type", 3)})}},
+                  makeNode("FunctionType", {firstTokenPosition, castNode("Type", 3)})}},
                 // (TYPE) -> [LPAREN] (TYPES) [RPAREN] [LAMBDA] (TYPE)
                 {{{ASTNodeType::TYPE,
                    {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::TYPE}},
-                  makeNode("FunctionType", {castNode("Types", 1), castNode("Type", 4)})}},
+                  makeNode("FunctionType", {firstTokenPosition, castNode("Types", 1), castNode("Type", 4)})}},
 
                 // (TYPE) -> (TYPE) [LSQUARE] [RSQUARE]
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LSQUARE, TokenType::RSQUARE}},
                   makeNode("ArrayType", {castNode("Type", 0)})}},
 
                 // (TYPE) -> [LPAREN] [RPAREN]
-                {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN}}, makeNode("TupleType", {})}},
+                {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN}},
+                  makeNode("TupleType", {firstTokenPosition})}},
                 // (TYPE) -> [LPAREN] (TYPES) [RPAREN]
                 {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN}},
-                  makeNode("TupleType", {castNode("Types", 1)})}},
+                  makeNode("TupleType", {firstTokenPosition, castNode("Types", 1)})}},
                 // (TYPE) -> [LPAREN] (TYPES) [COMMA] [RPAREN]
                 {{{ASTNodeType::TYPE, {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::COMMA, TokenType::RPAREN}},
-                  makeNode("TupleType", {castNode("Types", 1)})}},
+                  makeNode("TupleType", {firstTokenPosition, castNode("Types", 1)})}},
         });
     }
 #pragma clang diagnostic pop
