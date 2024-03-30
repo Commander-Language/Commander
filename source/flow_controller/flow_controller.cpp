@@ -20,6 +20,7 @@
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/util/scan.hpp"
 #include <cmath>
 
 #include <iostream>
@@ -261,8 +262,9 @@ namespace FlowController {
                 return returnValue;
             }
             case Parser::SCAN_EXPR: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented expression encountered");
+                auto expr = std::static_pointer_cast<Parser::ScanExprNode>(node);
+                auto prompt = std::static_pointer_cast<CommanderString>(_expr(expr->prompt));
+                return std::make_shared<CommanderString>(Util::scan(prompt->value));
             }
             case Parser::READ_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ReadExprNode>(node);
