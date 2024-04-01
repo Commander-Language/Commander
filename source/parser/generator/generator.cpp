@@ -186,6 +186,12 @@ namespace Parser {
                     return min;
                 }();
 
+                if (reduceRules.size() > 1) {
+                    std::cerr << "Warning: REDUCE/REDUCE conflict in state " << stateNum << " for token "
+                              << GrammarEntry {tokenType} << ":\n";
+                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
+                }
+
                 if (shifts.count(tokenType) > 0) {
                     std::cerr << "Warning: SHIFT/REDUCE conflict in state " << stateNum << " for token "
                               << GrammarEntry {tokenType} << ":\n";
@@ -194,13 +200,10 @@ namespace Parser {
                     std::cerr << "    ------------------------------------------------------------\n";
                     for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
 
-                    if (grammarRule->priority >= shifts[tokenType].priority) continue;
-                }
-
-                if (reduceRules.size() > 1) {
-                    std::cerr << "Warning: REDUCE/REDUCE conflict in state " << stateNum << " for token "
-                              << GrammarEntry {tokenType} << ":\n";
-                    for (const auto& rule : reduceRules) std::cerr << "    - " << *rule << "\n";
+                    if (grammarRule->priority > shifts[tokenType].priority
+                        || (grammarRule->associativity == GrammarRule::RIGHT_ASSOCIATIVE
+                            && grammarRule->priority == shifts[tokenType].priority))
+                        continue;
                 }
 
                 if (*grammarRule == goalRule) {
