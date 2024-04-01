@@ -1,2 +1,2 @@
 // Tests that timeouts get parsed correctly
-timeout 40000 ping http://google.com;
+timeout 40000 "Ping timed out" ping http://google.com;
