@@ -31,6 +31,11 @@ namespace TypeChecker {
         }
     }
 
+    std::string getErrorTypeString(const TyPtr& tyPtr) {
+        std::string typeString = getTypeString(tyPtr);
+        return typeString == "" ? " UNKNOWN" : typeString;
+    }
+
     std::string getTypeString(const TyPtr& tyPtr) {
         if (!tyPtr) { return ""; }
         switch (tyPtr->getType()) {
@@ -41,27 +46,26 @@ namespace TypeChecker {
             case STRING:
                 return " " + typeToString(tyPtr->getType());
             case ARRAY:
-                return " " + typeToString(std::static_pointer_cast<ArrayTy>(tyPtr)->baseType->getType()) + "[]";
+                return getTypeString(std::static_pointer_cast<ArrayTy>(tyPtr)->baseType) + "[]";
             case FUNCTION: {
                 const FunctionTyPtr functionTy = std::static_pointer_cast<FunctionTy>(tyPtr);
-                std::stringstream builder;
-                builder << "(";
-                for (const TyPtr& type : functionTy->parameters) { builder << " " << typeToString(type->getType()); }
-                builder << " ) -> " << typeToString(functionTy->returnType->getType());
-                return " " + builder.str();
+                return " (" + getTypeSequenceString(functionTy->parameters) + ") ->"
+                     + getTypeString(functionTy->returnType);
             }
             case TUPLE: {
-                std::stringstream builder;
-                builder << "{";
-                for (const TyPtr& type : std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes) {
-                    builder << " " << typeToString(type->getType());
-                }
-                builder << " }";
-                return " " + builder.str();
+                return " (" + getTypeSequenceString(std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes) + ")";
             }
             default:
                 return "";
         }
+    }
+
+    std::string getTypeSequenceString(const std::vector<TyPtr>& types) {
+        if (types.empty()) { return ""; }
+        std::stringstream builder;
+        builder << getTypeString(types[0]).substr(1);
+        for (int i = 1; i < types.size(); i++) { builder << "," << getTypeString(types[i]); }
+        return builder.str();
     }
 
     bool areTypesEqual(const TyPtr& type1, const TyPtr& type2) {

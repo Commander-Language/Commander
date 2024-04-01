@@ -647,19 +647,21 @@ namespace Parser {
         return "(CallExprNode " + func->sExpression() + " " + args->sExpression() + getTypeString() + ")";
     }
 
-    ApiCallExprNode::ApiCallExprNode(const ExprNodePtr& expression, std::string func)
+    ApiCallExprNode::ApiCallExprNode(const ExprNodePtr& expression, std::string func, Lexer::FilePosition funcPosition)
         : expression(expression), func(std::move(func)), args(std::make_shared<ExprsNode>(expression->position)),
-          ExprNode(expression->position) {}
+          funcPosition(std::move(funcPosition)), ExprNode(expression->position) {}
 
-    ApiCallExprNode::ApiCallExprNode(const ExprNodePtr& expression, std::string func, ExprsNodePtr args)
-        : expression(expression), func(std::move(func)), args(std::move(args)), ExprNode(expression->position) {}
+    ApiCallExprNode::ApiCallExprNode(const ExprNodePtr& expression, std::string func, Lexer::FilePosition funcPosition,
+                                     ExprsNodePtr args)
+        : expression(expression), func(std::move(func)), args(std::move(args)), ExprNode(expression->position),
+          funcPosition(std::move(funcPosition)) {}
 
     std::string ApiCallExprNode::sExpression() const {
         return "(ApiCallExprNode " + expression->sExpression() + " " + func + " " + args->sExpression()
              + getTypeString() + ")";
     }
 
-    LambdaExprNode::LambdaExprNode(Lexer::FilePosition position, ExprNodePtr body, TypeNodePtr returnType)
+    LambdaExprNode::LambdaExprNode(const Lexer::FilePosition& position, const ExprNodePtr& body, TypeNodePtr returnType)
         : bindings(std::make_shared<BindingsNode>(position)),
           body(std::make_shared<ReturnStmtNode>(body->position, body)), returnType(std::move(returnType)),
           ExprNode(position) {}
