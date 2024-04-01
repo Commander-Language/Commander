@@ -102,6 +102,14 @@ namespace Parser {
      */
     struct GrammarRule {
         /**
+         * @brief Whether a grammar rule is left-associative or right-associative.
+         */
+        enum Associativity : std::uint8_t {
+            LEFT_ASSOCIATIVE,
+            RIGHT_ASSOCIATIVE,
+        };
+
+        /**
          * @brief Default constructor.
          */
         GrammarRule();
@@ -111,9 +119,11 @@ namespace Parser {
          *
          * @param result The result of applying this grammar rule.
          * @param components The components that make up this grammar rule.
+         * @param associativity The associativity of this rule (left or right). Defaults to left.
          * @param priority The priority of this grammar rule. Defaults to 0.
          */
-        GrammarRule(ASTNodeType result, const std::vector<GrammarEntry>& components, std::size_t priority = 0);
+        GrammarRule(ASTNodeType result, const std::vector<GrammarEntry>& components,
+                    Associativity associativity = LEFT_ASSOCIATIVE, std::size_t priority = 0);
 
         /**
          * @brief Equality operator.
@@ -162,9 +172,14 @@ namespace Parser {
          * @brief The priority of this grammar rule.
          */
         std::size_t priority;
+
+        /**
+         * @brief The associativity of this rule (left or right).
+         */
+        Associativity associativity;
     };
 
-}  //  namespace Parser
+}  // namespace Parser
 
 namespace std {
 
@@ -182,7 +197,6 @@ namespace std {
         size_t operator()(const Parser::GrammarEntry& grammarEntry) const noexcept;
     };
 
-
     /**
      * @brief Specialization of `std::hash` for `GrammarRule` objects.
      */
@@ -197,7 +211,7 @@ namespace std {
         size_t operator()(const Parser::GrammarRule& grammarRule) const noexcept;
     };
 
-}  //  namespace std
+}  // namespace std
 
 namespace Parser {
 
@@ -256,6 +270,6 @@ namespace Parser {
         static std::vector<std::tuple<GrammarRule, NodeConstructor>> _defineGrammar();
     };
 
-}  //  namespace Parser
+}  // namespace Parser
 
-#endif  //  GRAMMAR_HPP
+#endif  // GRAMMAR_HPP

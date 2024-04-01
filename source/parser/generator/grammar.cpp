@@ -51,11 +51,15 @@ namespace Parser {
     GrammarRule::GrammarRule() : result(), priority() {}
 
     GrammarRule::GrammarRule(const ASTNodeType result, const std::vector<GrammarEntry>& components,
-                             const std::size_t priority)
-        : result(result), components(components), priority(priority) {}
+                             const Associativity associativity, const std::size_t priority)
+        : result(result), components(components), priority(priority), associativity(associativity) {}
 
     bool GrammarRule::operator==(const GrammarRule& other) const {
         if (this->result != other.result) return false;
+
+        if (this->priority != other.priority) return false;
+
+        if (this->associativity != other.associativity) return false;
 
         if (this->components.size() != other.components.size()) return false;
 
@@ -70,11 +74,17 @@ namespace Parser {
 
     bool GrammarRule::operator<(const GrammarRule& other) const {
         if (this->priority != other.priority) return this->priority < other.priority;
+
         if (this->result != other.result) return this->result < other.result;
+
+        if (this->associativity != other.associativity) return this->associativity < other.associativity;
+
         if (this->components.size() != other.components.size()) return this->components.size() < components.size();
+
         for (std::size_t ind = 0; ind < this->components.size(); ++ind) {
             if (this->components[ind] != other.components[ind]) return this->components[ind] < other.components[ind];
         }
+
         return false;
     }
 
@@ -139,7 +149,8 @@ namespace Parser {
             for (const auto& precedenceSet : rules) {
                 ++precedenceVal;
                 for (const auto& [rule, nodeConstructor] : precedenceSet) {
-                    result.emplace_back(GrammarRule {rule.result, rule.components, precedenceVal}, nodeConstructor);
+                    result.emplace_back(GrammarRule {rule.result, rule.components, rule.associativity, precedenceVal},
+                                        nodeConstructor);
                 }
             }
             return result;
@@ -306,7 +317,9 @@ namespace Parser {
                   makeNode("UnOpExpr", {"UnOpType::NEGATE", castNode("Expr", 1)})}},
 
                 // RA: (EXPR) -> (EXPR) [EXPONENTIATE] (EXPR)
-                {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::EXPONENTIATE, ASTNodeType::EXPR}},
+                {{{ASTNodeType::EXPR,
+                   {ASTNodeType::EXPR, TokenType::EXPONENTIATE, ASTNodeType::EXPR},
+                   GrammarRule::Associativity::RIGHT_ASSOCIATIVE},
                   makeNode("BinOpExpr", {castNode("Expr", 0), "BinOpType::EXPONENTIATE", castNode("Expr", 2)})}},
 
                 // (Shared precedence)
