@@ -262,12 +262,13 @@ namespace Parser {
                 // (EXPR) -> (EXPR) [DOT] [VARIABLE] [LPAREN] [RPAREN]
                 {{{ASTNodeType::EXPR,
                    {ASTNodeType::EXPR, TokenType::DOT, TokenType::VARIABLE, TokenType::LPAREN, TokenType::RPAREN}},
-                  makeNode("ApiCallExpr", {castNode("Expr", 0), tokenContents(2)})}},
+                  makeNode("ApiCallExpr", {castNode("Expr", 0), tokenContents(2), tokenPosition(2)})}},
                 // (EXPR) -> (EXPR) [DOT] [VARIABLE] [LPAREN] (EXPRS) [RPAREN]
                 {{{ASTNodeType::EXPR,
                    {ASTNodeType::EXPR, TokenType::DOT, TokenType::VARIABLE, TokenType::LPAREN, ASTNodeType::EXPRS,
                     TokenType::RPAREN}},
-                  makeNode("ApiCallExpr", {castNode("Expr", 0), tokenContents(2), castNode("Exprs", 4)})}},
+                  makeNode("ApiCallExpr",
+                           {castNode("Expr", 0), tokenContents(2), tokenPosition(2), castNode("Exprs", 4)})}},
 
                 // (EXPR) -> (EXPR) [LPAREN] [RPAREN]
                 {{{ASTNodeType::EXPR, {ASTNodeType::EXPR, TokenType::LPAREN, TokenType::RPAREN}},

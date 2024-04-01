@@ -1571,6 +1571,11 @@ namespace Parser {
         std::string func;
 
         /**
+         * @brief The function position
+         */
+        Lexer::FilePosition funcPosition;
+
+        /**
          * @brief The arguments to pass into the function
          */
         ExprsNodePtr args;
@@ -1580,17 +1585,20 @@ namespace Parser {
          *
          * @param expression The expression being called on
          * @param func The function to call
+         * @param funcPosition Position of the func variable
          */
-        ApiCallExprNode(const ExprNodePtr& expression, std::string func);
+        ApiCallExprNode(const ExprNodePtr& expression, std::string func, Lexer::FilePosition funcPosition);
 
         /**
          * @brief Class constructor.
          *
          * @param expression The expression being called on
          * @param func The function to call
+         * @param funcPosition Position of the func variable
          * @param args The arguments for the function call.
          */
-        ApiCallExprNode(const ExprNodePtr& expression, std::string func, ExprsNodePtr args);
+        ApiCallExprNode(const ExprNodePtr& expression, std::string func, Lexer::FilePosition funcPosition,
+                        ExprsNodePtr args);
 
         /**
          * @brief Gets the string representation of the node as an s-expression
@@ -1649,7 +1657,7 @@ namespace Parser {
          * @param body The body of the function.
          * @param returnType The return type of the function.
          */
-        LambdaExprNode(Lexer::FilePosition position, ExprNodePtr body, TypeNodePtr returnType = nullptr);
+        LambdaExprNode(const Lexer::FilePosition& position, const ExprNodePtr& body, TypeNodePtr returnType = nullptr);
 
         /**
          * @brief Class constructor with a statement body (the default).

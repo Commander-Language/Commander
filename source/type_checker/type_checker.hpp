@@ -49,8 +49,9 @@ namespace TypeChecker {
         /**
          * Asserts that a variable does not exist in the current scope
          * @param variable The variable to assert does not exist
+         * @param position Position of the variable
          */
-        void assertNotExists(const std::string& variable);
+        void assertNotExists(const std::string& variable, const Lexer::FilePosition& position);
 
         /**
          * @brief Pushes new scope on top of the stack
