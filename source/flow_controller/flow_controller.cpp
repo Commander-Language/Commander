@@ -15,7 +15,8 @@
 
 
 #include "source/flow_controller/types.hpp"
-#include "source/job_runner/job_runner.hpp"
+#include "source/job_runner/job_runner_linux.hpp"
+using Runner = JobRunner::JobRunnerLinux;
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type.hpp"
@@ -116,7 +117,7 @@ namespace FlowController {
                 args = _parseArguments(cmd->arguments);
 
                 // Run the command
-                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
+                auto job = std::make_shared<Process::Process>(args, Process::ProcessType::EXTERNAL, isBackground,
                                                                 !isBackground && saveInfo);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
@@ -126,7 +127,7 @@ namespace FlowController {
                 auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(asyncCmd->cmd);
                 args = _parseArguments(cmd->arguments);
                 // Run the command
-                auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
+                auto job = std::make_shared<Process::Process>(args, Process::ProcessType::EXTERNAL, isBackground,
                                                                 !isBackground && saveInfo);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
@@ -134,7 +135,7 @@ namespace FlowController {
             case Parser::PIPE_CMD: {
                 auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(node);
                 const std::vector<std::vector<std::string>> pipeArgs;
-                std::vector<JobRunner::ProcessPtr> processes;
+                std::vector<Process::ProcessPtr> processes;
 
                 std::vector<Parser::BasicCmdNodePtr> jobs;
                 _getJobs(pipeCmd, jobs);
@@ -142,12 +143,12 @@ namespace FlowController {
                 std::vector<std::string> pArgs;
                 for (const auto& job : jobs) {
                     pArgs = _parseArguments(job->arguments);
-                    auto process = std::make_shared<JobRunner::Process>(pArgs, JobRunner::ProcessType::EXTERNAL,
+                    auto process = std::make_shared<Process::Process>(pArgs, Process::ProcessType::EXTERNAL,
                                                                         isBackground, !isBackground && saveInfo);
                     processes.emplace_back(process);
                 }
 
-                auto pipeline = std::make_shared<JobRunner::Process>(processes);
+                auto pipeline = std::make_shared<Process::Process>(processes);
                 auto jobResult = _runCommand(pipeline);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
@@ -876,8 +877,8 @@ namespace FlowController {
     //  ==========================
     //  ||   Helper Methods     ||
     //  ==========================
-    JobRunner::JobInfo FlowController::_runCommand(JobRunner::ProcessPtr process) {
-        JobRunner::JobRunner runner(std::move(process));
+    JobRunner::JobInfo FlowController::_runCommand(Process::ProcessPtr process) {
+        Runner runner(std::move(process));
         return runner.execProcess();
     }
 

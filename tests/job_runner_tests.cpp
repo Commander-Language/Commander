@@ -2,7 +2,7 @@
  * @file job_runner_tests.cpp
  * @brief Tests for the job runner
  */
-#include "source/job_runner/job_runner.hpp"
+#include "source/job_runner/job_runner_linux.hpp"
 #include "source/util/commander_exception.hpp"
 #include <fstream>
 #include <gtest/gtest.h>

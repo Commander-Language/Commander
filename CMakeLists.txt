@@ -169,7 +169,7 @@ add_library(flow_controller source/flow_controller/flow_controller.cpp source/ut
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
-add_library(job_runner source/job_runner/job_runner.cpp source/util/print.cpp ${builtins})
+add_library(job_runner source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
 
 add_executable(commander source/interpreter/commander.cpp)
 
