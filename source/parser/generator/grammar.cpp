@@ -519,10 +519,6 @@ namespace Parser {
                 {{{ASTNodeType::STMT, {TokenType::TIMEOUT, TokenType::INTVAL, ASTNodeType::STRING, ASTNodeType::STMT}},
                   makeNode("TimeoutStmt", {firstTokenPosition, callFunc("std::stoll", {tokenContents(1)}),
                                            castNode("String", 2), castNode("Stmt", 3)})}},
-                // (STMT) -> [TIMEOUT] [INTVAL] (STMT)
-                {{{ASTNodeType::STMT, {TokenType::TIMEOUT, TokenType::INTVAL, ASTNodeType::STMT}},
-                  makeNode("TimeoutStmt", {firstTokenPosition, callFunc("std::stoll", {tokenContents(1)}),
-                                           makeNode("String", {tokenPosition(2), "\"\""}), castNode("Stmt", 2)})}},
                 // (STMT) -> [IMPORT] (STRING) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::IMPORT, ASTNodeType::STRING, TokenType::SEMICOLON}},
                   makeNode("ImportStmt", {firstTokenPosition, castNode("String", 1)})}},
@@ -530,10 +526,6 @@ namespace Parser {
                 {{{ASTNodeType::STMT,
                    {TokenType::ASSERT, ASTNodeType::EXPR, TokenType::COMMA, ASTNodeType::STRING, TokenType::SEMICOLON}},
                   makeNode("AssertStmt", {firstTokenPosition, castNode("Expr", 1), castNode("String", 3)})}},
-                // (STMT) -> [ASSERT] (EXPR) [SEMICOLON]
-                {{{ASTNodeType::STMT, {TokenType::ASSERT, ASTNodeType::EXPR, TokenType::SEMICOLON}},
-                  makeNode("AssertStmt",
-                           {firstTokenPosition, castNode("Expr", 1), makeNode("String", {tokenPosition(2), "\"\""})})}},
 
                 // (STMT) -> [RETURN] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::RETURN, ASTNodeType::EXPR, TokenType::SEMICOLON}},
