@@ -725,8 +725,9 @@ namespace Parser {
           body(std::move(body)), StmtNode(std::move(position)) {}
 
     std::string ForStmtNode::sExpression() const {
-        return "(ForStmtNode " + initial->sExpression() + " " + condition->sExpression() + " " + update->sExpression()
-             + " " + body->sExpression() + ")";
+        return "(ForStmtNode" + (initial ? " " + initial->sExpression() : "")
+             + (condition ? " " + condition->sExpression() : "") + (update ? " " + update->sExpression() : "") + " "
+             + body->sExpression() + ")";
     }
 
     WhileStmtNode::WhileStmtNode(Lexer::FilePosition position, ExprNodePtr condition, StmtNodePtr body)
