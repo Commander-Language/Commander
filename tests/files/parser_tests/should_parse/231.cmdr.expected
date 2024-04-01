@@ -1,2 +1,2 @@
 (PrgmNode
-	(TimeoutStmtNode 5000 (StringNode '') (CmdStmtNode (PipeCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'netstat') (StringNode '-tlnp')) | (BasicCmdNode (StringNode 'grep') (StringNode '8080'))) | (BasicCmdNode (StringNode 'echo') (StringNode 'hello'))))))
+	(TimeoutStmtNode 5000 (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Timed out')))) (CmdStmtNode (PipeCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'netstat') (StringNode '-tlnp')) | (BasicCmdNode (StringNode 'grep') (StringNode '8080'))) | (BasicCmdNode (StringNode 'echo') (StringNode 'hello'))))))

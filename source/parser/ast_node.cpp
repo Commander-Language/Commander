@@ -266,7 +266,7 @@ namespace Parser {
 
     TypesNode::TypesNode(Lexer::FilePosition position) : ASTNode(std::move(position)) {}
 
-    TypesNode::TypesNode(TypeNodePtr type) : types({std::move(type)}), ASTNode(type->position) {}
+    TypesNode::TypesNode(const TypeNodePtr& type) : types({type}), ASTNode(type->position) {}
 
     TypesNode::TypesNode(const std::shared_ptr<TypesNode>& types, TypeNodePtr type)
         : types(concat(types->types, std::move(type))), ASTNode(types->position) {}
@@ -303,7 +303,7 @@ namespace Parser {
 
     BindingsNode::BindingsNode(Lexer::FilePosition position) : ASTNode(std::move(position)) {}
 
-    BindingsNode::BindingsNode(BindingNodePtr binding) : bindings({std::move(binding)}), ASTNode(binding->position) {}
+    BindingsNode::BindingsNode(BindingNodePtr binding) : bindings({binding}), ASTNode(binding->position) {}
 
     BindingsNode::BindingsNode(const std::shared_ptr<BindingsNode>& bindings, BindingNodePtr binding)
         : bindings(concat(bindings->bindings, std::move(binding))), ASTNode(bindings->position) {}
@@ -360,7 +360,7 @@ namespace Parser {
 
     ExprsNode::ExprsNode(Lexer::FilePosition position) : ASTNode(std::move(position)) {}
 
-    ExprsNode::ExprsNode(ExprNodePtr expr) : exprs({std::move(expr)}), ASTNode(expr->position) {}
+    ExprsNode::ExprsNode(const ExprNodePtr& expr) : exprs({expr}), ASTNode(expr->position) {}
 
     ExprsNode::ExprsNode(const std::shared_ptr<ExprsNode>& exprs, ExprNodePtr expr)
         : exprs(concat(exprs->exprs, std::move(expr))), ASTNode(exprs->position) {}
@@ -415,7 +415,7 @@ namespace Parser {
 
     StmtsNode::StmtsNode(Lexer::FilePosition position) : ASTNode(std::move(position)) {}
 
-    StmtsNode::StmtsNode(StmtNodePtr stmt) : stmts({std::move(stmt)}), ASTNode(stmt->position) {}
+    StmtsNode::StmtsNode(const StmtNodePtr& stmt) : stmts({stmt}), ASTNode(stmt->position) {}
 
     StmtsNode::StmtsNode(const std::shared_ptr<StmtsNode>& stmts, StmtNodePtr stmt)
         : stmts(concat(stmts->stmts, std::move(stmt))), ASTNode(stmts->position) {}
@@ -430,7 +430,7 @@ namespace Parser {
         return result.str();
     }
 
-    StringExprsNode::StringExprsNode(Lexer::FilePosition position, std::string literal) : ASTNode(std::move(position)) {
+    StringExprsNode::StringExprsNode(const Lexer::FilePosition& position, std::string literal) : ASTNode(position) {
         expressions.push_back(std::make_shared<StringExprNode>(
                 std::make_shared<StringNode>(StringNode(position, std::move(literal)))));
     }
@@ -441,7 +441,7 @@ namespace Parser {
         expressions.insert(expressions.end(), exprs->expressions.begin(), exprs->expressions.end());
         expressions.push_back(std::move(expr));
         expressions.push_back(std::make_shared<StringExprNode>(
-                std::make_shared<StringNode>(StringNode(position, std::move(literal)))));
+                std::make_shared<StringNode>(StringNode(std::move(position), std::move(literal)))));
     }
 
     ASTNodeType StringExprsNode::nodeType() const { return ASTNodeType::STRING_EXPRS; }
@@ -468,7 +468,7 @@ namespace Parser {
         return "(StringNode " + (isLiteral() ? "'" + literal + "'" : expressions->sExpression()) + ")";
     }
 
-    PrgmNode::PrgmNode(StmtsNodePtr stmts) : stmts(std::move(stmts)), ASTNode(stmts->position) {}
+    PrgmNode::PrgmNode(const StmtsNodePtr& stmts) : stmts(stmts), ASTNode(stmts->position) {}
 
     ASTNodeType PrgmNode::nodeType() const { return PRGM; }
 
@@ -482,7 +482,7 @@ namespace Parser {
     //  ||  Commands:  ||
     //  =================
 
-    BasicCmdNode::BasicCmdNode(ASTNodePtr argument) : arguments({std::move(argument)}), CmdNode(argument->position) {}
+    BasicCmdNode::BasicCmdNode(const ASTNodePtr& argument) : arguments({argument}), CmdNode(argument->position) {}
 
     BasicCmdNode::BasicCmdNode(const BasicCmdNodePtr& first, const BasicCmdNodePtr& second) : CmdNode(first->position) {
         arguments.insert(arguments.end(), first->arguments.begin(), first->arguments.end());
@@ -495,12 +495,12 @@ namespace Parser {
         return "(BasicCmdNode" + builder.str() + ")";
     }
 
-    AsyncCmdNode::AsyncCmdNode(CmdNodePtr cmd) : cmd(std::move(cmd)), CmdNode(cmd->position) {}
+    AsyncCmdNode::AsyncCmdNode(const CmdNodePtr& cmd) : cmd(cmd), CmdNode(cmd->position) {}
 
     std::string AsyncCmdNode::sExpression() const { return "(AsyncCmdNode " + cmd->sExpression() + ")"; }
 
-    PipeCmdNode::PipeCmdNode(CmdNodePtr leftCmd, CmdNodePtr rightCmd)
-        : leftCmd(std::move(leftCmd)), rightCmd(std::move(rightCmd)), CmdNode(leftCmd->position) {}
+    PipeCmdNode::PipeCmdNode(const CmdNodePtr& leftCmd, CmdNodePtr rightCmd)
+        : leftCmd(leftCmd), rightCmd(std::move(rightCmd)), CmdNode(leftCmd->position) {}
 
     std::string PipeCmdNode::sExpression() const {
         return "(PipeCmdNode " + leftCmd->sExpression() + " | " + rightCmd->sExpression() + ")";
@@ -515,8 +515,8 @@ namespace Parser {
 
     std::string VarLValueNode::sExpression() const { return "(VarLValueNode " + variable + getTypeString() + ")"; }
 
-    IndexLValueNode::IndexLValueNode(Parser::LValueNodePtr lvalue, Parser::ExprNodePtr index)
-        : lvalue(std::move(lvalue)), index(std::move(index)), LValueNode(lvalue->position) {}
+    IndexLValueNode::IndexLValueNode(const Parser::LValueNodePtr& lvalue, Parser::ExprNodePtr index)
+        : lvalue(lvalue), index(std::move(index)), LValueNode(lvalue->position) {}
 
     std::string IndexLValueNode::sExpression() const {
         return "(IndexLValueNode " + lvalue->sExpression() + " " + index->sExpression() + getTypeString() + ")";
@@ -540,8 +540,8 @@ namespace Parser {
         return "(FloatExprNode " + std::to_string(value) + getTypeString() + ")";
     }
 
-    StringExprNode::StringExprNode(StringNodePtr stringNode)
-        : stringNode(std::move(stringNode)), ExprNode(stringNode->position) {}
+    StringExprNode::StringExprNode(const StringNodePtr& stringNode)
+        : stringNode(stringNode), ExprNode(stringNode->position) {}
 
     std::string StringExprNode::sExpression() const {
         return "(StringExpressionNode " + stringNode->sExpression() + getTypeString() + ")";
@@ -574,8 +574,8 @@ namespace Parser {
         return "(LValueExprNode " + expr->sExpression() + getTypeString() + ")";
     }
 
-    ArrayExprNode::ArrayExprNode(Lexer::FilePosition position)
-        : expressions(std::make_shared<ExprsNode>(position)), ExprNode(std::move(position)) {}
+    ArrayExprNode::ArrayExprNode(const Lexer::FilePosition& position)
+        : expressions(std::make_shared<ExprsNode>(position)), ExprNode(position) {}
 
     ArrayExprNode::ArrayExprNode(Lexer::FilePosition position, ExprsNodePtr expressions)
         : expressions(std::move(expressions)), ExprNode(std::move(position)) {}
@@ -584,10 +584,10 @@ namespace Parser {
         return "(ArrayExprNode " + expressions->sExpression() + getTypeString() + ")";
     }
 
-    IndexExprNode::IndexExprNode(ExprNodePtr expr, ExprNodePtr index)
-        : expr(std::move(expr)), index(std::move(index)), ExprNode(expr->position) {}
+    IndexExprNode::IndexExprNode(const ExprNodePtr& expr, ExprNodePtr index)
+        : expr(expr), index(std::move(index)), ExprNode(expr->position) {}
 
-    IndexExprNode::IndexExprNode(IndexLValueNodePtr indexLValue)
+    IndexExprNode::IndexExprNode(const IndexLValueNodePtr& indexLValue)
         : index(indexLValue->index), ExprNode(indexLValue->position) {
         if (indexLValue->lvalue->nodeType() == VAR_LVALUE) {
             expr = std::make_shared<VarExprNode>(
@@ -602,8 +602,8 @@ namespace Parser {
         return "(IndexExprNode " + expr->sExpression() + " " + index->sExpression() + getTypeString() + ")";
     }
 
-    TupleExprNode::TupleExprNode(Lexer::FilePosition position)
-        : expressions(std::make_shared<ExprsNode>(position)), ExprNode(std::move(position)) {}
+    TupleExprNode::TupleExprNode(const Lexer::FilePosition& position)
+        : expressions(std::make_shared<ExprsNode>(position)), ExprNode(position) {}
 
     TupleExprNode::TupleExprNode(Lexer::FilePosition position, ExprsNodePtr expressions)
         : expressions(std::move(expressions)), ExprNode(std::move(position)) {}
@@ -629,31 +629,30 @@ namespace Parser {
         return "(UnOpExprNode " + node->sExpression() + " " + unOpToString(opType) + getTypeString() + ")";
     }
 
-    BinOpExprNode::BinOpExprNode(ASTNodePtr left, BinOpType opType, ExprNodePtr right)
-        : opType(opType), left(std::move(left)), right(std::move(right)), ExprNode(left->position) {}
+    BinOpExprNode::BinOpExprNode(const ASTNodePtr& left, BinOpType opType, ExprNodePtr right)
+        : opType(opType), left(left), right(std::move(right)), ExprNode(left->position) {}
 
     std::string BinOpExprNode::sExpression() const {
         return "(BinOpExprNode " + left->sExpression() + " " + binOpToString(opType) + " " + right->sExpression()
              + getTypeString() + ")";
     }
 
-    CallExprNode::CallExprNode(ExprNodePtr func)
-        : func(std::move(func)), args(std::make_shared<ExprsNode>(func->position)), ExprNode(func->position) {}
+    CallExprNode::CallExprNode(const ExprNodePtr& func)
+        : func(func), args(std::make_shared<ExprsNode>(func->position)), ExprNode(func->position) {}
 
-    CallExprNode::CallExprNode(ExprNodePtr func, ExprsNodePtr args)
-        : func(std::move(func)), args(std::move(args)), ExprNode(func->position) {}
+    CallExprNode::CallExprNode(const ExprNodePtr& func, ExprsNodePtr args)
+        : func(func), args(std::move(args)), ExprNode(func->position) {}
 
     std::string CallExprNode::sExpression() const {
         return "(CallExprNode " + func->sExpression() + " " + args->sExpression() + getTypeString() + ")";
     }
 
-    ApiCallExprNode::ApiCallExprNode(ExprNodePtr expression, std::string func)
-        : expression(std::move(expression)), func(std::move(func)),
-          args(std::make_shared<ExprsNode>(expression->position)), ExprNode(expression->position) {}
-
-    ApiCallExprNode::ApiCallExprNode(ExprNodePtr expression, std::string func, ExprsNodePtr args)
-        : expression(std::move(expression)), func(std::move(func)), args(std::move(args)),
+    ApiCallExprNode::ApiCallExprNode(const ExprNodePtr& expression, std::string func)
+        : expression(expression), func(std::move(func)), args(std::make_shared<ExprsNode>(expression->position)),
           ExprNode(expression->position) {}
+
+    ApiCallExprNode::ApiCallExprNode(const ExprNodePtr& expression, std::string func, ExprsNodePtr args)
+        : expression(expression), func(std::move(func)), args(std::move(args)), ExprNode(expression->position) {}
 
     std::string ApiCallExprNode::sExpression() const {
         return "(ApiCallExprNode " + expression->sExpression() + " " + func + " " + args->sExpression()
@@ -662,16 +661,16 @@ namespace Parser {
 
     LambdaExprNode::LambdaExprNode(Lexer::FilePosition position, ExprNodePtr body, TypeNodePtr returnType)
         : bindings(std::make_shared<BindingsNode>(position)),
-          body(std::make_shared<ReturnStmtNode>(body->position, std::move(body))), returnType(std::move(returnType)),
-          ExprNode(std::move(position)) {}
+          body(std::make_shared<ReturnStmtNode>(body->position, body)), returnType(std::move(returnType)),
+          ExprNode(position) {}
 
-    LambdaExprNode::LambdaExprNode(Lexer::FilePosition position, StmtNodePtr body, TypeNodePtr returnType)
+    LambdaExprNode::LambdaExprNode(const Lexer::FilePosition& position, StmtNodePtr body, TypeNodePtr returnType)
         : bindings(std::make_shared<BindingsNode>(position)), body(std::move(body)), returnType(std::move(returnType)),
-          ExprNode(std::move(position)) {}
+          ExprNode(position) {}
 
-    LambdaExprNode::LambdaExprNode(Lexer::FilePosition position, BindingsNodePtr bindings, ExprNodePtr body,
+    LambdaExprNode::LambdaExprNode(Lexer::FilePosition position, BindingsNodePtr bindings, const ExprNodePtr& body,
                                    TypeNodePtr returnType)
-        : bindings(std::move(bindings)), body(std::make_shared<ReturnStmtNode>(body->position, std::move(body))),
+        : bindings(std::move(bindings)), body(std::make_shared<ReturnStmtNode>(body->position, body)),
           returnType(std::move(returnType)), ExprNode(std::move(position)) {}
 
     LambdaExprNode::LambdaExprNode(Lexer::FilePosition position, BindingsNodePtr bindings, StmtNodePtr body,
@@ -757,20 +756,20 @@ namespace Parser {
 
     std::string ContinueStmtNode::sExpression() const { return "(ContinueStmtNode)"; }
 
-    ScopeStmtNode::ScopeStmtNode(Lexer::FilePosition position)
-        : stmts(std::make_shared<StmtsNode>(position)), StmtNode(std::move(position)) {}
+    ScopeStmtNode::ScopeStmtNode(const Lexer::FilePosition& position)
+        : stmts(std::make_shared<StmtsNode>(position)), StmtNode(position) {}
 
     ScopeStmtNode::ScopeStmtNode(Lexer::FilePosition position, StmtsNodePtr stmts)
         : stmts(std::move(stmts)), StmtNode(std::move(position)) {}
 
     std::string ScopeStmtNode::sExpression() const { return "(ScopeStmtNode " + stmts->sExpression() + ")"; }
 
-    CmdStmtNode::CmdStmtNode(CmdNodePtr command) : command(std::move(command)), StmtNode(command->position) {}
+    CmdStmtNode::CmdStmtNode(const CmdNodePtr& command) : command(command), StmtNode(command->position) {}
 
     std::string CmdStmtNode::sExpression() const { return "(CmdStmtNode " + command->sExpression() + ")"; }
 
-    ExprStmtNode::ExprStmtNode(ExprNodePtr expression)
-        : expression(std::move(expression)), StmtNode(expression->position) {}
+    ExprStmtNode::ExprStmtNode(const ExprNodePtr& expression)
+        : expression(expression), StmtNode(expression->position) {}
 
     std::string ExprStmtNode::sExpression() const { return "(ExprStmtNode " + expression->sExpression() + ")"; }
 
@@ -786,7 +785,7 @@ namespace Parser {
 
     std::string ImportStmtNode::sExpression() const {
         std::stringstream builder;
-        for (ASTNodePtr node : prgm) { builder << " " + node->sExpression(); }
+        for (ASTNodePtr const& node : prgm) { builder << " " + node->sExpression(); }
         return "(ImportStmtNode " + filePath->sExpression() + builder.str() + ")";
     }
 
@@ -823,7 +822,7 @@ namespace Parser {
     FunctionStmtNode::FunctionStmtNode(Lexer::FilePosition position, std::string name, StmtNodePtr body,
                                        TypeNodePtr returnType)
         : name(std::move(name)), bindings(std::make_shared<BindingsNode>(position)), body(std::move(body)),
-          returnType(std::move(returnType)), StmtNode(std::move(position)) {}
+          returnType(std::move(returnType)), StmtNode(position) {}
 
     FunctionStmtNode::FunctionStmtNode(Lexer::FilePosition position, std::string name, BindingsNodePtr bindings,
                                        StmtNodePtr body, TypeNodePtr returnType)
@@ -865,8 +864,8 @@ namespace Parser {
         return "(ArrayTypeNode " + subtype->sExpression() + getTypeString() + ")";
     }
 
-    TupleTypeNode::TupleTypeNode(Lexer::FilePosition position)
-        : subtypes(std::make_shared<TypesNode>(position)), TypeNode(std::move(position)) {}
+    TupleTypeNode::TupleTypeNode(const Lexer::FilePosition& position)
+        : subtypes(std::make_shared<TypesNode>(position)), TypeNode(position) {}
 
     TupleTypeNode::TupleTypeNode(Lexer::FilePosition position, TypesNodePtr subtypes)
         : subtypes(std::move(subtypes)), TypeNode(std::move(position)) {}
@@ -876,8 +875,7 @@ namespace Parser {
     }
 
     FunctionTypeNode::FunctionTypeNode(Lexer::FilePosition position, TypeNodePtr returnType)
-        : params(std::make_shared<TypesNode>(position)), returnType(std::move(returnType)),
-          TypeNode(std::move(position)) {}
+        : params(std::make_shared<TypesNode>(position)), returnType(std::move(returnType)), TypeNode(position) {}
 
     FunctionTypeNode::FunctionTypeNode(Lexer::FilePosition position, TypesNodePtr params, TypeNodePtr returnType)
         : params(std::move(params)), returnType(std::move(returnType)), TypeNode(std::move(position)) {}
