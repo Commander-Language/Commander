@@ -721,8 +721,8 @@ namespace Parser {
              + (falseStmt ? " " + falseStmt->sExpression() : "") + ")";
     }
 
-    ForStmtNode::ForStmtNode(Lexer::FilePosition position, StmtNodePtr initial, ExprNodePtr condition,
-                             StmtNodePtr update, StmtNodePtr body)
+    ForStmtNode::ForStmtNode(Lexer::FilePosition position, ExprNodePtr initial, ExprNodePtr condition,
+                             ExprNodePtr update, StmtNodePtr body)
         : initial(std::move(initial)), condition(std::move(condition)), update(std::move(update)),
           body(std::move(body)), StmtNode(std::move(position)) {}
 

@@ -801,6 +801,9 @@ namespace TypeChecker {
                 if (!returnType) {
                     returnType = typeCheck(stmtNode->body);
                     if (!returnType) { returnType = VOID_TY; }
+                    stmtNode->returnType = std::make_shared<Parser::FunctionTypeNode>(stmtNode->body->position,
+                                                                                      nullptr);
+                    stmtNode->returnType->type = returnType;
                 } else if (!areTypesEqual(returnType, typeCheck(stmtNode->body))) {
                     throw Util::CommanderException(
                             "Return types for the function declaration don't match. Expected return type"
