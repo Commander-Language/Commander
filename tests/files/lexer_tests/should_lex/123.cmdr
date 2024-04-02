@@ -1,0 +1,2 @@
+//Should lex api call expression by itself
+x.append(4);

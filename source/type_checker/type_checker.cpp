@@ -910,6 +910,11 @@ namespace TypeChecker {
                         astNode);
                 if (variableTypePtr->type) { return variableTypePtr->type; }
                 VarInfoPtr typeInfo = _table.getVariable(variableTypePtr->name);
+                if (!typeInfo) {
+                    throw Util::CommanderException("The variable '" + variableTypePtr->name
+                                                           + "' has not been initialized yet",
+                                                   variableTypePtr->position);
+                }
                 if (typeInfo->infoType() != TYPE_INFO) {
                     throw Util::CommanderException("The variable '" + variableTypePtr->name
                                                            + "' does not refer to a type, but instead something of type"

@@ -42,15 +42,19 @@ namespace TypeChecker {
             case BOOL:
             case STRING:
                 return " " + typeToString(tyPtr->getType());
-            case ARRAY:
-                return getTypeString(std::static_pointer_cast<ArrayTy>(tyPtr)->baseType) + "[]";
+            case ARRAY: {
+                const TyPtr baseTy = std::static_pointer_cast<ArrayTy>(tyPtr)->baseType;
+                return (baseTy ? getTypeString(baseTy) : " ANY") + "[]";
+            }
             case FUNCTION: {
                 const FunctionTyPtr functionTy = std::static_pointer_cast<FunctionTy>(tyPtr);
                 return " (" + getTypeSequenceString(functionTy->parameters) + ") ->"
-                     + getTypeString(functionTy->returnType);
+                     + (functionTy->returnType ? getTypeString(functionTy->returnType) : " ANY");
             }
             case TUPLE: {
-                return " (" + getTypeSequenceString(std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes) + ")";
+                std::vector<TyPtr> types = std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes;
+                if (types.empty()) { return " VOID"; }
+                return " (" + getTypeSequenceString(types) + ")";
             }
             default:
                 return "";
@@ -60,13 +64,13 @@ namespace TypeChecker {
     std::string getTypeSequenceString(const std::vector<TyPtr>& types) {
         if (types.empty()) { return ""; }
         std::stringstream builder;
-        builder << getTypeString(types[0]).substr(1);
-        for (int i = 1; i < types.size(); i++) { builder << "," << getTypeString(types[i]); }
+        builder << (types[0] ? getTypeString(types[0]).substr(1) : "ANY");
+        for (int i = 1; i < types.size(); i++) { builder << "," << (types[i] ? getTypeString(types[i]) : " ANY"); }
         return builder.str();
     }
 
     bool areTypesEqual(const TyPtr& type1, const TyPtr& type2) {
-        if (!type1 || !type2) { return false; }
+        if (!type1 || !type2) { return true; }
         Type const typ = type1->getType();
         if (typ != type2->getType()) { return false; }
         if (type1->any() || type2->any()) { return true; }

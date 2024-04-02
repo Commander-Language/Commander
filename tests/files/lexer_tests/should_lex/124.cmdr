@@ -1,0 +1,2 @@
+//Should lex cat commmand
+cat notes.txt;

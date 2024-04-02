@@ -89,7 +89,8 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("116.cmdr", "116.cmdr.expected"), std::make_tuple("117.cmdr", "117.cmdr.expected"),
                 std::make_tuple("118.cmdr", "118.cmdr.expected"), std::make_tuple("119.cmdr", "119.cmdr.expected"),
                 std::make_tuple("120.cmdr", "120.cmdr.expected"), std::make_tuple("121.cmdr", "121.cmdr.expected"),
-                std::make_tuple("122.cmdr", "122.cmdr.expected")));
+                std::make_tuple("122.cmdr", "122.cmdr.expected"), std::make_tuple("123.cmdr", "123.cmdr.expected"),
+                std::make_tuple("124.cmdr", "124.cmdr.expected"), std::make_tuple("125.cmdr", "125.cmdr.expected")));
 
 /**
  * Creates test suite, with list of all the files that need to be lexed that are expected to fail (as a result of a
