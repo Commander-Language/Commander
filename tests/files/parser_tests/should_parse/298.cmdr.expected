@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (ApiCallExprNode (LValueExprNode (VarExprNode x)) append (ExprsNode (IntExprNode 4)))))
