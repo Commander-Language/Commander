@@ -728,7 +728,12 @@ namespace Function {
 
     FlowController::CommanderTuplePtr remove(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data) {
-        array->values.push_back(data);
+        const FlowController::CommanderIntPtr index = indexOf(array, data);
+        if (index->value == -1) {
+            // TODO: Should we throw an error?
+            return VOID;
+        }
+        array->values.erase(array->values.begin() + index->value);
         return VOID;
     }
 

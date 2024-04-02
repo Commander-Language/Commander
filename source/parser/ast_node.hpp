@@ -1884,7 +1884,7 @@ namespace Parser {
         /**
          * The statement for the initialization step of the loop
          */
-        StmtNodePtr initial;
+        ExprNodePtr initial;
 
         /**
          * The condition expression
@@ -1894,7 +1894,7 @@ namespace Parser {
         /**
          * The statement that is executed at the end of each iteration
          */
-        StmtNodePtr update;
+        ExprNodePtr update;
 
         /**
          * The statement that contains the body of the loop
@@ -1910,7 +1910,7 @@ namespace Parser {
          * @param update The variable-update expression in the parentheses.
          * @param body The body of the loop.
          */
-        ForStmtNode(Lexer::FilePosition position, StmtNodePtr initial, ExprNodePtr condition, StmtNodePtr update,
+        ForStmtNode(Lexer::FilePosition position, ExprNodePtr initial, ExprNodePtr condition, ExprNodePtr update,
                     StmtNodePtr body);
 
         /**

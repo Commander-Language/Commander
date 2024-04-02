@@ -74,15 +74,25 @@ namespace FlowController {
     //  =================
     //  ||   Lambda    ||
     //  =================
-    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body, std::string name)
-        : bindings(std::move(bindings)), body(std::move(body)), name(std::move(name)) {}
+    CommanderLambda::CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body,
+                                     TypeChecker::TyPtr returnType, std::string name)
+        : bindings(std::move(bindings)), body(std::move(body)), name(std::move(name)),
+          returnType(std::move(returnType)) {}
 
     [[nodiscard]] TypeChecker::Type CommanderTuple::getType() const { return TypeChecker::TUPLE; }
 
     [[nodiscard]] std::string CommanderLambda::getStringRepresentation() const {
-        if (name.empty()) return "<Anonymous Lambda>";
-
-        return "<Function " + name + ">";
+        std::stringstream builder;
+        builder << "(";
+        for (int i = 0; i < bindings->bindings.size(); i++) {
+            if (i != 0) { builder << ", "; }
+            auto binding = bindings->bindings[i];
+            if (binding->constant) { builder << "const "; }
+            builder << binding->variable;
+            if (binding->type) { builder << ":" << TypeChecker::getTypeString(binding->type->type); }
+        }
+        builder << ") ->" << TypeChecker::getTypeString(returnType);
+        return builder.str();
     }
 
     [[nodiscard]] TypeChecker::Type CommanderLambda::getType() const { return TypeChecker::FUNCTION; }
