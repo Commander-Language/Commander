@@ -15,8 +15,17 @@
 
 
 #include "source/flow_controller/types.hpp"
+#if defined(__APPLE__) || defined(__linux__) || defined(__unix__)
 #include "source/job_runner/job_runner_linux.hpp"
 using Runner = JobRunner::JobRunnerLinux;
+#elif defined(_MSC_VER)
+#include "source/job_runner/job_runner_windows.hpp"
+using Runner = JobRunner::JobRunnerWindows;
+#else
+# error OS/Compiler not supported
+#endif
+
+
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type.hpp"

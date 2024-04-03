@@ -109,7 +109,14 @@ project(commander)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS_RELEASE -O3)
+set(SUPPORTED_WINDOWS_COMPILER MSVC)
+
+if(SUPPORTED_WINDOWS_COMPILER)
+    set(CMAKE_CXX_FLAGS_RELEASE /bigobj)
+else()
+    set(CMAKE_CXX_FLAGS_RELEASE -O3)
+endif ()
+set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE) # complains only in windows
 
 include_directories(.)
 
@@ -128,7 +135,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-
 include(GoogleTest)
 
 
@@ -169,7 +175,13 @@ add_library(flow_controller source/flow_controller/flow_controller.cpp source/ut
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
-add_library(job_runner source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
+if(UNIX OR APPLE)
+    add_library(job_runner source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
+elseif(SUPPORTED_WINDOWS_COMPILER)
+    add_library(job_runner source/job_runner/job_runner_windows.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
+else()
+    message( FATAL_ERROR "OS not supported" )
+endif()
 
 add_executable(commander source/interpreter/commander.cpp)
 

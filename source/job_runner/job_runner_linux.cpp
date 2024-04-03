@@ -11,8 +11,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <utility>
-/* Windows specific includes */
-// #include <Windows.h>
 
 namespace JobRunner {
 
