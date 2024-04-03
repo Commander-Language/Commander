@@ -174,17 +174,21 @@ add_library(flow_controller source/flow_controller/flow_controller.cpp source/ut
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
-if(UNIX OR APPLE)
-    add_library(job_runner source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
-elseif(MSVC)
-    add_library(job_runner source/job_runner/job_runner_windows.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
+if(MSVC)
+    add_library(job_runner_windows source/job_runner/job_runner_windows.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
+elseif(UNIX OR APPLE)
+    add_library(job_runner_linux source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
 else()
     message( FATAL_ERROR "OS not supported" )
 endif()
 
 add_executable(commander source/interpreter/commander.cpp)
 
-target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner ncurses)
+if(MSVC)
+    target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner_windows)
+elseif(UNIX OR APPLE)
+    target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner_linux ncurses)
+endif()
 
 #  Test configurations:
 #  --------------------

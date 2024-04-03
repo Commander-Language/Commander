@@ -9,7 +9,7 @@
 
 #include "print.hpp"
 #include <iostream>
-#include <ncurses.h>
+//#include <ncurses.h>
 #include <string>
 
 namespace Util {

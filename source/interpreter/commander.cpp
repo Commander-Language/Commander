@@ -3,7 +3,13 @@
 #include "source/type_checker/type_checker.hpp"
 #include <fstream>
 #include <iostream>
+#define WINDOWS_DEBUG
+#ifdef WINDOWS_DEBUG
+#include <Windows.h>
+#endif
+#ifndef WINDOWS_DEBUG
 #include <ncurses.h>
+#endif
 
 bool hasArgument(std::vector<std::string>& arguments, std::string argument) {
     return std::find(arguments.begin(), arguments.end(), argument) != arguments.end();
@@ -61,21 +67,39 @@ int main(int argc, char** argv) {
             interpretFile(file, arguments, parser, typeChecker, controller);
             return 0;
         }
+        Util::usingNCurses = false;
+#ifndef WINDOWS_DEBUG
         Util::usingNCurses = true;
         initscr();
         cbreak();
         noecho();
         keypad(stdscr, TRUE);
         curs_set(2);
+#endif
         Util::println("Commander Language Version Beta");
         Util::println("Basic REPL for Commander scripting language");
         Util::print(">> ");
+#ifndef WINDOWS_DEBUG
         refresh();
+#endif
         std::string currentLine;
         std::vector<std::string> lines;
         int line = 0;
         int idx = 0;
         while (true) {
+            std::string source;
+            std::getline(std::cin, source);
+            try {
+                // Make a temporary file for the lexer
+                std::string tmpFileName = "test.cmdr";  // Not thread safe!!
+                std::ofstream tmp(tmpFileName);
+                tmp << source;
+                tmp.close();  // close file here to save changes
+                interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
+                std::remove(tmpFileName.c_str());
+            } catch (const Util::CommanderException& err) { Util::println(err.what()); }
+
+#ifndef WINDOWS_DEBUG
             int chr = getch();
             switch (chr) {
                 case KEY_ENTER:
@@ -154,11 +178,16 @@ int main(int argc, char** argv) {
                     }
             }
             refresh();
+#endif
         }
+#ifndef WINDOWS_DEBUG
         endwin();
+#endif
         return 0;
     } catch (const Util::CommanderException& e) {
+#ifndef WINDOWS_DEBUG
         endwin();
+#endif
         std::cout << e.what() << '\n';
         return 1;
     }

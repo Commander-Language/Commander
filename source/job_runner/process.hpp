@@ -13,7 +13,7 @@ namespace Process {
      * @details External processes call programs in the system.
      *          Builtins are called within (see builtins folder)
      */
-    enum ProcessType : u_int8_t {
+    enum ProcessType : uint8_t {
         EXTERNAL,
         BUILTIN,
     };

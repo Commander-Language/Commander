@@ -8,7 +8,13 @@
 
 #include "source/builtin_functions/functions.hpp"
 #include "source/flow_controller/types.hpp"
+#if defined(__APPLE__) || defined(__linux__) || defined(__unix__)
 #include "source/job_runner/job_runner_linux.hpp"
+#elif defined(_MSC_VER)
+#include "source/job_runner/job_runner_windows.hpp"
+#else
+# error OS/Compiler not supported
+#endif
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
 #include "source/symbol_table/symbol_table_organizer.hpp"

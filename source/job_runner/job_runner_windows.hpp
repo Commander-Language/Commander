@@ -18,15 +18,6 @@
 #include "builtins/builtins.hpp"
 #include "process.hpp"
 #include "source/util/print.hpp"
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <tuple>
-#include <unistd.h>
-#include <vector>
 
 namespace JobRunner {
     //  ==========================
@@ -57,7 +48,7 @@ namespace JobRunner {
          * @param in - file descriptor to read from (for builtins)
          * @param out - file descriptor to write to (for builtins)
          */
-        void _exec(const Process::ProcessPtr& process);
+        JobInfo _exec(const Process::ProcessPtr& process);
 
         /**
          * @brief Exectue a builtin command without returning
@@ -66,7 +57,7 @@ namespace JobRunner {
          * @param in - The file descriptor to read from (default std in)
          * @param out - The file descriptor to write to (default std out)
          */
-        void _execBuiltinNoReturn(const Process::ProcessPtr& process, int in = STDIN_FILENO, int out = STDOUT_FILENO);
+        void _execBuiltinNoReturn(const Process::ProcessPtr& process);
 
         /**
          * @brief Execute a builtin
@@ -75,7 +66,7 @@ namespace JobRunner {
          * @param out - The file descriptor to write to (default std out)
          * @return The job information
          */
-        JobInfo _execBuiltin(const Process::ProcessPtr& process, int in = STDIN_FILENO, int out = STDOUT_FILENO);
+        JobInfo _execBuiltin(const Process::ProcessPtr& process);
 
         /**
          * @brief Does piping of processes
