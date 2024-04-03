@@ -67,25 +67,7 @@ int main(int argc, char** argv) {
             interpretFile(file, arguments, parser, typeChecker, controller);
             return 0;
         }
-        Util::usingNCurses = false;
-#ifndef WINDOWS_DEBUG
-        Util::usingNCurses = true;
-        initscr();
-        cbreak();
-        noecho();
-        keypad(stdscr, TRUE);
-        curs_set(2);
-#endif
-        Util::println("Commander Language Version Beta");
-        Util::println("Basic REPL for Commander scripting language");
-        Util::print(">> ");
-#ifndef WINDOWS_DEBUG
-        refresh();
-#endif
-        std::string currentLine;
-        std::vector<std::string> lines;
-        int line = 0;
-        int idx = 0;
+#ifdef WINDOWS_DEBUG
         while (true) {
             std::string source;
             std::getline(std::cin, source);
@@ -98,8 +80,24 @@ int main(int argc, char** argv) {
                 interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
                 std::remove(tmpFileName.c_str());
             } catch (const Util::CommanderException& err) { Util::println(err.what()); }
-
+        }
+#endif
 #ifndef WINDOWS_DEBUG
+        Util::usingNCurses = true;
+        initscr();
+        cbreak();
+        noecho();
+        keypad(stdscr, TRUE);
+        curs_set(2);
+        Util::println("Commander Language Version Beta");
+        Util::println("Basic REPL for Commander scripting language");
+        Util::print(">> ");
+        refresh();
+        std::string currentLine;
+        std::vector<std::string> lines;
+        int line = 0;
+        int idx = 0;
+        while (true) {
             int chr = getch();
             switch (chr) {
                 case KEY_ENTER:
@@ -178,9 +176,7 @@ int main(int argc, char** argv) {
                     }
             }
             refresh();
-#endif
         }
-#ifndef WINDOWS_DEBUG
         endwin();
 #endif
         return 0;
