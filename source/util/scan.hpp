@@ -15,7 +15,6 @@
 #ifndef WINDOWS_DEBUG
 #include <ncurses.h>
 #endif
-#include <ncurses.h>
 #include <string>
 
 namespace Util {
