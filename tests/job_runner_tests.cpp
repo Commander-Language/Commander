@@ -24,15 +24,15 @@ const std::string testLocation = "../tests/files/job_runner_tests/";
  */
 TEST(JobRunnerTests, RunBuiltinPrint) {
     Args arg1 {"println", "Hello from println builtin"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::BUILTIN, false, true);
+    Process::Process proc1(arg1, Process::ProcessType::BUILTIN, false, true);
 
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo output1 = runner1.execProcess();
 
     Args arg2 {"print", "Hello from print builtin"};
-    JobRunner::Process proc2(arg2, JobRunner::ProcessType::BUILTIN, false, true);
+    Process::Process proc2(arg2, Process::ProcessType::BUILTIN, false, true);
 
-    JobRunner::JobRunner runner2(std::make_shared<JobRunner::Process>(proc2));
+    JobRunner::JobRunnerLinux runner2(std::make_shared<Process::Process>(proc2));
     JobRunner::JobInfo output2 = runner2.execProcess();
 
     EXPECT_EQ(std::get<0>(output1), "Hello from println builtin\n");
@@ -43,8 +43,8 @@ TEST(JobRunnerTests, RunBuiltinPrint) {
  */
 TEST(JobRunnerTests, RunSimpleJobCat) {
     Args arg1 {"cat", testLocation + "testDirectory/cat.txt"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo output1 = runner1.execProcess();
 
     std::string expected = getFileContents(testLocation + "testDirectory/cat.txt");
@@ -55,8 +55,8 @@ TEST(JobRunnerTests, RunSimpleJobCat) {
  */
 TEST(JobRunnerTests, RunSimpleJobCat2) {
     Args arg1 {"cat", testLocation + "testDirectory/cat2.txt"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo output1 = runner1.execProcess();
 
     std::string expected = getFileContents(testLocation + "testDirectory/cat2.txt");
@@ -70,8 +70,8 @@ TEST(JobRunnerTests, RunSimpleJobLS) {
     // same output across different systems
     //  (gets rid of user info and time)
     Args arg1 {"ls", "-Ggh", "--time-style=+", testLocation + "testDirectory"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo output1 = runner1.execProcess();
 
     std::string expected = getFileContents(testLocation + "lsOutput.txt");
@@ -84,8 +84,8 @@ TEST(JobRunnerTests, RunSimpleJobLS) {
  */
 TEST(JobRunnerTests, RunBackgroundJob) {
     Args arg1 {"sleep", "20s"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     runner1.execProcess();
     SUCCEED();
 }
@@ -94,8 +94,8 @@ TEST(JobRunnerTests, RunBackgroundJob) {
  */
 TEST(JobRunnerTests, RunSaveReturnJob) {
     Args arg1 {"ls", "-l", "-a"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo info = runner1.execProcess();
     std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
     std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
@@ -106,8 +106,8 @@ TEST(JobRunnerTests, RunSaveReturnJob) {
  */
 TEST(JobRunnerTests, RunSaveReturnJob2) {
     Args arg1 {"cat", testLocation + "testDirectory/cat.txt"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo info = runner1.execProcess();
     std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
     std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
@@ -119,8 +119,8 @@ TEST(JobRunnerTests, RunSaveReturnJob2) {
  */
 TEST(JobRunnerTests, RunReturnJob3) {
     Args arg1 {"cat", "-badarg"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo info = runner1.execProcess();
     std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
     std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
@@ -132,8 +132,8 @@ TEST(JobRunnerTests, RunReturnJob3) {
  */
 TEST(JobRunnerTests, RunSaveReturnJob4) {
     Args arg1 {"cat", testLocation + "testDirectory/cat2.txt"};
-    JobRunner::Process proc1(arg1, JobRunner::ProcessType::EXTERNAL, false, true);
-    JobRunner::JobRunner runner1(std::make_shared<JobRunner::Process>(proc1));
+    Process::Process proc1(arg1, Process::ProcessType::EXTERNAL, false, true);
+    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
     JobRunner::JobInfo info = runner1.execProcess();
     std::cout << "Standard Output is:\n" << std::get<0>(info) << "\n";
     std::cout << "Standard Error is:\n" << std::get<1>(info) << "\n";
