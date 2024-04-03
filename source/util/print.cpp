@@ -12,7 +12,9 @@ namespace Util {
 
     void print(const std::string& str) {
         if (usingNCurses) {
-            //printw("%s", str.c_str());
+#ifndef WINDOWS_DEBUG
+            printw("%s", str.c_str());
+#endif
         } else {
             std::cout << str;
         }
@@ -22,7 +24,9 @@ namespace Util {
         if (str.empty()) return;
 
         if (usingNCurses) {
-            //printw("%s\n", str.c_str());
+#ifndef WINDOWS_DEBUG
+            printw("%s\n", str.c_str());
+#endif
         } else {
             std::cout << str << '\n';
         }

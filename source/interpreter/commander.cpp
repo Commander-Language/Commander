@@ -3,7 +3,10 @@
 #include "source/type_checker/type_checker.hpp"
 #include <fstream>
 #include <iostream>
+
+#if defined(_MSC_VER)
 #define WINDOWS_DEBUG
+#endif
 #ifdef WINDOWS_DEBUG
 #include <Windows.h>
 #endif

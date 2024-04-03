@@ -176,17 +176,15 @@ add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/s
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 if(MSVC)
     add_library(job_runner_windows source/job_runner/job_runner_windows.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
-elseif(UNIX OR APPLE)
-    add_library(job_runner_linux source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
 else()
-    message( FATAL_ERROR "OS not supported" )
+    add_library(job_runner_linux source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
 endif()
 
 add_executable(commander source/interpreter/commander.cpp)
 
 if(MSVC)
     target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner_windows)
-elseif(UNIX OR APPLE)
+else()
     target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner_linux ncurses)
 endif()
 
@@ -209,12 +207,20 @@ add_executable(symbolTableTests tests/symbol_table_tests.cpp)
 target_link_libraries(symbolTableTests symbol_table GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
 
-add_executable(flowControllerTests tests/flow_controller_tests.cpp)
-target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner ncurses GTest::gtest_main)
-gtest_discover_tests(flowControllerTests)
 
-if(UNIX OR APPLE)
-    add_executable(jobRunnerTests tests/job_runner_tests.cpp)
-    target_link_libraries(jobRunnerTests lexer job_runner ncurses GTest::gtest_main)
+add_executable(jobRunnerTests tests/job_runner_tests.cpp)
+add_executable(flowControllerTests tests/flow_controller_tests.cpp)
+
+if(MSVC)
+    target_link_libraries(jobRunnerTests lexer job_runner_windows GTest::gtest_main)
     gtest_discover_tests(jobRunnerTests)
+
+    target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner_windows GTest::gtest_main)
+    gtest_discover_tests(flowControllerTests)
+else()
+    target_link_libraries(jobRunnerTests lexer job_runner_linux ncurses GTest::gtest_main)
+    gtest_discover_tests(jobRunnerTests)
+
+    target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner_linux ncurses GTest::gtest_main)
+    gtest_discover_tests(flowControllerTests)
 endif()

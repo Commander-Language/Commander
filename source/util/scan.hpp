@@ -9,7 +9,13 @@
 
 #include "print.hpp"
 #include <iostream>
-//#include <ncurses.h>
+#if defined(_MSC_VER)
+#define WINDOWS_DEBUG
+#endif
+#ifndef WINDOWS_DEBUG
+#include <ncurses.h>
+#endif
+#include <ncurses.h>
 #include <string>
 
 namespace Util {
