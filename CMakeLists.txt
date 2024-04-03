@@ -109,9 +109,7 @@ project(commander)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(SUPPORTED_WINDOWS_COMPILER MSVC)
-
-if(SUPPORTED_WINDOWS_COMPILER)
+if(MSVC)
     set(CMAKE_CXX_FLAGS /bigobj)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000") # 10MB stack size for windows
 else()
@@ -178,7 +176,7 @@ add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/s
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 if(UNIX OR APPLE)
     add_library(job_runner source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
-elseif(SUPPORTED_WINDOWS_COMPILER)
+elseif(MSVC)
     add_library(job_runner source/job_runner/job_runner_windows.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
 else()
     message( FATAL_ERROR "OS not supported" )
