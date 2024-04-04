@@ -39,7 +39,7 @@ namespace TypeChecker {
                 Parser::BasicCmdNodePtr const command = std::static_pointer_cast<Parser::BasicCmdNode>(astNode);
                 for (const Parser::ASTNodePtr& node : command->arguments) {
                     TyPtr const nodeType = typeCheck(node);
-                    if (!nodeType || nodeType->getType() != Type::STRING) {
+                    if (nodeType && nodeType->getType() != Type::STRING) {
                         throw Util::CommanderException("Command has an argument that is of type"
                                                                + getErrorTypeString(nodeType)
                                                                + " instead of type STRING",
@@ -96,12 +96,11 @@ namespace TypeChecker {
             case Parser::VAR_EXPR: {
                 Parser::VarExprNodePtr const exprNode = std::static_pointer_cast<Parser::VarExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr const varType = getVarType(exprNode->variable);
-                if (!varType) {
+                if (!_table.hasVariable(exprNode->variable)) {
                     throw Util::CommanderException(
                             "Variable '" + exprNode->variable + "' has not been initialized yet.", exprNode->position);
                 }
-                return (exprNode->type = varType);
+                return (exprNode->type = getVarType(exprNode->variable));
             }
             case Parser::LVALUE_EXPR: {
                 Parser::LValueExprNodePtr const exprNode = std::static_pointer_cast<Parser::LValueExprNode>(astNode);
@@ -114,7 +113,6 @@ namespace TypeChecker {
                 TyPtr const type = exprNode->expressions->exprs.empty() ? nullptr
                                                                         : typeCheck(exprNode->expressions->exprs[0]);
                 if (!exprNode->expressions->exprs.empty()) {
-                    if (!type) { throw Util::CommanderException("Array has an unknown type.", exprNode->position); }
                     for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
                         TyPtr const type2 = typeCheck(exprNodePtr);
                         if (!areTypesEqual(type, type2)) {
@@ -131,7 +129,7 @@ namespace TypeChecker {
                 Parser::IndexExprNodePtr const exprNode = std::static_pointer_cast<Parser::IndexExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const indexType = typeCheck(exprNode->index);
-                if (!indexType || indexType->getType() != Type::INT) {
+                if (indexType && indexType->getType() != Type::INT) {
                     throw Util::CommanderException("Tried to index an array or tuple with type"
                                                            + getErrorTypeString(indexType) + " instead of type INT",
                                                    exprNode->index->position);
@@ -174,11 +172,7 @@ namespace TypeChecker {
                 if (exprNode->type) { return exprNode->type; }
                 std::vector<TyPtr> expressionTypes;
                 for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
-                    TyPtr const exprType = typeCheck(exprNodePtr);
-                    if (!exprType) {
-                        throw Util::CommanderException("Unknown type for expression in tuple", exprNodePtr->position);
-                    }
-                    expressionTypes.push_back(exprType);
+                    expressionTypes.push_back(typeCheck(exprNodePtr));
                 }
                 return (exprNode->type = std::make_shared<TupleTy>(expressionTypes));
             }
@@ -186,21 +180,21 @@ namespace TypeChecker {
                 Parser::TernaryExprNodePtr const exprNode = std::static_pointer_cast<Parser::TernaryExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const conditionType = typeCheck(exprNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
+                if (conditionType && conditionType->getType() != Type::BOOL) {
                     throw Util::CommanderException("Ternary condition evaluates to the type"
                                                            + getErrorTypeString(conditionType) + " instead of BOOL",
                                                    exprNode->condition->position);
                 }
                 TyPtr const trueType = typeCheck(exprNode->trueExpr);
                 TyPtr const falseType = typeCheck(exprNode->falseExpr);
-                if (!trueType || !falseType || !areTypesEqual(trueType, falseType)) {
+                if (!areTypesEqual(trueType, falseType)) {
                     throw Util::CommanderException(
                             "True and false expressions do not match the same type. True expression has type"
                                     + getErrorTypeString(trueType) + " but false expression has type"
                                     + getErrorTypeString(falseType),
                             exprNode->falseExpr->position);
                 }
-                return (exprNode->type = trueType);
+                return (exprNode->type = trueType ? trueType : falseType);
             }
             case Parser::UNOP_EXPR: {
                 Parser::UnOpExprNodePtr const exprNode = std::static_pointer_cast<Parser::UnOpExprNode>(astNode);
@@ -213,7 +207,7 @@ namespace TypeChecker {
                                   == TUPLE;
                 switch (exprNode->opType) {
                     case Parser::NOT:
-                        if (expressionType->getType() != Type::BOOL) {
+                        if (expressionType && expressionType->getType() != Type::BOOL) {
                             throw Util::CommanderException("Got type" + getErrorTypeString(expressionType)
                                                                    + " instead of BOOL inside of ! operation",
                                                            exprNode->node->position);
@@ -436,7 +430,7 @@ namespace TypeChecker {
                 Parser::CallExprNodePtr const exprNode = std::static_pointer_cast<Parser::CallExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const type = typeCheck(exprNode->func);
-                if (!type || type->getType() != Type::FUNCTION) {
+                if (type && type->getType() != Type::FUNCTION) {
                     throw Util::CommanderException("Tried to call something that wasn't a function, but rather of type"
                                                            + getErrorTypeString(type),
                                                    exprNode->func->position);
@@ -529,7 +523,7 @@ namespace TypeChecker {
                 if (exprNode->type) { return exprNode->type; }
                 exprNode->args->exprs.insert(exprNode->args->exprs.begin(), exprNode->expression);
                 TyPtr const type = getVarType(exprNode->func);
-                if (!type || type->getType() != Type::FUNCTION) {
+                if (type && type->getType() != Type::FUNCTION) {
                     throw Util::CommanderException("Tried to call '" + exprNode->func
                                                            + "' which isn't a function type. The type is instead"
                                                            + getErrorTypeString(type),
@@ -622,7 +616,7 @@ namespace TypeChecker {
                 Parser::ScanExprNodePtr const exprNode = std::static_pointer_cast<Parser::ScanExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const promptType = typeCheck(exprNode->prompt);
-                if (!promptType || promptType->getType() != Type::STRING) {
+                if (promptType && promptType->getType() != Type::STRING) {
                     throw Util::CommanderException("Expected a STRING prompt for scan expression, but found type"
                                                            + getErrorTypeString(promptType) + " instead",
                                                    exprNode->prompt->position);
@@ -633,7 +627,7 @@ namespace TypeChecker {
                 Parser::ReadExprNodePtr const exprNode = std::static_pointer_cast<Parser::ReadExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const pathType = typeCheck(exprNode->filePath);
-                if (!pathType || pathType->getType() != Type::STRING) {
+                if (pathType && pathType->getType() != Type::STRING) {
                     throw Util::CommanderException("Expected a STRING file path for read expression, but found type"
                                                            + getErrorTypeString(pathType) + " instead",
                                                    exprNode->filePath->position);
@@ -652,7 +646,7 @@ namespace TypeChecker {
             case Parser::IF_STMT: {
                 Parser::IfStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(astNode);
                 TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
+                if (conditionType && conditionType->getType() != Type::BOOL) {
                     throw Util::CommanderException(
                             "If statement condition does not evaluate to a BOOL type, but instead to type"
                                     + getErrorTypeString(conditionType),
@@ -667,7 +661,7 @@ namespace TypeChecker {
                 pushScope();
                 typeCheck(stmtNode->initial);
                 TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
+                if (conditionType && conditionType->getType() != Type::BOOL) {
                     throw Util::CommanderException(
                             "For statement condition does not evaluate to a BOOL type, but instead to type"
                                     + getErrorTypeString(conditionType),
@@ -681,7 +675,7 @@ namespace TypeChecker {
             case Parser::WHILE_STMT: {
                 Parser::WhileStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(astNode);
                 TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
+                if (conditionType && conditionType->getType() != Type::BOOL) {
                     throw Util::CommanderException(
                             "While statement condition does not evaluate to a BOOL type, but instead to type"
                                     + getErrorTypeString(conditionType),
@@ -694,7 +688,7 @@ namespace TypeChecker {
                 Parser::DoWhileStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::DoWhileStmtNode>(astNode);
                 typeCheck(stmtNode->body);
                 TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
+                if (conditionType && conditionType->getType() != Type::BOOL) {
                     throw Util::CommanderException(
                             "Do-while statement condition does not evaluate to a BOOL type, but instead to type"
                                     + getErrorTypeString(conditionType),
@@ -733,7 +727,7 @@ namespace TypeChecker {
             case Parser::IMPORT_STMT: {
                 Parser::ImportStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ImportStmtNode>(astNode);
                 TyPtr const pathType = typeCheck(stmtNode->filePath);
-                if (!pathType || pathType->getType() != Type::STRING) {
+                if (pathType && pathType->getType() != Type::STRING) {
                     throw Util::CommanderException("Expected a STRING file path for import statement, but found type"
                                                            + getErrorTypeString(pathType) + " instead",
                                                    stmtNode->filePath->position);
@@ -769,13 +763,13 @@ namespace TypeChecker {
             case Parser::WRITE_STMT: {
                 Parser::WriteStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::WriteStmtNode>(astNode);
                 TyPtr const dataType = typeCheck(stmtNode->fileData);
-                if (!dataType || dataType->getType() != Type::STRING) {
+                if (dataType && dataType->getType() != Type::STRING) {
                     throw Util::CommanderException("Expected a STRING for file data in write statement, but found type"
                                                            + getErrorTypeString(dataType) + " instead",
                                                    stmtNode->fileData->position);
                 }
                 TyPtr const pathType = typeCheck(stmtNode->filePath);
-                if (!pathType || pathType->getType() != Type::STRING) {
+                if (pathType && pathType->getType() != Type::STRING) {
                     throw Util::CommanderException("Expected a STRING file path for write statement, but found type"
                                                            + getErrorTypeString(pathType) + " instead",
                                                    stmtNode->filePath->position);
@@ -825,7 +819,7 @@ namespace TypeChecker {
                 Parser::AssertStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::AssertStmtNode>(astNode);
                 typeCheck(stmtNode->message);
                 TyPtr type = typeCheck(stmtNode->expr);
-                if (!type || type->getType() != BOOL) {
+                if (type && type->getType() != BOOL) {
                     throw Util::CommanderException(
                             "Assert statement condition does not evaluate to a BOOL type, but instead to type"
                                     + getErrorTypeString(type),
@@ -853,7 +847,7 @@ namespace TypeChecker {
             }
             case Parser::STRING: {
                 Parser::StringNodePtr const stringPtr = std::static_pointer_cast<Parser::StringNode>(astNode);
-                if (!stringPtr->isLiteral()) { typeCheck(stringPtr->expressions); }
+                typeCheck(stringPtr->expressions);
                 return STRING_TY;
             }
             case Parser::STRING_EXPRS: {
