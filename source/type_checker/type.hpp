@@ -19,7 +19,7 @@ namespace TypeChecker {
      * @brief Enumeration of all possible (base) types in Commander
      *
      */
-    enum Type : std::uint8_t { INT, FLOAT, BOOL, TUPLE, ARRAY, FUNCTION, STRING };
+    enum Type : std::uint8_t { INT, FLOAT, BOOL, TUPLE, ARRAY, FUNCTION, STRING, COMMAND };
 
     /**
      * @brief An abstract class representing a type
@@ -82,6 +82,29 @@ namespace TypeChecker {
      * @return The string representation of the given type
      */
     std::string getTypeString(const TyPtr& tyPtr);
+
+    /**
+     * @brief A class representing a Commander command type
+     *
+     */
+    class CommandTy : public Ty {
+    public:
+        /**
+         * Default constructor
+         */
+        CommandTy();
+        /**
+         * @brief Gets the type that the class represents
+         *
+         * @return `COMMAND` always.
+         */
+        [[nodiscard]] Type getType() const override;
+    };
+    /**
+     * @brief Pointer to an command type
+     */
+    using CommandTyPtr = std::shared_ptr<CommandTy>;
+
 
     /**
      * @brief A class representing a Commander int type
@@ -266,6 +289,7 @@ namespace TypeChecker {
     using FunctionTyPtr = std::shared_ptr<FunctionTy>;
 
     const TupleTyPtr VOID_TY = std::make_shared<TupleTy>(false);
+    const CommandTyPtr COMMAND_TY = std::make_shared<CommandTy>();
     const IntTyPtr INT_TY = std::make_shared<IntTy>();
     const FloatTyPtr FLOAT_TY = std::make_shared<FloatTy>();
     const BoolTyPtr BOOL_TY = std::make_shared<BoolTy>();

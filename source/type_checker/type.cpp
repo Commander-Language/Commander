@@ -10,6 +10,8 @@ namespace TypeChecker {
 
     std::string typeToString(const Type& type) {
         switch (type) {
+            case COMMAND:
+                return "COMMAND";
             case INT:
                 return "INT";
             case FLOAT:
@@ -32,6 +34,7 @@ namespace TypeChecker {
     std::string getTypeString(const TyPtr& tyPtr) {
         if (!tyPtr) { return ""; }
         switch (tyPtr->getType()) {
+            case COMMAND:
             case INT:
             case FLOAT:
             case BOOL:
@@ -102,10 +105,13 @@ namespace TypeChecker {
     bool Ty::any() const { return _any; }
 
     Ty::Ty(bool any) : _any(any) {}
+    CommandTy::CommandTy() : Ty(true) {}
     IntTy::IntTy() : Ty(true) {}
     FloatTy::FloatTy() : Ty(true) {}
     BoolTy::BoolTy() : Ty(true) {}
     StringTy::StringTy() : Ty(true) {}
+
+    Type CommandTy::getType() const { return Type::COMMAND; }
 
     Type IntTy::getType() const { return Type::INT; }
 

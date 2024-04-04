@@ -115,7 +115,6 @@ namespace FlowController {
             case Parser::BASIC_CMD: {
                 auto cmd = std::static_pointer_cast<Parser::BasicCmdNode>(node);
                 args = _parseArguments(cmd->arguments);
-
                 // Run the command
                 auto job = std::make_shared<JobRunner::Process>(args, JobRunner::ProcessType::EXTERNAL, isBackground,
                                                                 !isBackground && saveInfo);
@@ -895,6 +894,7 @@ namespace FlowController {
 
     std::vector<std::string> FlowController::_parseArguments(const std::vector<Parser::ASTNodePtr>& args) {
         std::vector<std::string> result;
+
         for (const auto& arg : args) {
             if (arg->nodeType() == Parser::ASTNodeType::VAR_EXPR) {
                 auto var = std::static_pointer_cast<Parser::VarExprNode>(arg);
@@ -903,6 +903,11 @@ namespace FlowController {
                 auto string = std::static_pointer_cast<Parser::StringNode>(arg);
                 result.emplace_back(_string(string));
             }
+        }
+        // check if first arg is an alias, if so replace
+        if (_symbolTable.varExistsInScope(result[0])) {
+            auto* alias = _symbolTable.getVariable<CommanderCommandPtr>(result[0]);
+            result[0] = alias->get()->getStringRepresentation();
         }
         return result;
     }
