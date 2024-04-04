@@ -1,0 +1,5 @@
+//Test builtin sec type checks
+a = 1;
+x = sec(16);
+x = sec(0.25);
+x = sec((1.0, true, 3)[a]);

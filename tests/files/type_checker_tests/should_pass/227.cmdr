@@ -1,0 +1,4 @@
+//Test that functions type check
+fn add(): int { return 3 + 4; }
+add();
+x = add();

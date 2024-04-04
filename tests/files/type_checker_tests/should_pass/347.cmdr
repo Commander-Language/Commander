@@ -1,0 +1,5 @@
+//Test builtin split type checks
+a = 1;
+x = "hi".split("h");
+x = (1.0, true, 3)[a].split("h");
+x = "hi".split((1.0, true, 3)[a]);

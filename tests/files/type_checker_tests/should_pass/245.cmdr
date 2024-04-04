@@ -1,0 +1,6 @@
+//Test that lambdas type check
+add = fn (a, b) -> { 
+    return a + b;
+};
+add(2, 3);
+x = add(2.3, 3.4);

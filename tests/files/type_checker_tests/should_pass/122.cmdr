@@ -1,0 +1,2 @@
+//Test that and operation type checks
+x = true && false;

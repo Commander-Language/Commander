@@ -226,7 +226,7 @@ namespace Function {
             {"append", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
                                TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::VOID_TY)}},
             {"remove", std::vector<TypeChecker::FunctionTyPtr> {
-                               getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::VOID_TY)}}};
+                               getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::BOOL_TY)}}};
 
     /* ========== Implementations ========== */
 
@@ -364,7 +364,7 @@ namespace Function {
     FlowController::CommanderTuplePtr append(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data);
 
-    FlowController::CommanderTuplePtr remove(FlowController::CommanderArrayPtr array,
+    FlowController::CommanderBoolPtr remove(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data);
 }  // namespace Function
 

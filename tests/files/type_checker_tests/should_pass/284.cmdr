@@ -1,0 +1,4 @@
+//Test aliases type check
+x = "commander";
+alias cmd = echo $x &;
+println cmd;

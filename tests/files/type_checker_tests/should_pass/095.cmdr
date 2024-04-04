@@ -1,0 +1,2 @@
+//Test constant set operation type checks
+const x: int = 4;

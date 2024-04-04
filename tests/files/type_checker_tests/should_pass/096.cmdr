@@ -1,0 +1,3 @@
+//Test constant set operation type checks
+const x = 1;
+const y = (2.0, "hi", 1)[x];

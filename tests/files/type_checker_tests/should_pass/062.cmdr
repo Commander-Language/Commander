@@ -1,0 +1,3 @@
+//Test that negate operations type check
+x = 2;
+y = -[1, 2, 3][x];

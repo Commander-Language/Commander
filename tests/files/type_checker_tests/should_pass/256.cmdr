@@ -1,0 +1,3 @@
+//Test basic backtick commands type check
+x = "world!";
+y = `echo "hi " $x`;

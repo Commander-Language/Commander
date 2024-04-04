@@ -1,0 +1,4 @@
+//Test type statements type check
+type output = (string, string, int);
+type outputs = output[];
+x: outputs = [`echo 'hi'`, `echo 'bye'`];

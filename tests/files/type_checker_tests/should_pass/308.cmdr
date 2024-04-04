@@ -1,0 +1,5 @@
+//Test builtin cos type checks
+a = 1;
+x = cos(16);
+x = cos(0.25);
+x = cos((1.0, true, 3)[a]);

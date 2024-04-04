@@ -1,0 +1,5 @@
+//Test builtin csc type checks
+a = 1;
+x = csc(16);
+x = csc(0.25);
+x = csc((1.0, true, 3)[a]);

@@ -1,0 +1,5 @@
+//Test builtin arctanh type checks
+a = 1;
+x = arctanh(16);
+x = arctanh(0.25);
+x = arctanh((1.0, true, 3)[a]);

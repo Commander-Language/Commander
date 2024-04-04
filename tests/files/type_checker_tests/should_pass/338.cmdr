@@ -1,0 +1,9 @@
+//Test builtin includes type checks
+a = 1;
+x = "hi".includes("hi");
+x = "hi".includes((1.0, true, 3)[a]);
+x = (1.0, true, 3)[a].includes("hi");
+x = [1, 2, 3].includes(3);
+x = [1, 2, 3].includes((1.0, true, 3)[a]);
+x = (2.0, true, 3).includes(true);
+x = (2.0, true, 3).includes((1.0, true, 3)[a]);

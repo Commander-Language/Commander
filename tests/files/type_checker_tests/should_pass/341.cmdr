@@ -1,0 +1,5 @@
+//Test builtin replace type checks
+a = 1;
+x = "hi".replace("i", "e");
+x = (1.0, true, 3)[a].replace("i", "e");
+x = "hi".replace((1.0, true, 3)[a], (1.0, true, 3)[a]);

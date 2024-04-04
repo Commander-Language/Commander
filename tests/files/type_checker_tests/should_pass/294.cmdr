@@ -1,0 +1,2 @@
+//Test assert statements type check
+assert true, "Shouldn't get here";
