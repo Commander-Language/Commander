@@ -474,7 +474,7 @@ namespace FlowController {
             case Parser::PRE_DECREMENT:
             case Parser::POST_DECREMENT: {
                 if (unOp->node->nodeType() == Parser::VAR_LVALUE) {
-                    std::string varName = std::static_pointer_cast<Parser::VarLValueNode>(unOp->node)->variable;
+                    const std::string varName = std::static_pointer_cast<Parser::VarLValueNode>(unOp->node)->variable;
                     auto value = _getVariable(varName);
                     switch (value->getType()) {
                         case TypeChecker::INT: {
