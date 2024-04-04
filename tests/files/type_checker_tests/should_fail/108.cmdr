@@ -1,0 +1,2 @@
+//Should fail pre-decrement on something not a lvalue
+--"hi";

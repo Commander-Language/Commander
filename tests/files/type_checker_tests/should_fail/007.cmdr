@@ -1,2 +1,2 @@
 //Should fail trying to do a ternary expression with non boolean condition
-x = "HI" ? "PASS" : "FAIL";
+x = if "HI" then "PASS" else "FAIL";

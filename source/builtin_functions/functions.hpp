@@ -365,7 +365,7 @@ namespace Function {
                                              FlowController::CommanderTypePtr data);
 
     FlowController::CommanderBoolPtr remove(FlowController::CommanderArrayPtr array,
-                                             FlowController::CommanderTypePtr data);
+                                            FlowController::CommanderTypePtr data);
 }  // namespace Function
 
 #endif  // COMMANDER_FUNCTIONS_HPP

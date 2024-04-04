@@ -1,0 +1,2 @@
+//Should fail if not operation on something not a bool
+x = !"hi";

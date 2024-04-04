@@ -1,0 +1,5 @@
+//Should fail if using variable out of scope
+fn add(a:int, b:int) {
+    return a + b;
+}
+println a;

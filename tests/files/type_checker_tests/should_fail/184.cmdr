@@ -1,0 +1,2 @@
+//Should fail calling builtin with incorrect number of parameters
+sin(3, 3);

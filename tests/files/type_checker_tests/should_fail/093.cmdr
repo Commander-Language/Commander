@@ -1,0 +1,2 @@
+//Should fail if ternary items do not match
+x = if true then true else 1;

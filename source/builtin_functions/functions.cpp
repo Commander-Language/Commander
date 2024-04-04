@@ -637,11 +637,9 @@ namespace Function {
     }
 
     FlowController::CommanderBoolPtr remove(FlowController::CommanderArrayPtr array,
-                                             FlowController::CommanderTypePtr data) {
+                                            FlowController::CommanderTypePtr data) {
         const FlowController::CommanderIntPtr index = indexOf(array, data);
-        if (index->value == -1) {
-            return std::make_shared<FlowController::CommanderBool>(false);
-        }
+        if (index->value == -1) { return std::make_shared<FlowController::CommanderBool>(false); }
         array->values.erase(array->values.begin() + index->value);
         return std::make_shared<FlowController::CommanderBool>(true);
     }

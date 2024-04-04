@@ -1,0 +1,2 @@
+//Should fail indexing something other than array or tuple
+x = true[1];
