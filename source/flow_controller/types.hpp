@@ -8,6 +8,7 @@
 #include "source/parser/ast_node.hpp"
 #include "source/type_checker/type.hpp"
 #include <memory>
+#include <numeric>
 #include <string>
 
 namespace FlowController {
@@ -286,6 +287,40 @@ namespace FlowController {
      * @brief A pointer to a Commander lambda.
      */
     using CommanderLambdaPtr = std::shared_ptr<CommanderLambda>;
+
+    //  ==================
+    //  ||   Command    ||
+    //  ==================
+
+    /**
+     * @brief A commander command representation
+     */
+    struct CommanderCommand : public CommanderType {
+        /**
+         * @brief Class Constructor
+         * @param command The command
+         */
+        CommanderCommand(Parser::CmdNodePtr cmdNode, std::string command);
+
+        Parser::CmdNodePtr cmdNode;
+        std::string command;
+
+        /**
+         * @brief Get a string representation of the type.
+         * @return The string representation of a commander lambda.
+         */
+        [[nodiscard]] std::string getStringRepresentation() const override;
+
+        /**
+         * @brief Get the type of this.
+         * @return `COMMAND` always.
+         */
+        [[nodiscard]] TypeChecker::Type getType() const override;
+    };
+    /**
+     * @brief A pointer to a Commander lambda.
+     */
+    using CommanderCommandPtr = std::shared_ptr<CommanderCommand>;
 
     // Primitive representation of Commander Types
     using PrimitiveInt = int64_t;

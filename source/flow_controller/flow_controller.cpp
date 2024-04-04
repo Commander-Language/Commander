@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <utility>
 #include <vector>
@@ -394,8 +395,9 @@ namespace FlowController {
                 return _expr(expr->expression);
             }
             case Parser::ALIAS_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                auto stmt = std::static_pointer_cast<Parser::AliasStmtNode>(node);
+                _setVariable(stmt->alias,
+                             std::make_shared<CommanderCommand>(stmt->command, _getCommandString(stmt->command)));
             }
             case Parser::IMPORT_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::ImportStmtNode>(node);
@@ -929,5 +931,28 @@ namespace FlowController {
             // right cmds are always leaf nodes
             jobs.emplace_back(std::static_pointer_cast<Parser::BasicCmdNode>(tmp->rightCmd));
         }
+    }
+
+    std::string FlowController::_getCommandString(const Parser::CmdNodePtr& command) {
+        std::string cmd;
+        switch (command->nodeType()) {
+            case Parser::BASIC_CMD: {
+                auto basicCmd = std::static_pointer_cast<Parser::BasicCmdNode>(command);
+                std::vector<std::string> args = _parseArguments(basicCmd->arguments);
+                cmd = std::accumulate(args.begin(), args.end(), std::string(" "));
+                break;
+            }
+            case Parser::PIPE_CMD: {
+                auto pipeCmd = std::static_pointer_cast<Parser::PipeCmdNode>(command);
+                cmd = _getCommandString(pipeCmd->leftCmd) + " | " + _getCommandString(pipeCmd->rightCmd);
+                break;
+            }
+            default: {
+                auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(command);
+                cmd = _getCommandString(asyncCmd->cmd) + " &";
+                break;
+            }
+        }
+        return cmd;
     }
 }  // namespace FlowController
