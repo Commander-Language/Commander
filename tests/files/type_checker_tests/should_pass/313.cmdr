@@ -1,0 +1,5 @@
+//Test builtin sinh type checks
+a = 1;
+x = sinh(16);
+x = sinh(0.25);
+x = sinh((1.0, true, 3)[a]);

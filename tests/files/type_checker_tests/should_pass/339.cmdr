@@ -1,0 +1,9 @@
+//Test builtin indexOf type checks
+a = 1;
+x = "hi".indexOf("hi");
+x = "hi".indexOf((1.0, true, 3)[a]);
+x = (1.0, true, 3)[a].indexOf("hi");
+x = [1, 2, 3].indexOf(3);
+x = [1, 2, 3].indexOf((1.0, true, 3)[a]);
+x = (2.0, true, 3).indexOf(true);
+x = (2.0, true, 3).indexOf((1.0, true, 3)[a]);

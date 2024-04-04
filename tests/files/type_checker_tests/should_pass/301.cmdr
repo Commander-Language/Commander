@@ -1,0 +1,5 @@
+//Test builtin ln type checks
+a = 1;
+x = ln(16);
+x = ln(0.25);
+x = ln((1.0, true, 3)[a]);

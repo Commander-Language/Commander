@@ -1,0 +1,2 @@
+//Test that divide operation type checks
+x = 1.2 / 2;

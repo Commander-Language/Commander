@@ -1,0 +1,5 @@
+//Test builtin arccosh type checks
+a = 1;
+x = arccosh(16);
+x = arccosh(0.25);
+x = arccosh((1.0, true, 3)[a]);

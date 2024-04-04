@@ -1,0 +1,5 @@
+//Test builtin arccot type checks
+a = 1;
+x = arccot(16);
+x = arccot(0.25);
+x = arccot((1.0, true, 3)[a]);

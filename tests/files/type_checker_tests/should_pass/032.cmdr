@@ -1,0 +1,3 @@
+//Test bindings type check
+x: () -> void = fn (): void -> println "hi world";
+y = x;

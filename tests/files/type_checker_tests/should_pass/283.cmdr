@@ -1,0 +1,4 @@
+//Test aliases type check
+x = "commander";
+alias cmd = ls "-a" | grep $x;
+println cmd;

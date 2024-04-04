@@ -1,0 +1,6 @@
+//Test do while loops type check
+a = 1;
+do {
+    println 1;
+    continue;
+} while ((2.0, true, 1)[a]);

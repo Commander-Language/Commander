@@ -1,0 +1,5 @@
+//Test builtin sort type checks
+a = 1;
+x = [3, 2, 1].sort(fn (a, b) -> a < b);
+x = (1.0, true, 3)[a].sort(fn (a, b) -> a < b);
+x = [3, 2, 1].sort((1.0, true, 3)[a]);

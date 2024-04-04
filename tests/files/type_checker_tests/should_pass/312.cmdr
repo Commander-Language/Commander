@@ -1,0 +1,5 @@
+//Test builtin cot type checks
+a = 1;
+x = cot(16);
+x = cot(0.25);
+x = cot((1.0, true, 3)[a]);

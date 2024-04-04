@@ -1,0 +1,4 @@
+//Test simple function type checks
+fn add(a: int, b: float): float {
+    return a + b;
+}

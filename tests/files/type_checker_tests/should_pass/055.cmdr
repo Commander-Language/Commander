@@ -1,0 +1,2 @@
+//Test that not operations type check
+x = !true;

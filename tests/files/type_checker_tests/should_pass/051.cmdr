@@ -1,0 +1,2 @@
+//Test that ternary operations type check
+x = if [true][0] then [true] else [false];

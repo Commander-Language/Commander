@@ -1,0 +1,5 @@
+//Test builtin round type checks
+a = 1;
+x = round(16);
+x = round(0.25);
+x = round((1.0, true, 3)[a]);

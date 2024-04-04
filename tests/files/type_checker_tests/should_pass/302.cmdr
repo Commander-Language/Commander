@@ -1,0 +1,5 @@
+//Test builtin log type checks
+a = 1;
+x = log(16);
+x = log(0.25);
+x = log((1.0, true, 3)[a]);

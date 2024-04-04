@@ -1,0 +1,2 @@
+//Test that greater than or equal operation type checks
+x = "hi" >= "there";

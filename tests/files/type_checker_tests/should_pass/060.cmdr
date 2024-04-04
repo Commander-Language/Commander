@@ -1,0 +1,2 @@
+//Test that negate operations type check
+x = -3;

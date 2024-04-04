@@ -1,0 +1,2 @@
+//Test scan expressions type check
+x = scan "Enter name: ";

@@ -1,0 +1,3 @@
+//Test pipe commands type check
+x = "commander";
+ls "-a" | grep $x;

@@ -1,0 +1,4 @@
+//Test bindings type check
+a = 1;
+x: bool = (2.0, true, 1)[a];
+y = x;

@@ -1,0 +1,4 @@
+//Test builtin sleep type checks
+a = 1;
+x = sleep(10);
+x = sleep((1.0, true, 3)[a]);

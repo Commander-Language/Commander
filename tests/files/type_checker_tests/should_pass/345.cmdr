@@ -1,0 +1,4 @@
+//Test builtin lower type checks
+a = 1;
+x = "hi".lower();
+x = (1.0, true, 3)[a].lower();

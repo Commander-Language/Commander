@@ -1,0 +1,2 @@
+//Test that equals operation type checks
+x = 1.2 == 2.1;

@@ -1,0 +1,5 @@
+//Test builtin filter type checks
+a = 1;
+x = [3, 2, 1].filter(fn (a) -> a < 10);
+x = (1.0, true, 3)[a].filter(fn (a) -> a < 10);
+x = [3, 2, 1].filter((1.0, true, 3)[a]);

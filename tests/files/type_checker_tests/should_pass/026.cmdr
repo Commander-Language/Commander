@@ -1,0 +1,3 @@
+//Test bindings type check
+x: (int, int) -> int = fn (a: int, b: int): int -> a + b;
+y = x;

@@ -1,0 +1,6 @@
+//Test that lambdas type check
+add = fn (): void -> {
+    println 3 + 4;
+}
+add();
+x = add();
