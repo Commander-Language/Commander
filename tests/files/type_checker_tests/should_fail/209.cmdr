@@ -1,0 +1,3 @@
+//Should fail using variables incorrectly
+alias x = ls;
+y: x = 3;

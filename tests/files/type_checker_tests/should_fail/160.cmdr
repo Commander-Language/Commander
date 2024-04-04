@@ -1,0 +1,3 @@
+//Should fail if operation types are incompatible
+x = 1;
+x *= true;

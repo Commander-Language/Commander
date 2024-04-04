@@ -1,0 +1,5 @@
+//Should fail if variable already exists
+alias x = ls;
+foo = fn (x: int): int {
+    return x;
+};

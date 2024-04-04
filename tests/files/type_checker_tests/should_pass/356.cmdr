@@ -1,4 +1,4 @@
 //Test import statements type check
-import "000.cmdr";
-import "001.cmdr";
+import "354.cmdr";
+import "355.cmdr";
 x = add(num, pi);

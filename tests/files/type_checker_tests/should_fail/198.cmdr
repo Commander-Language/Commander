@@ -1,0 +1,2 @@
+//Should fail import if file does not type check
+import "10.cmdr";

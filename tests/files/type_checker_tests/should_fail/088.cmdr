@@ -1,0 +1,2 @@
+//Should fail index tuple if given index literal out of bounds
+x = (1, 1.0, true)[3];

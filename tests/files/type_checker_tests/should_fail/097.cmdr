@@ -1,0 +1,2 @@
+//Should fail if negate operation on something not an int/float
+x = -"hi";

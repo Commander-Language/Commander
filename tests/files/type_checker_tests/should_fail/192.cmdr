@@ -1,0 +1,6 @@
+//Should fail if using variable out of scope
+{
+    a = 3;
+    println a;
+}
+println a;

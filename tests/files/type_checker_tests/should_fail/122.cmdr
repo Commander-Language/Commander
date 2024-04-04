@@ -1,0 +1,2 @@
+//Should fail if left hand side of set is something not an lvalue
+3 + 2 -= 3;

@@ -1,0 +1,5 @@
+//Should fail if variable already exists
+x: int = 3;
+foo = fn (x: float): int -> {
+    return x;
+};

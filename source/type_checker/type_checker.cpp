@@ -423,7 +423,7 @@ namespace TypeChecker {
                                 exprNode->position);
                 }
                 // All cases are dealt with in switch statement, so it shouldn't ever get here
-                throw Util::CommanderException("Unexpected error occurred with parsing binary expression",
+                throw Util::CommanderException("Unexpected error occurred with type checking binary expression",
                                                exprNode->position);
             }
             case Parser::CALL_EXPR: {

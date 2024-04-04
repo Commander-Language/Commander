@@ -1,0 +1,4 @@
+//Should fail if bindings don't match
+foo = fn (x: int, y: float): bool -> {
+    return x && y;
+};

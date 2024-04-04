@@ -1,0 +1,3 @@
+//Should fail when defining pre-existing variables
+type x = int;
+alias x = ls;

@@ -1,0 +1,4 @@
+//Should fail using uninitialized variable
+foo = fn (x: a) -> {
+    return x;
+};

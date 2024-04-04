@@ -1,0 +1,2 @@
+//Should fail write if not using strings
+write 3 to "myfile.txt";
