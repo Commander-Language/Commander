@@ -194,6 +194,11 @@ namespace FlowController {
             case TypeChecker::FUNCTION: {
                 // TODO: Implement. Figure out how to check if two functions are the same
             }
+            case TypeChecker::COMMAND: {
+                auto leftCmd = std::static_pointer_cast<CommanderCommand>(left);
+                auto rightCmd = std::static_pointer_cast<CommanderCommand>(right);
+                return std::make_shared<CommanderBool>(leftCmd->command == rightCmd->command);
+            }
         }
         // Shouldn't ever get to this point since type checker should reject any cases that would get to this point
         throw Util::CommanderException("Operation Error: Can't \"==\" with types " + TypeChecker::typeToString(leftType)

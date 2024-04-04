@@ -2169,7 +2169,7 @@ namespace Parser {
         /**
          * The command being aliased
          */
-        CmdNodePtr command;
+        BasicCmdNodePtr command;
 
         /**
          * @brief Class constructor.
@@ -2177,7 +2177,7 @@ namespace Parser {
          * @param variable The new alias name.
          * @param command The alias's command.
          */
-        AliasStmtNode(std::string alias, CmdNodePtr command);
+        AliasStmtNode(std::string alias, BasicCmdNodePtr command);
 
         /**
          * @brief Gets the string representation of the node as an s-expression

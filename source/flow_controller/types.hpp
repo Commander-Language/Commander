@@ -8,7 +8,6 @@
 #include "source/parser/ast_node.hpp"
 #include "source/type_checker/type.hpp"
 #include <memory>
-#include <numeric>
 #include <string>
 
 namespace FlowController {
