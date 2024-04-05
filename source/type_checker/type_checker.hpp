@@ -81,7 +81,7 @@ namespace TypeChecker {
         std::string getVarTypeString(const InfoType& infoType);
 
     private:
-        VariableTable _table;
+        VariableTablePtr _table;
     };
 }  //  namespace TypeChecker
 
