@@ -51,7 +51,7 @@ namespace TypeChecker {
             }
             case FUNCTION: {
                 const FunctionTyPtr functionTy = std::static_pointer_cast<FunctionTy>(tyPtr);
-                return " ((" + getTypeSequenceString(functionTy->parameters) + ") ->"
+                return " (fn (" + getTypeSequenceString(functionTy->parameters) + ") ->"
                      + (functionTy->returnType ? getTypeString(functionTy->returnType) : " ANY") + ")";
             }
             case TUPLE: {

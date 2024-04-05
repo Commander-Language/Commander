@@ -722,13 +722,15 @@ namespace Parser {
                 {{{ASTNodeType::TYPE, {ASTNodeType::TYPE, TokenType::LSQUARE, TokenType::RSQUARE}},
                   makeNode("ArrayType", {castNode("Type", 0)})}},
 
-                // (TYPE) -> [LPAREN] [RPAREN] [LAMBDA] (TYPE)
-                {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::TYPE}},
-                  makeNode("FunctionType", {firstTokenPosition, castNode("Type", 3)})}},
-                // (TYPE) -> [LPAREN] (TYPES) [RPAREN] [LAMBDA] (TYPE)
+                // (TYPE) -> [FN] [LPAREN] [RPAREN] [LAMBDA] (TYPE)
                 {{{ASTNodeType::TYPE,
-                   {TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::TYPE}},
-                  makeNode("FunctionType", {firstTokenPosition, castNode("Types", 1), castNode("Type", 4)})}},
+                   {TokenType::FN, TokenType::LPAREN, TokenType::RPAREN, TokenType::LAMBDA, ASTNodeType::TYPE}},
+                  makeNode("FunctionType", {firstTokenPosition, castNode("Type", 4)})}},
+                // (TYPE) -> [FN] [LPAREN] (TYPES) [RPAREN] [LAMBDA] (TYPE)
+                {{{ASTNodeType::TYPE,
+                   {TokenType::FN, TokenType::LPAREN, ASTNodeType::TYPES, TokenType::RPAREN, TokenType::LAMBDA,
+                    ASTNodeType::TYPE}},
+                  makeNode("FunctionType", {firstTokenPosition, castNode("Types", 2), castNode("Type", 5)})}},
 
                 // (TYPE) -> [LPAREN] [RPAREN]
                 {{{ASTNodeType::TYPE, {TokenType::LPAREN, TokenType::RPAREN}},

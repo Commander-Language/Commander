@@ -5,4 +5,4 @@ type c = bool;
 type d = string;
 type e = (a, b, c, (string, float));
 type f = e[][];
-type g = (int, float, e, f) -> b;
+type g = fn (int, float, e, f) -> b;

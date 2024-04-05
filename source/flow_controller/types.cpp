@@ -83,7 +83,7 @@ namespace FlowController {
 
     [[nodiscard]] std::string CommanderLambda::getStringRepresentation() const {
         std::stringstream builder;
-        builder << "(";
+        builder << "fn (";
         for (int i = 0; i < bindings->bindings.size(); i++) {
             if (i != 0) { builder << ", "; }
             auto binding = bindings->bindings[i];

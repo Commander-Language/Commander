@@ -15,9 +15,9 @@ fn func(
     m : (int, float, bool, string),
     n : (int[], float[], bool[], string[])[],
     o : ((int, float, bool, string), (int[], float[], bool[], string[]), (int[][], float[][], bool[][], string[][]))[][],
-    p : () -> int,
-    q : (int, float, bool, string) -> (int, float, bool, string),
-    r : (int[], float[], bool[], string[]) -> (int, float, bool, string)[]
+    p : fn () -> int,
+    q : fn (int, float, bool, string) -> (int, float, bool, string),
+    r : fn (int[], float[], bool[], string[]) -> (int, float, bool, string)[]
 ) : (
     int,
     float,
@@ -35,8 +35,8 @@ fn func(
     (int[], float[], bool[], string[])[],
     ((int, float, bool, string), (int[], float[], bool[], string[]), (int[][], float[][], bool[][], string[][]))[][],
     int,
-    (int, float, bool, string) -> (int, float, bool, string),
-    (int[], float[], bool[], string[]) -> (int, float, bool, string)[]
+    fn (int, float, bool, string) -> (int, float, bool, string),
+    fn (int[], float[], bool[], string[]) -> (int, float, bool, string)[]
 ) {
     z: int =  a;
     y : float = b;
