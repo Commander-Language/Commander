@@ -903,12 +903,14 @@ namespace FlowController {
                 result.emplace_back(_string(string));
             }
         }
+
         // check if first arg is an alias, if so replace
         if (_symbolTable.varExistsInScope(result[0])) {
             auto alias = std::static_pointer_cast<CommanderCommand>(
                     *_symbolTable.getVariable<CommanderTypePtr>(result[0]));
             std::vector<std::string> aliasArgs = _parseArguments(
                     std::static_pointer_cast<Parser::BasicCmdNode>(alias->cmdNode)->arguments);
+            result.erase(result.begin()); // remove the alias name!
             result.insert(result.begin(), aliasArgs.begin(), aliasArgs.end());
         }
         return result;
