@@ -96,4 +96,16 @@ namespace FlowController {
     [[nodiscard]] std::string CommanderString::getStringRepresentation() const { return value; }
 
     [[nodiscard]] TypeChecker::Type CommanderString::getType() const { return TypeChecker::STRING; }
+
+    //  ==================
+    //  ||   Command    ||
+    //  ==================
+
+    CommanderCommand::CommanderCommand(Parser::CmdNodePtr cmdNode, std::string command)
+        : cmdNode(std::move(cmdNode)), command(std::move(command)) {}
+
+    std::string CommanderCommand::getStringRepresentation() const { return command; }
+
+    TypeChecker::Type CommanderCommand::getType() const { return TypeChecker::COMMAND; }
+
 }  // namespace FlowController

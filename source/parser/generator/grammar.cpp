@@ -561,16 +561,6 @@ namespace Parser {
                     TokenType::RPAREN, TokenType::SEMICOLON}},
                   makeNode("WriteStmt", {castNode("Expr", 2), castNode("Expr", 4)})}},
 
-                // (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (ASYNC_CMD) [SEMICOLON]
-                {{{ASTNodeType::STMT,
-                   {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::ASYNC_CMD,
-                    TokenType::SEMICOLON}},
-                  makeNode("AliasStmt", {tokenContents(1), castNode("AsyncCmd", 3)})}},
-                // (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (PIPE_CMD) [SEMICOLON]
-                {{{ASTNodeType::STMT,
-                   {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::PIPE_CMD,
-                    TokenType::SEMICOLON}},
-                  makeNode("AliasStmt", {tokenContents(1), castNode("PipeCmd", 3)})}},
                 // (STMT) -> [ALIAS] [VARIABLE] [EQUALS] (BASIC_CMD) [SEMICOLON]
                 {{{ASTNodeType::STMT,
                    {TokenType::ALIAS, TokenType::VARIABLE, TokenType::EQUALS, ASTNodeType::BASIC_CMD,
