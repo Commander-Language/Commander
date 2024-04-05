@@ -1,0 +1,4 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (TupleExprNode (ExprsNode (FloatExprNode 2.000000 FLOAT) (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi') STRING))) STRING) (IntExprNode 3 INT)) (FLOAT, STRING, INT)) (FLOAT, STRING, INT)))
+	(ExprStmtNode (BinOpExprNode (BindingNode y) SET (LValueExprNode (IndexExprNode (VarExprNode x (FLOAT, STRING, INT)) (IntExprNode 1 INT) STRING) STRING) STRING))
+	(ExprStmtNode (BinOpExprNode (IndexLValueNode (VarLValueNode x (FLOAT, STRING, INT)) (IntExprNode 1 INT) STRING) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'bye') STRING))) STRING) STRING)))

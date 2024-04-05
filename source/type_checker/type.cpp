@@ -51,8 +51,8 @@ namespace TypeChecker {
             }
             case FUNCTION: {
                 const FunctionTyPtr functionTy = std::static_pointer_cast<FunctionTy>(tyPtr);
-                return " (" + getTypeSequenceString(functionTy->parameters) + ") ->"
-                     + (functionTy->returnType ? getTypeString(functionTy->returnType) : " ANY");
+                return " ((" + getTypeSequenceString(functionTy->parameters) + ") ->"
+                     + (functionTy->returnType ? getTypeString(functionTy->returnType) : " ANY") + ")";
             }
             case TUPLE: {
                 std::vector<TyPtr> types = std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes;

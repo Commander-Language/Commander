@@ -1,0 +1,7 @@
+//Test multidimensional arrays type check
+x = [[[[[1,2]]]]];
+a = x[0];
+a = x[0][0];
+a = x[0][0][0];
+a = x[0][0][0][0];
+a = x[0][0][0][0][0];
