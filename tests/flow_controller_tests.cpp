@@ -9,6 +9,7 @@ void runFile(const std::string& filePath) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, filePath);
     Parser::ASTNodeList nodes = parser.parse(tokens);
+    TypeChecker::TypeChecker typeChecker(parser);
     typeChecker.typeCheck(nodes);
     FlowController::FlowController controller;
     controller.runtime(nodes);
@@ -47,9 +48,6 @@ TEST(FlowControllerTests, SaveIntToVariable) {
 TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     auto params = GetParam();
 
-    typeChecker = TypeChecker::TypeChecker(parser);
-    controller = FlowController::FlowController();
-
     const std::string filePath = "../tests/files/flow_controller_tests/should_run/" + std::get<0>(params);
     const std::string expectedFilePath = "../tests/files/flow_controller_tests/should_run/" + std::get<1>(params);
 
@@ -72,6 +70,7 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     }
 
     // Type Check
+    TypeChecker::TypeChecker typeChecker(parser);
     try {
         typeChecker.typeCheck(nodes);
     } catch (const Util::CommanderException& e) {
@@ -84,6 +83,7 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
 
     // Run
+    FlowController::FlowController controller;
     try {
         controller.runtime(nodes);
     } catch (std::exception e) {
@@ -105,8 +105,6 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
  */
 TEST_P(FlowControllerFailTests, ShouldFailRun) {
     auto param = GetParam();
-    typeChecker = TypeChecker::TypeChecker(parser);
-    controller = FlowController::FlowController();
     const std::string filePath = "../tests/files/flow_controller_tests/should_fail/" + param;
     ASSERT_THROW(runFile(filePath), Util::CommanderException);
 }

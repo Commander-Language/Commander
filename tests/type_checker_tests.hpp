@@ -27,11 +27,6 @@ std::shared_ptr<TypeChecker::VariableInfo> makeType() {
 Parser::Parser parser;
 
 /**
- * Type checker used in the tests (initialized here to prevent initializing it for every test)
- */
-TypeChecker::TypeChecker typeChecker(parser);
-
-/**
  * @brief Represents the format for type checker tests that successfully type check. Tests take in a file path to file
  * to type checked, and another file path to file with expected S-Expression output.
  */

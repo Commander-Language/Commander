@@ -18,6 +18,7 @@ void lexParseAndTypeCheck(const std::string& filePath) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, filePath);
     Parser::ASTNodeList nodes = parser.parse(tokens);
+    TypeChecker::TypeChecker typeChecker(parser);
     typeChecker.typeCheck(nodes);
 }
 
@@ -98,8 +99,6 @@ TEST(STRESSTESTS, stressTest100000) {
 TEST_P(TypeCheckerPassTests, ShouldTypeCheckFileAndMatchExpectedExamples) {
     auto params = GetParam();
 
-    typeChecker = TypeChecker::TypeChecker(parser);
-
     const std::string filePath = "../tests/files/type_checker_tests/should_type_check/" + std::get<0>(params);
     const std::string expectedFilePath = "../tests/files/type_checker_tests/should_type_check/" + std::get<1>(params);
 
@@ -122,6 +121,7 @@ TEST_P(TypeCheckerPassTests, ShouldTypeCheckFileAndMatchExpectedExamples) {
     }
 
     // Type Check
+    TypeChecker::TypeChecker typeChecker(parser);
     try {
         typeChecker.typeCheck(nodes);
         const std::string expectedOutput = Lexer::readFile(expectedFilePath);
@@ -137,7 +137,6 @@ TEST_P(TypeCheckerPassTests, ShouldTypeCheckFileAndMatchExpectedExamples) {
  */
 TEST_P(TypeCheckerFailTests, ShouldNotTypeCheckFile) {
     auto param = GetParam();
-    typeChecker = TypeChecker::TypeChecker(parser);
     const std::string filePath = "../tests/files/type_checker_tests/should_fail/" + param;
     ASSERT_THROW(lexParseAndTypeCheck(filePath), Util::CommanderException);
 }
