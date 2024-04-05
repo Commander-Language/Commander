@@ -1,4 +1,4 @@
 (PrgmNode
 	(AliasStmtNode all (BasicCmdNode (StringNode 'ls') (StringNode '-a')))
-	(AliasStmtNode allGrep (AsyncCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'all')) | (BasicCmdNode (StringNode 'grep') (StringNode 'myDir')))))
-	(CmdStmtNode (BasicCmdNode (StringNode 'allGrep'))))
+	(AliasStmtNode allDetails (BasicCmdNode (StringNode 'all') (StringNode '-l')))
+	(CmdStmtNode (BasicCmdNode (StringNode 'allDetails'))))
