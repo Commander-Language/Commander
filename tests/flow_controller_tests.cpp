@@ -47,6 +47,9 @@ TEST(FlowControllerTests, SaveIntToVariable) {
 TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     auto params = GetParam();
 
+    typeChecker = TypeChecker::TypeChecker(parser);
+    controller = FlowController::FlowController();
+
     const std::string filePath = "../tests/files/flow_controller_tests/should_run/" + std::get<0>(params);
     const std::string expectedFilePath = "../tests/files/flow_controller_tests/should_run/" + std::get<1>(params);
 
@@ -102,6 +105,8 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
  */
 TEST_P(FlowControllerFailTests, ShouldFailRun) {
     auto param = GetParam();
+    typeChecker = TypeChecker::TypeChecker(parser);
+    controller = FlowController::FlowController();
     const std::string filePath = "../tests/files/flow_controller_tests/should_fail/" + param;
     ASSERT_THROW(runFile(filePath), Util::CommanderException);
 }

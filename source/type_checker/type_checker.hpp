@@ -66,9 +66,19 @@ namespace TypeChecker {
         /**
          * Gets the type of a variable
          * @param varName The variable
+         * @param infoType The expected var info type of the variable
+         * @param variablePosition The position of the variable in the file
          * @return The type
          */
-        TyPtr getVarType(const std::string& varName);
+        TyPtr getVarType(const std::string& varName, const InfoType& infoType,
+                         const Lexer::FilePosition& variablePosition);
+
+        /**
+         * Helper for printing out error message when getting a variable
+         * @param infoType The info type
+         * @return The string for the info type
+         */
+        std::string getVarTypeString(const InfoType& infoType);
 
     private:
         VariableTable _table;

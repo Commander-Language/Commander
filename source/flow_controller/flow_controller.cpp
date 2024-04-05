@@ -890,7 +890,7 @@ namespace FlowController {
                     *_symbolTable.getVariable<CommanderTypePtr>(result[0]));
             std::vector<std::string> aliasArgs = _parseArguments(
                     std::static_pointer_cast<Parser::BasicCmdNode>(alias->cmdNode)->arguments);
-            result.erase(result.begin()); // remove the alias name!
+            result.erase(result.begin());  // remove the alias name!
             result.insert(result.begin(), aliasArgs.begin(), aliasArgs.end());
         }
         return result;

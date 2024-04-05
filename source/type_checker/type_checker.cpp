@@ -64,7 +64,7 @@ namespace TypeChecker {
             case Parser::VAR_LVALUE: {
                 Parser::VarLValueNodePtr const lvalue = std::static_pointer_cast<Parser::VarLValueNode>(astNode);
                 if (lvalue->type) { return lvalue->type; }
-                return (lvalue->type = getVarType(lvalue->variable));
+                return (lvalue->type = getVarType(lvalue->variable, VARIABLE_INFO, lvalue->position));
             }
             case Parser::INDEX_LVALUE: {
                 Parser::IndexLValueNodePtr const lvalue = std::static_pointer_cast<Parser::IndexLValueNode>(astNode);
@@ -100,7 +100,7 @@ namespace TypeChecker {
                     throw Util::CommanderException(
                             "Variable '" + exprNode->variable + "' has not been initialized yet.", exprNode->position);
                 }
-                return (exprNode->type = getVarType(exprNode->variable));
+                return (exprNode->type = getVarType(exprNode->variable, VARIABLE_INFO, exprNode->position));
             }
             case Parser::LVALUE_EXPR: {
                 Parser::LValueExprNodePtr const exprNode = std::static_pointer_cast<Parser::LValueExprNode>(astNode);
@@ -265,7 +265,8 @@ namespace TypeChecker {
                 TyPtr const leftTy
                         = !isBinding || isFirst
                                 ? typeCheck(exprNode->left)
-                                : getVarType(std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->variable);
+                                : getVarType(std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->variable,
+                                             VARIABLE_INFO, exprNode->left->position);
                 TyPtr const rightTy = typeCheck(exprNode->right);
                 // Right type must be known in all operations
                 if (!rightTy) {
@@ -522,7 +523,7 @@ namespace TypeChecker {
                 Parser::ApiCallExprNodePtr const exprNode = std::static_pointer_cast<Parser::ApiCallExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 exprNode->args->exprs.insert(exprNode->args->exprs.begin(), exprNode->expression);
-                TyPtr const type = getVarType(exprNode->func);
+                TyPtr const type = getVarType(exprNode->func, FUNCTION_INFO, exprNode->funcPosition);
                 if (type && type->getType() != Type::FUNCTION) {
                     throw Util::CommanderException("Tried to call '" + exprNode->func
                                                            + "' which isn't a function type. The type is instead"
@@ -948,10 +949,30 @@ namespace TypeChecker {
         return scope;
     }
 
-    TyPtr TypeChecker::getVarType(const std::string& varName) {
-        VarInfoPtr variableInfo = _table.getVariable(varName);
+    TyPtr TypeChecker::getVarType(const std::string& varName, const InfoType& infoType,
+                                  const Lexer::FilePosition& variablePosition) {
+        const VarInfoPtr variableInfo = _table.getVariable(varName);
+        if (variableInfo->infoType() != infoType) {
+            throw Util::CommanderException("Expected the variable named '" + varName + "' to be a "
+                                                   + getVarTypeString(infoType) + " variable, but got a "
+                                                   + getVarTypeString(variableInfo->infoType()) + " variable instead.",
+                                           variablePosition);
+        }
         // Guaranteed to have at least 1 type in the types list, if variableInfo exists that is
         return variableInfo ? variableInfo->types[0] : nullptr;
+    }
+
+    std::string TypeChecker::getVarTypeString(const InfoType& infoType) {
+        switch (infoType) {
+            case FUNCTION_INFO:
+                return "function";
+            case VARIABLE_INFO:
+                return "normal";
+            case TYPE_INFO:
+                return "type";
+            default:
+                return "alias";
+        }
     }
 
 }  //  namespace TypeChecker
