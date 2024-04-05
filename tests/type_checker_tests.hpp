@@ -258,7 +258,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "174.cmdr", "185.cmdr", "186.cmdr", "187.cmdr", "188.cmdr", "189.cmdr", "190.cmdr", "191.cmdr",
                 "192.cmdr", "193.cmdr", "194.cmdr", "195.cmdr", "196.cmdr", "197.cmdr", "198.cmdr", "199.cmdr",
                 "200.cmdr", "201.cmdr", "202.cmdr", "203.cmdr", "204.cmdr", "205.cmdr", "206.cmdr", "207.cmdr",
-                "208.cmdr", "209.cmdr", "210.cmdr"));
+                "208.cmdr", "209.cmdr", "210.cmdr", "211.cmdr"));
 
 /**
  * @brief Takes in a file path, and goes through lexing, parsing, and type checking it

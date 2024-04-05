@@ -1,3 +1,3 @@
 //Test that custom types parse correctly
 type AddFunction = (int, int) -> int;
-add: AddFunction = (a, b) -> a + b;
+add: AddFunction = fn (a, b) -> a + b;

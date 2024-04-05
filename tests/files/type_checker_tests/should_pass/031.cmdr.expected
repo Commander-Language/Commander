@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (LambdaExprNode (BindingsNode) (PrintlnStmtNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi world') STRING))) STRING)) (() -> VOID)) (() -> VOID)))
+	(ExprStmtNode (BinOpExprNode (BindingNode y) SET (LValueExprNode (VarExprNode x (() -> VOID)) (() -> VOID)) (() -> VOID))))

@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (TernaryExprNode (BoolExprNode true BOOL) (IntExprNode 1 INT) (IntExprNode 0 INT) INT) INT)))
