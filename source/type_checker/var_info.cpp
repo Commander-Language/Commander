@@ -25,6 +25,6 @@ namespace TypeChecker {
 
     TypeInfo::TypeInfo(TyPtr type) : VarInfo(true, std::vector<TyPtr> {std::move(type)}) {}
 
-    AliasInfo::AliasInfo() : VarInfo(true, std::vector<TyPtr> {STRING_TY}) {}
+    AliasInfo::AliasInfo() : VarInfo(true, std::vector<TyPtr> {COMMAND_TY}) {}
 
 }  //  namespace TypeChecker

@@ -166,6 +166,14 @@ namespace FlowController {
          * @return The results of the builtin function call, or nullptr if no builtin exists.
          */
         CommanderTypePtr _builtin(Parser::ExprNodePtr node);
+
+        /**
+         * Get the string representation of a command
+         *
+         * @param command The command
+         * @return The string representation
+         */
+        std::string _getCommandString(const Parser::CmdNodePtr& command);
     };
 
 }  // namespace FlowController

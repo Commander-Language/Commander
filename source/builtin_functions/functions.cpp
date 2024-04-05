@@ -29,9 +29,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderInt>(
                         std::stoi(std::static_pointer_cast<FlowController::CommanderString>(intValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to parse int from type "
-                                               + TypeChecker::typeToString(intValue->getType()));
+                return std::make_shared<FlowController::CommanderInt>(-1);
         }
     }
 
@@ -49,9 +47,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::stod(std::static_pointer_cast<FlowController::CommanderString>(floatValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to parse float from type "
-                                               + TypeChecker::typeToString(floatValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -69,9 +65,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderBool>(
                         std::static_pointer_cast<FlowController::CommanderString>(boolValue)->value == "true");
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to parse bool from type "
-                                               + TypeChecker::typeToString(boolValue->getType()));
+                return std::make_shared<FlowController::CommanderBool>(false);
         }
     }
 
@@ -88,9 +82,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::sqrt(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take sqrt of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -103,9 +95,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::log(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take ln of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -118,9 +108,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::log10(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take log of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -133,9 +121,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::abs(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take abs of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -147,9 +133,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderInt>(
                         std::floor(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take floor of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderInt>(-1);
         }
     }
 
@@ -161,9 +145,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderInt>(
                         std::ceil(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take ceil of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderInt>(-1);
         }
     }
 
@@ -175,9 +157,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderInt>(
                         std::round(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take round of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderInt>(-1);
         }
     }
 
@@ -190,9 +170,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::sin(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take sin of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -205,9 +183,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::cos(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take cos of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -220,41 +196,27 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::tan(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take tan of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
     FlowController::CommanderFloatPtr csc(FlowController::CommanderTypePtr numberValue) {
-        if (numberValue->getType() != TypeChecker::INT && numberValue->getType() != TypeChecker::FLOAT) {
-            // TODO: Improve error to have location in file
-            throw Util::CommanderException("Unable to take csc of type "
-                                           + TypeChecker::typeToString(numberValue->getType()));
-        }
         FlowController::CommanderFloatPtr val = sin(numberValue);
+        if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
     }
 
     FlowController::CommanderFloatPtr sec(FlowController::CommanderTypePtr numberValue) {
-        if (numberValue->getType() != TypeChecker::INT && numberValue->getType() != TypeChecker::FLOAT) {
-            // TODO: Improve error to have location in file
-            throw Util::CommanderException("Unable to take sec of type "
-                                           + TypeChecker::typeToString(numberValue->getType()));
-        }
         FlowController::CommanderFloatPtr val = cos(numberValue);
+        if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
     }
 
     FlowController::CommanderFloatPtr cot(FlowController::CommanderTypePtr numberValue) {
-        if (numberValue->getType() != TypeChecker::INT && numberValue->getType() != TypeChecker::FLOAT) {
-            // TODO: Improve error to have location in file
-            throw Util::CommanderException("Unable to take cot of type "
-                                           + TypeChecker::typeToString(numberValue->getType()));
-        }
         FlowController::CommanderFloatPtr val = tan(numberValue);
+        if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
     }
@@ -268,9 +230,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::sinh(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take sinh of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -283,9 +243,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::cosh(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take cosh of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -298,41 +256,27 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::tanh(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take tanh of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
     FlowController::CommanderFloatPtr csch(FlowController::CommanderTypePtr numberValue) {
-        if (numberValue->getType() != TypeChecker::INT && numberValue->getType() != TypeChecker::FLOAT) {
-            // TODO: Improve error to have location in file
-            throw Util::CommanderException("Unable to take csch of type "
-                                           + TypeChecker::typeToString(numberValue->getType()));
-        }
         FlowController::CommanderFloatPtr val = sinh(numberValue);
+        if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
     }
 
     FlowController::CommanderFloatPtr sech(FlowController::CommanderTypePtr numberValue) {
-        if (numberValue->getType() != TypeChecker::INT && numberValue->getType() != TypeChecker::FLOAT) {
-            // TODO: Improve error to have location in file
-            throw Util::CommanderException("Unable to take sech of type "
-                                           + TypeChecker::typeToString(numberValue->getType()));
-        }
         FlowController::CommanderFloatPtr val = sech(numberValue);
+        if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
     }
 
     FlowController::CommanderFloatPtr coth(FlowController::CommanderTypePtr numberValue) {
-        if (numberValue->getType() != TypeChecker::INT && numberValue->getType() != TypeChecker::FLOAT) {
-            // TODO: Improve error to have location in file
-            throw Util::CommanderException("Unable to take coth of type "
-                                           + TypeChecker::typeToString(numberValue->getType()));
-        }
         FlowController::CommanderFloatPtr val = coth(numberValue);
+        if (val->value == NAN) { return val; }
         val->value = 1.0 / val->value;
         return val;
     }
@@ -346,9 +290,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::asin(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arcsin of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -361,9 +303,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::acos(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arccos of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -376,9 +316,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::atan(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arctan of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -391,9 +329,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::asin(1.0 / std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arccsc of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -406,9 +342,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::acos(1.0 / std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arcsec of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -421,9 +355,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::atan(1.0 / std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arccot of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -436,9 +368,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::asinh(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arcsinh of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -451,9 +381,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::acosh(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arccosh of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -466,9 +394,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::atanh(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arctanh of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -481,9 +407,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::asinh(1.0 / std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arccsch of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -496,9 +420,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::acosh(1.0 / std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arcsech of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -511,9 +433,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::atanh(1.0 / std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to take arccoth of type "
-                                               + TypeChecker::typeToString(numberValue->getType()));
+                return std::make_shared<FlowController::CommanderFloat>(NAN);
         }
     }
 
@@ -586,9 +506,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderInt>(
                         std::static_pointer_cast<FlowController::CommanderString>(source)->value.length());
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to get length from type "
-                                               + TypeChecker::typeToString(source->getType()));
+                return std::make_shared<FlowController::CommanderInt>(-1);
         }
     }
 
@@ -673,9 +591,7 @@ namespace Function {
                         std::static_pointer_cast<FlowController::CommanderString>(obj)->value.find(
                                 std::static_pointer_cast<FlowController::CommanderString>(obj)->value));
             default:
-                // TODO: Improve error to have location in file
-                throw Util::CommanderException("Unable to get index from type "
-                                               + TypeChecker::typeToString(obj->getType()));
+                return std::make_shared<FlowController::CommanderInt>(-1);
         }
         for (int i = 0; i < values.size(); i++) {
             if (FlowController::equalOperation(values[i], data)->value) {
@@ -687,12 +603,6 @@ namespace Function {
 
     FlowController::CommanderBoolPtr includes(FlowController::CommanderTypePtr obj,
                                               FlowController::CommanderTypePtr data) {
-        if (obj->getType() != TypeChecker::TUPLE && obj->getType() != TypeChecker::ARRAY
-            && obj->getType() != TypeChecker::STRING) {
-            // TODO: Improve error to have location in file
-            throw Util::CommanderException("Unable to get includes from type "
-                                           + TypeChecker::typeToString(obj->getType()));
-        }
         return std::make_shared<FlowController::CommanderBool>(indexOf(obj, data)->value != -1);
     }
 

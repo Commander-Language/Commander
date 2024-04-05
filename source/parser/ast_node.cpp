@@ -717,7 +717,7 @@ namespace Parser {
 
     std::string ExprStmtNode::sExpression() const { return "(ExprStmtNode " + expression->sExpression() + ")"; }
 
-    AliasStmtNode::AliasStmtNode(std::string alias, CmdNodePtr command)
+    AliasStmtNode::AliasStmtNode(std::string alias, BasicCmdNodePtr command)
         : alias(std::move(alias)), command(std::move(command)) {}
 
     std::string AliasStmtNode::sExpression() const {
