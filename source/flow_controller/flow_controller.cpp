@@ -319,6 +319,11 @@ namespace FlowController {
                      std::static_pointer_cast<CommanderBool>(_expr(stmtNode->condition))->value;
                      _expr(stmtNode->update)) {
                     _stmt(stmtNode->body);
+                    if (_break) {
+                        _break = false;
+                        break;
+                    }
+                    if (_continue) { _continue = false; }
                 }
 
                 _symbolTable.popSymbolTable();  // pop scope from for
@@ -330,6 +335,11 @@ namespace FlowController {
 
                 while (std::static_pointer_cast<CommanderBool>(_expr(stmtNode->condition))->value) {
                     _stmt(stmtNode->body);
+                    if (_break) {
+                        _break = false;
+                        break;
+                    }
+                    if (_continue) { _continue = false; }
                 }
 
                 return nullptr;
@@ -339,6 +349,11 @@ namespace FlowController {
 
                 do {
                     _stmt(stmtNode->body);
+                    if (_break) {
+                        _break = false;
+                        break;
+                    }
+                    if (_continue) { _continue = false; }
                 } while (std::static_pointer_cast<CommanderBool>(_expr(stmtNode->condition))->value);
 
                 return nullptr;
@@ -350,7 +365,15 @@ namespace FlowController {
             case Parser::SCOPE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
                 _symbolTable.pushSymbolTable();  // new scope
-                for (auto& statement : stmtNode->stmts->stmts) { _stmt(statement); }
+                for (auto& statement : stmtNode->stmts->stmts) {
+                    if (statement->nodeType() == Parser::CONTINUE_STMT || statement->nodeType() == Parser::BREAK_STMT
+                        || _break || _continue) {
+                        _break = _break || statement->nodeType() == Parser::BREAK_STMT;
+                        _continue = _continue || statement->nodeType() == Parser::CONTINUE_STMT;
+                        break;
+                    }
+                    _stmt(statement);
+                }
                 _symbolTable.popSymbolTable();  // pop the created scope
                 return nullptr;
             }
@@ -401,13 +424,9 @@ namespace FlowController {
                 return nullptr;
             }
             case Parser::TYPE_STMT:
-                // Ignore type statements
-                return nullptr;
             case Parser::BREAK_STMT:
-                // TODO: Implement
-                return nullptr;
             case Parser::CONTINUE_STMT:
-                // TODO: Implement
+                // Ignore these statements
                 return nullptr;
             case Parser::TIMEOUT_STMT:
                 // TODO: Implement
