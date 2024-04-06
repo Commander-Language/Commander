@@ -171,8 +171,20 @@ add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/s
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 add_library(job_runner source/job_runner/job_runner.cpp source/util/print.cpp ${builtins})
 
-add_executable(commander source/interpreter/commander.cpp)
+add_executable(commander
+        source/interpreter/commander.cpp
 
+        source/interpreter/repl.cpp
+)
+if (WIN32)
+    target_sources(commander PUBLIC source/interpreter/console-windows.cpp)
+endif (WIN32)
+if (MSVC)
+    target_sources(commander PUBLIC source/interpreter/console-windows.cpp)
+endif (MSVC)
+if (UNIX)
+    target_sources(commander PUBLIC source/interpreter/console-unix.cpp)
+endif (UNIX)
 target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner ncurses)
 
 #  Test configurations:
