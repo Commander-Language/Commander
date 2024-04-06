@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (IntExprNode 1 INT) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (IntExprNode 2 INT) DIVIDE (IndexExprNode (TupleExprNode (ExprsNode (FloatExprNode 2.000000 FLOAT) (BoolExprNode true BOOL) (IntExprNode 1 INT)) (FLOAT, BOOL, INT)) (LValueExprNode (VarExprNode a INT) INT)) INT) INT)))

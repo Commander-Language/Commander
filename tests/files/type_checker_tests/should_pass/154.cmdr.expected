@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi') STRING))) STRING) ADD (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'there') STRING))) STRING) STRING) STRING)))

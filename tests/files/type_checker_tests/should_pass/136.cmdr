@@ -1,2 +1,2 @@
 //Test that equals operation type checks
-x = fn () -> true; == fn () -> false;;
+x = (fn () -> true) == (fn () -> false);
