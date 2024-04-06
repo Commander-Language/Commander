@@ -1,0 +1,10 @@
+//Should allow updating variable types in certain cases
+y = 1;
+x = 3.1;
+x += y; //Should stay float, but allow int to convert to float
+z = (2.0, false, 1)[y];
+z += 1; //Should become int
+a = (2.0, false, 1)[y];
+a += 1.1; //Should become float
+b = (2.0, false, 1)[y];
+b = false; //Should become boolean

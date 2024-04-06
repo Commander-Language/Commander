@@ -1,3 +1,2 @@
-//Should fail indexing if empty array
-y = 1;
-x = [][y];
+//Should fail indexing if empty tuple
+x = ()[0];

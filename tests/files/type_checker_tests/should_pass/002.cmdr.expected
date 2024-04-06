@@ -1,0 +1,4 @@
+(PrgmNode
+	(FunctionStmtNode add (BindingsNode (BindingNode x) (BindingNode y)) (VariableTypeNode add) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (BinOpExprNode (LValueExprNode (VarExprNode x)) ADD (LValueExprNode (VarExprNode y)))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (IntExprNode 3 INT) INT)))

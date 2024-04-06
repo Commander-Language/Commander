@@ -89,9 +89,9 @@ namespace FlowController {
             auto binding = bindings->bindings[i];
             if (binding->constant) { builder << "const "; }
             builder << binding->variable;
-            if (binding->type) { builder << ":" << TypeChecker::getTypeString(binding->type->type); }
+            if (binding->type) { builder << ":" << TypeChecker::getErrorTypeString(binding->type->type); }
         }
-        builder << ") ->" << TypeChecker::getTypeString(returnType);
+        builder << ") ->" << TypeChecker::getErrorTypeString(returnType);
         return builder.str();
     }
 

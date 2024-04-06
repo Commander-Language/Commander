@@ -47,11 +47,26 @@ namespace TypeChecker {
         TyPtr typeCheck(const Parser::ASTNodePtr& astNode);
 
         /**
+         * Asserts that a variable does exist in the current scope
+         * @param variable The variable to assert does exist
+         * @param position Position of the variable
+         */
+        void assertVariableExists(const std::string& variable, const Lexer::FilePosition& position);
+
+        /**
          * Asserts that a variable does not exist in the current scope
          * @param variable The variable to assert does not exist
          * @param position Position of the variable
          */
-        void assertNotExists(const std::string& variable, const Lexer::FilePosition& position);
+        void assertVariableNotExists(const std::string& variable, const Lexer::FilePosition& position);
+
+        /**
+         * Asserts that a type is the expected type
+         * @param type The type
+         * @param expectedType The expected type
+         * @param position The position of the type
+         */
+        void assertType(const TyPtr& type, const TyPtr& expectedType, const Lexer::FilePosition& position);
 
         /**
          * @brief Pushes new scope on top of the stack

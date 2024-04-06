@@ -1,5 +1,6 @@
-//Should allow setting variables before being used in functions
-x = 3;
+//Should allow setting variables in functions
 fn add(x, y) {
-	return x + y;
+	a = 3;
+	return x + y + a;
 }
+a = false;

@@ -24,16 +24,14 @@ namespace TypeChecker {
                 return "ARRAY";
             case TUPLE:
                 return "TUPLE";
-            case FUNCTION:
-                return "FUNCTION";
             default:
-                return "UNKNOWN";
+                return "FUNCTION";
         }
     }
 
     std::string getErrorTypeString(const TyPtr& tyPtr) {
         std::string typeString = getTypeString(tyPtr);
-        return typeString == "" ? " UNKNOWN" : typeString;
+        return typeString == "" ? " ANY" : typeString;
     }
 
     std::string getTypeString(const TyPtr& tyPtr) {
