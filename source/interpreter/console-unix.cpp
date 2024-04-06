@@ -1,3 +1,8 @@
+/**
+ * @file console-unix.cpp
+ * @brief Implementation of the `Console` class for Linux and UNIX systems.
+ */
+
 #include "console.hpp"
 
 #include "source/util/commander_exception.hpp"
@@ -9,7 +14,7 @@
 #include <unistd.h>
 
 Console::Character Console::getChar() {
-    // Source: https://github.com/antirez/linenoise/blob/master/linenoise.c
+    // Inspiration: https://github.com/antirez/linenoise/blob/master/linenoise.c
     constexpr int stdinFD = 0;
 
     std::cout << std::flush;
@@ -87,7 +92,7 @@ std::tuple<unsigned int, unsigned int> Console::getCursorPosition() {
     std::cout << "\033[6n";
 
     for (int ind = 0; ind < bufferSize; ++ind) {
-        buffer.at(ind) = getChar().utf8Contents;
+        buffer.at(ind) = getChar().value;
         if (buffer.at(ind) == 'R') break;
     }
     buffer[bufferSize - 1] = 0;
@@ -126,4 +131,7 @@ void Console::clearLine() {
     std::cout << "\r" << std::string(cols, ' ') << "\r";
 }
 
-void Console::clearScreen() { system("clear"); }
+void Console::clearScreen() {
+    // TODO: There's probably an escape sequence for this.
+    system("clear");
+}

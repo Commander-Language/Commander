@@ -22,69 +22,67 @@ void REPL::run() {
     while (true) {
         std::string line = _readLine();
 
+        // If the line is empty, just ignore it.
+        if (line.empty()) continue;
+
+        // Special built-in command: "quit" or "exit" exits the REPL.
         if (line == "quit" || line == "exit") break;
 
+        // Special built-in command: "clear" to clear the screen.
         if (line == "clear") {
             Console::clearScreen();
         } else
             try {
-                // Make a temporary file for the lexer.
-                const std::string tmpFileName = std::tmpnam(nullptr);  // NOLINT(*-mt-unsafe)
-                std::ofstream tmp(tmpFileName);
-                tmp << line;
-                tmp.close();  // Close file here to save changes
-
-                _interpretFunc(tmpFileName);
-
-                if (std::remove(tmpFileName.c_str()) != 0) {  // NOLINT(*-mt-unsafe)
-                    throw Util::CommanderException("I/O error: could not delete temporary file");
-                }
+                _interpretFunc(line);
             } catch (const Util::CommanderException& err) { std::cerr << err.what() << "\n"; }
     }
 }
 
 std::string REPL::_readLine() {
-    const std::string prompt = ">>  ";
+    const std::string prompt = ">> ";
     std::cout << prompt;
 
-    std::string line;
-    std::string lineCopy;  // In case we come back to the line after looking through history.
+    std::string displayedLine;
+    std::string lastEditedLine;  // <-- So that <Arrow-up> and then <Arrow-down> doesn't delete what you were typing.
     std::size_t historyNum = 0;
-    unsigned int position = 0;
+    unsigned int position = 0;  // <-- Current index into the line. (Changed with, e.g., <Arrow-left> and <Arrow-right>)
 
+    // If we delete characters, then we need to re-draw the whole line.
     const auto refreshLine = [&] {
         Console::clearLine();
-        std::cout << prompt << line;
-        Console::moveCursorHorizontal(static_cast<int>(position) - static_cast<int>(line.size()));
+        std::cout << prompt << displayedLine;
+        Console::moveCursorHorizontal(static_cast<int>(position) - static_cast<int>(displayedLine.size()));
     };
 
     while (true) {
-        auto [charType, charContents] = Console::getChar();
+        auto [charType, charValue] = Console::getChar();
 
         switch (charType) {
+            // ===================
+            // ||  Arrow keys:  ||
+            // ===================
             case Console::Character::ARROW_UP:
                 if (historyNum < _history.size()) {
                     ++historyNum;
-                    line = _history[_history.size() - historyNum];
-                    position = line.size();
+                    displayedLine = _history[_history.size() - historyNum];
+                    position = displayedLine.size();
                     refreshLine();
                 }
                 break;
             case Console::Character::ARROW_DOWN:
+                if (historyNum == 0) break;
+
                 if (historyNum > 1) {
                     --historyNum;
-                    line = _history[_history.size() - historyNum];
-                    position = line.size();
-                    refreshLine();
-                    break;
-                }
-                if (historyNum == 1) {
+                    displayedLine = _history[_history.size() - historyNum];
+                    position = displayedLine.size();
+                } else if (historyNum == 1) {
                     --historyNum;
-                    line = lineCopy;
-                    position = line.size();
-                    refreshLine();
-                    break;
+                    displayedLine = lastEditedLine;
+                    position = displayedLine.size();
                 }
+
+                refreshLine();
                 break;
             case Console::Character::ARROW_LEFT:
                 --position;
@@ -95,59 +93,73 @@ std::string REPL::_readLine() {
                 Console::moveCursorHorizontal(1);
                 break;
 
+            // =============================
+            // ||  Backspace and delete:  ||
+            // =============================
             case Console::Character::BACKSPACE:
                 if (position > 0) {
                     if (position == 1) {
-                        line = line.substr(1);
+                        displayedLine = displayedLine.substr(1);
                     } else {
-                        line = line.substr(0, position - 1) + line.substr(position);
+                        displayedLine = displayedLine.substr(0, position - 1) + displayedLine.substr(position);
                     }
                     --position;
                     historyNum = 0;
-                    lineCopy = line;
+                    lastEditedLine = displayedLine;
+                    // TODO: Don't redraw the whole line for deleting one character.
                     refreshLine();
                 }
                 break;
-
             case Console::Character::DELETE:
-                if (position < line.size()) {
-                    if (position == line.size() - 1) {
-                        line = line.substr(0, position);
+                if (position < displayedLine.size()) {
+                    if (position == displayedLine.size() - 1) {
+                        displayedLine = displayedLine.substr(0, position);
                     } else {
-                        line = line.substr(0, position) + line.substr(position + 1);
+                        displayedLine = displayedLine.substr(0, position) + displayedLine.substr(position + 1);
                     }
                     historyNum = 0;
-                    lineCopy = line;
+                    lastEditedLine = displayedLine;
+                    // TODO: Don't redraw the whole line for deleting one character.
                     refreshLine();
                 }
                 break;
 
+            // =====================
+            // ||  <Ctrl>-<Key>:  ||
+            // =====================
             case Console::Character::CTRL_C:
             case Console::Character::CTRL_D:
                 std::cout << "\n";
-                exit(0);  // NOLINT(*-mt-unsafe)
+                return "exit";
 
             case Console::Character::CTRL_L:
                 Console::clearScreen();
                 refreshLine();
                 break;
 
+            // ================
+            // ||  Newline:  ||
+            // ================
+            case Console::Character::NEWLINE:
+                std::cout << "\n";
+                _history.push_back(displayedLine);
+                return displayedLine;
+
+            // ========================
+            // ||  All other chars:  ||
+            // ========================
             case Console::Character::UTF8:
-                if (position++ == line.size()) {
-                    line += charContents;
-                    std::cout << charContents;
+                if (position++ == displayedLine.size()) {
+                    displayedLine += charValue;
+                    std::cout << charValue;
                 } else {
-                    line.insert(position - 1, 1, charContents);
+                    displayedLine.insert(position - 1, 1, charValue);
+                    // TODO: Don't redraw the whole line for inserting one character.
                     refreshLine();
                 }
                 historyNum = 0;
-                lineCopy = line;
+                lastEditedLine = displayedLine;
                 break;
-
-            case Console::Character::NEWLINE:
-                std::cout << "\n";
-                _history.push_back(line);
-                return line;
         }
     }
 }
