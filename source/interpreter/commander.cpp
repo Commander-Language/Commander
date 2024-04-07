@@ -5,6 +5,7 @@
 
 #include "repl.hpp"
 
+#include "source/bash_transpiler/transpiler.hpp"
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/lexer/lexer.hpp"
 #include "source/type_checker/type_checker.hpp"
@@ -77,14 +78,13 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
     if (hasArgument(arguments, "-b")) {
         std::string outFile = getArgumentValue(arguments, "-o");
         if (outFile.empty()) { outFile = "bash-out.sh"; }
-        // TODO: Implement bash transpiler
-        /*BashTranspiler::BashTranspiler transpiler;
+        BashTranspiler::BashTranspiler transpiler;
         std::string bashOutput = transpiler.transpile(nodes);
         if (Util::usingNCurses) {
             Util::println(bashOutput);
         } else {
             Util::writeToFile(bashOutput, outFile);
-        }*/
+        }
         return;
     }
 

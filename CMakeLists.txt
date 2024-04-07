@@ -180,6 +180,7 @@ add_library(flow_controller
 target_link_libraries(flow_controller console)
 
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
+add_library(bash_transpiler source/bash_transpiler/transpiler.cpp)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
 if (MSVC)
@@ -200,13 +201,12 @@ add_executable(commander
         source/interpreter/commander.cpp
         source/interpreter/repl.cpp
 )
-target_link_libraries(commander lexer parser type_checker flow_controller symbol_table)
+target_link_libraries(commander lexer parser type_checker flow_controller symbol_table bash_transpiler)
 if (MSVC)
     target_link_libraries(commander job_runner_windows)
 else ()
     target_link_libraries(commander job_runner_linux)
 endif ()
-
 
 #  Test configurations:
 #  --------------------
@@ -235,11 +235,17 @@ if (MSVC)
     target_link_libraries(jobRunnerTests lexer job_runner_windows GTest::gtest_main)
     gtest_discover_tests(jobRunnerTests)
 
+    target_link_libraries(bashTranspilerTests lexer parser type_checker flow_controller symbol_table job_runner_windows ncurses bash_transpiler GTest::gtest_main)
+    gtest_discover_tests(bashTranspilerTests)
+
     target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner_windows GTest::gtest_main)
     gtest_discover_tests(flowControllerTests)
 else ()
     target_link_libraries(jobRunnerTests lexer job_runner_linux GTest::gtest_main)
     gtest_discover_tests(jobRunnerTests)
+
+    target_link_libraries(bashTranspilerTests lexer parser type_checker flow_controller symbol_table job_runner_linux ncurses bash_transpiler GTest::gtest_main)
+    gtest_discover_tests(bashTranspilerTests)
 
     target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner_linux GTest::gtest_main)
     gtest_discover_tests(flowControllerTests)
