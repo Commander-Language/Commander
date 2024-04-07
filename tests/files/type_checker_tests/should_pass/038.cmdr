@@ -1,0 +1,4 @@
+//Test index lvalues type check
+x = (2.0, "hi", 3);
+y = x[1];
+x[1] = "bye";

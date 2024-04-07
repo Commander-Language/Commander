@@ -1,0 +1,2 @@
+//Should fail if operation setting an uninitialized variable
+x /= 3;

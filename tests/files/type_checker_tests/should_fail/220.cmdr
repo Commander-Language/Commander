@@ -1,0 +1,4 @@
+//Test that this doesn't type check due to conflicting return types
+fn add(): int 1 + 2;
+add();
+x = add();

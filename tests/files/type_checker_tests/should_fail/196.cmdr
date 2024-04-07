@@ -1,0 +1,3 @@
+//Should fail import if it is interpolated
+name = "myfile";
+import "${name}";

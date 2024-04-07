@@ -1,0 +1,5 @@
+//Test builtin arccoth type checks
+a = 1;
+x = arccoth(16);
+x = arccoth(0.25);
+x = arccoth((1.0, true, 3)[a]);

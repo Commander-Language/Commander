@@ -1,0 +1,2 @@
+(PrgmNode
+	(AssertStmtNode (BoolExprNode true BOOL) (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Shouldn't get here') STRING)))))

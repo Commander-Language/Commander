@@ -9,9 +9,10 @@
 namespace TypeChecker {
 
     TypeChecker::TypeChecker(Parser::Parser& parser) {
+        _table = std::make_shared<VariableTable>();
         for (const auto& pair : Function::functionTypes) {
-            _table.addVariable(pair.first, std::make_shared<FunctionInfo>(
-                                                   std::vector<TyPtr> {pair.second.begin(), pair.second.end()}));
+            _table->addVariable(pair.first, std::make_shared<FunctionInfo>(
+                                                    std::vector<TyPtr> {pair.second.begin(), pair.second.end()}));
         }
         _parser = parser;
     }
@@ -25,9 +26,9 @@ namespace TypeChecker {
         switch (astNode->nodeType()) {
             case Parser::BINDING: {
                 Parser::BindingNodePtr const binding = std::static_pointer_cast<Parser::BindingNode>(astNode);
-                assertNotExists(binding->variable);
+                assertVariableNotExists(binding->variable, binding->position);
                 TyPtr bindingType = typeCheck(binding->type);
-                _table.addVariable(binding->variable, std::make_shared<VariableInfo>(binding->constant, bindingType));
+                _table->addVariable(binding->variable, std::make_shared<VariableInfo>(binding->constant, bindingType));
                 return bindingType;
             }
             case Parser::BINDINGS: {
@@ -38,36 +39,78 @@ namespace TypeChecker {
             case Parser::BASIC_CMD: {
                 Parser::BasicCmdNodePtr const command = std::static_pointer_cast<Parser::BasicCmdNode>(astNode);
                 for (const Parser::ASTNodePtr& node : command->arguments) {
-                    TyPtr const nodeType = typeCheck(node);
-                    if (!nodeType || nodeType->getType() != Type::STRING) {
-                        // TODO: Improve error
-                        throw Util::CommanderException("Command has an argument that is not a string.");
-                    }
+                    assertType(typeCheck(node), STRING_TY, node->position);
                 }
-                std::vector<TyPtr> contentTypes;
-                contentTypes.push_back(STRING_TY);
-                contentTypes.push_back(STRING_TY);
-                contentTypes.push_back(INT_TY);
-                return std::make_shared<TupleTy>(contentTypes);
+                return nullptr;
             }
             case Parser::PIPE_CMD: {
                 Parser::PipeCmdNodePtr const pipeCommand = std::static_pointer_cast<Parser::PipeCmdNode>(astNode);
                 typeCheck(pipeCommand->leftCmd);
-                return typeCheck(pipeCommand->rightCmd);
+                typeCheck(pipeCommand->rightCmd);
+                return nullptr;
             }
             case Parser::ASYNC_CMD: {
                 Parser::AsyncCmdNodePtr const asyncCommand = std::static_pointer_cast<Parser::AsyncCmdNode>(astNode);
-                return typeCheck(asyncCommand->cmd);
+                typeCheck(asyncCommand->cmd);
+                return nullptr;
             }
+            case Parser::VAR_EXPR:
             case Parser::VAR_LVALUE: {
-                Parser::VarLValueNodePtr const lvalue = std::static_pointer_cast<Parser::VarLValueNode>(astNode);
-                if (lvalue->type) { return lvalue->type; }
-                return (lvalue->type = getVarType(lvalue->variable));
+                const bool isLvalue = astNode->nodeType() == Parser::VAR_LVALUE;
+                TyPtr type = isLvalue ? std::static_pointer_cast<Parser::VarLValueNode>(astNode)->type
+                                      : std::static_pointer_cast<Parser::VarExprNode>(astNode)->type;
+                if (type) { return type; }
+                const std::string varName = isLvalue
+                                                  ? std::static_pointer_cast<Parser::VarLValueNode>(astNode)->variable
+                                                  : std::static_pointer_cast<Parser::VarExprNode>(astNode)->variable;
+                assertVariableExists(varName, astNode->position);
+                type = getVarType(varName, VARIABLE_INFO, astNode->position);
+                if (isLvalue) { return (std::static_pointer_cast<Parser::VarLValueNode>(astNode)->type = type); }
+                return (std::static_pointer_cast<Parser::VarExprNode>(astNode)->type = type);
             }
+            case Parser::INDEX_EXPR:
             case Parser::INDEX_LVALUE: {
-                Parser::IndexLValueNodePtr const lvalue = std::static_pointer_cast<Parser::IndexLValueNode>(astNode);
-                if (lvalue->type) { return lvalue->type; }
-                return (lvalue->type = typeCheck(std::make_shared<Parser::IndexExprNode>(lvalue)));
+                const bool isLvalue = astNode->nodeType() == Parser::INDEX_LVALUE;
+                TyPtr type = isLvalue ? std::static_pointer_cast<Parser::IndexLValueNode>(astNode)->type
+                                      : std::static_pointer_cast<Parser::IndexExprNode>(astNode)->type;
+                if (type) { return type; }
+                const Parser::ExprNodePtr index
+                        = isLvalue ? std::static_pointer_cast<Parser::IndexLValueNode>(astNode)->index
+                                   : std::static_pointer_cast<Parser::IndexExprNode>(astNode)->index;
+                assertType(typeCheck(index), INT_TY, index->position);
+                TyPtr const exprType
+                        = isLvalue ? typeCheck(std::static_pointer_cast<Parser::IndexLValueNode>(astNode)->lvalue)
+                                   : typeCheck(std::static_pointer_cast<Parser::IndexExprNode>(astNode)->expr);
+                if (!exprType) { return nullptr; }
+                if (exprType->getType() != ARRAY && exprType->getType() != TUPLE) {
+                    throw Util::CommanderException("Expected ARRAY or TUPLE type, but got"
+                                                           + getErrorTypeString(exprType) + " instead.",
+                                                   astNode->position);
+                }
+                switch (exprType->getType()) {
+                    case ARRAY:
+                        type = std::static_pointer_cast<ArrayTy>(exprType)->baseType;
+                        break;
+                    default: {
+                        TupleTyPtr const tupleTy = std::static_pointer_cast<TupleTy>(exprType);
+                        if (tupleTy->contentTypes.empty()) {
+                            throw Util::CommanderException("Unable to index empty tuple", astNode->position);
+                        }
+                        if (index->nodeType() == Parser::INT_EXPR) {
+                            int64_t const idx = std::static_pointer_cast<Parser::IntExprNode>(index)->value;
+                            if (tupleTy->contentTypes.size() <= idx) {
+                                throw Util::CommanderException("Index out of bounds on tuple. Tuple size is "
+                                                                       + std::to_string(tupleTy->contentTypes.size())
+                                                                       + " while index is " + std::to_string(idx),
+                                                               index->position);
+                            }
+                            type = tupleTy->contentTypes[idx];
+                        }
+                        break;
+                    }
+                }
+                if (isLvalue) { return (std::static_pointer_cast<Parser::IndexLValueNode>(astNode)->type = type); }
+                return (std::static_pointer_cast<Parser::IndexExprNode>(astNode)->type = type);
             }
             case Parser::INT_EXPR: {
                 Parser::IntExprNodePtr const exprNode = std::static_pointer_cast<Parser::IntExprNode>(astNode);
@@ -80,7 +123,6 @@ namespace TypeChecker {
                 return (exprNode->type = FLOAT_TY);
             }
             case Parser::STRING_EXPR: {
-                if (astNode == nullptr) return nullptr;
                 Parser::StringExprNodePtr const exprNode = std::static_pointer_cast<Parser::StringExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 typeCheck(exprNode->stringNode);
@@ -91,17 +133,6 @@ namespace TypeChecker {
                 if (exprNode->type) { return exprNode->type; }
                 return (exprNode->type = BOOL_TY);
             }
-            case Parser::VAR_EXPR: {
-                Parser::VarExprNodePtr const exprNode = std::static_pointer_cast<Parser::VarExprNode>(astNode);
-                if (exprNode->type) { return exprNode->type; }
-                TyPtr const varType = getVarType(exprNode->variable);
-                if (!varType) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("No variable by the name '" + exprNode->variable
-                                                   + "' has not been initialized yet (in the current scope).");
-                }
-                return (exprNode->type = varType);
-            }
             case Parser::LVALUE_EXPR: {
                 Parser::LValueExprNodePtr const exprNode = std::static_pointer_cast<Parser::LValueExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
@@ -110,74 +141,25 @@ namespace TypeChecker {
             case Parser::ARRAY_EXPR: {
                 Parser::ArrayExprNodePtr const exprNode = std::static_pointer_cast<Parser::ArrayExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr const type = exprNode->expressions->exprs.empty() ? nullptr
-                                                                        : typeCheck(exprNode->expressions->exprs[0]);
-                if (!exprNode->expressions->exprs.empty()) {
-                    if (!type) {
-                        // TODO: Improve error
-                        throw Util::CommanderException("Array has an unknown type.");
-                    }
-                    for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
-                        if (!areTypesEqual(type, typeCheck(exprNodePtr))) {
-                            // TODO: Improve error
-                            throw Util::CommanderException("Array contains multiple different types.");
-                        }
+                TyPtr baseType = nullptr;
+                for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
+                    TyPtr const type = typeCheck(exprNodePtr);
+                    if (!baseType && type) { baseType = type; }
+                    if (!areTypesEqual(baseType, type)) {
+                        throw Util::CommanderException("Array contains multiple different types, including"
+                                                               + getErrorTypeString(baseType) + " and"
+                                                               + getErrorTypeString(type),
+                                                       exprNode->position);
                     }
                 }
-                return (exprNode->type = std::make_shared<ArrayTy>(type));
-            }
-            case Parser::INDEX_EXPR: {
-                Parser::IndexExprNodePtr const exprNode = std::static_pointer_cast<Parser::IndexExprNode>(astNode);
-                if (exprNode->type) { return exprNode->type; }
-                TyPtr const indexType = typeCheck(exprNode->index);
-                if (!indexType || indexType->getType() != Type::INT) {
-                    // TODO: Improve error (not just position, but what type; same for the other errors)
-                    throw Util::CommanderException(
-                            "Tried to index an array or tuple with a different type than an int");
-                }
-                TyPtr const exprType = typeCheck(exprNode->expr);
-                if (!exprType) { return (exprNode->type = nullptr); }
-                switch (exprType->getType()) {
-                    case ARRAY: {
-                        ArrayTyPtr arrayTy = std::static_pointer_cast<ArrayTy>(exprType);
-                        if (!arrayTy->baseType) {
-                            // TODO: Improve error
-                            throw Util::CommanderException("Unable to index empty array");
-                        }
-                        return (exprNode->type = arrayTy->baseType);
-                    }
-                    case TUPLE: {
-                        TupleTyPtr tupleTy = std::static_pointer_cast<TupleTy>(exprType);
-                        if (tupleTy->contentTypes.size() == 0) {
-                            // TODO: Improve error
-                            throw Util::CommanderException("Unable to index empty tuple");
-                        }
-                        if (exprNode->index->nodeType() == Parser::INT_EXPR) {
-                            int64_t index = std::static_pointer_cast<Parser::IntExprNode>(exprNode->index)->value;
-                            if (tupleTy->contentTypes.size() <= index) {
-                                // TODO: Improve error
-                                throw Util::CommanderException("Index out of bounds on tuple");
-                            }
-                            return (exprNode->type = tupleTy->contentTypes[index]);
-                        }
-                        return (exprNode->type = nullptr);
-                    }
-                    default:
-                        // TODO: Improve error
-                        throw Util::CommanderException("Tried to index a type that isn't an array or tuple");
-                }
+                return (exprNode->type = std::make_shared<ArrayTy>(baseType));
             }
             case Parser::TUPLE_EXPR: {
                 Parser::TupleExprNodePtr const exprNode = std::static_pointer_cast<Parser::TupleExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 std::vector<TyPtr> expressionTypes;
                 for (const Parser::ExprNodePtr& exprNodePtr : exprNode->expressions->exprs) {
-                    TyPtr const exprType = typeCheck(exprNodePtr);
-                    if (!exprType) {
-                        // TODO: Improve error
-                        throw Util::CommanderException("Unknown type for expression in tuple");
-                    }
-                    expressionTypes.push_back(exprType);
+                    expressionTypes.push_back(typeCheck(exprNodePtr));
                 }
                 return (exprNode->type = std::make_shared<TupleTy>(expressionTypes));
             }
@@ -185,59 +167,53 @@ namespace TypeChecker {
                 Parser::TernaryExprNodePtr const exprNode = std::static_pointer_cast<Parser::TernaryExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const conditionType = typeCheck(exprNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Ternary condition does not evaluate to a boolean");
-                }
+                assertType(typeCheck(exprNode->condition), BOOL_TY, exprNode->condition->position);
                 TyPtr const trueType = typeCheck(exprNode->trueExpr);
                 TyPtr const falseType = typeCheck(exprNode->falseExpr);
-                if (!trueType || !falseType || !areTypesEqual(trueType, falseType)) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("True and false expressions in ternary do not match the same type.");
+                if (!areTypesEqual(trueType, falseType)) {
+                    throw Util::CommanderException(
+                            "Ternary true and false expressions do not match the same type. True expression has type"
+                                    + getErrorTypeString(trueType) + " but false expression has type"
+                                    + getErrorTypeString(falseType),
+                            exprNode->falseExpr->position);
                 }
-                return (exprNode->type = trueType);
+                return (exprNode->type = trueType ? trueType : falseType);
             }
             case Parser::UNOP_EXPR: {
                 Parser::UnOpExprNodePtr const exprNode = std::static_pointer_cast<Parser::UnOpExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 TyPtr const expressionType = typeCheck(exprNode->node);
-                bool const isTuple
-                        = exprNode->node->nodeType() == Parser::INDEX_LVALUE
-                       && std::static_pointer_cast<Parser::IndexLValueNode>(exprNode->node)->lvalue->type
-                       && std::static_pointer_cast<Parser::IndexLValueNode>(exprNode->node)->lvalue->type->getType()
-                                  == TUPLE;
                 switch (exprNode->opType) {
                     case Parser::NOT:
-                        if (expressionType->getType() != Type::BOOL) {
-                            // TODO: Improve error
-                            throw Util::CommanderException("Expected a bool in not operation.");
-                        }
-                        break;
+                        assertType(expressionType, BOOL_TY, exprNode->node->position);
+                        return (exprNode->type = BOOL_TY);
                     case Parser::NEGATE:
                     case Parser::PRE_INCREMENT:
                     case Parser::POST_INCREMENT:
                     case Parser::PRE_DECREMENT:
                     case Parser::POST_DECREMENT:
-                        if (!isTuple && expressionType->getType() != Type::INT
+                        if (expressionType && expressionType->getType() != Type::INT
                             && expressionType->getType() != Type::FLOAT) {
-                            // TODO: Improve error
-                            throw Util::CommanderException("Expected int or float in unop expression.");
+                            throw Util::CommanderException("Expected INT or FLOAT type, but got"
+                                                                   + getErrorTypeString(expressionType) + " instead.",
+                                                           exprNode->node->position);
                         }
-                        if (exprNode->opType != Parser::NEGATE) {
-                            if (exprNode->node->nodeType() != Parser::INDEX_LVALUE
-                                && exprNode->node->nodeType() != Parser::VAR_LVALUE) {
-                                // TODO: Improve error
-                                throw Util::CommanderException(
-                                        "Expected variable or index lvalue in decrement or increment operation.");
-                            }
-                            if (exprNode->node->nodeType() == Parser::VAR_LVALUE) {
-                                VarInfoPtr const varInfo = _table.getVariable(
-                                        std::static_pointer_cast<Parser::VarLValueNode>(exprNode->node)->variable);
-                                if (varInfo->constant) {
-                                    // TODO: Improve error
-                                    throw Util::CommanderException(
-                                            "Unable to increment or decrement constant variable.");
-                                }
+                        if (exprNode->opType == Parser::NEGATE) { break; }
+                        if (exprNode->node->nodeType() != Parser::INDEX_LVALUE
+                            && exprNode->node->nodeType() != Parser::VAR_LVALUE) {
+                            throw Util::CommanderException(
+                                    "Expected variable or index lvalue in decrement or increment operation, but "
+                                    "found " + Parser::nodeTypeToString(exprNode->node->nodeType())
+                                            + " instead",
+                                    exprNode->node->position);
+                        }
+                        if (exprNode->node->nodeType() == Parser::VAR_LVALUE) {
+                            std::string const varName
+                                    = std::static_pointer_cast<Parser::VarLValueNode>(exprNode->node)->variable;
+                            if (_table->getVariable(varName)->constant) {
+                                throw Util::CommanderException("Unable to increment or decrement constant variable '"
+                                                                       + varName + "'",
+                                                               exprNode->node->position);
                             }
                         }
                 }
@@ -246,243 +222,343 @@ namespace TypeChecker {
             case Parser::BINOP_EXPR: {
                 Parser::BinOpExprNodePtr const exprNode = std::static_pointer_cast<Parser::BinOpExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                bool const isLvalue = exprNode->left->nodeType() == Parser::VAR_LVALUE
-                                   || exprNode->left->nodeType() == Parser::INDEX_LVALUE;
+                bool const isVarLValue = exprNode->left->nodeType() == Parser::VAR_LVALUE;
+                bool const isLvalue = isVarLValue || exprNode->left->nodeType() == Parser::INDEX_LVALUE;
                 bool const isBinding = exprNode->left->nodeType() == Parser::BINDING;
                 bool const isFirst
                         = isBinding
-                               && !_table.hasVariable(
+                               && !_table->hasVariable(
                                        std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->variable)
-                       || exprNode->left->nodeType() == Parser::VAR_LVALUE
-                                  && !_table.hasVariable(
+                       || isVarLValue
+                                  && !_table->hasVariable(
                                           std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable);
-                TyPtr const leftTy
-                        = !isBinding || isFirst
-                                ? typeCheck(exprNode->left)
-                                : getVarType(std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->variable);
-                TyPtr const rightTy = typeCheck(exprNode->right);
-                // Right type must be known in all operations
-                if (!rightTy) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Right expression evaluates to unknown type in binary operation");
+                TyPtr leftTy = nullptr;
+                if (isBinding && isFirst || !isBinding && !isFirst) {
+                    leftTy = typeCheck(exprNode->left);
+                } else if (!isFirst && (isBinding || isVarLValue)) {
+                    leftTy = getVarType(
+                            isBinding ? std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->variable
+                                      : std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable,
+                            VARIABLE_INFO, exprNode->left->position);
                 }
-                Type const rightType = rightTy->getType();
-                bool const isInt = rightType == Type::INT;
-                bool const isFloat = rightType == Type::FLOAT;
-                bool const isBool = rightType == Type::BOOL;
-                bool const isString = rightType == Type::STRING;
-                bool areEqual = areTypesEqual(leftTy, rightTy);
-                bool areIntFloat = leftTy
-                                && ((leftTy->getType() == Type::INT && isFloat)
-                                    || (leftTy->getType() == Type::FLOAT && isInt));
+                TyPtr rightTy = typeCheck(exprNode->right);
+                const bool areEqual = areTypesEqual(leftTy, rightTy);
+                const bool areIntFloat = (!leftTy || leftTy->getType() == FLOAT || leftTy->getType() == INT)
+                                      && (!rightTy || rightTy->getType() == FLOAT || rightTy->getType() == INT);
+                const bool areString = (!leftTy || leftTy->getType() == STRING)
+                                    && (!rightTy || rightTy->getType() == STRING);
+                const bool areBool = (!leftTy || leftTy->getType() == BOOL) && (!rightTy || rightTy->getType() == BOOL);
+                const bool areInt = (!leftTy || leftTy->getType() == INT) && (!rightTy || rightTy->getType() == INT);
+                const bool areUnknown = !leftTy && !rightTy;
                 switch (exprNode->opType) {
-                    case Parser::SET: {
-                        if (!isLvalue && !isBinding) {
-                            // TODO: Improve error
-                            throw Util::CommanderException(
-                                    "Invalid set expression; must have variable or index lvalue on left side of '='");
-                        }
-                        if (isBinding && std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->type
-                            && !areTypesEqual(
-                                    typeCheck(std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->type),
-                                    rightTy)) {
-                            // TODO: Improve error
-                            throw Util::CommanderException(
-                                    "Expected one type, but got another, while setting a variable");
-                        }
-                        if (isBinding || exprNode->left->nodeType() == Parser::VAR_LVALUE) {
-                            std::string varName
-                                    = isBinding
-                                            ? std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->variable
-                                            : std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable;
-                            bool isConstant = !isFirst && _table.getVariable(varName)->constant;
-                            if (isConstant) {
-                                // TODO: Improve error
-                                throw Util::CommanderException("Unable to update constant variable.");
-                            }
-                            _table.addVariable(
-                                    varName,
-                                    std::make_shared<VariableInfo>(
-                                            isBinding
-                                                    && std::static_pointer_cast<Parser::BindingNode>(exprNode->left)
-                                                               ->constant,
-                                            rightTy));
-                        } else if (leftTy) {
-                            Parser::IndexLValueNodePtr lvalue = std::static_pointer_cast<Parser::IndexLValueNode>(
-                                    exprNode->left);
-                            if (!areEqual && lvalue->lvalue->type->getType() == ARRAY) {
-                                // TODO: Improve error
-                                throw Util::CommanderException("Array index cannot be set due to incompatible types.");
-                            }
-                            if (lvalue->lvalue->type->getType() == TUPLE) {
-                                int64_t index = std::static_pointer_cast<Parser::IntExprNode>(lvalue->index)->value;
-                                TupleTyPtr tupleTy = std::static_pointer_cast<TupleTy>(lvalue->lvalue->type);
-                                tupleTy->contentTypes[index] = rightTy;
-                            }
-                        }
-                        return (exprNode->type = rightTy);
-                    }
                     case Parser::LESSER:
                     case Parser::GREATER:
                     case Parser::LESSER_EQUAL:
                     case Parser::GREATER_EQUAL:
                         // Int/float | float/float | Int/int | string/string --> bool
-                        if (areIntFloat || (areEqual && (isInt || isFloat || isString))) {
-                            return (exprNode->type = BOOL_TY);
-                        }
-                        // TODO: Improve error
-                        throw Util::CommanderException("Inequality operation has incompatible types.");
-                    case Parser::AND:
-                    case Parser::OR:
-                        // bool/bool --> bool
-                        if (areEqual && isBool) { return (exprNode->type = BOOL_TY); }
-                        // TODO: Improve error
-                        throw Util::CommanderException("Boolean operation has incompatible types.");
+                        if (areIntFloat || areString) { return (exprNode->type = BOOL_TY); }
+                        throw Util::CommanderException(
+                                "Inequality operation '" + Parser::binOpToString(exprNode->opType)
+                                        + "' has incompatible types. Left and right types should be INT, FLOAT, or "
+                                          "STRING. Left: "
+                                        + getErrorTypeString(leftTy) + ", Right: " + getErrorTypeString(rightTy),
+                                exprNode->position);
                     case Parser::EQUAL:
                     case Parser::NOT_EQUAL:
                         // any/any --> bool
                         if (areIntFloat || areEqual) { return (exprNode->type = BOOL_TY); }
-                        // TODO: Improve error
-                        throw Util::CommanderException("Equality operation has incompatible types.");
-                    case Parser::ADD_SET:
-                    case Parser::SUBTRACT_SET:
+                        throw Util::CommanderException(
+                                "Equality operation '" + Parser::binOpToString(exprNode->opType)
+                                        + "' has incompatible types. Left and right types should be the same. Left: "
+                                        + getErrorTypeString(leftTy) + ", Right: " + getErrorTypeString(rightTy),
+                                exprNode->position);
+                    case Parser::AND:
+                    case Parser::OR:
+                        // bool/bool --> bool
+                        if (areBool) { return (exprNode->type = BOOL_TY); }
+                        throw Util::CommanderException(
+                                "Boolean operation '" + Parser::binOpToString(exprNode->opType)
+                                        + "' has incompatible types. Both left and right types should be BOOL. Left: "
+                                        + getErrorTypeString(leftTy) + ", Right: " + getErrorTypeString(rightTy),
+                                exprNode->position);
+                    case Parser::EXPONENTIATE_SET:
                     case Parser::MULTIPLY_SET:
                     case Parser::DIVIDE_SET:
                     case Parser::MODULO_SET:
-                    case Parser::EXPONENTIATE_SET:
+                    case Parser::ADD_SET:
+                    case Parser::SUBTRACT_SET:
                         if (!isLvalue) {
-                            // TODO: Improve error
                             throw Util::CommanderException(
-                                    "Invalid set expression; must have variable or index lvalue on left side of '='");
+                                    "Invalid set expression. Must have variable or index lvalue on left side of '"
+                                            + Parser::binOpToString(exprNode->opType) + "', but found "
+                                            + Parser::nodeTypeToString(exprNode->left->nodeType()) + " instead",
+                                    exprNode->left->position);
                         }
-                        if (exprNode->left->nodeType() == Parser::VAR_LVALUE) {
-                            if (!leftTy) {
-                                // TODO: Improve error
-                                throw Util::CommanderException("Variable is not initialized");
+                        if (!areEqual && areIntFloat && leftTy->getType() == INT) {
+                            throw Util::CommanderException("Cannot update int to float in operation set expression.",
+                                                           exprNode->position);
+                        }
+                        if (!areEqual && exprNode->opType == Parser::ADD_SET && rightTy->getType() == STRING) {
+                            throw Util::CommanderException("Cannot update" + getErrorTypeString(leftTy)
+                                                                   + " to STRING in add set expression.",
+                                                           exprNode->position);
+                        }
+                        if (isVarLValue) {
+                            std::string const varName
+                                    = std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable;
+                            assertVariableExists(varName, exprNode->left->position);
+                            if (_table->getVariable(varName)->constant) {
+                                throw Util::CommanderException("Unable to update constant variable '" + varName + "'",
+                                                               exprNode->left->position);
                             }
-                            if (_table.getVariable(
+                        }
+                        if (!leftTy) {
+                            std::static_pointer_cast<Parser::LValueNode>(exprNode->left)->type = rightTy;
+                            if (isVarLValue) {
+                                _table->getVariable(
                                               std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable)
-                                        ->constant) {
-                                // TODO: Improve error
-                                throw Util::CommanderException("Unable to update constant variable.");
+                                        ->types[0]
+                                        = rightTy;
+                            } else {
+                                Parser::IndexLValueNodePtr const lvalue
+                                        = std::static_pointer_cast<Parser::IndexLValueNode>(exprNode->left);
+                                if (lvalue->lvalue->type->getType() == ARRAY) {
+                                    std::static_pointer_cast<ArrayTy>(lvalue->lvalue->type)->baseType = rightTy;
+                                } else if (lvalue->index->nodeType() == Parser::INT_EXPR) {
+                                    int64_t const index
+                                            = std::static_pointer_cast<Parser::IntExprNode>(lvalue->index)->value;
+                                    TupleTyPtr const tupleTy = std::static_pointer_cast<TupleTy>(lvalue->lvalue->type);
+                                    tupleTy->contentTypes[index] = rightTy;
+                                }
                             }
-                        } else if (!leftTy) {
-                            // This must be a non-empty tuple being indexed, so since we don't know the left ty assume
-                            // it matches the right ty
-                            areIntFloat = isInt || isFloat;
-                            areEqual = true;
                         }
                         // NO break here! Should continue to the next lines of code that handle add, subtract, etc.
-                    case Parser::ADD:
-                    case Parser::MODULO:
-                    case Parser::DIVIDE:
-                    case Parser::MULTIPLY:
-                    case Parser::SUBTRACT:
                     case Parser::EXPONENTIATE:
-                        // Int/float | float/float --> float
+                    case Parser::MULTIPLY:
+                    case Parser::DIVIDE:
+                    case Parser::MODULO:
+                    case Parser::ADD:
+                    case Parser::SUBTRACT:
+                        // Unknown/Unknown --> Unknown
                         // Int/int --> int
-                        // string/string --> string (in the case of ADD and ADD_EQUAL)
-                        if (areIntFloat || (areEqual && isFloat)) { return (exprNode->type = FLOAT_TY); }
-                        if (areEqual && isInt) { return (exprNode->type = INT_TY); }
-                        if (areEqual && isString
+                        // Int/float | float/float --> float
+                        // string/string | any/string | string/any --> string (in the case of ADD and ADD_EQUAL)
+                        if (areUnknown) { return nullptr; }
+                        if (areInt) { return (exprNode->type = INT_TY); }
+                        if (areIntFloat) { return (exprNode->type = FLOAT_TY); }
+                        if ((leftTy && leftTy->getType() == STRING || rightTy && rightTy->getType() == STRING)
                             && (exprNode->opType == Parser::ADD || exprNode->opType == Parser::ADD_SET)) {
                             return (exprNode->type = STRING_TY);
                         }
-                        // TODO: Improve error
-                        throw Util::CommanderException("Binary operation has incompatible types.");
+                        throw Util::CommanderException(
+                                "Binary operation '" + Parser::binOpToString(exprNode->opType)
+                                        + "' has incompatible types. Left and right types should be INT, FLOAT, or "
+                                          "STRING (if doing ADD for string concatenation). Left: "
+                                        + getErrorTypeString(leftTy) + ", Right: " + getErrorTypeString(rightTy),
+                                exprNode->position);
+                    default:
+                        if (!isLvalue && !isBinding) {
+                            throw Util::CommanderException(
+                                    "Invalid set expression. Must have variable or index lvalue on left side of '=', "
+                                    "but found "
+                                            + Parser::nodeTypeToString(exprNode->left->nodeType()) + " instead",
+                                    exprNode->left->position);
+                        }
+                        if (!areEqual
+                            || isBinding && std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->type
+                                       && !areTypesEqual(
+                                               typeCheck(std::static_pointer_cast<Parser::BindingNode>(exprNode->left)
+                                                                 ->type),
+                                               rightTy)) {
+                            throw Util::CommanderException(
+                                    "Expected the type"
+                                            + getErrorTypeString(
+                                                    isBinding ? typeCheck(std::static_pointer_cast<Parser::BindingNode>(
+                                                                                  exprNode->left)
+                                                                                  ->type)
+                                                              : leftTy)
+                                            + " for the expression right of '=' to match left, but got"
+                                            + getErrorTypeString(rightTy) + " instead",
+                                    exprNode->right->position);
+                        }
+                        if (isBinding || isVarLValue) {
+                            std::string const varName
+                                    = isBinding
+                                            ? std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->variable
+                                            : std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable;
+                            bool const isConstant = !isFirst && _table->getVariable(varName)->constant;
+                            if (isConstant) {
+                                throw Util::CommanderException("Unable to update constant variable '" + varName + "'",
+                                                               exprNode->left->position);
+                            }
+                            rightTy = isBinding && std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->type
+                                            ? typeCheck(
+                                                    std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->type)
+                                            : rightTy;
+                            if (isFirst) {
+                                _table->addVariable(
+                                        varName,
+                                        std::make_shared<VariableInfo>(
+                                                isBinding
+                                                        && std::static_pointer_cast<Parser::BindingNode>(exprNode->left)
+                                                                   ->constant,
+                                                rightTy));
+                            } else {
+                                getVarType(varName, VARIABLE_INFO, exprNode->left->position);
+                                const VarInfoPtr info = _table->getVariable(varName);
+                                if (isBinding) {
+                                    info->constant
+                                            = std::static_pointer_cast<Parser::BindingNode>(exprNode->left)->constant;
+                                }
+                                info->types[0] = rightTy;
+                            }
+                        } else if (!leftTy) {
+                            Parser::IndexLValueNodePtr const lvalue = std::static_pointer_cast<Parser::IndexLValueNode>(
+                                    exprNode->left);
+                            if (lvalue->lvalue->type->getType() == ARRAY) {
+                                std::static_pointer_cast<ArrayTy>(lvalue->lvalue->type)->baseType = rightTy;
+                            } else if (lvalue->index->nodeType() == Parser::INT_EXPR) {
+                                int64_t const index
+                                        = std::static_pointer_cast<Parser::IntExprNode>(lvalue->index)->value;
+                                TupleTyPtr const tupleTy = std::static_pointer_cast<TupleTy>(lvalue->lvalue->type);
+                                tupleTy->contentTypes[index] = rightTy;
+                            }
+                        }
+                        return (exprNode->type = rightTy);
                 }
-                // All cases are dealt with in switch statement, so it shouldn't ever get here
-                throw Util::CommanderException("Unexpected error occurred with parsing binary expression");
             }
             case Parser::CALL_EXPR: {
                 Parser::CallExprNodePtr const exprNode = std::static_pointer_cast<Parser::CallExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr type = typeCheck(exprNode->func);
-                if (!type || type->getType() != Type::FUNCTION) {
-                    // TODO: Improve Error
-                    throw Util::CommanderException("Tried to call something that wasn't a function.");
-                }
+                const bool isVarLValue
+                        = exprNode->func->nodeType() == Parser::LVALUE_EXPR
+                       && std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr->nodeType()
+                                  == Parser::VAR_EXPR;
+                TyPtr type;
                 std::vector<TyPtr> functionTypes;
-                if (exprNode->func->nodeType() == Parser::VAR_EXPR
-                    || (exprNode->func->nodeType() == Parser::LVALUE_EXPR
-                        && std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr->nodeType()
-                                   == Parser::VAR_EXPR)) {
-                    std::string varName
-                            = exprNode->func->nodeType() == Parser::VAR_EXPR
-                                    ? std::static_pointer_cast<Parser::VarExprNode>(exprNode->func)->variable
-                                    : std::static_pointer_cast<Parser::VarExprNode>(
-                                              std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr)
-                                              ->variable;
-                    VarInfoPtr const functionInfo = _table.getVariable(varName);
-                    if (functionInfo->infoType() != FUNCTION_INFO) {
-                        // TODO: Improve error
-                        throw Util::CommanderException("Variable of name " + varName
-                                                       + " does not refer to a function.");
-                    }
+                if (isVarLValue) {
+                    std::string const varName
+                            = std::static_pointer_cast<Parser::VarExprNode>(
+                                      std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr)
+                                      ->variable;
+                    assertVariableExists(varName, exprNode->func->position);
+                    VarInfoPtr const functionInfo = _table->getVariable(varName);
+                    type = functionInfo->types[0];
                     functionTypes = functionInfo->types;
                 } else {
+                    type = typeCheck(exprNode->func);
                     functionTypes.push_back(type);
                 }
+                assertType(type, FUNCTION_TY, exprNode->func->position);
                 std::vector<TyPtr> argTypes;
                 for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
+                bool unknownFunction = false;
                 for (const TyPtr& typ : functionTypes) {
+                    if (!typ) {
+                        unknownFunction = true;
+                        continue;
+                    }
                     FunctionTyPtr const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }
+                    bool areEqual = true;
                     for (int i = 0; i < size; i++) {
-                        if (!areTypesEqual(functionTy->parameters[i], argTypes[i])) { continue; }
+                        if (!areTypesEqual(functionTy->parameters[i], argTypes[i])) {
+                            areEqual = false;
+                            break;
+                        }
                     }
+                    if (!areEqual) { continue; }
                     functionType = functionTy;
                     break;
                 }
-                if (!functionType) {
-                    // TODO: Improve Error
-                    throw Util::CommanderException("No function exists that matches this function signature.");
+                if (!functionType && !unknownFunction) {
+                    const TyPtr callType = std::make_shared<FunctionTy>(
+                            argTypes, std::static_pointer_cast<FunctionTy>(type)->returnType);
+                    if (isVarLValue) {
+                        std::string const varName
+                                = std::static_pointer_cast<Parser::VarExprNode>(
+                                          std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr)
+                                          ->variable;
+                        std::stringstream functionSignatures;
+                        for (const TyPtr& typ : functionTypes) {
+                            functionSignatures << "\n" << getErrorTypeString(typ);
+                        }
+                        throw Util::CommanderException(
+                                "The parameters being used in call expression don't match any function signatures of '"
+                                        + varName + "'. Calling signature:" + getErrorTypeString(callType)
+                                        + "\nPossible function signatures:" + functionSignatures.str(),
+                                exprNode->position);
+                    }
+                    throw Util::CommanderException("The parameters being used in call expression don't match the "
+                                                   "function signature. Function signature:"
+                                                           + getErrorTypeString(type)
+                                                           + ", Calling signature:" + getErrorTypeString(callType),
+                                                   exprNode->position);
                 }
-                return (exprNode->type = functionType->returnType);
+                if (isVarLValue) {
+                    const Parser::LValueExprNodePtr lvalue = std::static_pointer_cast<Parser::LValueExprNode>(
+                            exprNode->func);
+                    const Parser::VarExprNodePtr varExpr = std::static_pointer_cast<Parser::VarExprNode>(lvalue->expr);
+                    lvalue->type = functionType;
+                    varExpr->type = functionType;
+                }
+                return (exprNode->type = functionType ? functionType->returnType : functionType);
             }
             case Parser::API_CALL_EXPR: {
                 Parser::ApiCallExprNodePtr const exprNode = std::static_pointer_cast<Parser::ApiCallExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 exprNode->args->exprs.insert(exprNode->args->exprs.begin(), exprNode->expression);
-                // TODO: Everything after this is pretty much the same as call expr, so perhaps put this code into it's
-                // own method
-                TyPtr type = getVarType(exprNode->func);
-                if (!type || type->getType() != Type::FUNCTION) {
-                    // TODO: Improve Error
-                    throw Util::CommanderException("Tried to call something that wasn't a function.");
-                }
-                std::vector<TyPtr> functionTypes;
-                VarInfoPtr const functionInfo = _table.getVariable(exprNode->func);
-                if (functionInfo->infoType() != FUNCTION_INFO) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Variable of name " + exprNode->func
-                                                   + " does not refer to a function.");
-                }
-                functionTypes = functionInfo->types;
+                assertVariableExists(exprNode->func, exprNode->funcPosition);
+                VarInfoPtr const functionInfo = _table->getVariable(exprNode->func);
+                const TyPtr type = functionInfo->types[0];
+                const std::vector<TyPtr> functionTypes = functionInfo->types;
                 std::vector<TyPtr> argTypes;
                 for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
+                bool unknownFunction = false;
                 for (const TyPtr& typ : functionTypes) {
+                    if (!typ) {
+                        unknownFunction = true;
+                        continue;
+                    }
                     FunctionTyPtr const functionTy = std::static_pointer_cast<FunctionTy>(typ);
                     size_t const size = functionTy->parameters.size();
                     if (size != argTypes.size()) { continue; }
+                    bool areEqual = true;
                     for (int i = 0; i < size; i++) {
-                        if (!areTypesEqual(functionTy->parameters[i], argTypes[i])) { continue; }
+                        if (!areTypesEqual(functionTy->parameters[i], argTypes[i])) {
+                            areEqual = false;
+                            break;
+                        }
                     }
+                    if (!areEqual) { continue; }
                     functionType = functionTy;
                     break;
                 }
-                if (!functionType) {
-                    // TODO: Improve Error
-                    throw Util::CommanderException("No function exists that matches this function signature.");
+                if (!functionType && !unknownFunction) {
+                    std::stringstream functionSignatures;
+                    for (const TyPtr& typ : functionTypes) { functionSignatures << "\n" << getErrorTypeString(typ); }
+                    const TyPtr callType = std::make_shared<FunctionTy>(
+                            argTypes, std::static_pointer_cast<FunctionTy>(type)->returnType);
+                    throw Util::CommanderException(
+                            "The parameters being used in call expression don't match any function signatures of '"
+                                    + exprNode->func + "'. Calling signature:" + getErrorTypeString(callType)
+                                    + "\nPossible function signatures:" + functionSignatures.str(),
+                            exprNode->position);
                 }
-                if (exprNode->func == "append") {
-                    ArrayTyPtr arrayTy = std::static_pointer_cast<ArrayTy>(argTypes[0]);
-                    if (!arrayTy->baseType) { arrayTy->baseType = argTypes[1]; }
+                if (exprNode->func == "append" && argTypes[0]) {
+                    ArrayTyPtr const arrayTy = std::static_pointer_cast<ArrayTy>(argTypes[0]);
+                    if (!arrayTy->baseType) {
+                        arrayTy->baseType = argTypes[1];
+                    } else if (!areTypesEqual(arrayTy->baseType, argTypes[1])) {
+                        throw Util::CommanderException("Cannot append type" + getErrorTypeString(argTypes[1])
+                                                               + " to array of type" + getErrorTypeString(arrayTy),
+                                                       exprNode->position);
+                    }
                 }
-                return (exprNode->type = functionType->returnType);
+                return (exprNode->type = functionType ? functionType->returnType : functionType);
             }
             case Parser::LAMBDA_EXPR: {
                 Parser::LambdaExprNodePtr const exprNode = std::static_pointer_cast<Parser::LambdaExprNode>(astNode);
@@ -493,12 +569,34 @@ namespace TypeChecker {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(exprNode->returnType);
+                TyPtr bodyReturnType = typeCheck(exprNode->body);
+                if (!bodyReturnType) {
+                    bodyReturnType = exprNode->body->nodeType() == Parser::RETURN_STMT
+                                                  || (exprNode->body->nodeType() == Parser::SCOPE_STMT
+                                                      && std::static_pointer_cast<Parser::ScopeStmtNode>(exprNode->body)
+                                                                         ->stmts->stmts.back()
+                                                                         ->nodeType()
+                                                                 == Parser::RETURN_STMT)
+                                           ? nullptr
+                                           : VOID_TY;
+                }
                 if (!returnType) {
-                    returnType = typeCheck(exprNode->body);
-                    if (!returnType) { returnType = VOID_TY; }
-                } else if (!areTypesEqual(returnType, typeCheck(exprNode->body))) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Return types for the lambda function don't match.");
+                    returnType = bodyReturnType;
+                } else if (!areTypesEqual(returnType, bodyReturnType)) {
+                    throw Util::CommanderException(
+                            "Return types for the function declaration don't match. Expected return type"
+                                    + getErrorTypeString(returnType) + " but got"
+                                    + getErrorTypeString(typeCheck(exprNode->body)) + " instead",
+                            exprNode->position);
+                } else if (!bodyReturnType) {
+                    if (exprNode->body->nodeType() == Parser::RETURN_STMT) {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(exprNode->body)->retExpr->type = returnType;
+                    } else {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(
+                                std::static_pointer_cast<Parser::ScopeStmtNode>(exprNode->body)->stmts->stmts.back())
+                                ->retExpr->type
+                                = returnType;
+                    }
                 }
                 popScope();
                 return (exprNode->type = std::make_shared<FunctionTy>(bindings, returnType));
@@ -507,32 +605,18 @@ namespace TypeChecker {
                 Parser::CmdExprNodePtr const exprNode = std::static_pointer_cast<Parser::CmdExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
                 typeCheck(exprNode->cmd);
-                std::vector<TyPtr> contentTypes;
-                contentTypes.push_back(STRING_TY);
-                contentTypes.push_back(STRING_TY);
-                contentTypes.push_back(INT_TY);
-                return (exprNode->type = std::make_shared<TupleTy>(contentTypes));
+                return (exprNode->type = std::make_shared<TupleTy>(std::vector<TyPtr> {STRING_TY, STRING_TY, INT_TY}));
             }
             case Parser::SCAN_EXPR: {
                 Parser::ScanExprNodePtr const exprNode = std::static_pointer_cast<Parser::ScanExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr const promptType = typeCheck(exprNode->prompt);
-                if (!promptType || promptType->getType() != Type::STRING) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Expected a string prompt for scan expression, but got something else.");
-                }
+                assertType(typeCheck(exprNode->prompt), STRING_TY, exprNode->prompt->position);
                 return (exprNode->type = STRING_TY);
             }
             case Parser::READ_EXPR: {
                 Parser::ReadExprNodePtr const exprNode = std::static_pointer_cast<Parser::ReadExprNode>(astNode);
                 if (exprNode->type) { return exprNode->type; }
-                TyPtr const pathType = typeCheck(exprNode->filePath);
-                if (!pathType || pathType->getType() != Type::STRING) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Expected a string file path for read expression, but got something else.");
-                }
+                assertType(typeCheck(exprNode->filePath), STRING_TY, exprNode->filePath->position);
                 return (exprNode->type = STRING_TY);
             }
             case Parser::EXPRS: {
@@ -542,28 +626,21 @@ namespace TypeChecker {
             }
             case Parser::PRGM: {
                 Parser::PrgmNodePtr const program = std::static_pointer_cast<Parser::PrgmNode>(astNode);
-                return typeCheck(program->stmts);
+                typeCheck(program->stmts);
+                return nullptr;
             }
             case Parser::IF_STMT: {
                 Parser::IfStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(astNode);
-                TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
-                }
+                assertType(typeCheck(stmtNode->condition), BOOL_TY, stmtNode->condition->position);
                 typeCheck(stmtNode->trueStmt);
-                if (stmtNode->falseStmt) { typeCheck(stmtNode->falseStmt); }
+                typeCheck(stmtNode->falseStmt);
                 return nullptr;
             }
             case Parser::FOR_STMT: {
                 Parser::ForStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ForStmtNode>(astNode);
                 pushScope();
                 typeCheck(stmtNode->initial);
-                TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
-                }
+                assertType(typeCheck(stmtNode->condition), BOOL_TY, stmtNode->condition->position);
                 typeCheck(stmtNode->update);
                 typeCheck(stmtNode->body);
                 popScope();
@@ -571,22 +648,14 @@ namespace TypeChecker {
             }
             case Parser::WHILE_STMT: {
                 Parser::WhileStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(astNode);
-                TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
-                }
+                assertType(typeCheck(stmtNode->condition), BOOL_TY, stmtNode->condition->position);
                 typeCheck(stmtNode->body);
                 return nullptr;
             }
             case Parser::DO_WHILE_STMT: {
                 Parser::DoWhileStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::DoWhileStmtNode>(astNode);
                 typeCheck(stmtNode->body);
-                TyPtr const conditionType = typeCheck(stmtNode->condition);
-                if (!conditionType || conditionType->getType() != Type::BOOL) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("The condition does not evaluate to a bool type.");
-                }
+                assertType(typeCheck(stmtNode->condition), BOOL_TY, stmtNode->condition->position);
                 return nullptr;
             }
             case Parser::RETURN_STMT: {
@@ -605,38 +674,36 @@ namespace TypeChecker {
             }
             case Parser::CMD_STMT: {
                 Parser::CmdStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::CmdStmtNode>(astNode);
-                return typeCheck(stmtNode->command);
+                typeCheck(stmtNode->command);
+                return nullptr;
             }
             case Parser::EXPR_STMT: {
                 Parser::ExprStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ExprStmtNode>(astNode);
-                return typeCheck(stmtNode->expression);
+                typeCheck(stmtNode->expression);
+                return nullptr;
             }
             case Parser::ALIAS_STMT: {
                 Parser::AliasStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::AliasStmtNode>(astNode);
-                assertNotExists(stmtNode->alias);
-                _table.addVariable(stmtNode->alias, std::make_shared<AliasInfo>());
+                assertVariableNotExists(stmtNode->alias, stmtNode->position);
+                typeCheck(stmtNode->command);
+                _table->addVariable(stmtNode->alias, std::make_shared<AliasInfo>());
                 return nullptr;
             }
             case Parser::IMPORT_STMT: {
                 Parser::ImportStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::ImportStmtNode>(astNode);
-                TyPtr const pathType = typeCheck(stmtNode->filePath);
-                if (!pathType || pathType->getType() != Type::STRING) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Expected a string file path for import statement, but got something else.");
-                }
+                typeCheck(stmtNode->filePath);
                 Parser::StringNodePtr currentNode = stmtNode->filePath;
                 while (!currentNode->isLiteral()) {
                     if (currentNode->expressions->expressions.size() != 1) {
-                        // TODO: Improve error
                         throw Util::CommanderException(
-                                "Expected string literal for import statement, but got an interpolated string");
+                                "Expected string literal for file path, but got an interpolated string",
+                                stmtNode->filePath->position);
                     }
                     currentNode = std::static_pointer_cast<Parser::StringExprNode>(
                                           currentNode->expressions->expressions[0])
                                           ->stringNode;
                 }
-                std::string filePath = currentNode->literal;
+                std::string const filePath = currentNode->literal;
                 Lexer::TokenList tokens;
                 Lexer::tokenize(tokens, filePath);
                 stmtNode->prgm = _parser.parse(tokens);
@@ -655,75 +722,95 @@ namespace TypeChecker {
             }
             case Parser::WRITE_STMT: {
                 Parser::WriteStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::WriteStmtNode>(astNode);
-                TyPtr const dataType = typeCheck(stmtNode->fileData);
-                if (!dataType || dataType->getType() != Type::STRING) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Expected a string data for write statement, but got something else.");
-                }
-                TyPtr const pathType = typeCheck(stmtNode->filePath);
-                if (!pathType || pathType->getType() != Type::STRING) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Expected a string file path for write statement, but got something else.");
-                }
+                assertType(typeCheck(stmtNode->fileData), STRING_TY, stmtNode->fileData->position);
+                assertType(typeCheck(stmtNode->filePath), STRING_TY, stmtNode->filePath->position);
                 return nullptr;
             }
             case Parser::TYPE_STMT: {
                 Parser::TypeStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::TypeStmtNode>(astNode);
-                assertNotExists(stmtNode->alias);
-                _table.addVariable(stmtNode->alias, std::make_shared<TypeInfo>(typeCheck(stmtNode->type)));
+                assertVariableNotExists(stmtNode->alias, stmtNode->position);
+                _table->addVariable(stmtNode->alias, std::make_shared<TypeInfo>(typeCheck(stmtNode->type)));
                 return nullptr;
             }
             case Parser::FUNCTION_STMT: {
                 Parser::FunctionStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::FunctionStmtNode>(
                         astNode);
-                assertNotExists(stmtNode->name);
+                assertVariableNotExists(stmtNode->name, stmtNode->position);
                 pushScope();
                 std::vector<TyPtr> bindings;
                 for (const Parser::BindingNodePtr& binding : stmtNode->bindings->bindings) {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(stmtNode->returnType);
+                TyPtr bodyReturnType = typeCheck(stmtNode->body);
+                if (!bodyReturnType) {
+                    bodyReturnType = stmtNode->body->nodeType() == Parser::RETURN_STMT
+                                                  || (stmtNode->body->nodeType() == Parser::SCOPE_STMT
+                                                      && std::static_pointer_cast<Parser::ScopeStmtNode>(stmtNode->body)
+                                                                         ->stmts->stmts.back()
+                                                                         ->nodeType()
+                                                                 == Parser::RETURN_STMT)
+                                           ? nullptr
+                                           : VOID_TY;
+                }
                 if (!returnType) {
-                    returnType = typeCheck(stmtNode->body);
-                    if (!returnType) { returnType = VOID_TY; }
-                } else if (!areTypesEqual(returnType, typeCheck(stmtNode->body))) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Return types for the function " + stmtNode->name + " don't match.");
+                    returnType = bodyReturnType;
+                    stmtNode->returnType = std::make_shared<Parser::TupleTypeNode>(stmtNode->body->position);
+                    stmtNode->returnType->type = returnType;
+                } else if (!areTypesEqual(returnType, bodyReturnType)) {
+                    throw Util::CommanderException(
+                            "Return types for the function declaration don't match. Expected return type"
+                                    + getErrorTypeString(returnType) + " but got"
+                                    + getErrorTypeString(typeCheck(stmtNode->body)) + " instead",
+                            stmtNode->position);
+                } else if (!bodyReturnType) {
+                    if (stmtNode->body->nodeType() == Parser::RETURN_STMT) {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(stmtNode->body)->retExpr->type = returnType;
+                    } else {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(
+                                std::static_pointer_cast<Parser::ScopeStmtNode>(stmtNode->body)->stmts->stmts.back())
+                                ->retExpr->type
+                                = returnType;
+                    }
                 }
                 popScope();
-                _table.addVariable(stmtNode->name, std::make_shared<FunctionInfo>(std::vector<TyPtr> {
-                                                           std::make_shared<FunctionTy>(bindings, returnType)}));
+                _table->addVariable(stmtNode->name, std::make_shared<FunctionInfo>(std::vector<TyPtr> {
+                                                            std::make_shared<FunctionTy>(bindings, returnType)}));
                 return nullptr;
             }
             case Parser::TIMEOUT_STMT: {
                 Parser::TimeoutStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::TimeoutStmtNode>(astNode);
                 typeCheck(stmtNode->message);
-                return typeCheck(stmtNode->stmt);
+                typeCheck(stmtNode->stmt);
+                return nullptr;
             }
             case Parser::ASSERT_STMT: {
                 Parser::AssertStmtNodePtr const stmtNode = std::static_pointer_cast<Parser::AssertStmtNode>(astNode);
                 typeCheck(stmtNode->message);
-                TyPtr type = typeCheck(stmtNode->expr);
-                if (!type || type->getType() != BOOL) {
-                    // TODO: Improve error
-                    throw Util::CommanderException(
-                            "Assert statement requires boolean expression, but got different type.");
-                }
+                assertType(typeCheck(stmtNode->expr), BOOL_TY, stmtNode->position);
                 return nullptr;
             }
             case Parser::STMTS: {
                 Parser::StmtsNodePtr const stmtsPtr = std::static_pointer_cast<Parser::StmtsNode>(astNode);
-                for (const Parser::StmtNodePtr& stmtPtr : stmtsPtr->stmts) { typeCheck(stmtPtr); }
                 TyPtr returnType = VOID_TY;
-                Parser::StmtNodePtr const lastStmt = stmtsPtr->stmts.back();
-                if (lastStmt->nodeType() == Parser::RETURN_STMT) { returnType = typeCheck(lastStmt); }
+                int idx = 0;
+                for (const Parser::StmtNodePtr& stmtPtr : stmtsPtr->stmts) {
+                    TyPtr const type = typeCheck(stmtPtr);
+                    if (stmtPtr->nodeType() == Parser::RETURN_STMT) {
+                        returnType = type;
+                        if (idx + 1 != stmtsPtr->stmts.size()) {
+                            throw Util::CommanderException("Return statement is not the last statement in the scope",
+                                                           stmtPtr->position);
+                        }
+                        break;
+                    }
+                    idx++;
+                }
                 return returnType;
             }
             case Parser::STRING: {
                 Parser::StringNodePtr const stringPtr = std::static_pointer_cast<Parser::StringNode>(astNode);
-                if (!stringPtr->isLiteral()) { typeCheck(stringPtr->expressions); }
+                typeCheck(stringPtr->expressions);
                 return STRING_TY;
             }
             case Parser::STRING_EXPRS: {
@@ -782,13 +869,9 @@ namespace TypeChecker {
                 Parser::VariableTypeNodePtr const variableTypePtr = std::static_pointer_cast<Parser::VariableTypeNode>(
                         astNode);
                 if (variableTypePtr->type) { return variableTypePtr->type; }
-                VarInfoPtr typeInfo = _table.getVariable(variableTypePtr->name);
-                if (typeInfo->infoType() != TYPE_INFO) {
-                    // TODO: Improve error
-                    throw Util::CommanderException("Variable of name " + variableTypePtr->name
-                                                   + " does not refer to a type.");
-                }
-                return (variableTypePtr->type = typeInfo->types[0]);
+                assertVariableExists(variableTypePtr->name, variableTypePtr->position);
+                return (variableTypePtr->type = getVarType(variableTypePtr->name, TYPE_INFO,
+                                                           variableTypePtr->position));
             }
             case Parser::TYPES: {
                 Parser::TypesNodePtr const typesPtr = std::static_pointer_cast<Parser::TypesNode>(astNode);
@@ -796,31 +879,66 @@ namespace TypeChecker {
                 return nullptr;
             }
             default:
-                throw Util::CommanderException(
-                        "This should not have happened. Abstract ExprNode, TypeNode, or StmtNode was created...");
+                throw Util::CommanderException("Unexpected error occurred with type checking (possible abstract AST "
+                                               "node accidentally created)",
+                                               astNode->position);
         }
     }
 
-    void TypeChecker::assertNotExists(const std::string& variable) {
-        if (_table.hasVariable(variable)) {
-            // TODO: Improve error
-            throw Util::CommanderException("Variable of name " + variable + " already exists in current scope.");
+    void TypeChecker::assertVariableExists(const std::string& variable, const Lexer::FilePosition& position) {
+        if (!_table->hasVariable(variable)) {
+            throw Util::CommanderException("Variable '" + variable + "' has not been initialized yet.", position);
         }
     }
 
-    void TypeChecker::pushScope() { _table = VariableTable(_table); }
+    void TypeChecker::assertVariableNotExists(const std::string& variable, const Lexer::FilePosition& position) {
+        if (_table->hasVariable(variable)) {
+            throw Util::CommanderException("Variable of name '" + variable + "' already exists in current scope.",
+                                           position);
+        }
+    }
+
+    void TypeChecker::assertType(const TyPtr& type, const TyPtr& expectedType, const Lexer::FilePosition& position) {
+        if (!areTypesEqual(expectedType, type)) {
+            throw Util::CommanderException("Expected" + getErrorTypeString(expectedType) + " type, but got"
+                                                   + getErrorTypeString(type) + " instead.",
+                                           position);
+        }
+    }
+
+    void TypeChecker::pushScope() { _table = std::make_shared<VariableTable>(_table); }
 
     VariableTablePtr TypeChecker::popScope() {
         VariableTablePtr scope = std::make_shared<VariableTable>(_table);
-        auto parent = _table.getParent();
-        if (parent) { _table = *parent; }
+        auto parent = _table->getParent();
+        if (parent) { _table = parent; }
         return scope;
     }
 
-    TyPtr TypeChecker::getVarType(const std::string& varName) {
-        VarInfoPtr variableInfo = _table.getVariable(varName);
+    TyPtr TypeChecker::getVarType(const std::string& varName, const InfoType& infoType,
+                                  const Lexer::FilePosition& variablePosition) {
+        const VarInfoPtr variableInfo = _table->getVariable(varName);
+        if (variableInfo->infoType() != infoType) {
+            throw Util::CommanderException("Expected the variable named '" + varName + "' to be a "
+                                                   + getVarTypeString(infoType) + " variable, but got a "
+                                                   + getVarTypeString(variableInfo->infoType()) + " variable instead.",
+                                           variablePosition);
+        }
         // Guaranteed to have at least 1 type in the types list, if variableInfo exists that is
         return variableInfo ? variableInfo->types[0] : nullptr;
+    }
+
+    std::string TypeChecker::getVarTypeString(const InfoType& infoType) {
+        switch (infoType) {
+            case FUNCTION_INFO:
+                return "function";
+            case VARIABLE_INFO:
+                return "normal";
+            case TYPE_INFO:
+                return "type";
+            default:
+                return "alias";
+        }
     }
 
 }  //  namespace TypeChecker

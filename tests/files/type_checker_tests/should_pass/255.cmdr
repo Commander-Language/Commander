@@ -1,0 +1,2 @@
+//Test that lambdas type check
+x = (fn (a, b) -> (fn () -> a(b)))(fn (a) -> a + 3.3, 4)(); //Should return 7.3, a float

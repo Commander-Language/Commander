@@ -1,0 +1,2 @@
+//Test timeout statements type check
+timeout 40000 "Sin took too long" sin(3);

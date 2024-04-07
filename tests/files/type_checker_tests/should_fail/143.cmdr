@@ -1,0 +1,3 @@
+//Should fail if constant variable is set again
+const x = 3;
+x -= 4;

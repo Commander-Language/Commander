@@ -1,0 +1,4 @@
+(PrgmNode
+	(TypeStmtNode output (TupleTypeNode (TypesNode (StringTypeNode STRING) (StringTypeNode STRING) (IntTypeNode INT)) (STRING, STRING, INT)))
+	(TypeStmtNode outputs (ArrayTypeNode (VariableTypeNode output (STRING, STRING, INT)) (STRING, STRING, INT)[]))
+	(ExprStmtNode (BinOpExprNode (BindingNode x (VariableTypeNode outputs (STRING, STRING, INT)[])) SET (ArrayExprNode (ExprsNode (CmdExprNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi') STRING)))) (STRING, STRING, INT)) (CmdExprNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'bye') STRING)))) (STRING, STRING, INT))) (STRING, STRING, INT)[]) (STRING, STRING, INT)[])))

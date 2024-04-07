@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (IntExprNode 3 INT) GREATER (FloatExprNode 4.400000 FLOAT) BOOL) BOOL)))

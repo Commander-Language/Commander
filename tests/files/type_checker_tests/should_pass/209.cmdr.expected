@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (FloatExprNode 1.200000 FLOAT) FLOAT))
+	(ExprStmtNode (BinOpExprNode (VarLValueNode x FLOAT) MODULO_SET (FloatExprNode 2.300000 FLOAT) FLOAT)))

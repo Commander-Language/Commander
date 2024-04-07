@@ -1,0 +1,5 @@
+//Should fail if variable already exists
+x: int = 3;
+fn foo(x: int): int {
+    return x;
+}

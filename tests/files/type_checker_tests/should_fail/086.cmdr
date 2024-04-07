@@ -1,0 +1,2 @@
+//Should fail indexing if empty tuple
+x = ()[0];

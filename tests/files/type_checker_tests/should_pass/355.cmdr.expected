@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode pi) SET (FloatExprNode 3.141590 FLOAT) FLOAT))
+	(ExprStmtNode (BinOpExprNode (BindingNode num) SET (IntExprNode 42 INT) INT)))

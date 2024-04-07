@@ -1,0 +1,5 @@
+//Test builtin arctan type checks
+a = 1;
+x = arctan(16);
+x = arctan(0.25);
+x = arctan((1.0, true, 3)[a]);

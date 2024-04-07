@@ -1,0 +1,5 @@
+(PrgmNode
+	(ForStmtNode (BinOpExprNode (BindingNode i) SET (IntExprNode 0)) (BinOpExprNode (LValueExprNode (VarExprNode i)) LESSER (IntExprNode 10)) (UnOpExprNode (VarLValueNode i) POST_INCREMENT) (ScopeStmtNode (StmtsNode
+	(ForStmtNode (BinOpExprNode (BindingNode j (IntTypeNode)) SET (IntExprNode 0)) (BinOpExprNode (LValueExprNode (VarExprNode j)) LESSER (LValueExprNode (VarExprNode i))) (UnOpExprNode (VarLValueNode j) PRE_INCREMENT) (ScopeStmtNode (StmtsNode
+	(ForStmtNode (BinOpExprNode (BindingNode k) SET (UnOpExprNode (IntExprNode 1) NEGATE)) (BinOpExprNode (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode i)) LESSER (IntExprNode 10)) AND (BinOpExprNode (LValueExprNode (VarExprNode j)) GREATER (LValueExprNode (VarExprNode i)))) OR (BinOpExprNode (LValueExprNode (VarExprNode k)) EQUAL (LValueExprNode (VarExprNode m)))) (BinOpExprNode (VarLValueNode k) MULTIPLY_SET (UnOpExprNode (VarLValueNode j) POST_DECREMENT)) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))))))))))))

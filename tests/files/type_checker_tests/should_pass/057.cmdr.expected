@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BoolExprNode true BOOL) BOOL))
+	(ExprStmtNode (BinOpExprNode (BindingNode y) SET (UnOpExprNode (LValueExprNode (VarExprNode x BOOL) BOOL) NOT BOOL) BOOL)))

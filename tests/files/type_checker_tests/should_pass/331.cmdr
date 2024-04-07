@@ -1,0 +1,2 @@
+//Test builtin random type checks
+x = random();

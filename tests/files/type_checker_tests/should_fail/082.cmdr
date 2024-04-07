@@ -1,0 +1,2 @@
+//Should fail if array contains multiple types
+x = [1.0, 2, "hi"];

@@ -1,0 +1,2 @@
+//Should fail using uninitialized variable
+type a = b;

@@ -1,0 +1,5 @@
+//Test builtin tanh type checks
+a = 1;
+x = tanh(16);
+x = tanh(0.25);
+x = tanh((1.0, true, 3)[a]);

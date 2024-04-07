@@ -47,10 +47,26 @@ namespace TypeChecker {
         TyPtr typeCheck(const Parser::ASTNodePtr& astNode);
 
         /**
+         * Asserts that a variable does exist in the current scope
+         * @param variable The variable to assert does exist
+         * @param position Position of the variable
+         */
+        void assertVariableExists(const std::string& variable, const Lexer::FilePosition& position);
+
+        /**
          * Asserts that a variable does not exist in the current scope
          * @param variable The variable to assert does not exist
+         * @param position Position of the variable
          */
-        void assertNotExists(const std::string& variable);
+        void assertVariableNotExists(const std::string& variable, const Lexer::FilePosition& position);
+
+        /**
+         * Asserts that a type is the expected type
+         * @param type The type
+         * @param expectedType The expected type
+         * @param position The position of the type
+         */
+        void assertType(const TyPtr& type, const TyPtr& expectedType, const Lexer::FilePosition& position);
 
         /**
          * @brief Pushes new scope on top of the stack
@@ -65,12 +81,22 @@ namespace TypeChecker {
         /**
          * Gets the type of a variable
          * @param varName The variable
+         * @param infoType The expected var info type of the variable
+         * @param variablePosition The position of the variable in the file
          * @return The type
          */
-        TyPtr getVarType(const std::string& varName);
+        TyPtr getVarType(const std::string& varName, const InfoType& infoType,
+                         const Lexer::FilePosition& variablePosition);
+
+        /**
+         * Helper for printing out error message when getting a variable
+         * @param infoType The info type
+         * @return The string for the info type
+         */
+        std::string getVarTypeString(const InfoType& infoType);
 
     private:
-        VariableTable _table;
+        VariableTablePtr _table;
     };
 }  //  namespace TypeChecker
 

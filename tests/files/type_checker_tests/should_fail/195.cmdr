@@ -1,0 +1,2 @@
+//Should fail import if using something other than string
+import 3;

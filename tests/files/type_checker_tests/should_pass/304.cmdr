@@ -1,0 +1,5 @@
+//Test builtin floor type checks
+a = 1;
+x = floor(16);
+x = floor(0.25);
+x = floor((1.0, true, 3)[a]);

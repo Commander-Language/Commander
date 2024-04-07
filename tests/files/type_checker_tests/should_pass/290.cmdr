@@ -1,0 +1,2 @@
+//Test write statements type check
+write "hi" to "hi.txt";

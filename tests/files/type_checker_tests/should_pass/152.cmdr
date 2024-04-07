@@ -1,0 +1,2 @@
+//Test that add operation type checks
+x = 1 + 2.3;

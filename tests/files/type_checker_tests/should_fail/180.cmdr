@@ -1,0 +1,2 @@
+//Should fail calling something not a function
+"hi"();

@@ -1,0 +1,5 @@
+//Test builtin sin type checks
+a = 1;
+x = sin(16);
+x = sin(0.25);
+x = sin((1.0, true, 3)[a]);

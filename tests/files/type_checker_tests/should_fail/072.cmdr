@@ -1,0 +1,3 @@
+//Should fail using alias variables inappropriately
+alias x = ls;
+println x;

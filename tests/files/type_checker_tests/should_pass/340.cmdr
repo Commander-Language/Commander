@@ -1,0 +1,6 @@
+//Test builtin length type checks
+a = 1;
+x = "hi".length();
+x = (1.0, true, 3)[a].length();
+x = [1, 2, 3].length();
+x = (2.0, true, 3).length();

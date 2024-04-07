@@ -1,0 +1,5 @@
+//Should not allow redeclaring variables
+x: int = 4;
+x: float = 3.2;
+x = true;
+x = "hi";

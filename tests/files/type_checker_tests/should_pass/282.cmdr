@@ -1,0 +1,3 @@
+//Test aliases type check
+x = "world!";
+alias hi = echo "hi " $x;

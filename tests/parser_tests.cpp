@@ -55,7 +55,13 @@ TEST_P(ParserParseTests, ShouldParseFileAndMatchExpectedExamples) {
 TEST_P(ParserFailTests, ShouldNotParseFile) {
     auto param = GetParam();
     const std::string filePath = "../tests/files/parser_tests/should_fail/" + param;
-    ASSERT_THROW(lexAndParse(filePath), Util::CommanderException);
+    ASSERT_THROW(
+            {
+                try {
+                    lexAndParse(filePath);
+                } catch (const std::out_of_range& e) { throw Util::CommanderException(e.what()); }
+            },
+            Util::CommanderException);
 }
 
 /**

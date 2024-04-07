@@ -1,0 +1,6 @@
+TYPE 'type' 2:1
+VARIABLE 'x' 2:6
+EQUALS '=' 2:8
+VOID 'void' 2:10
+SEMICOLON ';' 2:14
+END_OF_FILE 2:15

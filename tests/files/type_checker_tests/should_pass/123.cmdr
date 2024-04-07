@@ -1,0 +1,3 @@
+//Test that and operation type checks
+a = 1;
+x = true && (2.0, true, 1)[a];

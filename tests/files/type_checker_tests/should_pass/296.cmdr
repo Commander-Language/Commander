@@ -1,0 +1,7 @@
+//Test builtin parseInt type checks
+a = 1;
+x = parseInt(1);
+x = parseInt(3.0);
+x = parseInt(true);
+x = parseInt("50");
+x = parseInt((1.0, true, 3)[a]);

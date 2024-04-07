@@ -1,0 +1,6 @@
+//Test that functions type check
+fn add(a:int, b: float): float { 
+    return a + b;
+}
+add(2, 3.5);
+x = add(4, 3.4);

@@ -1,0 +1,4 @@
+//Should fail if return bindings don't match return type
+fn foo(x: int, y: float): bool {
+    println x + y;
+}

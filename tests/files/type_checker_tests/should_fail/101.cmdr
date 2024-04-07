@@ -1,0 +1,3 @@
+//Should fail pre-increment on something of incorrect type
+a = "hi";
+++a;

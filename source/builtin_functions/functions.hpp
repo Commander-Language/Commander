@@ -216,17 +216,22 @@ namespace Function {
                               TypeChecker::STRING_TY, TypeChecker::STRING_TY,
                               std::make_shared<TypeChecker::ArrayTy>(TypeChecker::STRING_TY))}},
             {"sort", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                             TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
+                             TypeChecker::ARRAY_TY,
+                             getFunctionTy(TypeChecker::ANY_TY, TypeChecker::ANY_TY, TypeChecker::BOOL_TY),
+                             TypeChecker::ARRAY_TY)}},
             {"filter", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                               TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
+                               TypeChecker::ARRAY_TY, getFunctionTy(TypeChecker::ANY_TY, TypeChecker::BOOL_TY),
+                               TypeChecker::ARRAY_TY)}},
             {"map", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                            TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::ARRAY_TY)}},
+                            TypeChecker::ARRAY_TY, getFunctionTy(TypeChecker::ANY_TY, TypeChecker::ANY_TY),
+                            TypeChecker::ARRAY_TY)}},
             {"foreach", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
-                                TypeChecker::ARRAY_TY, TypeChecker::FUNCTION_TY, TypeChecker::VOID_TY)}},
+                                TypeChecker::ARRAY_TY, getFunctionTy(TypeChecker::ANY_TY, TypeChecker::VOID_TY),
+                                TypeChecker::VOID_TY)}},
             {"append", std::vector<TypeChecker::FunctionTyPtr> {getFunctionTy(
                                TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::VOID_TY)}},
             {"remove", std::vector<TypeChecker::FunctionTyPtr> {
-                               getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::VOID_TY)}}};
+                               getFunctionTy(TypeChecker::ARRAY_TY, TypeChecker::ANY_TY, TypeChecker::BOOL_TY)}}};
 
     /* ========== Implementations ========== */
 
@@ -364,8 +369,8 @@ namespace Function {
     FlowController::CommanderTuplePtr append(FlowController::CommanderArrayPtr array,
                                              FlowController::CommanderTypePtr data);
 
-    FlowController::CommanderTuplePtr remove(FlowController::CommanderArrayPtr array,
-                                             FlowController::CommanderTypePtr data);
+    FlowController::CommanderBoolPtr remove(FlowController::CommanderArrayPtr array,
+                                            FlowController::CommanderTypePtr data);
 }  // namespace Function
 
 #endif  // COMMANDER_FUNCTIONS_HPP

@@ -1,0 +1,3 @@
+//Test basic commands type check
+x = "world!";
+echo "hi " $x;

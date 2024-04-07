@@ -1,0 +1,5 @@
+//Test builtin startsWith type checks
+a = 1;
+x = "hi".startsWith("hi");
+x = "hi".startsWith((1.0, true, 3)[a]);
+x = (1.0, true, 3)[a].startsWith("hi");

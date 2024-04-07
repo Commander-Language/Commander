@@ -1,0 +1,8 @@
+//Test builtin substring type checks
+a = 1;
+x = "hi".substring(1);
+x = "hi".substring(1, 2);
+x = (1.0, true, 3)[a].substring(1);
+x = (1.0, true, 3)[a].substring(1, 2);
+x = "hi".substring((1.0, true, 3)[a]);
+x = "hi".substring((1.0, true, 3)[a], (1.0, true, 3)[a]);

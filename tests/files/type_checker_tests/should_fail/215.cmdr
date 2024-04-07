@@ -1,0 +1,5 @@
+//Should not allow setting variables before being used in functions
+x = 3;
+fn add(x, y) {
+	return x + y;
+}

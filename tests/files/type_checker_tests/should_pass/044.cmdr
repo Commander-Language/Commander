@@ -1,0 +1,4 @@
+//Test array expression type checks
+x = 1;
+y = (2.0, true, 3)[x];
+z = [y, 3, 4];

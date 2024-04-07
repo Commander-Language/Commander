@@ -1,0 +1,2 @@
+//Should fail if scan expression does not have string
+x = scan 3;

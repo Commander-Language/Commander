@@ -1,0 +1,2 @@
+//Test that ternary operations type check
+x = if false then fn () -> 1 else fn () -> 2;

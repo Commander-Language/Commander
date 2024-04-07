@@ -1,0 +1,2 @@
+//Test that less than operation type checks
+x = 3 < 4;

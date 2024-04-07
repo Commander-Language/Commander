@@ -1,0 +1,3 @@
+//Test bindings type check
+x: (int, float, bool, string) = (1, 2.0, true, "hi");
+y = x;

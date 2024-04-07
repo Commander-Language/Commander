@@ -1,0 +1,4 @@
+//Test builtin upper type checks
+a = 1;
+x = "hi".upper();
+x = (1.0, true, 3)[a].upper();

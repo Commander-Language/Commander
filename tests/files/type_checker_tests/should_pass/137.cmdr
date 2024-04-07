@@ -1,0 +1,3 @@
+//Test that equals operation type checks
+a = 1;
+x = (2.0, true, 1)[a] == false;

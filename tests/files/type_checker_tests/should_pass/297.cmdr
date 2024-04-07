@@ -1,0 +1,7 @@
+//Test builtin parseFloat type checks
+a = 1;
+x = parseFloat(1);
+x = parseFloat(3.0);
+x = parseFloat(true);
+x = parseFloat("50.5");
+x = parseFloat((1.0, true, 3)[a]);
