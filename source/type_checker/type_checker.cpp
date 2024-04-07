@@ -298,6 +298,11 @@ namespace TypeChecker {
                             throw Util::CommanderException("Cannot update int to float in operation set expression.",
                                                            exprNode->position);
                         }
+                        if (!areEqual && exprNode->opType == Parser::ADD_SET && rightTy->getType() == STRING) {
+                            throw Util::CommanderException("Cannot update" + getErrorTypeString(leftTy)
+                                                                   + " to STRING in add set expression.",
+                                                           exprNode->position);
+                        }
                         if (isVarLValue) {
                             std::string const varName
                                     = std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable;
@@ -337,11 +342,12 @@ namespace TypeChecker {
                         // Unknown/Unknown --> Unknown
                         // Int/int --> int
                         // Int/float | float/float --> float
-                        // string/string --> string (in the case of ADD and ADD_EQUAL)
+                        // string/string | any/string | string/any --> string (in the case of ADD and ADD_EQUAL)
                         if (areUnknown) { return nullptr; }
                         if (areInt) { return (exprNode->type = INT_TY); }
                         if (areIntFloat) { return (exprNode->type = FLOAT_TY); }
-                        if (areString && (exprNode->opType == Parser::ADD || exprNode->opType == Parser::ADD_SET)) {
+                        if ((leftTy && leftTy->getType() == STRING || rightTy && rightTy->getType() == STRING)
+                            && (exprNode->opType == Parser::ADD || exprNode->opType == Parser::ADD_SET)) {
                             return (exprNode->type = STRING_TY);
                         }
                         throw Util::CommanderException(
