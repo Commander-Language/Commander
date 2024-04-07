@@ -146,14 +146,213 @@ namespace PowerShellTranspiler {
         }
     }
     void PowerShellTranspiler::_expr(const Parser::ExprNodePtr node) {
-
+        switch (node->nodeType()) {
+            case Parser::INT_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::IntExprNode>(node);
+                _write(std::to_string(expr->value));
+                break;
+            }
+            case Parser::FLOAT_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::FloatExprNode>(node);
+                _write(std::to_string(expr->value));
+                break;
+            }
+            case Parser::STRING_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::StringExprNode>(node);
+                _node(expr->stringNode);
+                break;
+            }
+            case Parser::BOOL_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::BoolExprNode>(node);
+                if (expr->value) _write("1");
+                else
+                    _write("0");
+                break;
+            }
+            case Parser::VAR_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::VarExprNode>(node);
+                _write("$" + expr->variable);
+                break;
+            }
+            case Parser::LVALUE_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::LValueExprNode>(node);
+                _expr(expr->expr);
+                break;
+            }
+            case Parser::ARRAY_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::ArrayExprNode>(node);
+                auto exprs = std::static_pointer_cast<Parser::ExprsNode>(expr->expressions);
+                auto array = exprs->exprs;
+                if (array.size() == 0) _write("@()");
+                else if (array.size() == 1) {
+                    _write(",");
+                    _expr(array[0]);
+                } else {
+                    for (int i = 0; i < array.size(); i++) {
+                        _expr(array[i]);
+                        if (i != array.size() - 1) _write(",");
+                    }
+                }
+                break;
+            }
+            case Parser::INDEX_EXPR: {
+                // TODO: Update when tuples are actually implemented
+                auto expr = std::static_pointer_cast<Parser::IndexExprNode>(node);
+                _expr(expr->expr);
+                _write("[");
+                _expr(expr->index);
+                _write("]");
+                break;
+            }
+            case Parser::TUPLE_EXPR: {
+                // TODO: Use actual powershell tuple
+                // This impelmentation just set it as an array
+                auto expr = std::static_pointer_cast<Parser::TupleExprNode>(node);
+                auto exprs = std::static_pointer_cast<Parser::ExprsNode>(expr->expressions);
+                auto array = exprs->exprs;
+                if (array.size() == 0) _write("@()");
+                else if (array.size() == 1) {
+                    _write(",");
+                    _expr(array[0]);
+                } else {
+                    for (int i = 0; i < array.size(); i++) {
+                        _expr(array[i]);
+                        if (i != array.size() - 1) _write(",");
+                    }
+                }
+                break;
+            }
+            case Parser::TERNARY_EXPR: {
+                // Only for powershell v7.0+
+                auto expr = std::static_pointer_cast<Parser::TernaryExprNode>(node);
+                _write("( ");
+                _expr(expr->condition);
+                _write(") ?");
+                _expr(expr->trueExpr);
+                _write(" : ");
+                _expr(expr->falseExpr);
+                break;
+            }
+            case Parser::UNOP_EXPR: {
+                auto unaryOperation = std::static_pointer_cast<Parser::UnOpExprNode>(node);
+                break;
+            }
+            case Parser::BINOP_EXPR: {
+                auto binaryOperation = std::static_pointer_cast<Parser::BinOpExprNode>(node);
+                break;
+            }
+            case Parser::LAMBDA_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::LambdaExprNode>(node);
+                _write("{ ");
+                auto bindings = expr->bindings->bindings;
+                if (bindings.size() > 0) {
+                    _write("Param(");
+                    for (int i = 0; i < bindings.size(); i++) {
+                        if (i > 0) { _write("[,"); }
+                        auto binding = bindings[i];
+                        if (binding->type) {
+                            _write("[");
+                            _type(binding->type);
+                            _write("]");
+                        }
+                        _write("$" + binding->variable);
+                        if (i > 0) { _write("]"); }
+                    }
+                    _write(")");
+                }
+                _stmt(expr->body);
+                break;
+            }
+            case Parser::CMD_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::CmdExprNode>(node);
+                _cmd(expr->cmd);
+                break;
+            }
+            case Parser::CALL_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::CallExprNode>(node);
+                // TODO: Implement
+                break;
+            }
+            case Parser::API_CALL_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::ApiCallExprNode>(node);
+                // TODO: Implement
+                break;
+            }
+            case Parser::SCAN_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::ScanExprNode>(node);
+                // TODO: Implement
+                break;
+            }
+            case Parser::READ_EXPR: {
+                auto expr = std::static_pointer_cast<Parser::ReadExprNode>(node);
+                // TODO: Implement
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
     void PowerShellTranspiler::_stmt(const Parser::StmtNodePtr node) {
-
+        switch (node->nodeType()) {
+            case Parser::IF_STMT: {
+                break;
+            }
+            case Parser::FOR_STMT: {
+                break;
+            }
+            case Parser::WHILE_STMT: {
+                break;
+            }
+            case Parser::DO_WHILE_STMT: {
+                break;
+            }
+            case Parser::RETURN_STMT: {
+                break;
+            }
+            case Parser::SCOPE_STMT: {
+                break;
+            }
+            case Parser::CMD_STMT: {
+                break;
+            }
+            case Parser::EXPR_STMT: {
+                break;
+            }
+            case Parser::ALIAS_STMT: {
+                break;
+            }
+            case Parser::IMPORT_STMT: {
+                break;
+            }
+            case Parser::PRINT_STMT: {
+                break;
+            }
+            case Parser::PRINTLN_STMT: {
+                break;
+            }
+            case Parser::WRITE_STMT: {
+                break;
+            }
+            case Parser::TYPE_STMT:
+                break;
+            case Parser::BREAK_STMT:
+                break;
+            case Parser::CONTINUE_STMT:
+                break;
+            case Parser::TIMEOUT_STMT:
+                break;
+            case Parser::ASSERT_STMT: {
+                break;
+            }
+            case Parser::FUNCTION_STMT: {
+                break;
+            }
+            default: {
+            }
+        }
     }
-    void PowerShellTranspiler::_type(const Parser::TypeNodePtr node) {
-
-    }
+    void PowerShellTranspiler::_type(const Parser::TypeNodePtr node) {}
 
     void PowerShellTranspiler::_writeLine(const std::string& str) {
         _output.append(str);
