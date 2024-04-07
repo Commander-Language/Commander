@@ -365,6 +365,7 @@ namespace FlowController {
             case Parser::SCOPE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
                 _symbolTable.pushSymbolTable();  // new scope
+                CommanderTypePtr returnValue = nullptr;
                 for (auto& statement : stmtNode->stmts->stmts) {
                     if (statement->nodeType() == Parser::CONTINUE_STMT || statement->nodeType() == Parser::BREAK_STMT
                         || _break || _continue) {
@@ -372,10 +373,14 @@ namespace FlowController {
                         _continue = _continue || statement->nodeType() == Parser::CONTINUE_STMT;
                         break;
                     }
-                    _stmt(statement);
+                    if (statement->nodeType() == Parser::RETURN_STMT) {
+                        returnValue = _expr(std::static_pointer_cast<Parser::ReturnStmtNode>(statement)->retExpr);
+                    } else {
+                        _stmt(statement);
+                    }
                 }
                 _symbolTable.popSymbolTable();  // pop the created scope
-                return nullptr;
+                return returnValue;
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
