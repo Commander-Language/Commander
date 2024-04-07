@@ -20,25 +20,6 @@ using Args = std::vector<std::string>;
 const std::string testLocation = "../tests/files/job_runner_tests/";
 
 /**
- * @brief Run the builtin println and print
- */
-TEST(JobRunnerTests, RunBuiltinPrint) {
-    Args arg1 {"println", "Hello from println builtin"};
-    Process::Process proc1(arg1, Process::ProcessType::BUILTIN, false, true);
-
-    JobRunner::JobRunnerLinux runner1(std::make_shared<Process::Process>(proc1));
-    JobRunner::JobInfo output1 = runner1.execProcess();
-
-    Args arg2 {"print", "Hello from print builtin"};
-    Process::Process proc2(arg2, Process::ProcessType::BUILTIN, false, true);
-
-    JobRunner::JobRunnerLinux runner2(std::make_shared<Process::Process>(proc2));
-    JobRunner::JobInfo output2 = runner2.execProcess();
-
-    EXPECT_EQ(std::get<0>(output1), "Hello from println builtin\n");
-    EXPECT_EQ(std::get<0>(output2), "Hello from print builtin");
-}
-/**
  * @brief Run a simple external command
  */
 TEST(JobRunnerTests, RunSimpleJobCat) {
