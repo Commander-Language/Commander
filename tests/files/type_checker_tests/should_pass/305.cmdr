@@ -1,0 +1,5 @@
+//Test builtin ceil type checks
+a = 1;
+x = ceil(16);
+x = ceil(0.25);
+x = ceil((1.0, true, 3)[a]);

@@ -1,0 +1,3 @@
+//Should not be able to append ints to bool array
+x = [true, false];
+x.append(1);

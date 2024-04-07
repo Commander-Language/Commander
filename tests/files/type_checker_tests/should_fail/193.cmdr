@@ -1,0 +1,5 @@
+//Should fail if using variable out of scope
+{
+    type a = int;
+}
+x: a = 3;

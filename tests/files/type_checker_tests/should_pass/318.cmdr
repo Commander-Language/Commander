@@ -1,0 +1,5 @@
+//Test builtin coth type checks
+a = 1;
+x = coth(16);
+x = coth(0.25);
+x = coth((1.0, true, 3)[a]);

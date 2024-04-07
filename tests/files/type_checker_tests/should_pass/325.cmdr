@@ -1,0 +1,5 @@
+//Test builtin arcsinh type checks
+a = 1;
+x = arcsinh(16);
+x = arcsinh(0.25);
+x = arcsinh((1.0, true, 3)[a]);

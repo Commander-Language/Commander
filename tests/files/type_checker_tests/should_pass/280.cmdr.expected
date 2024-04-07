@@ -1,0 +1,9 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (IntExprNode 1 INT) INT))
+	(ScopeStmtNode (StmtsNode
+	(PrintStmtNode (LValueExprNode (VarExprNode a INT) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (IntExprNode 2 INT) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode b) SET (IntExprNode 1 INT) INT))))
+	(PrintStmtNode (LValueExprNode (VarExprNode a INT) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode b) SET (BoolExprNode false BOOL) BOOL))
+	(PrintStmtNode (LValueExprNode (VarExprNode b BOOL) BOOL)))

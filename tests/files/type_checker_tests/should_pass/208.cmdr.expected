@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (ArrayExprNode (ExprsNode (FloatExprNode 2.300000 FLOAT)) FLOAT[]) FLOAT[]))
+	(ExprStmtNode (BinOpExprNode (IndexLValueNode (VarLValueNode x FLOAT[]) (IntExprNode 0 INT) FLOAT) MODULO_SET (IntExprNode 2 INT) FLOAT)))

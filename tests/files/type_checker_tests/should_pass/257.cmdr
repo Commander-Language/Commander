@@ -1,0 +1,3 @@
+//Test pipe backtick commands type check
+x = "commander";
+y = `ls "-a" | grep $x`;

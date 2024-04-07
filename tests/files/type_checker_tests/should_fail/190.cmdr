@@ -1,0 +1,2 @@
+//Should fail if read expression does not have string
+x = read 3;

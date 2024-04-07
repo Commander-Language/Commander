@@ -1,0 +1,7 @@
+//Test builtin parseBool type checks
+a = 1;
+x = parseBool(1);
+x = parseBool(3.0);
+x = parseBool(true);
+x = parseBool("true");
+x = parseBool((1.0, true, 3)[a]);

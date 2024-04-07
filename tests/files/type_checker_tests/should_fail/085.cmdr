@@ -1,0 +1,4 @@
+//Should fail if array contains multiple types
+x = [];
+x.append(2.3);
+x.append(1);

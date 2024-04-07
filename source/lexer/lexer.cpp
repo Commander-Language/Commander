@@ -162,6 +162,8 @@ namespace Lexer {
                 return "TYPE";
             case VARIABLE:
                 return "VARIABLE";
+            case VOID:
+                return "VOID";
             case WHILE:
                 return "WHILE";
             case WRITE:
@@ -622,7 +624,7 @@ namespace Lexer {
     }
 
     bool isNextToken(const TokenType& type, const std::string& file, FilePosition& position, bool& isCommand) {
-        FilePosition originalPosition = position;
+        const FilePosition originalPosition = position;
         skipWhitespace(file, position);
         if (position.index >= file.length()) { return false; }
         const TokenPtr token = lexToken(file, position, isCommand, false);
@@ -691,7 +693,8 @@ namespace Lexer {
                     || nextToken->type == GREATER_EQUAL || nextToken->type == MODULO_EQUALS
                     || nextToken->type == DIVIDE_EQUALS || nextToken->type == MULTIPLY_EQUALS
                     || nextToken->type == MINUS_EQUALS || nextToken->type == ADD_EQUALS || nextToken->type == LSQUARE
-                    || (noSpace && (nextToken->type == DECREMENT || nextToken->type == INCREMENT))) {
+                    || (noSpace && (nextToken->type == DECREMENT || nextToken->type == INCREMENT))
+                    || (noSpace && nextToken->type == DOT)) {
                     tokens.push_back(nextToken);
                 } else {
                     // If it isn't a variable, it's a command, so reset the position index so that the command string

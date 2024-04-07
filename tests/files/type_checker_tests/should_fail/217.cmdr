@@ -1,0 +1,6 @@
+//Should not allow using function defined variables outside functions
+fn add(x, y) {
+	a = 3;
+	return x + y;
+}
+println a;

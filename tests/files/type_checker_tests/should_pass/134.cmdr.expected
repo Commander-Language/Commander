@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (ArrayExprNode (ExprsNode (IntExprNode 1 INT) (IntExprNode 2 INT) (IntExprNode 3 INT)) INT[]) EQUAL (ArrayExprNode (ExprsNode (IntExprNode 4 INT) (IntExprNode 5 INT) (IntExprNode 6 INT)) INT[]) BOOL) BOOL)))

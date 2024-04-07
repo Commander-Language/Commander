@@ -1,0 +1,3 @@
+//Test bindings type check
+x: string = "Hello world!";
+y = x;

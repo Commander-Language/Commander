@@ -1,0 +1,3 @@
+(PrgmNode
+	(ForStmtNode (BinOpExprNode (BindingNode i) SET (IntExprNode 0 INT) INT) (BoolExprNode true BOOL) (ScopeStmtNode (StmtsNode
+	(PrintlnStmtNode (LValueExprNode (VarExprNode i INT) INT))))))

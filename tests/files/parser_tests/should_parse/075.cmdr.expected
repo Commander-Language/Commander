@@ -1,0 +1,3 @@
+(PrgmNode
+	(TypeStmtNode AddFunction (FunctionTypeNode (TypesNode (IntTypeNode) (IntTypeNode)) (IntTypeNode)))
+	(ExprStmtNode (BinOpExprNode (BindingNode add (VariableTypeNode AddFunction)) SET (LambdaExprNode (BindingsNode (BindingNode a) (BindingNode b)) (ReturnStmtNode (BinOpExprNode (LValueExprNode (VarExprNode a)) ADD (LValueExprNode (VarExprNode b))))))))

@@ -1,0 +1,2 @@
+//Should fail due to uninitialized array
+a[1] = 3;

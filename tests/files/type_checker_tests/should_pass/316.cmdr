@@ -1,0 +1,5 @@
+//Test builtin csch type checks
+a = 1;
+x = csch(16);
+x = csch(0.25);
+x = csch((1.0, true, 3)[a]);

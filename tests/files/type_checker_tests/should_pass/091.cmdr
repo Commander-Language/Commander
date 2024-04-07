@@ -1,0 +1,4 @@
+//Test set operation type checks
+a = 1;
+x = ["bye"];
+x[a] = "hi";

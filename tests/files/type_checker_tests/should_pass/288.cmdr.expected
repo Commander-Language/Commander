@@ -1,0 +1,2 @@
+(PrgmNode
+	(PrintlnStmtNode (IntExprNode 3 INT)))

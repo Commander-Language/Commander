@@ -1,0 +1,5 @@
+(PrgmNode
+	(IfStmtNode (BoolExprNode true BOOL) (ScopeStmtNode (StmtsNode
+	(PrintlnStmtNode (IntExprNode 1 INT)))) (IfStmtNode (BoolExprNode false BOOL) (ScopeStmtNode (StmtsNode
+	(PrintlnStmtNode (IntExprNode 2 INT)))) (ScopeStmtNode (StmtsNode
+	(PrintlnStmtNode (IntExprNode 3 INT)))))))

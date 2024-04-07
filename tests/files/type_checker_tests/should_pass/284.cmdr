@@ -1,0 +1,6 @@
+//Test setting types
+a = 1;
+x = (2.0, false, 1)[a];
+println x;
+x = fn (b) -> b + "hi";
+println x;

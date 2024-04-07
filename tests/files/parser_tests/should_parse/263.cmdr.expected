@@ -1,0 +1,4 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode i) SET (IntExprNode 0)))
+	(ForStmtNode (BoolExprNode true) (UnOpExprNode (VarLValueNode i) POST_INCREMENT) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode 'Hi')))))))

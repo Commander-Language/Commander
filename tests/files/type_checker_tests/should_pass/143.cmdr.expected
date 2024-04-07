@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (BinOpExprNode (BoolExprNode true BOOL) NOT_EQUAL (BoolExprNode false BOOL) BOOL) BOOL)))

@@ -1,0 +1,4 @@
+//Test set operation type checks
+a = 1;
+x = [true];
+x[a] = false;

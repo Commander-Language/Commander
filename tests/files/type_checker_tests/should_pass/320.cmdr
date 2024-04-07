@@ -1,0 +1,5 @@
+//Test builtin arccos type checks
+a = 1;
+x = arccos(16);
+x = arccos(0.25);
+x = arccos((1.0, true, 3)[a]);

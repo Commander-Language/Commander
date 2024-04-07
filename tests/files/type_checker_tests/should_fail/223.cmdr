@@ -1,0 +1,2 @@
+//Should not be able to use function variable inappropriately
+println sin;

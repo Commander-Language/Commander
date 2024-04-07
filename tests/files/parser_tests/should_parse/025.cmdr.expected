@@ -1,0 +1,3 @@
+(PrgmNode
+	(FunctionStmtNode foo (BindingsNode (BindingNode a) (BindingNode b) (BindingNode c)) (ScopeStmtNode (StmtsNode
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'a + b + c = ')) (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode a)) ADD (LValueExprNode (VarExprNode b))) ADD (LValueExprNode (VarExprNode c))) (StringExpressionNode (StringNode ''))))))))))

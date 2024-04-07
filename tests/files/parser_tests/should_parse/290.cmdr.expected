@@ -1,0 +1,8 @@
+(PrgmNode
+	(TypeStmtNode a (IntTypeNode))
+	(TypeStmtNode b (FloatTypeNode))
+	(TypeStmtNode c (BoolTypeNode))
+	(TypeStmtNode d (StringTypeNode))
+	(TypeStmtNode e (TupleTypeNode (TypesNode (VariableTypeNode a) (VariableTypeNode b) (VariableTypeNode c) (TupleTypeNode (TypesNode (StringTypeNode) (FloatTypeNode))))))
+	(TypeStmtNode f (ArrayTypeNode (ArrayTypeNode (VariableTypeNode e))))
+	(TypeStmtNode g (FunctionTypeNode (TypesNode (IntTypeNode) (FloatTypeNode) (VariableTypeNode e) (VariableTypeNode f)) (VariableTypeNode b))))

@@ -21,16 +21,6 @@
  */
 Parser::Parser parser;
 
-// TODO: May be bad to have global variables here for type checker and controller, maybe fix in the future
-/**
- * Type checker used in the tests (initialized here to prevent initializing it for every test)
- */
-TypeChecker::TypeChecker typeChecker(parser);
-
-/**
- * Flow controller used in the tests (initialized here to prevent initializing it for every test)
- */
-FlowController::FlowController controller;
 /**
  * @brief Represents the format for flow controller tests that successfully run. Tests take in a file path to file to
  * run, and another file path to file with expected output.

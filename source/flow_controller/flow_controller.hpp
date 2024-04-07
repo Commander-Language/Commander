@@ -47,6 +47,16 @@ namespace FlowController {
         SymbolTableOrganizer _symbolTable;
 
         /**
+         * @brief Tells whether break statement is encountered
+         */
+        bool _break = false;
+
+        /**
+         * @brief Tells whether continue statement is encountered
+         */
+        bool _continue = false;
+
+        /**
          * @brief Set a variable in the symbol table.
          * @param name The name of the symbol
          * @param value The value of the symbol

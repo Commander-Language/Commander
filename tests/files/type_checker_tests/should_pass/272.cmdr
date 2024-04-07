@@ -1,0 +1,5 @@
+//Test for loops type check
+i = 0;
+for (;i < 10;) {
+    println i;
+}

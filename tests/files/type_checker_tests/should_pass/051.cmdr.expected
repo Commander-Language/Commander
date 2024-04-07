@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (TernaryExprNode (IndexExprNode (ArrayExprNode (ExprsNode (BoolExprNode true BOOL)) BOOL[]) (IntExprNode 0 INT) BOOL) (ArrayExprNode (ExprsNode (BoolExprNode true BOOL)) BOOL[]) (ArrayExprNode (ExprsNode (BoolExprNode false BOOL)) BOOL[]) BOOL[]) BOOL[])))

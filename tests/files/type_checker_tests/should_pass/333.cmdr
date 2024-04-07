@@ -1,0 +1,2 @@
+//Test builtin date type checks
+x = date();

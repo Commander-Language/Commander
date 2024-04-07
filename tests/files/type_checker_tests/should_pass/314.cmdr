@@ -1,0 +1,5 @@
+//Test builtin cosh type checks
+a = 1;
+x = cosh(16);
+x = cosh(0.25);
+x = cosh((1.0, true, 3)[a]);

@@ -1,0 +1,5 @@
+//Test builtin arcsech type checks
+a = 1;
+x = arcsech(16);
+x = arcsech(0.25);
+x = arcsech((1.0, true, 3)[a]);

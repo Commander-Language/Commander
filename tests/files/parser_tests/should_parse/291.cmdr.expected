@@ -1,0 +1,3 @@
+(PrgmNode
+	(TypeStmtNode command_return (TupleTypeNode (TypesNode (StringTypeNode) (StringTypeNode) (StringTypeNode))))
+	(ExprStmtNode (BinOpExprNode (BindingNode add (FunctionTypeNode (TypesNode (VariableTypeNode command_return)) (VariableTypeNode command_return))) SET (LambdaExprNode (BindingsNode (BindingNode a (VariableTypeNode command_return))) (VariableTypeNode command_return) (ReturnStmtNode (CmdExprNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hello ')) (LValueExprNode (IndexExprNode (VarExprNode a) (IntExprNode 0))) (StringExpressionNode (StringNode ' world!')))))))))))

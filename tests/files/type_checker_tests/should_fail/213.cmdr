@@ -1,0 +1,5 @@
+//Should not allow redefining variables as functions
+add = 3;
+fn add(x, y) {
+	return x + y;
+}

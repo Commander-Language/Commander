@@ -1,0 +1,5 @@
+//Should fail if variable already exists
+type x = int;
+foo = fn (x: int): int {
+    return x;
+};

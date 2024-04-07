@@ -1,0 +1,3 @@
+//Test that modulo set operation type checks
+x = [2.3];
+x[0] %= 2;

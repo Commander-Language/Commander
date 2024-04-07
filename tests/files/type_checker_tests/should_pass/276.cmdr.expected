@@ -1,0 +1,4 @@
+(PrgmNode
+	(WhileStmtNode (BoolExprNode true BOOL) (ScopeStmtNode (StmtsNode
+	(PrintlnStmtNode (IntExprNode 1 INT))
+	(BreakStmtNode)))))

@@ -1,0 +1,3 @@
+//Test scan expressions type check
+a = 1;
+x = scan (2.0, true, 1)[a];

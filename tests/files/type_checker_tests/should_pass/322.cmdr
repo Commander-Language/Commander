@@ -1,0 +1,5 @@
+//Test builtin arccsc type checks
+a = 1;
+x = arccsc(16);
+x = arccsc(0.25);
+x = arccsc((1.0, true, 3)[a]);

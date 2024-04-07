@@ -1,0 +1,3 @@
+//Should fail in commands if using something other than string
+x = 3;
+echo $x;

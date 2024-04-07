@@ -1,0 +1,3 @@
+//Test that post-increment operations type check
+a = 1.1;
+x = a++;

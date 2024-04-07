@@ -1,0 +1,5 @@
+//Test builtin arcsin type checks
+a = 1;
+x = arcsin(16);
+x = arcsin(0.25);
+x = arcsin((1.0, true, 3)[a]);

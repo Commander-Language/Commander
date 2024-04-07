@@ -1,0 +1,4 @@
+//Test for loops type check
+for (a = 1; (2.0, true, 1)[a]; a++) {
+    println a;
+}

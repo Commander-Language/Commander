@@ -1,0 +1,2 @@
+//Test that subtract operation type checks
+x = 1 - 2.3;

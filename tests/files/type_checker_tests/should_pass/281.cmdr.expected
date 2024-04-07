@@ -1,0 +1,2 @@
+(PrgmNode
+	(AliasStmtNode ll (BasicCmdNode (StringNode 'ls') (StringNode '-al'))))

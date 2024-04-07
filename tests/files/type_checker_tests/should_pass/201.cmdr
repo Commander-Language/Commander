@@ -1,0 +1,2 @@
+//Test that modulo operation type checks
+x = 1.2 % 2;

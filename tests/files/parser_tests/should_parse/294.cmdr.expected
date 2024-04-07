@@ -1,0 +1,5 @@
+(PrgmNode
+	(TypeStmtNode a (TupleTypeNode (TypesNode (StringTypeNode) (StringTypeNode))))
+	(TypeStmtNode b (ArrayTypeNode (VariableTypeNode a)))
+	(TypeStmtNode c (VariableTypeNode b))
+	(TypeStmtNode d (ArrayTypeNode (TupleTypeNode (TypesNode (VariableTypeNode a) (VariableTypeNode b) (VariableTypeNode c))))))
