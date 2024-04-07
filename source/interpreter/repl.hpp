@@ -29,14 +29,6 @@ public:
 
 private:
     /**
-     * @brief Reads a line of text from stdin.
-     * @details Supports arrows, backspace, etc. Compare to GNU's `readline`.
-     *
-     * @return A single line of input text.
-     */
-    std::string _readLine();
-
-    /**
      * @brief A list of previously-run commands.
      */
     std::vector<std::string> _history;

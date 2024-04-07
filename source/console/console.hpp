@@ -9,7 +9,9 @@
 #define CONSOLE_HPP
 
 #include <cstdint>
+#include <string>
 #include <tuple>
+#include <vector>
 
 /**
  * @brief Defines lots of utilities related to the console.
@@ -103,6 +105,16 @@ public:
      * @brief Clears the console screen.
      */
     static void clearScreen();
+
+    /**
+     * @brief Reads a line of text from stdin.
+     * @details Supports arrows, backspace, etc. Compare to GNU's `readline`.
+     *
+     * @param prompt The prompt to display to the user.
+     * @param history A history to look through. Defaults to empty.
+     * @return A line read from stdin.
+     */
+    static std::string readLine(const std::string& prompt, const std::vector<std::string>& history = {});
 };
 
 #endif  // CONSOLE_HPP

@@ -4,6 +4,7 @@
  */
 
 #include "repl.hpp"
+
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/lexer/lexer.hpp"
 #include "source/type_checker/type_checker.hpp"
@@ -54,21 +55,21 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
 
     // Lex only:
     if (hasArgument(arguments, "-l")) {
-        for (const Lexer::TokenPtr& token : tokens) Util::println(token->toString());
+        for (const Lexer::TokenPtr& token : tokens) std::cout << token->toString() << "\n";
         return;
     }
 
     // Lex and parse:
     Parser::ASTNodeList nodes = parser.parse(tokens);
     if (hasArgument(arguments, "-p")) {
-        for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
+        for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << "\n";
         return;
     }
 
     // Lex, parse, and type-check:
     typeChecker.typeCheck(nodes);
     if (hasArgument(arguments, "-t")) {
-        for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
+        for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << "\n";
         return;
     }
 
