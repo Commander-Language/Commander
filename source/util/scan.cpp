@@ -13,6 +13,7 @@ namespace Util {
 
         std::string input;
 
+#ifndef WINDOWS_DEBUG
         // let the terminal do the line editing
         nocbreak();
         echo();
@@ -28,6 +29,7 @@ namespace Util {
 
         // restore your cbreak / echo settings here
 
+#endif
         return input;
     }
 
