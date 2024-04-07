@@ -7,8 +7,14 @@
 #ifndef PRINT_HPP
 #define PRINT_HPP
 
+#if defined(_MSC_VER)
+#define WINDOWS_DEBUG
+#endif
+
 #include <iostream>
+#ifndef WINDOWS_DEBUG
 #include <ncurses.h>
+#endif
 #include <string>
 
 namespace Util {

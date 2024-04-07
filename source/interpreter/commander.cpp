@@ -3,7 +3,16 @@
 #include "source/type_checker/type_checker.hpp"
 #include <fstream>
 #include <iostream>
+
+#if defined(_MSC_VER)
+#define WINDOWS_DEBUG
+#endif
+#ifdef WINDOWS_DEBUG
+#include <Windows.h>
+#endif
+#ifndef WINDOWS_DEBUG
 #include <ncurses.h>
+#endif
 
 bool hasArgument(std::vector<std::string>& arguments, std::string argument) {
     return std::find(arguments.begin(), arguments.end(), argument) != arguments.end();
@@ -61,6 +70,26 @@ int main(int argc, char** argv) {
             interpretFile(file, arguments, parser, typeChecker, controller);
             return 0;
         }
+#ifdef WINDOWS_DEBUG
+        Util::usingNCurses = false;
+        Util::println("Commander Language Version Beta");
+        Util::println("Basic REPL for Commander scripting language");
+        while (true) {
+            Util::print(">> ");
+            std::string source;
+            std::getline(std::cin, source);
+            try {
+                // Make a temporary file for the lexer
+                std::string tmpFileName = "test.cmdr";  // Not thread safe!!
+                std::ofstream tmp(tmpFileName);
+                tmp << source;
+                tmp.close();  // close file here to save changes
+                interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
+                std::remove(tmpFileName.c_str());
+            } catch (const Util::CommanderException& err) { Util::println(err.what()); }
+        }
+#endif
+#ifndef WINDOWS_DEBUG
         Util::usingNCurses = true;
         initscr();
         cbreak();
@@ -156,9 +185,12 @@ int main(int argc, char** argv) {
             refresh();
         }
         endwin();
+#endif
         return 0;
     } catch (const Util::CommanderException& e) {
+#ifndef WINDOWS_DEBUG
         endwin();
+#endif
         std::cout << e.what() << '\n';
         return 1;
     }

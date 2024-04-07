@@ -9,8 +9,6 @@
 namespace Builtins {
 
     std::unordered_map<std::string, Function> builtins = {
-            {"print", print},
-            {"println", print},
     };
 
     Function getBuiltinFunction(const std::string& name) {
