@@ -1,0 +1,21 @@
+//String concatenation should type check
+x = "HI" + 1;
+x = "HI" + 2.3;
+x = "HI" + true;
+x = "HI" + "bye";
+x = "HI" + [1, 2, 3];
+x = "HI" + (2.0, 3, true);
+x = "HI" + (fn (a: int) -> a);
+x = 1 + "HI";
+x = 2.3 + "HI";
+x = true + "HI";
+x = [1, 2, 3] + "HI";
+x = (2.0, 3, true) + "HI";
+x = (fn (a: int) -> a) + "HI";
+x += 1;
+x += 2.3;
+x += true;
+x += [1,2,3];
+x += (2.0, 3, true);
+x += "cool";
+x += fn (a: int) -> a;

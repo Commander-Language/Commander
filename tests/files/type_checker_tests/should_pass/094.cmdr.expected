@@ -1,0 +1,4 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (IntExprNode 1 INT) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (ArrayExprNode (ExprsNode (IntExprNode 3 INT)) INT[]) INT[]))
+	(ExprStmtNode (BinOpExprNode (IndexLValueNode (VarLValueNode x INT[]) (LValueExprNode (VarExprNode a INT) INT) INT) SET (IntExprNode 3 INT) INT)))

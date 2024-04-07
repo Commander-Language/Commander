@@ -1,0 +1,5 @@
+//Test builtin abs type checks
+a = 1;
+x = abs(16);
+x = abs(0.25);
+x = abs((1.0, true, 3)[a]);

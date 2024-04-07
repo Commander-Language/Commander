@@ -1,0 +1,5 @@
+//Should fail calling something with incorrect number of parameters
+fn add(a: int, b: int): int {
+    return a + b;
+}
+println add(3);

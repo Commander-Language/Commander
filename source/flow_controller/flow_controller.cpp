@@ -195,9 +195,18 @@ namespace FlowController {
                 CommanderTypePtr dataStructure = _expr(expr->expr);
                 if (dataStructure->getType() == TypeChecker::ARRAY) {
                     const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(dataStructure);
+                    if (index->value >= array->values.size()) {
+                        throw Util::CommanderException("Index array out of bounds. Index: "
+                                                       + std::to_string(index->value)
+                                                       + ", Array Length: " + std::to_string(array->values.size()));
+                    }
                     return array->values[index->value];
                 }
                 const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(dataStructure);
+                if (index->value >= tuple->values.size()) {
+                    throw Util::CommanderException("Index tuple out of bounds. Index: " + std::to_string(index->value)
+                                                   + ", Tuple Length: " + std::to_string(tuple->values.size()));
+                }
                 return tuple->values[index->value];
             }
             case Parser::TUPLE_EXPR: {
@@ -226,7 +235,9 @@ namespace FlowController {
             }
             case Parser::LAMBDA_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::LambdaExprNode>(node);
-                return std::make_shared<CommanderLambda>(expr->bindings, expr->body);
+                return std::make_shared<CommanderLambda>(
+                        expr->bindings, expr->body,
+                        std::static_pointer_cast<TypeChecker::FunctionTy>(expr->type)->returnType);
             }
             case Parser::CMD_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::CmdExprNode>(node);
@@ -303,20 +314,16 @@ namespace FlowController {
                 auto stmtNode = std::static_pointer_cast<Parser::ForStmtNode>(node);
 
                 _symbolTable.pushSymbolTable();  // for gets new scope
-                _stmt(stmtNode->initial);
 
-                CommanderTypePtr exprResult = _expr(stmtNode->condition);
-                // Type checked?
-                auto condition = std::static_pointer_cast<CommanderBool>(exprResult);
-
-                // infinite loop error checking?
-                while (condition->value) {
+                for (_expr(stmtNode->initial);
+                     std::static_pointer_cast<CommanderBool>(_expr(stmtNode->condition))->value;
+                     _expr(stmtNode->update)) {
                     _stmt(stmtNode->body);
-                    _stmt(stmtNode->update);
-
-                    // update condition value
-                    exprResult = _expr(stmtNode->condition);
-                    condition = std::static_pointer_cast<CommanderBool>(exprResult);
+                    if (_break) {
+                        _break = false;
+                        break;
+                    }
+                    if (_continue) { _continue = false; }
                 }
 
                 _symbolTable.popSymbolTable();  // pop scope from for
@@ -326,41 +333,28 @@ namespace FlowController {
             case Parser::WHILE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(node);
 
-                //_symbolTable.pushSymbolTable();  // while gets new scope
-
-                CommanderTypePtr exprResult = _expr(stmtNode->condition);
-                // Type checked?
-                auto condition = std::static_pointer_cast<CommanderBool>(exprResult);
-
-                while (condition->value) {
+                while (std::static_pointer_cast<CommanderBool>(_expr(stmtNode->condition))->value) {
                     _stmt(stmtNode->body);
-                    exprResult = _expr(stmtNode->condition);
-                    condition = std::static_pointer_cast<CommanderBool>(exprResult);
+                    if (_break) {
+                        _break = false;
+                        break;
+                    }
+                    if (_continue) { _continue = false; }
                 }
-
-                //_symbolTable.popSymbolTable();  // pop scope from while
 
                 return nullptr;
             }
             case Parser::DO_WHILE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::DoWhileStmtNode>(node);
 
-                _symbolTable.pushSymbolTable();  // do-while gets new scope
-
-                // do
-                _stmt(stmtNode->body);
-
-                CommanderTypePtr exprResult = _expr(stmtNode->condition);
-                // Type checked?
-                auto condition = std::static_pointer_cast<CommanderBool>(exprResult);
-
-                while (condition->value) {
+                do {
                     _stmt(stmtNode->body);
-                    exprResult = _expr(stmtNode->condition);
-                    condition = std::static_pointer_cast<CommanderBool>(exprResult);
-                }
-
-                _symbolTable.popSymbolTable();  // pop scope from do-while
+                    if (_break) {
+                        _break = false;
+                        break;
+                    }
+                    if (_continue) { _continue = false; }
+                } while (std::static_pointer_cast<CommanderBool>(_expr(stmtNode->condition))->value);
 
                 return nullptr;
             }
@@ -371,7 +365,15 @@ namespace FlowController {
             case Parser::SCOPE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
                 _symbolTable.pushSymbolTable();  // new scope
-                for (auto& statement : stmtNode->stmts->stmts) { _stmt(statement); }
+                for (auto& statement : stmtNode->stmts->stmts) {
+                    if (statement->nodeType() == Parser::CONTINUE_STMT || statement->nodeType() == Parser::BREAK_STMT
+                        || _break || _continue) {
+                        _break = _break || statement->nodeType() == Parser::BREAK_STMT;
+                        _continue = _continue || statement->nodeType() == Parser::CONTINUE_STMT;
+                        break;
+                    }
+                    _stmt(statement);
+                }
                 _symbolTable.popSymbolTable();  // pop the created scope
                 return nullptr;
             }
@@ -387,7 +389,6 @@ namespace FlowController {
                 }
                 return _cmd(cmd->command);
             }
-                // Util::println(std::to_string(std::any_cast<TypeChecker::CommanderBool>(value)));
             case Parser::EXPR_STMT: {
                 auto expr = std::static_pointer_cast<Parser::ExprStmtNode>(node);
                 return _expr(expr->expression);
@@ -423,13 +424,9 @@ namespace FlowController {
                 return nullptr;
             }
             case Parser::TYPE_STMT:
-                // Ignore type statements
-                return nullptr;
             case Parser::BREAK_STMT:
-                // TODO: Implement
-                return nullptr;
             case Parser::CONTINUE_STMT:
-                // TODO: Implement
+                // Ignore these statements
                 return nullptr;
             case Parser::TIMEOUT_STMT:
                 // TODO: Implement
@@ -441,11 +438,13 @@ namespace FlowController {
                 return nullptr;
             }
             case Parser::FUNCTION_STMT: {
-                // TODO: Implement
-                throw Util::CommanderException("Flow Controller: Unimplemented statement encountered");
+                auto func = std::static_pointer_cast<Parser::FunctionStmtNode>(node);
+                _setVariable(func->name,
+                             std::make_shared<CommanderLambda>(func->bindings, func->body, func->returnType->type));
+                return nullptr;
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown statement encountered");
             }
         }
     }
@@ -495,7 +494,7 @@ namespace FlowController {
             case Parser::PRE_DECREMENT:
             case Parser::POST_DECREMENT: {
                 if (unOp->node->nodeType() == Parser::VAR_LVALUE) {
-                    std::string varName = std::static_pointer_cast<Parser::VarLValueNode>(unOp->node)->variable;
+                    const std::string varName = std::static_pointer_cast<Parser::VarLValueNode>(unOp->node)->variable;
                     auto value = _getVariable(varName);
                     switch (value->getType()) {
                         case TypeChecker::INT: {
@@ -910,7 +909,7 @@ namespace FlowController {
                     *_symbolTable.getVariable<CommanderTypePtr>(result[0]));
             std::vector<std::string> aliasArgs = _parseArguments(
                     std::static_pointer_cast<Parser::BasicCmdNode>(alias->cmdNode)->arguments);
-            result.erase(result.begin()); // remove the alias name!
+            result.erase(result.begin());  // remove the alias name!
             result.insert(result.begin(), aliasArgs.begin(), aliasArgs.end());
         }
         return result;

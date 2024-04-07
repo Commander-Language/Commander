@@ -1,0 +1,5 @@
+//Test builtin sqrt type checks
+a = 1;
+x = sqrt(16);
+x = sqrt(0.25);
+x = sqrt((1.0, true, 3)[a]);

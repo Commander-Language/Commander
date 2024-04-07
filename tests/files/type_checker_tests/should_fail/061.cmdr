@@ -1,0 +1,5 @@
+//Should fail if there is any lines of code appearing after return statement
+fn foo(x: int, y: float): float {
+    return x + y;
+    println x + y;
+}

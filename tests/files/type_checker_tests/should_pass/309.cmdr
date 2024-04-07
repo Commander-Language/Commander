@@ -1,0 +1,5 @@
+//Test builtin tan type checks
+a = 1;
+x = tan(16);
+x = tan(0.25);
+x = tan((1.0, true, 3)[a]);

@@ -1,0 +1,7 @@
+(PrgmNode
+	(FunctionStmtNode add (BindingsNode (BindingNode a (IntTypeNode)) (BindingNode b (FloatTypeNode))) (FloatTypeNode) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode a)) ADD (LValueExprNode (VarExprNode b))) ADD (IntExprNode 1))))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'a + b + 1 = ')) (CallExprNode (LValueExprNode (VarExprNode add)) (ExprsNode (IntExprNode 1) (LValueExprNode (VarExprNode a)))) (StringExpressionNode (StringNode ''))))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'a + b + 1 = ${add(1,a)}'))))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'a + b + 1 = ')) (CallExprNode (LValueExprNode (VarExprNode add)) (ExprsNode (IntExprNode 1) (LValueExprNode (VarExprNode a)))) (StringExpressionNode (StringNode ''))))))
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'a + b + 1 = ')) (CallExprNode (LValueExprNode (VarExprNode add)) (ExprsNode (IntExprNode 1) (LValueExprNode (VarExprNode a)))) (StringExpressionNode (StringNode '')))))))

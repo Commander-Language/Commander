@@ -9,6 +9,7 @@ void runFile(const std::string& filePath) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, filePath);
     Parser::ASTNodeList nodes = parser.parse(tokens);
+    TypeChecker::TypeChecker typeChecker(parser);
     typeChecker.typeCheck(nodes);
     FlowController::FlowController controller;
     controller.runtime(nodes);
@@ -69,6 +70,7 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     }
 
     // Type Check
+    TypeChecker::TypeChecker typeChecker(parser);
     try {
         typeChecker.typeCheck(nodes);
     } catch (const Util::CommanderException& e) {
@@ -81,6 +83,7 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
 
     // Run
+    FlowController::FlowController controller;
     try {
         controller.runtime(nodes);
     } catch (std::exception e) {

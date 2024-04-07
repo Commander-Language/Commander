@@ -1,2 +1,2 @@
 (PrgmNode
-	(TimeoutStmtNode 5000 (StringNode '') (CmdStmtNode (AsyncCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'git') (StringNode 'clone') (StringNode 'myurl.com')) | (BasicCmdNode (StringNode 'echo') (StringNode 'hello')))))))
+	(TimeoutStmtNode 5000 (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Unable to pipe clone to echo due to failed clone')))) (CmdStmtNode (AsyncCmdNode (PipeCmdNode (BasicCmdNode (StringNode 'git') (StringNode 'clone') (StringNode 'myurl.com')) | (BasicCmdNode (StringNode 'echo') (StringNode 'hello')))))))

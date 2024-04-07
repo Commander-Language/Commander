@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (ArrayExprNode (ExprsNode (LambdaExprNode (BindingsNode) (ReturnStmtNode (IntExprNode 1 INT)) (fn () -> INT)) (LambdaExprNode (BindingsNode) (ReturnStmtNode (IntExprNode 2 INT)) (fn () -> INT)) (LambdaExprNode (BindingsNode) (ReturnStmtNode (IntExprNode 3 INT)) (fn () -> INT))) (fn () -> INT)[]) (fn () -> INT)[]))
+	(ExprStmtNode (BinOpExprNode (IndexLValueNode (VarLValueNode x (fn () -> INT)[]) (IntExprNode 2 INT) (fn () -> INT)) SET (LambdaExprNode (BindingsNode) (ReturnStmtNode (IntExprNode 4 INT)) (fn () -> INT)) (fn () -> INT))))

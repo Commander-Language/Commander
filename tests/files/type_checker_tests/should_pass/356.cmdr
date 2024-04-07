@@ -1,0 +1,4 @@
+//Test import statements type check
+import "../tests/files/type_checker_tests/should_pass/354.cmdr";
+import "../tests/files/type_checker_tests/should_pass/355.cmdr";
+x = add(num, pi);

@@ -1,0 +1,2 @@
+//Test builtin time type checks
+x = time();

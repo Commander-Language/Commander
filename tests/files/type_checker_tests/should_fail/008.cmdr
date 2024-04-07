@@ -1,2 +1,2 @@
 //Should fail trying to do a ternary expression with non matching types
-x = true ? "PASS" : false;
+x = if true then "PASS" else false;

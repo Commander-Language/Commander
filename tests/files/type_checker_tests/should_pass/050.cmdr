@@ -1,0 +1,2 @@
+//Test that ternary operations type check
+x = if true then true else false;

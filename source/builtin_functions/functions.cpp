@@ -636,10 +636,12 @@ namespace Function {
         return VOID;
     }
 
-    FlowController::CommanderTuplePtr remove(FlowController::CommanderArrayPtr array,
-                                             FlowController::CommanderTypePtr data) {
-        array->values.push_back(data);
-        return VOID;
+    FlowController::CommanderBoolPtr remove(FlowController::CommanderArrayPtr array,
+                                            FlowController::CommanderTypePtr data) {
+        const FlowController::CommanderIntPtr index = indexOf(array, data);
+        if (index->value == -1) { return std::make_shared<FlowController::CommanderBool>(false); }
+        array->values.erase(array->values.begin() + index->value);
+        return std::make_shared<FlowController::CommanderBool>(true);
     }
 
 }  // namespace Function

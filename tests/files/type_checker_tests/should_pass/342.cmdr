@@ -1,0 +1,5 @@
+//Test builtin replaceAll type checks
+a = 1;
+x = "hi".replaceAll("i", "e");
+x = (1.0, true, 3)[a].replaceAll("i", "e");
+x = "hi".replaceAll((1.0, true, 3)[a], (1.0, true, 3)[a]);

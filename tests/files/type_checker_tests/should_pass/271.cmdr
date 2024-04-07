@@ -1,0 +1,4 @@
+//Test for loops type check
+for (i = 0;;) {
+    println i;
+}

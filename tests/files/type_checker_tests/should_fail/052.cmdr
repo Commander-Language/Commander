@@ -1,2 +1,2 @@
-//Should fail due to interpolated expression not evaluating to a string
-x = $"My cool {true} string";
+//Should fail when binding types don't match
+x: int = 3.9;

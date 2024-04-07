@@ -1,0 +1,4 @@
+//Test that post-decrement operations type check
+a = (2.0, true, 3);
+x = 1;
+y = a[x]--;

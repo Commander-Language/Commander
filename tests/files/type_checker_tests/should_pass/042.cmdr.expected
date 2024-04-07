@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode y) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'name') STRING))) STRING) STRING))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '3+2=') STRING) (BinOpExprNode (IntExprNode 3 INT) ADD (IntExprNode 2 INT) INT) (StringExpressionNode (StringNode '; my name is ') STRING) (LValueExprNode (VarExprNode y STRING) STRING) (StringExpressionNode (StringNode '; ') STRING) (BinOpExprNode (LValueExprNode (VarExprNode y STRING) STRING) ADD (LValueExprNode (VarExprNode y STRING) STRING) STRING) (StringExpressionNode (StringNode '') STRING))) STRING) STRING)))

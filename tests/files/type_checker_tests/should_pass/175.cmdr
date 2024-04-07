@@ -1,0 +1,4 @@
+//Test that subtract set operation type checks
+a = 1;
+x = 2;
+x -= (2.0, true, 1)[a];

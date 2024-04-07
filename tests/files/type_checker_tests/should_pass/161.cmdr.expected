@@ -1,0 +1,3 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi') STRING))) STRING) STRING))
+	(ExprStmtNode (BinOpExprNode (VarLValueNode x STRING) ADD_SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'there') STRING))) STRING) STRING)))

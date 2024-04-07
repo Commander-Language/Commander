@@ -1,0 +1,6 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (IntExprNode 3)))
+	(ExprStmtNode (BinOpExprNode (VarLValueNode x) MULTIPLY_SET (IntExprNode 2)))
+	(CmdStmtNode (BasicCmdNode (StringNode 'echo') (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hello'))))))
+	(FunctionStmtNode add (BindingsNode (BindingNode a (IntTypeNode)) (BindingNode b)) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (BinOpExprNode (LValueExprNode (VarExprNode a)) ADD (LValueExprNode (VarExprNode b))))))))

@@ -1,0 +1,2 @@
+//Should fail asserts when not using bool
+assert 3, "hello";

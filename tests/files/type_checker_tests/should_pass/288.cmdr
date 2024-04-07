@@ -1,0 +1,2 @@
+//Test println statements type check
+println 3;

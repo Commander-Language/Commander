@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (ScanExprNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Enter name: ') STRING))) STRING) STRING) STRING)))

@@ -1,0 +1,5 @@
+//Test builtin arcsec type checks
+a = 1;
+x = arcsec(16);
+x = arcsec(0.25);
+x = arcsec((1.0, true, 3)[a]);

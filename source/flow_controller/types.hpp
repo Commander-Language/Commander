@@ -264,11 +264,13 @@ namespace FlowController {
          * @param body The body of the lambda/function
          * @param name The name of the lambda/function (defaults to empty)
          */
-        CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body, std::string name = "");
+        CommanderLambda(Parser::BindingsNodePtr bindings, Parser::StmtNodePtr body, TypeChecker::TyPtr returnType,
+                        std::string name = "");
 
         std::string name;
         Parser::BindingsNodePtr bindings;
         Parser::StmtNodePtr body;
+        TypeChecker::TyPtr returnType;
 
         /**
          * @brief Get a string representation of the type.

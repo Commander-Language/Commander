@@ -1,0 +1,7 @@
+//Test that functions type check
+fn add(const a:float, b: int): float { 
+    return a + b;
+}
+a = 3;
+add((2.0, true, 1)[a], 3);
+x = add(2.4, (2.0, true, 1)[a]);

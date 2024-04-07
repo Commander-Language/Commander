@@ -1,0 +1,4 @@
+//Should allow redeclaring variables of same type
+x: int = 4;
+x: int = 5;
+x = 6;

@@ -1,0 +1,6 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (IntExprNode 1 INT) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (IndexExprNode (TupleExprNode (ExprsNode (FloatExprNode 2.000000 FLOAT) (BoolExprNode false BOOL) (IntExprNode 1 INT)) (FLOAT, BOOL, INT)) (LValueExprNode (VarExprNode a INT) INT))))
+	(PrintlnStmtNode (LValueExprNode (VarExprNode x)))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (TupleExprNode (ExprsNode (FloatExprNode 3.140000 FLOAT) (BoolExprNode true BOOL) (IntExprNode 2 INT)) (FLOAT, BOOL, INT)) (FLOAT, BOOL, INT)))
+	(PrintlnStmtNode (LValueExprNode (VarExprNode x (FLOAT, BOOL, INT)) (FLOAT, BOOL, INT))))

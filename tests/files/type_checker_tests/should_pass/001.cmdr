@@ -1,5 +1,6 @@
-//Should allow redefining functions as variables
-add(x, y) {
-	return x + y;
+//Should allow setting globals in functions
+a = 2;
+fn add(x, y) {
+	a = 3;
+	return x + y + a;
 }
-add = 3;

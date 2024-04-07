@@ -76,12 +76,28 @@ namespace TypeChecker {
     bool areTypesEqual(const TyPtr& type1, const TyPtr& type2);
 
     /**
+     * @brief Gets a type string for errors
+     *
+     * @param tyPtr The type
+     * @return The type string
+     */
+    std::string getErrorTypeString(const TyPtr& tyPtr);
+
+    /**
      * @brief Gets the string representation of the given type for S-Expressions
      * @param tyPtr The given type
      *
      * @return The string representation of the given type
      */
     std::string getTypeString(const TyPtr& tyPtr);
+
+    /**
+     * @brief Gets the string representation of the sequence of types, using getTypeString()
+     * @param types The given type sequence
+     *
+     * @return The string representation of the given type sequence
+     */
+    std::string getTypeSequenceString(const std::vector<TyPtr>& types);
 
     /**
      * @brief A class representing a Commander command type
@@ -104,7 +120,6 @@ namespace TypeChecker {
      * @brief Pointer to an command type
      */
     using CommandTyPtr = std::shared_ptr<CommandTy>;
-
 
     /**
      * @brief A class representing a Commander int type

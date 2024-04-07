@@ -1,0 +1,3 @@
+//Test that exponentiate set operation type checks
+x = 1.2;
+x **= 2.3;

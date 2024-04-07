@@ -1,0 +1,8 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode const x) SET (IntExprNode 3)))
+	(ExprStmtNode (BinOpExprNode (BindingNode const y) SET (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode x)) EXPONENTIATE (LValueExprNode (VarExprNode x))) MULTIPLY (LValueExprNode (VarExprNode x)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode const z (IntTypeNode)) SET (BinOpExprNode (LValueExprNode (VarExprNode x)) MULTIPLY (LValueExprNode (VarExprNode y)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode const a (FloatTypeNode)) SET (BinOpExprNode (BinOpExprNode (LValueExprNode (VarExprNode x)) EXPONENTIATE (LValueExprNode (VarExprNode z))) MULTIPLY (LValueExprNode (VarExprNode z)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode b) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hello')))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode c) SET (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'there')))))))
+	(ExprStmtNode (BinOpExprNode (BindingNode d) SET (BinOpExprNode (LValueExprNode (VarExprNode b)) ADD (LValueExprNode (VarExprNode c))))))

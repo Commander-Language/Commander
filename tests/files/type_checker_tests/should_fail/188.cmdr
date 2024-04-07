@@ -1,0 +1,2 @@
+//Should fail calling non existing function
+println "hi".foo(1, 2);

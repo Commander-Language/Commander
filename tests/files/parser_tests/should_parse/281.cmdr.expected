@@ -1,0 +1,2 @@
+(PrgmNode
+	(ExprStmtNode (CallExprNode (LValueExprNode (VarExprNode add)) (ExprsNode (LValueExprNode (VarExprNode a)) (LValueExprNode (VarExprNode b)) (LambdaExprNode (BindingsNode (BindingNode e (TupleTypeNode (TypesNode (BoolTypeNode) (BoolTypeNode)))) (BindingNode f (ArrayTypeNode (BoolTypeNode)))) (ReturnStmtNode (BinOpExprNode (LValueExprNode (VarExprNode e)) SUBTRACT (LValueExprNode (VarExprNode f)))))))))

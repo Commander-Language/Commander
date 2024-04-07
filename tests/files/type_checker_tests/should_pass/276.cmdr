@@ -1,0 +1,5 @@
+//Test while loops type check
+while (true) {
+    println 1;
+    break;
+}

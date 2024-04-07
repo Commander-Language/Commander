@@ -1,0 +1,2 @@
+//Should fail if arrays are different types in ternary
+x = if true then [true] else [1];

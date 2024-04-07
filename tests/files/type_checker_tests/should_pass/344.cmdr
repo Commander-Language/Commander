@@ -1,0 +1,4 @@
+//Test builtin trim type checks
+a = 1;
+x = "hi".trim();
+x = (1.0, true, 3)[a].trim();

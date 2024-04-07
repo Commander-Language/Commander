@@ -1,0 +1,2 @@
+//Should fail calling non existing function
+println add(1, 2);

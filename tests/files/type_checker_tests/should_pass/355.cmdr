@@ -1,0 +1,3 @@
+//Test simple variables type check
+pi = 3.14159;
+num = 42;

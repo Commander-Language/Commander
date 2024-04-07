@@ -1,0 +1,5 @@
+//Test that functions type check
+a = 1;
+fn add(): void (2.0, true, 1)[a];
+add();
+x = add();

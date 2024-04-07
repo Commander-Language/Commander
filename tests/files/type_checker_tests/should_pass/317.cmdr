@@ -1,0 +1,5 @@
+//Test builtin sech type checks
+a = 1;
+x = sech(16);
+x = sech(0.25);
+x = sech((1.0, true, 3)[a]);

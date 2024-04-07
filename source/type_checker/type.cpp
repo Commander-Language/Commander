@@ -24,11 +24,14 @@ namespace TypeChecker {
                 return "ARRAY";
             case TUPLE:
                 return "TUPLE";
-            case FUNCTION:
-                return "FUNCTION";
             default:
-                return "UNKNOWN";
+                return "FUNCTION";
         }
+    }
+
+    std::string getErrorTypeString(const TyPtr& tyPtr) {
+        std::string typeString = getTypeString(tyPtr);
+        return typeString == "" ? " ANY" : typeString;
     }
 
     std::string getTypeString(const TyPtr& tyPtr) {
@@ -40,32 +43,35 @@ namespace TypeChecker {
             case BOOL:
             case STRING:
                 return " " + typeToString(tyPtr->getType());
-            case ARRAY:
-                return " " + typeToString(std::static_pointer_cast<ArrayTy>(tyPtr)->baseType->getType()) + "[]";
+            case ARRAY: {
+                const TyPtr baseTy = std::static_pointer_cast<ArrayTy>(tyPtr)->baseType;
+                return (baseTy ? getTypeString(baseTy) : " ANY") + "[]";
+            }
             case FUNCTION: {
                 const FunctionTyPtr functionTy = std::static_pointer_cast<FunctionTy>(tyPtr);
-                std::stringstream builder;
-                builder << "(";
-                for (const TyPtr& type : functionTy->parameters) { builder << " " << typeToString(type->getType()); }
-                builder << " ) -> " << typeToString(functionTy->returnType->getType());
-                return " " + builder.str();
+                return " (fn (" + getTypeSequenceString(functionTy->parameters) + ") ->"
+                     + (functionTy->returnType ? getTypeString(functionTy->returnType) : " ANY") + ")";
             }
             case TUPLE: {
-                std::stringstream builder;
-                builder << "{";
-                for (const TyPtr& type : std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes) {
-                    builder << " " << typeToString(type->getType());
-                }
-                builder << " }";
-                return " " + builder.str();
+                std::vector<TyPtr> types = std::static_pointer_cast<TupleTy>(tyPtr)->contentTypes;
+                if (types.empty()) { return " VOID"; }
+                return " (" + getTypeSequenceString(types) + ")";
             }
             default:
                 return "";
         }
     }
 
+    std::string getTypeSequenceString(const std::vector<TyPtr>& types) {
+        if (types.empty()) { return ""; }
+        std::stringstream builder;
+        builder << (types[0] ? getTypeString(types[0]).substr(1) : "ANY");
+        for (int i = 1; i < types.size(); i++) { builder << "," << (types[i] ? getTypeString(types[i]) : " ANY"); }
+        return builder.str();
+    }
+
     bool areTypesEqual(const TyPtr& type1, const TyPtr& type2) {
-        if (!type1 || !type2) { return false; }
+        if (!type1 || !type2) { return true; }
         Type const typ = type1->getType();
         if (typ != type2->getType()) { return false; }
         if (type1->any() || type2->any()) { return true; }
