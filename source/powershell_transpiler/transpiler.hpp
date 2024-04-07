@@ -22,14 +22,12 @@ namespace PowerShellTranspiler {
         void _string_exprs(Parser::StringExprsNodePtr  node);
         void _types(Parser::TypesNodePtr  node);
         void _cmd(Parser::CmdNodePtr  node);
-        void _basic_cmd(Parser::BasicCmdNodePtr  node);
-        void _pipe_cmd(Parser::PipeCmdNodePtr  node);
-        void _async_cmd(Parser::AsyncCmdNodePtr  node);
         void _lvalue(Parser::LValueNodePtr  node);
         void _expr(Parser::ExprNodePtr  node);
         void _stmt(Parser::StmtNodePtr  node);
         void _type(Parser::TypeNodePtr  node);
 
+        void _node(const Parser::ASTNodePtr& node);
         void _writeLine(const std::string& str);
         void _write(const std::string& str);
     };
