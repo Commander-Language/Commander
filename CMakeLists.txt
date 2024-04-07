@@ -109,7 +109,13 @@ project(commander)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS_RELEASE -O3)
+if(MSVC)
+    set(CMAKE_CXX_FLAGS /bigobj)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000") # 10MB stack size for windows
+else()
+    set(CMAKE_CXX_FLAGS_RELEASE -O3)
+endif ()
+set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE) # complains only in windows
 
 include_directories(.)
 
@@ -128,7 +134,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-
 include(GoogleTest)
 
 
@@ -169,7 +174,11 @@ add_library(flow_controller source/flow_controller/flow_controller.cpp source/ut
 add_library(symbol_table source/symbol_table/symbol_table_organizer.cpp source/symbol_table/scope.cpp)
 
 FILE(GLOB builtins source/job_runner/builtins/*.cpp)
-add_library(job_runner source/job_runner/job_runner.cpp source/util/print.cpp ${builtins})
+if(MSVC)
+    add_library(job_runner_windows source/job_runner/job_runner_windows.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
+else()
+    add_library(job_runner_linux source/job_runner/job_runner_linux.cpp source/util/print.cpp ${builtins} source/job_runner/process.cpp)
+endif()
 
 add_executable(commander
         source/interpreter/commander.cpp
@@ -178,14 +187,17 @@ add_executable(commander
 )
 if (WIN32)
     target_sources(commander PUBLIC source/interpreter/console-windows.cpp)
+    target_link_libraries(commander job_runner_windows)
 endif (WIN32)
 if (MSVC)
     target_sources(commander PUBLIC source/interpreter/console-windows.cpp)
+    target_link_libraries(commander job_runner_windows)
 endif (MSVC)
 if (UNIX)
     target_sources(commander PUBLIC source/interpreter/console-unix.cpp)
+    target_link_libraries(commander job_runner_linux)
 endif (UNIX)
-target_link_libraries(commander lexer parser type_checker flow_controller symbol_table job_runner ncurses)
+target_link_libraries(commander lexer parser type_checker flow_controller symbol_table)
 
 #  Test configurations:
 #  --------------------
@@ -206,10 +218,20 @@ add_executable(symbolTableTests tests/symbol_table_tests.cpp)
 target_link_libraries(symbolTableTests symbol_table GTest::gtest_main)
 gtest_discover_tests(symbolTableTests)
 
-add_executable(flowControllerTests tests/flow_controller_tests.cpp)
-target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner ncurses GTest::gtest_main)
-gtest_discover_tests(flowControllerTests)
 
 add_executable(jobRunnerTests tests/job_runner_tests.cpp)
-target_link_libraries(jobRunnerTests lexer job_runner ncurses GTest::gtest_main)
-gtest_discover_tests(jobRunnerTests)
+add_executable(flowControllerTests tests/flow_controller_tests.cpp)
+
+if(MSVC)
+    target_link_libraries(jobRunnerTests lexer job_runner_windows GTest::gtest_main)
+    gtest_discover_tests(jobRunnerTests)
+
+    target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner_windows GTest::gtest_main)
+    gtest_discover_tests(flowControllerTests)
+else()
+    target_link_libraries(jobRunnerTests lexer job_runner_linux GTest::gtest_main)
+    gtest_discover_tests(jobRunnerTests)
+
+    target_link_libraries(flowControllerTests lexer parser type_checker flow_controller symbol_table job_runner_linux GTest::gtest_main)
+    gtest_discover_tests(flowControllerTests)
+endif()

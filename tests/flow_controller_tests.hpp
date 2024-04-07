@@ -8,7 +8,7 @@
 #define COMMANDER_FLOW_CONTROLLER_TESTS_HPP
 
 #include "source/flow_controller/flow_controller.hpp"
-#include "source/job_runner/job_runner.hpp"
+#include "source/job_runner/job_runner_linux.hpp"
 #include "source/lexer/lexer.hpp"
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type_checker.hpp"
