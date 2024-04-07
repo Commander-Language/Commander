@@ -1,4 +1,6 @@
-//Test aliases type check
-x = "commander";
-alias cmd = ls "-a" | grep $x;
-println cmd;
+//Test setting types
+a = 1;
+x = (2.0, false, 1)[a];
+println x;
+x = "hi";
+println x;

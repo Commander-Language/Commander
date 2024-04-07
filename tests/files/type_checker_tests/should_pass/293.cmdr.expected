@@ -1,0 +1,2 @@
+(PrgmNode
+	(TimeoutStmtNode 40000 (StringNode (StringExprsNode (StringExpressionNode (StringNode 'Sin took too long') STRING))) (ExprStmtNode (CallExprNode (LValueExprNode (VarExprNode sin (fn (INT) -> FLOAT)) (fn (INT) -> FLOAT)) (ExprsNode (IntExprNode 3 INT)) FLOAT))))

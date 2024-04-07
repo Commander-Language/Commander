@@ -6,5 +6,5 @@ x = true.toString();
 x = "hi".toString();
 x = [1, 2, 3].toString();
 x = (2.0, true, 1).toString();
-x = (fn (a: int, b: float): float -> a+b).toString();
+x = (fn (b: int, c: float): float -> b+c).toString();
 x = (1.0, true, 3)[a].toString();

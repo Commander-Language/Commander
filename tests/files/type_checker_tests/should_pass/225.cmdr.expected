@@ -1,0 +1,5 @@
+(PrgmNode
+	(FunctionStmtNode add (BindingsNode) (TupleTypeNode (TypesNode) INT) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (BinOpExprNode (IntExprNode 3 INT) ADD (IntExprNode 4 INT) INT)))))
+	(ExprStmtNode (CallExprNode (LValueExprNode (VarExprNode add (fn () -> INT)) (fn () -> INT)) (ExprsNode) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode add (fn () -> INT)) (fn () -> INT)) (ExprsNode) INT) INT)))

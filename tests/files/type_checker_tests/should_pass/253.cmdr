@@ -1,4 +1,4 @@
 //Test that lambdas type check
-add = fn () -> println 3 + 4;
+add = fn () -> println 3 + 4;;
 add();
 x = add();

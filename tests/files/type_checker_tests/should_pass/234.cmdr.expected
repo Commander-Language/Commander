@@ -1,0 +1,6 @@
+(PrgmNode
+	(FunctionStmtNode add (BindingsNode (BindingNode const a (FloatTypeNode FLOAT)) (BindingNode b (IntTypeNode INT))) (FloatTypeNode FLOAT) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (BinOpExprNode (LValueExprNode (VarExprNode a FLOAT) FLOAT) ADD (LValueExprNode (VarExprNode b INT) INT) FLOAT)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (IntExprNode 3 INT) INT))
+	(ExprStmtNode (CallExprNode (LValueExprNode (VarExprNode add (fn (FLOAT, INT) -> FLOAT)) (fn (FLOAT, INT) -> FLOAT)) (ExprsNode (IndexExprNode (TupleExprNode (ExprsNode (FloatExprNode 2.000000 FLOAT) (BoolExprNode true BOOL) (IntExprNode 1 INT)) (FLOAT, BOOL, INT)) (LValueExprNode (VarExprNode a INT) INT)) (IntExprNode 3 INT)) FLOAT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode add (fn (FLOAT, INT) -> FLOAT)) (fn (FLOAT, INT) -> FLOAT)) (ExprsNode (FloatExprNode 2.400000 FLOAT) (IndexExprNode (TupleExprNode (ExprsNode (FloatExprNode 2.000000 FLOAT) (BoolExprNode true BOOL) (IntExprNode 1 INT)) (FLOAT, BOOL, INT)) (LValueExprNode (VarExprNode a INT) INT))) FLOAT) FLOAT)))

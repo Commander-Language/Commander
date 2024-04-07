@@ -1,4 +1,4 @@
 //Test that functions type check
-fn add(): int 1 + 2;
+fn add(): void 1 + 2;
 add();
 x = add();

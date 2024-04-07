@@ -1,0 +1,7 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (IntExprNode 1 INT) INT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode parseFloat (fn (INT) -> FLOAT)) (fn (INT) -> FLOAT)) (ExprsNode (IntExprNode 1 INT)) FLOAT) FLOAT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode parseFloat (fn (FLOAT) -> FLOAT)) (fn (FLOAT) -> FLOAT)) (ExprsNode (FloatExprNode 3.000000 FLOAT)) FLOAT) FLOAT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode parseFloat (fn (BOOL) -> FLOAT)) (fn (BOOL) -> FLOAT)) (ExprsNode (BoolExprNode true BOOL)) FLOAT) FLOAT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode parseFloat (fn (STRING) -> FLOAT)) (fn (STRING) -> FLOAT)) (ExprsNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '50.5') STRING))) STRING)) FLOAT) FLOAT))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode parseFloat (fn (INT) -> FLOAT)) (fn (INT) -> FLOAT)) (ExprsNode (IndexExprNode (TupleExprNode (ExprsNode (FloatExprNode 1.000000 FLOAT) (BoolExprNode true BOOL) (IntExprNode 3 INT)) (FLOAT, BOOL, INT)) (LValueExprNode (VarExprNode a INT) INT))) FLOAT) FLOAT)))

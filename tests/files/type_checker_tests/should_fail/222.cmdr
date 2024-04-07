@@ -1,0 +1,3 @@
+//Should not be able to use type variable inappropriately
+type myType = int;
+println myType;

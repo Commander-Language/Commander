@@ -436,12 +436,11 @@ namespace TypeChecker {
                                       std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr)
                                       ->variable;
                     assertVariableExists(varName, exprNode->func->position);
-                    type = getVarType(varName, FUNCTION_INFO, exprNode->func->position);
                     VarInfoPtr const functionInfo = _table->getVariable(varName);
+                    type = functionInfo->types[0];
                     functionTypes = functionInfo->types;
                 } else {
                     type = typeCheck(exprNode->func);
-                    assertType(type, FUNCTION_TY, exprNode->func->position);
                     functionTypes.push_back(type);
                 }
                 assertType(type, FUNCTION_TY, exprNode->func->position);
@@ -506,8 +505,9 @@ namespace TypeChecker {
                 if (exprNode->type) { return exprNode->type; }
                 exprNode->args->exprs.insert(exprNode->args->exprs.begin(), exprNode->expression);
                 assertVariableExists(exprNode->func, exprNode->funcPosition);
-                const TyPtr type = getVarType(exprNode->func, FUNCTION_INFO, exprNode->funcPosition);
-                std::vector<TyPtr> functionTypes = _table->getVariable(exprNode->func)->types;
+                VarInfoPtr const functionInfo = _table->getVariable(exprNode->func);
+                const TyPtr type = functionInfo->types[0];
+                const std::vector<TyPtr> functionTypes = functionInfo->types;
                 std::vector<TyPtr> argTypes;
                 for (const Parser::ExprNodePtr& expr : exprNode->args->exprs) { argTypes.push_back(typeCheck(expr)); }
                 FunctionTyPtr functionType = nullptr;
@@ -563,16 +563,34 @@ namespace TypeChecker {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(exprNode->returnType);
-                const TyPtr bodyType = typeCheck(exprNode->body);
+                TyPtr bodyReturnType = typeCheck(exprNode->body);
+                if (!bodyReturnType) {
+                    bodyReturnType = exprNode->body->nodeType() == Parser::RETURN_STMT
+                                                  || (exprNode->body->nodeType() == Parser::SCOPE_STMT
+                                                      && std::static_pointer_cast<Parser::ScopeStmtNode>(exprNode->body)
+                                                                         ->stmts->stmts.back()
+                                                                         ->nodeType()
+                                                                 == Parser::RETURN_STMT)
+                                           ? nullptr
+                                           : VOID_TY;
+                }
                 if (!returnType) {
-                    returnType = bodyType ? bodyType
-                                          : (exprNode->body->nodeType() == Parser::RETURN_STMT ? nullptr : VOID_TY);
-                } else if (!areTypesEqual(returnType, bodyType)) {
+                    returnType = bodyReturnType;
+                } else if (!areTypesEqual(returnType, bodyReturnType)) {
                     throw Util::CommanderException(
-                            "Return types for the lambda function don't match. Expected return type"
+                            "Return types for the function declaration don't match. Expected return type"
                                     + getErrorTypeString(returnType) + " but got"
                                     + getErrorTypeString(typeCheck(exprNode->body)) + " instead",
                             exprNode->position);
+                } else if (!bodyReturnType) {
+                    if (exprNode->body->nodeType() == Parser::RETURN_STMT) {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(exprNode->body)->retExpr->type = returnType;
+                    } else {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(
+                                std::static_pointer_cast<Parser::ScopeStmtNode>(exprNode->body)->stmts->stmts.back())
+                                ->retExpr->type
+                                = returnType;
+                    }
                 }
                 popScope();
                 return (exprNode->type = std::make_shared<FunctionTy>(bindings, returnType));
@@ -718,27 +736,36 @@ namespace TypeChecker {
                     bindings.push_back(typeCheck(binding));
                 }
                 TyPtr returnType = typeCheck(stmtNode->returnType);
-                const TyPtr bodyType = typeCheck(stmtNode->body);
+                TyPtr bodyReturnType = typeCheck(stmtNode->body);
+                if (!bodyReturnType) {
+                    bodyReturnType = stmtNode->body->nodeType() == Parser::RETURN_STMT
+                                                  || (stmtNode->body->nodeType() == Parser::SCOPE_STMT
+                                                      && std::static_pointer_cast<Parser::ScopeStmtNode>(stmtNode->body)
+                                                                         ->stmts->stmts.back()
+                                                                         ->nodeType()
+                                                                 == Parser::RETURN_STMT)
+                                           ? nullptr
+                                           : VOID_TY;
+                }
                 if (!returnType) {
-                    returnType = bodyType ? bodyType
-                                          : (stmtNode->body->nodeType() == Parser::RETURN_STMT
-                                                             || (stmtNode->body->nodeType() == Parser::SCOPE_STMT
-                                                                 && std::static_pointer_cast<Parser::ScopeStmtNode>(
-                                                                            stmtNode->body)
-                                                                                    ->stmts->stmts.back()
-                                                                                    ->nodeType()
-                                                                            == Parser::RETURN_STMT)
-                                                     ? nullptr
-                                                     : VOID_TY);
-                    stmtNode->returnType = std::make_shared<Parser::VariableTypeNode>(stmtNode->body->position,
-                                                                                      stmtNode->name);
+                    returnType = bodyReturnType;
+                    stmtNode->returnType = std::make_shared<Parser::TupleTypeNode>(stmtNode->body->position);
                     stmtNode->returnType->type = returnType;
-                } else if (!areTypesEqual(returnType, bodyType)) {
+                } else if (!areTypesEqual(returnType, bodyReturnType)) {
                     throw Util::CommanderException(
                             "Return types for the function declaration don't match. Expected return type"
                                     + getErrorTypeString(returnType) + " but got"
                                     + getErrorTypeString(typeCheck(stmtNode->body)) + " instead",
                             stmtNode->position);
+                } else if (!bodyReturnType) {
+                    if (stmtNode->body->nodeType() == Parser::RETURN_STMT) {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(stmtNode->body)->retExpr->type = returnType;
+                    } else {
+                        std::static_pointer_cast<Parser::ReturnStmtNode>(
+                                std::static_pointer_cast<Parser::ScopeStmtNode>(stmtNode->body)->stmts->stmts.back())
+                                ->retExpr->type
+                                = returnType;
+                    }
                 }
                 popScope();
                 _table->addVariable(stmtNode->name, std::make_shared<FunctionInfo>(std::vector<TyPtr> {

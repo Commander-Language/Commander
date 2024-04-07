@@ -1,2 +1,2 @@
 //Test that lambdas type check
-x = (fn (a, b) -> a + b;)(3, 4);
+x = (fn (a, b) -> a + b)(3, 4);

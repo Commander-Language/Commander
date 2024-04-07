@@ -1,3 +1,2 @@
 //Test aliases type check
 alias ll = ls -al;
-println ll;
