@@ -26,76 +26,82 @@
     - [function](#function)
       - [API](#api-6)
       - [Examples](#examples-6)
+    - [command](#command)
+      - [API](#api-7)
+      - [Examples](#examples-7)
   - [Command Execution](#command-execution)
     - [Grammar](#grammar)
-    - [Examples](#examples-7)
+    - [Examples](#examples-8)
   - [Background (Asynchronous) Commands](#background-asynchronous-commands)
     - [Grammar](#grammar-1)
-    - [Examples](#examples-8)
+    - [Examples](#examples-9)
   - [Piping Commands](#piping-commands)
     - [Grammar](#grammar-2)
-    - [Examples](#examples-9)
-  - [Timeout Commands](#timeout-commands)
-    - [Grammar](#grammar-3)
     - [Examples](#examples-10)
+  - [Timeout Statements](#timeout-commands)
+    - [Grammar](#grammar-3)
+    - [Examples](#examples-11)
   - [Command Aliasing](#command-aliasing)
     - [Grammar](#grammar-4)
-    - [Examples](#examples-11)
+    - [Examples](#examples-12)
   - [Variables](#variables)
     - [Grammar](#grammar-5)
-    - [Examples](#examples-12)
+    - [Examples](#examples-13)
   - [While Loops](#while-loops)
     - [Grammar](#grammar-6)
-    - [Examples](#examples-13)
+    - [Examples](#examples-14)
   - [Do-While Loops](#do-while-loops)
     - [Grammar](#grammar-7)
-    - [Examples](#examples-14)
+    - [Examples](#examples-15)
   - [For Loops](#for-loops)
     - [Grammar](#grammar-8)
-    - [Examples](#examples-15)
+    - [Examples](#examples-16)
   - [If-Else Statements](#if-else-statements)
     - [Grammar](#grammar-9)
-    - [Examples](#examples-16)
+    - [Examples](#examples-17)
   - [Ternary Operator](#ternary-operator)
     - [Grammar](#grammar-10)
-    - [Examples](#examples-17)
+    - [Examples](#examples-18)
   - [Functions](#functions)
     - [Grammar](#grammar-11)
-    - [Examples](#examples-18)
+    - [Examples](#examples-19)
   - [Math Operations](#math-operations)
     - [Grammar (Unary)](#grammar-unary)
     - [Grammar (Binary)](#grammar-binary)
     - [Grammar (Comparison)](#grammar-comparison)
-    - [Examples](#examples-19)
+    - [Examples](#examples-20)
   - [Boolean Operations](#boolean-operations)
     - [Grammar](#grammar-12)
-    - [Examples](#examples-20)
+    - [Examples](#examples-21)
   - [String Concatenation](#string-concatenation)
     - [Grammar](#grammar-13)
-    - [Examples](#examples-21)
+    - [Examples](#examples-22)
   - [String Interpolation](#string-interpolation)
     - [Grammar](#grammar-14)
-    - [Examples](#examples-22)
+    - [Examples](#examples-23)
   - [Lambda Expressions](#lambda-expressions)
     - [Grammar](#grammar-15)
-    - [Examples](#examples-23)
+    - [Examples](#examples-24)
   - [User I/O](#user-io)
     - [Grammar](#grammar-16)
-    - [Examples](#examples-24)
+    - [Examples](#examples-25)
   - [File I/O](#file-io)
     - [Grammar](#grammar-17)
-    - [Examples](#examples-25)
+    - [Examples](#examples-26)
   - [User Defined Scopes](#user-defined-scopes)
     - [Grammar](#grammar-18)
-    - [Examples](#examples-26)
-  - [Comments](#comments)
     - [Examples](#examples-27)
+  - [Comments](#comments)
+    - [Examples](#examples-28)
   - [Code Separation and Libraries](#code-separation-and-libraries)
     - [Grammar](#grammar-19)
-    - [Examples](#examples-28)
+    - [Examples](#examples-29)
   - [Custom Types](#custom-types)
     - [Grammar](#grammar-20)
-    - [Examples](#examples-29)
+    - [Examples](#examples-30)
+  - [Assert Statements](#assert-statements)
+    - [Grammar](#grammar-21)
+    - [Examples](#examples-31)
   - [API Functions](#api-functions)
     - [Grammar (Parsing)](#grammar-parsing)
     - [Grammar (Math)](#grammar-math)
@@ -125,11 +131,13 @@ Note: you may override precedence anytime using parentheses ```()```.
 - Statements, expressed with ```<stmt>```, are either a line or multiple lines of code that ultimately end with a ```;```. They are simply executed at runtime, and don't return anything.
 - Expressions, expressed with ```<expr>```, is code that evaluates to a value of a certain type, and returns that value at runtime.
 - Variables, expressed with ```<variable>```, represent a variable name.
-- Bindings, expressed with ```<binding>```, are a variable name followed by an optional type. In other words, they have the following grammar:
-    ```
-    <binding> : <variable> : <type>
-              | <variable>
-    ```
+  - Bindings, expressed with ```<binding>```, are a variable name followed by an optional type. In other words, they have the following grammar:
+      ```
+      <binding> : <variable> : <type>
+                | <variable>
+                | const <variable> : <type>
+                | const <variable>
+      ```
 - Types are expressed as ```<int>``` for ints, ```<bool>``` for booleans, ```<string>``` for strings, etc. A general type (any type) would be expressed as ```<type>```. These are mostly used in API function definitions.
 - Expressions that are of a particular type will be expressed as ```<int_expr>``` for int expressions, ```<bool_expr>``` for boolean expressions, etc.
 - If, for some reason, multiple grammars apply, then they are separated using |. For example, commands are a sequence of strings, command strings, or variables, and so each command argument would be represented as ```<string | command_string | variable>```.
@@ -227,6 +235,7 @@ $'1 + 2 = {1 + 2}'
 
 "3 + 4 = ${3 + 4}"
 
+name = "bob";
 "My name is $name"
 ```
 ### array
@@ -238,15 +247,17 @@ Arrays contain multiple elements of a single type. To index an array, you use th
     3. filter(<function>) : <array>
     4. map(<function>) : <array>
     5. foreach(<function>) : void
-    6. includes(<type_expr>) : <array>
-    7. indexOf(<type_expr>) : <int>
+    6. includes(<any_expr>) : <bool>
+    7. indexOf(<any_expr>) : <int>
     8. length() : <int>
+    9. append(<any_expr>) : <void>
+    10.remove(<any_expr>) : <bool>
     
 #### Examples
 ```
-myNumbers = [1, 2, 3]
+myNumbers = [1, 2, 3];
 
-one = myNumbers[0]
+one = myNumbers[0];
 ```
 ### tuple
 Tuples contain multiple elements of different types. To index a tuple, you use the following grammar: ```<expr> : <variable> [ <int> ]```, i.e. use postfix ```[]``` with a number inside (which is zero-based, so 0 gets you the first element). If an attempt to index a non-existent item, an error is thrown.
@@ -264,16 +275,25 @@ pi = myItems[2]
 ```
 ### function
 Functions are types that represent a single function, and can be called. Functions can be initialized in two different ways (see [Functions](#functions) and [Lambda Expressions](#lambda-expressions)), but either way the function is stored into a variable.
-- Default: ```() -> void```
+- Default: ```fn () -> void```
 #### API
     1. toString() : <string>
 #### Examples
 ```
-add(a, b) {
+fn add(a, b) {
     return a + b;
 };
 
-subtract = (a, b) -> a - b;
+subtract = fn (a, b) -> a - b;
+```
+### command
+Command types are used only for command aliases. They are mostly internal types, so you can't do anything with them.
+- Default: ``` ```
+#### API
+    1. toString() : <string>
+#### Examples
+```
+alias ll = ls -al;
 ```
 
 ## Command Execution
@@ -290,8 +310,8 @@ If a command is surrounded in backticks ``` `` ```, the command will return a tu
 
 ### Grammar
 ```
-<command> : <command_string | string | variable> <command_string | string | variable> ... <command_string | string | variable>
-<stmt>    : <command>
+<basic_command>      : <command_string | string | variable> <command_string | string | variable> ... <command_string | string | variable>
+<stmt>         : <basic_command>
 <tuple_expr>   : `<command>`
 ```
 ### Examples
@@ -309,7 +329,9 @@ output = `cat myfile.txt`;
 Commands may be run in the background as opposed to the foreground if they end with an ```&```. In the background, they run asynchronously, so the command will be running concurrently with the rest of the script that follows after. Additionally, since it will be run in the background, any output the command normally prints out will not be printed out. 
 ### Grammar
 ```
-<command> : <command> &
+<async_command> : <basic_command> &
+<async_command> : <pipe_command> &
+<command> : <async_command>
 ```
 ### Examples
 ```
@@ -320,30 +342,36 @@ git clone $url1 &;
 The output from one command may be used as input to another through piping, using the ```|``` character. The output of the command on the left hand side of ```|``` is piped into the command on the right hand side as input to it. There can be many commands chained like this, and they get evaluated from left to right.
 ### Grammar
 ```
-<command> : <command> | ... | <command>
+<pipe_command> : <basic_command> | ... | <basic_command>
+<command> : <pipe_command>
 ```
 ### Examples
 ```
 ls -a | grep myDirectory;
 ```
 
-## Timeout Commands
-You can run commands with the option to time them out after a specified amount of time given in milliseconds.
+## Timeout Statements
+You can run commands, or any code for that matter, with the option to time them out after a specified amount of time given in milliseconds. You must provide a message that gets printed when the timeout occurs (or empty string "" if you don't want to print anything).
 ### Grammar
 ```
-<stmt> : timeout <int> <command>
+<stmt> : timeout <int> <string> <stmt>
 ```
 ### Examples
 ```
-timeout 5000 ping https://google.com;
+timeout 5000 "Could not reach Google" ping https://google.com;
+
+timeout 40000 "Could not finish loop" while (true) {
+  println "waiting...";
+}
 ```
 
 ## Command Aliasing
-You can alias a command, which is especially useful for frequently used commands that you wish to not have to type out all the time. The alias variable is in turn interpreted as a command, and follows all command rules as defined in [Command Execution](#command-execution)
+You can alias a command, which is especially useful for frequently used commands that you wish to not have to type out all the time. The alias variable is in turn interpreted as a command, and follows all command rules as defined in [Command Execution](#command-execution). Note that you can only alias basic commands, meaning you can't alias pipe commands or asynchronous commands.
+
+Another thing to keep in mind is that you can only use aliases if they are the first word in a command.
 ### Grammar
 ```
-<stmt>    : alias <command_variable> = <command>
-<command> : <command_variable>
+<stmt>    : alias <command_variable> = <basic_command>
 ```
 ### Examples
 ```
@@ -353,12 +381,10 @@ listAll | grep myDirectory;
 ```
 
 ## Variables
-Variables must be set with ```=```. Use keyword ```const``` if you want the value to be immutable. Each variable has a type, which may be optionally expressed.
+Variables must be set with ```=```. Use keyword ```const``` if you want the value to be immutable. Each variable has a type, which may be optionally expressed. Once a variable's type is set, you cannot update the variable to a different type.
 ### Grammar
 ```
 <stmt> : <binding> = <expr>
-       | const <binding> = <expr>
-       | <variable> = <expr>
        
 <expr> : <variable>
 ```
@@ -387,7 +413,7 @@ while (x > 5) {
     }
     if (x == 7) continue;
     print(x--);
-};
+}
 ```
 
 ## Do-While Loops
@@ -415,10 +441,10 @@ do {
 Similar to a while loop in that it will only execute one iteration of the statements if the ```<bool_expr>``` is true. However, it also executes the first statement in the parentheses before running the loop, and after iteration will execute the last statement contained in the parentheses.
 ### Grammar
 ```
-<stmt> : for ( <stmt> ; <bool_expr> ; <stmt> ) {
+<stmt> : for ( <any_expr> ; <bool_expr> ; <any_expr> ) {
              <stmt>
              ...
-         };
+         }
 ```
 ### Examples
 ```
@@ -487,69 +513,69 @@ if (x == 1) {
 Similar to an ```if``` statement, but is evaluated as an expression. If ```<bool_expr>``` is true, then the first expression is evaluated and returned, otherwise the second expression is evaluated and returned.
 ### Grammar
 ```
-<expr> : <booL_expr> ? <expr> : <expr>
+<expr> : if <bool_expr> then <expr> else <expr>
 ```
 ### Examples
 ```
 x = 1;
-print(x == 1 ? "One" : "Not One");
+print(if x == 1 then "One" else "Not One");
 ```
 
 ## Functions
-Functions contain statements that can be called anywhere after it is defined. You call a function by name followed by parentheses containing any parameter values that wish to be passed into it. Functions can have any number of parameters, and an optional return type. Exit from a function with the ```return;``` statement if the return type is ```void```, otherwise an expression must follow (i.e. the grammar ```return <expr>;```). Note that the grammar implies you may define functions inside of functions. Additionally, functions may be recursive, meaning you can call the same function from within itself (see examples below).
+Functions contain statements that can be called anywhere after it is defined. You call a function by name followed by parentheses containing any parameter values that wish to be passed into it. Functions can have any number of parameters, and an optional return type. Exit from a function with the ```return;``` statement if the return type is ```void``` (or it will exit at the end of the function if no return is provided), otherwise an expression must follow (i.e. the grammar ```return <expr>;```). Note that the grammar implies you may define functions inside of functions. Additionally, functions may be recursive, meaning you can call the same function from within itself (see examples below).
 ### Grammar
 ```
-<stmt> : <variable> ( <binding> , ... ) : <type> {
+<stmt> : fn <variable> ( <binding> , ... ) : <type> {
              <stmt>
              ...
          }
-       | <variable> ( <binding> , ... ) {
+       | fn <variable> ( <binding> , ... ) {
              <stmt>
              ...
          }
 
-<stmt | expr> : <variable> ( <expr>, ... )
+<expr> : <variable> ( <expr>, ... )
 ```
 ### Examples
 ```
-hello() {
+fn hello() {
     echo “Hello World!”;
 }
 ```
 ```
-goodbye(): void {
+fn goodbye(): void {
     echo “Goodbye!”;
 }
 ```
 ```
-add(a, b) {
+fn add(a, b) {
     echo f"Performing {a} + {b} ...";
     return a + b;
 }
 ```
 ```
-factorial(n: int): int {
+fn factorial(n: int): int {
     return n == 1 ? 1 : factorial(n - 1) * n;
 }
 ```
 
 ## Math Operations
-Math operations are used for doing basic math, namely addition (e.g. ```+```, ```++```, ```+=```), subtraction (e.g. ```-```, ```--```, or ```-=```), multiplication (e.g. ```*``` or ```*=```), division (e.g. ```/``` or ```/=```), modulo (e.g. ```%``` or ```%=```), and powers (e.g. ```**``` or ```**=```). Usually, expressions involving only ints will evaulate to an int, and expressions involving ints and floats or only floats will evaluate to a float. Additionally, it is important to note that modulo is defined for floats.
+Math operations are used for doing basic math, namely addition (e.g. ```+```, ```++```, ```+=```), subtraction (e.g. ```-```, ```--```, or ```-=```), multiplication (e.g. ```*``` or ```*=```), division (e.g. ```/``` or ```/=```), modulo (e.g. ```%``` or ```%=```), and powers (e.g. ```**``` or ```**=```). Usually, expressions involving only ints will evaluate to an int, and expressions involving ints and floats or only floats will evaluate to a float. Additionally, it is important to note that modulo is defined for floats.
 
-There are also comparison operations for numbers (i.e. ints and floats) that will compare whether numbers are equal, greater than, or less than each other.
+There are also comparison operations for numbers (i.e. ints and floats) that will compare whether numbers are equal, greater than, or less than each other. You can check for equality with ```==``` or ```!=```. You may also compare strings. 
 ### Grammar (Unary)
 ```
 <int_expr>   : -<int_expr>
-             | --<int_expr>
-             | <int_expr>--
-             | ++<int_expr>
-             | <int_expr>++
+             | --<variable>
+             | <variable>--
+             | ++<variable>
+             | <variable>++
 
 <float_expr> : -<float_expr>
-             | --<float_expr>
-             | <float_expr>--
-             | ++<float_expr>
-             | <float_expr>++
+             | --<variable>
+             | <variable>--
+             | ++<variable>
+             | <variable>++
 ```
 ### Grammar (Binary)
 ```
@@ -602,11 +628,11 @@ There are also comparison operations for numbers (i.e. ints and floats) that wil
 ```
 ### Examples
 ```
-x = 2
+x = 2 + 3;
 
-y += x
+y += x;
 
-z = (x <= y) ? 3 ** 2 : 2 % 4;
+z = if (x <= y) then 3 ** 2 else 2 % 4;
 ```
 
 ## Boolean Operations
@@ -629,18 +655,18 @@ if (true || false) {
 ```
 
 ## String Concatenation
-Strings may be combined into new strings this way.
+Strings may be combined into new strings this way. You may also include another type besides a string in the binary expression and it will automatically convert them to a string, as long as one of the expressions is a string.
 ### Grammar
 ```
-<string_expr> : <string_expr> + ... + <string_expr>
+<string_expr> : <string_expr> + ... + <any_expr>
 ```
 ### Examples
 ```
-hello = "Hello " + "world!\n"
+hello = "Hello " + "world!\n" + 2024;
 ```
 
 ## String Interpolation
-Way to evaulate expressions and insert them, or variables into strings. In double quotation strings, you can interpolate the value of a variable with the variable name preceded by ```$```. A string preceded by a ```$``` before the quotations will allow for expressions to be interpolated within curly braces. Additionally, in double quotation strings, you may interpolate as well, you just need to include a ```$``` before the curly braces in the string.
+Way to evaluate expressions and insert them, or variables into strings. In double quotation strings, you can interpolate the value of a variable with the variable name preceded by ```$```. A string preceded by a ```$``` before the quotations will allow for expressions to be interpolated within curly braces. Additionally, in double quotation strings, you may interpolate as well, you just need to include a ```$``` before the curly braces in the string.
 ### Grammar
 ```
 <string> : $"...{ <expr> }..."
@@ -650,33 +676,35 @@ Way to evaulate expressions and insert them, or variables into strings. In doubl
 ```
 ### Examples
 ```
-x = 4
-y = 6
-sum = $"The sum of {x} and {y} is {x + y}"
+x = 4;
+y = 6;
+sum = $"The sum of {x} and {y} is {x + y}";
 ```
 
 ## Lambda Expressions
-Similar to functions, but evaulate to an expression, allowing them to be stored in variables or passed as parameters on the fly.
+Similar to functions, but evaluate to an expression, allowing them to be stored in variables or passed as parameters on the fly.
 ### Grammar
 ```
-<function_expr> : (<binding>, ...) : <type> -> <expr>
-                | (<binding>, ...) -> <expr>
-                | (<binding>, ...) : <type> -> {
+<function_expr> : fn (<binding>, ...) : <type> -> <expr>
+                | fn (<binding>, ...) -> <expr>
+                | fn (<binding>, ...) : <type> -> {
                         <stmt>
                         ...
-                    }
-                | (<binding>, ...) -> {
+                  }
+                | fn (<binding>, ...) -> {
                         <stmt>
                         ...
-                    }
+                  }
 ```
 ### Examples
 ```
-add = (a, b) -> a+b;
+add = fn (a, b) -> a+b;
+println add(2.1, 3.2);
 
-subtract = () -> {
+subtract = fn () -> {
     return 3 - 1;
 }
+print subtract();
 ```
 
 ## User I/O
@@ -731,10 +759,10 @@ You may define a custom scope in your commander script. Any variables or functio
 ### Examples
 ```
 {
-    x = 5
-    print(x) // Prints 5
+    x = 5;
+    print(x); // Prints 5
 }
-print(x) // Throws error that x is not initialized
+print(x); // Throws error that x is not initialized
 ```
 
 ## Comments
@@ -753,35 +781,46 @@ comment
 ```
 
 ## Code Separation and Libraries
-Use the ```import``` keyword followed by the path to the commander script file with code you would like to use, as defined below.
+Use the ```import``` keyword followed by the path to the commander script file with code you would like to use, as defined below. Note that you cannot use interpolated strings here, just a single string literal.
 ### Grammar
 ```
 <stmt> : import <string>
 ```
 ### Examples
 ```
-import "add.cmdr"
+import "add.cmdr";
 // The add() function is defined in add.cmdr, which adds two numbers.
-print(add(3, 4))
+print(add(3, 4));
 ```
 
 ## Custom Types
 Use the ```type``` keyword followed by a type name and then a type to define a custom type.
 ### Grammar
 ```
-<stmt> : type <variable> <type>
+<stmt> : type <variable> = <type>
 ```
 ### Examples
 ```
-type BinOpFunction (a: int, b: int) -> int;
-add: BinopFunction = (a, b) -> a + b;
+type BinOpFunction = fn (a: int, b: int) -> int;
+add: BinopFunction = fn (a, b) -> a + b;
+```
+
+## Assert Statements
+You can have assertions which allow you to throw an error in the event something is wrong, and display a message of what happened.
+### Grammar
+```
+<stmt> : assert <bool_expr>, <string>
+```
+### Examples
+```
+assert isPositive(-1), "Number is not positive!";
 ```
 
 ## API Functions
 ### Grammar (Parsing)
-    1. parseInt(<string> | <int> | <bool>) : <int>
-    2. parseFloat(<string> | <int> | <bool>) : <float>
-    3. parseBool(<string> | <int> | <float>) : <bool>
+    1. parseInt(<string> | <int> | <bool> | <float>) : <int>
+    2. parseFloat(<string> | <int> | <bool> | <float>) : <float>
+    3. parseBool(<string> | <int> | <bool> | <float>) : <bool>
 
 ### Grammar (Math)
     1. sqrt(<int> | <float>) : <float>
