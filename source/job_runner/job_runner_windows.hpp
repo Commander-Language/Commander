@@ -1,14 +1,6 @@
 /**
- * @file job_runner.hpp
- * @brief Definitions for job runner classes: Process and JobRunner
- * @details A job could be one command or a pipeline of commands.
- *          Examples of a job could be:
- *              1) ls -la
- *              2) ls -la | grep *.txt | wc -l
- *              3) `ls -la`
- *              4) cat text.txt &
- *
- * TODO: Update to use shared_ptrs
+ * @file job_runner_windows.hpp
+ * @brief A job runner implementation for Windows
  */
 
 #ifndef JOBRUNNER_WINDOWS_HPP
@@ -44,44 +36,33 @@ namespace JobRunner {
          * @brief Executes a process
          * @details Executes a builtin or external process.
          *          This shouldn't return, so fork before calling if needed.
-         * @param process - the process to execute
-         * @param in - file descriptor to read from (for builtins)
-         * @param out - file descriptor to write to (for builtins)
+         * @param process - The process to execute
+         * @param background - Is the process a background process
+         * @param pipe - Is the process a piped process
          */
-        JobInfo _exec(const Process::ProcessPtr& process);
+        JobInfo _exec(const Process::ProcessPtr& process, bool background, bool pipe);
+
+        /**
+         * @brief Setup a string to be able to run in a windows powershell/command-line context
+         * @param process - The process to parse to a string
+         * @param pipe - Is the process a piped process
+         * @return A string containing the command
+         */
+        std::string _setupCommandString(const Process::ProcessPtr& process, bool pipe);
 
         /**
          * @brief Exectue a builtin command without returning
          * @details Shouldn't return, so fork before calling if needed.
          * @param process - The process to execute
-         * @param in - The file descriptor to read from (default std in)
-         * @param out - The file descriptor to write to (default std out)
          */
         void _execBuiltinNoReturn(const Process::ProcessPtr& process);
 
         /**
          * @brief Execute a builtin
          * @param process - The process to execute
-         * @param in - The file descriptor to read from (default std in)
-         * @param out - The file descriptor to write to (default std out)
          * @return The job information
          */
         JobInfo _execBuiltin(const Process::ProcessPtr& process);
-
-        /**
-         * @brief Does piping of processes
-         * @details Should work with any order of builtin and external types.
-         *          Don't call a background process in here.
-         * @param process - The start process of the pipeline
-         * @return The job information of the last process if set to save
-         */
-        JobInfo _doPiping(const Process::ProcessPtr& process);
-
-        /**
-         * @brief Execute a process in the background
-         * @param process - The process to execute
-         */
-        void _doBackground(const Process::ProcessPtr& process);
 
         /**
          * @brief Set up process to be able to save return information from
@@ -90,7 +71,7 @@ namespace JobRunner {
          *                     (if it is, should call this at end of pipe)
          * @return The job information
          */
-        JobInfo _doSaveInfo(const Process::ProcessPtr& process, bool partOfPipe, int* fds = nullptr, size_t count = 0);
+        JobInfo _doSaveInfo(const Process::ProcessPtr& process, bool partOfPipe);
     };
 
 }  // namespace JobRunner

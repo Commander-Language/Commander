@@ -71,7 +71,11 @@ int main(int argc, char** argv) {
             return 0;
         }
 #ifdef WINDOWS_DEBUG
+        Util::usingNCurses = false;
+        Util::println("Commander Language Version Beta");
+        Util::println("Basic REPL for Commander scripting language");
         while (true) {
+            Util::print(">> ");
             std::string source;
             std::getline(std::cin, source);
             try {

@@ -1,3 +1,7 @@
+/**
+ * @file job_runner_interface.hpp
+ * @brief A job runner interface class
+ */
 
 #ifndef JOBRUNNER_INTERFACE_HPP
 #define JOBRUNNER_INTERFACE_HPP

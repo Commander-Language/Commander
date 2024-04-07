@@ -1,14 +1,6 @@
 /**
- * @file job_runner.hpp
- * @brief Definitions for job runner classes: Process and JobRunner
- * @details A job could be one command or a pipeline of commands.
- *          Examples of a job could be:
- *              1) ls -la
- *              2) ls -la | grep *.txt | wc -l
- *              3) `ls -la`
- *              4) cat text.txt &
- *
- * TODO: Update to use shared_ptrs
+ * @file job_runner_linux.hpp
+ * @brief A job runner implementation for Linux/Unix
  */
 
 #ifndef JOBRUNNER_LINUX_HPP

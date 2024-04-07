@@ -1,6 +1,6 @@
 /**
- * @file job_runner.hpp
- * @brief Implements the classes Process and JobRunner
+ * @file job_runner_linux.hpp
+ * @brief Implements the JobRunner
  */
 #include "job_runner_linux.hpp"
 #include "process.hpp"
