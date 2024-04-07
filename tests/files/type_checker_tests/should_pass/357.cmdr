@@ -1,5 +1,4 @@
-//Should allow redeclaring variables
+//Should allow redeclaring variables of same type
 x: int = 4;
-x: float = 3.2;
-x = true;
-x = "hi";
+x: int = 5;
+x = 6;

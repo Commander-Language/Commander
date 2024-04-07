@@ -1,0 +1,7 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (ArrayExprNode (ExprsNode (ArrayExprNode (ExprsNode (ArrayExprNode (ExprsNode (ArrayExprNode (ExprsNode (ArrayExprNode (ExprsNode (IntExprNode 1 INT) (IntExprNode 2 INT)) INT[])) INT[][])) INT[][][])) INT[][][][])) INT[][][][][]) INT[][][][][]))
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (LValueExprNode (IndexExprNode (VarExprNode x INT[][][][][]) (IntExprNode 0 INT) INT[][][][]) INT[][][][]) INT[][][][]))
+	(ExprStmtNode (BinOpExprNode (BindingNode b) SET (LValueExprNode (IndexExprNode (IndexExprNode (VarExprNode x INT[][][][][]) (IntExprNode 0 INT) INT[][][][]) (IntExprNode 0 INT) INT[][][]) INT[][][]) INT[][][]))
+	(ExprStmtNode (BinOpExprNode (BindingNode c) SET (LValueExprNode (IndexExprNode (IndexExprNode (IndexExprNode (VarExprNode x INT[][][][][]) (IntExprNode 0 INT) INT[][][][]) (IntExprNode 0 INT) INT[][][]) (IntExprNode 0 INT) INT[][]) INT[][]) INT[][]))
+	(ExprStmtNode (BinOpExprNode (BindingNode d) SET (LValueExprNode (IndexExprNode (IndexExprNode (IndexExprNode (IndexExprNode (VarExprNode x INT[][][][][]) (IntExprNode 0 INT) INT[][][][]) (IntExprNode 0 INT) INT[][][]) (IntExprNode 0 INT) INT[][]) (IntExprNode 0 INT) INT[]) INT[]) INT[]))
+	(ExprStmtNode (BinOpExprNode (BindingNode e) SET (LValueExprNode (IndexExprNode (IndexExprNode (IndexExprNode (IndexExprNode (IndexExprNode (VarExprNode x INT[][][][][]) (IntExprNode 0 INT) INT[][][][]) (IntExprNode 0 INT) INT[][][]) (IntExprNode 0 INT) INT[][]) (IntExprNode 0 INT) INT[]) (IntExprNode 0 INT) INT) INT) INT)))

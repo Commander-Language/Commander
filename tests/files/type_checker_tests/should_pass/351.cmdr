@@ -1,5 +1,5 @@
 //Test builtin foreach type checks
 a = 1;
-x = [3, 2, 1].foreach(fn (a) -> println a;);
-x = (1.0, true, 3)[a].foreach(fn (a) -> println a;);
+x = [3, 2, 1].foreach(fn (b) -> println b;);
+x = (1.0, true, 3)[a].foreach(fn (b) -> println b;);
 x = [3, 2, 1].foreach((1.0, true, 3)[a]);

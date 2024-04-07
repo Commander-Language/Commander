@@ -542,7 +542,7 @@ namespace TypeChecker {
                                     + "\nPossible function signatures:" + functionSignatures.str(),
                             exprNode->position);
                 }
-                if (exprNode->func == "append") {
+                if (exprNode->func == "append" && argTypes[0]) {
                     ArrayTyPtr const arrayTy = std::static_pointer_cast<ArrayTy>(argTypes[0]);
                     if (!arrayTy->baseType) {
                         arrayTy->baseType = argTypes[1];

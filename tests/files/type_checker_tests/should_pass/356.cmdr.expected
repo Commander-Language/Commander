@@ -1,0 +1,8 @@
+(PrgmNode
+	(ImportStmtNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '../tests/files/type_checker_tests/should_pass/354.cmdr') STRING))) (PrgmNode
+	(FunctionStmtNode add (BindingsNode (BindingNode a (IntTypeNode INT)) (BindingNode b (FloatTypeNode FLOAT))) (FloatTypeNode FLOAT) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (BinOpExprNode (LValueExprNode (VarExprNode a INT) INT) ADD (LValueExprNode (VarExprNode b FLOAT) FLOAT) FLOAT)))))))
+	(ImportStmtNode (StringNode (StringExprsNode (StringExpressionNode (StringNode '../tests/files/type_checker_tests/should_pass/355.cmdr') STRING))) (PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode pi) SET (FloatExprNode 3.141590 FLOAT) FLOAT))
+	(ExprStmtNode (BinOpExprNode (BindingNode num) SET (IntExprNode 42 INT) INT))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode add (fn (INT, FLOAT) -> FLOAT)) (fn (INT, FLOAT) -> FLOAT)) (ExprsNode (LValueExprNode (VarExprNode num INT) INT) (LValueExprNode (VarExprNode pi FLOAT) FLOAT)) FLOAT) FLOAT)))
