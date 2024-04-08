@@ -301,12 +301,19 @@ namespace PowerShellTranspiler {
                 _write("if(");
                 _expr(stmt->condition);
                 _writeLine(") {");
+                _increaseIndent();
+
                 _stmt(stmt->trueStmt);
                 if (stmt->falseStmt) {
+                    _decreaseIndent();
                     _writeLine("} else {");
+
+                    _increaseIndent();
                     _stmt(stmt->falseStmt);
+                    _decreaseIndent();
                     _writeLine("}");
                 } else {
+                    _decreaseIndent();
                     _writeLine("}");
                 }
                 break;
@@ -320,7 +327,9 @@ namespace PowerShellTranspiler {
                 _write(";");
                 _expr(stmt->update);
                 _writeLine(") {");
+                _increaseIndent();
                 _stmt(stmt->body);
+                _decreaseIndent();
                 _writeLine("}");
                 break;
             }
@@ -329,14 +338,18 @@ namespace PowerShellTranspiler {
                 _write("while(");
                 _expr(stmt->condition);
                 _writeLine("){");
+                _increaseIndent();
                 _stmt(stmt->body);
+                _decreaseIndent();
                 _writeLine("}");
                 break;
             }
             case Parser::DO_WHILE_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::DoWhileStmtNode>(node);
                 _writeLine("do{");
+                _increaseIndent();
                 _stmt(stmt->body);
+                _decreaseIndent();
                 _write("} while(");
                 _expr(stmt->condition);
                 _writeLine(")");
@@ -350,9 +363,12 @@ namespace PowerShellTranspiler {
                 break;
             }
             case Parser::SCOPE_STMT: {
+                // TODO: implement user-defined scopes
                 auto stmt = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
-                _writeLine("if(1) {");
+                _writeLine("{");
+                _increaseIndent();
                 _stmts(stmt->stmts);
+                _decreaseIndent();
                 _writeLine("}");
                 break;
             }
@@ -448,6 +464,7 @@ namespace PowerShellTranspiler {
             case Parser::FUNCTION_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::FunctionStmtNode>(node);
                 _writeLine("function " + stmt->name + "{");
+                _increaseIndent();
                 auto bindings = stmt->bindings->bindings;
                 if (bindings.size() > 0) {
                     _write("param(");
@@ -464,6 +481,7 @@ namespace PowerShellTranspiler {
                     _writeLine(")");
                 }
                 _stmt(stmt->body);
+                _decreaseIndent();
                 _write("}");
                 break;
             }
@@ -510,9 +528,18 @@ namespace PowerShellTranspiler {
         }
     }
 
+    void PowerShellTranspiler::_increaseIndent() { _indentLevel++; }
+    void PowerShellTranspiler::_decreaseIndent() {
+        _indentLevel--;
+        if (_indentLevel < 0) { _indentLevel = 0; }
+    }
     void PowerShellTranspiler::_writeLine(const std::string& str) {
+        _output.append(std::string(_indentLevel * _indentSize, ' '));
         _output.append(str);
         _output.append("\n");
     }
-    void PowerShellTranspiler::_write(const std::string& str) { _output.append(str); }
+    void PowerShellTranspiler::_write(const std::string& str) {
+        _output.append(std::string(_indentLevel * _indentSize, ' '));
+        _output.append(str);
+    }
 }  // namespace PowerShellTranspiler
