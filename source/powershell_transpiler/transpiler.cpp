@@ -73,7 +73,7 @@ namespace PowerShellTranspiler {
         }
     }
 
-    void PowerShellTranspiler::_binding(const Parser::BindingNodePtr& node) { _write("$" + node->variable + " "); }
+    void PowerShellTranspiler::_binding(const Parser::BindingNodePtr& node) { _write("$" + node->variable); }
     void PowerShellTranspiler::_bindings(const Parser::BindingsNodePtr& node) {
         for (auto& binding : node->bindings) { _binding(binding); }
     }
