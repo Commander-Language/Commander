@@ -183,7 +183,7 @@ namespace PowerShellTranspiler {
                 auto expr = std::static_pointer_cast<Parser::ArrayExprNode>(node);
                 auto exprs = std::static_pointer_cast<Parser::ExprsNode>(expr->expressions);
                 auto array = exprs->exprs;
-                if (array.size() == 0) _write("@()");
+                if (array.empty()) _write("@()");
                 else if (array.size() == 1) {
                     _write(",");
                     _expr(array[0]);
@@ -235,10 +235,12 @@ namespace PowerShellTranspiler {
             }
             case Parser::UNOP_EXPR: {
                 auto unaryOperation = std::static_pointer_cast<Parser::UnOpExprNode>(node);
+                _unary(unaryOperation);
                 break;
             }
             case Parser::BINOP_EXPR: {
                 auto binaryOperation = std::static_pointer_cast<Parser::BinOpExprNode>(node);
+                _binary(binaryOperation);
                 break;
             }
             case Parser::LAMBDA_EXPR: {
@@ -294,6 +296,176 @@ namespace PowerShellTranspiler {
             }
         }
     }
+
+    void PowerShellTranspiler::_binary(Parser::BinOpExprNodePtr node) {
+        switch (node->opType) {
+            case Parser::LESSER: {
+                _node(node->left);
+                _write(" -lt ");
+                _node(node->right);
+                break;
+            }
+            case Parser::GREATER: {
+                _node(node->left);
+                _write(" -gt ");
+                _node(node->right);
+                break;
+            }
+            case Parser::LESSER_EQUAL: {
+                _node(node->left);
+                _write(" -le ");
+                _node(node->right);
+                break;
+            }
+            case Parser::GREATER_EQUAL: {
+                _node(node->left);
+                _write(" -ge ");
+                _node(node->right);
+                break;
+            }
+            case Parser::EQUAL: {
+                _node(node->left);
+                _write(" -eq ");
+                _node(node->right);
+                break;
+            }
+            case Parser::NOT_EQUAL: {
+                _node(node->left);
+                _write(" -ne ");
+                _node(node->right);
+                break;
+            }
+            case Parser::AND: {
+                _node(node->left);
+                _write(" -and ");
+                _node(node->right);
+                break;
+            }
+            case Parser::OR: {
+                _node(node->left);
+                _write(" -or ");
+                _node(node->right);
+                break;
+            }
+            case Parser::EXPONENTIATE: {
+                _write("[Math]::Pow(");
+                _node(node->left);
+                _write(", ");
+                _node(node->right);
+                _write(")");
+                break;
+            }
+            case Parser::MULTIPLY: {
+                _node(node->left);
+                _write(" * ");
+                _node(node->right);
+                break;
+            }
+            case Parser::DIVIDE: {
+                _node(node->left);
+                _write(" / ");
+                _node(node->right);
+                break;
+            }
+            case Parser::MODULO: {
+                _node(node->left);
+                _write(" % ");
+                _node(node->right);
+                break;
+            }
+            case Parser::ADD: {
+                _node(node->left);
+                _write(" + ");
+                _node(node->right);
+                break;
+            }
+            case Parser::SUBTRACT: {
+                _node(node->left);
+                _write(" - ");
+                _node(node->right);
+                break;
+            }
+            case Parser::EXPONENTIATE_SET: {
+                _node(node->left);
+                _write(" = [Math]::Pow(");
+                _node(node->left);
+                _write(", ");
+                _node(node->right);
+                _write(")");
+                break;
+            }
+            case Parser::MULTIPLY_SET: {
+                _node(node->left);
+                _write(" *= ");
+                _node(node->right);
+                break;
+            }
+            case Parser::DIVIDE_SET: {
+                _node(node->left);
+                _write(" /= ");
+                _node(node->right);
+                break;
+            }
+            case Parser::MODULO_SET: {
+                _node(node->left);
+                _write(" %= ");
+                _node(node->right);
+                break;
+            }
+            case Parser::ADD_SET: {
+                _node(node->left);
+                _write(" += ");
+                _node(node->right);
+                break;
+            }
+            case Parser::SUBTRACT_SET: {
+                _node(node->left);
+                _write(" -= ");
+                _node(node->right);
+                break;
+            }
+            case Parser::SET: {
+                _node(node->left);
+                _write(" = ");
+                _node(node->right);
+                break;
+            }
+        }
+    }
+    void PowerShellTranspiler::_unary(Parser::UnOpExprNodePtr node) {
+        switch (node->opType) {
+            case Parser::NEGATE: {
+                _write("-");
+                _node(node->node);
+                break;
+            }
+            case Parser::NOT: {
+                _write("!");
+                _node(node->node);
+            }
+            case Parser::PRE_INCREMENT: {
+                _write("++");
+                _node(node->node);
+                break;
+            }
+            case Parser::POST_INCREMENT: {
+                _node(node->node);
+                _write("++");
+                break;
+            }
+            case Parser::PRE_DECREMENT: {
+                _write("--");
+                _node(node->node);
+                break;
+            }
+            case Parser::POST_DECREMENT: {
+                _node(node->node);
+                _write("--");
+                break;
+            }
+        }
+    }
+
     void PowerShellTranspiler::_stmt(const Parser::StmtNodePtr node) {
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
