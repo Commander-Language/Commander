@@ -1,3 +1,7 @@
+/**
+* @file transpiler.cpp
+* @brief Implements the PowerShellTranspiler class.
+*/
 #include "transpiler.hpp"
 #include "source/parser/parser.hpp"
 #include "source/util/commander_exception.hpp"
@@ -121,7 +125,8 @@ namespace PowerShellTranspiler {
                 break;
             }
             default: {
-                // TODO: Error
+                throw Util::CommanderException("Unknown cmd type found while transpiling "
+                                               + Parser::nodeTypeToString(node->nodeType()));
             }
         }
     }
@@ -140,7 +145,8 @@ namespace PowerShellTranspiler {
                 //                break;
                 //            }
             default: {
-                break;
+                throw Util::CommanderException("Unknown lvalue type found while transpiling "
+                                               + Parser::nodeTypeToString(node->nodeType()));
             }
         }
     }
@@ -291,7 +297,8 @@ namespace PowerShellTranspiler {
                 break;
             }
             default: {
-                break;
+                throw Util::CommanderException("Unknown expr type found while transpiling "
+                                               + Parser::nodeTypeToString(node->nodeType()));
             }
         }
     }
@@ -674,6 +681,8 @@ namespace PowerShellTranspiler {
                 break;
             }
             default: {
+                throw Util::CommanderException("Unknown stmt type found while transpiling "
+                                               + Parser::nodeTypeToString(node->nodeType()));
             }
         }
     }
@@ -711,8 +720,6 @@ namespace PowerShellTranspiler {
                 _write("cmdlet");  // This is probably wrong
                 break;
             }
-            default: {
-            }
         }
     }
 
@@ -721,8 +728,8 @@ namespace PowerShellTranspiler {
 
     void PowerShellTranspiler::_increaseIndent() { _indentLevel++; }
     void PowerShellTranspiler::_decreaseIndent() {
-        _indentLevel--;
-        if (_indentLevel < 0) { _indentLevel = 0; }
+        if(_indentLevel != 0)
+            _indentLevel--;
     }
     void PowerShellTranspiler::_writeLine(const std::string& str) {
         if (_indent) _output.append(std::string(_indentLevel * _indentSize, ' '));
