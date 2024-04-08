@@ -18,6 +18,8 @@ namespace PowerShellTranspiler {
         size_t _indentLevel = 0;
         const size_t _indentSize = 4;
 
+        bool _indent = true;
+
         void _binding(Parser::BindingNodePtr node);
         void _bindings(Parser::BindingsNodePtr node);
         void _exprs(Parser::ExprsNodePtr node);
@@ -29,7 +31,7 @@ namespace PowerShellTranspiler {
         void _cmd(Parser::CmdNodePtr node);
         void _lvalue(Parser::LValueNodePtr node);
         void _expr(Parser::ExprNodePtr node);
-        void _stmt(Parser::StmtNodePtr node);
+        void _stmt(Parser::StmtNodePtr node, bool skipScope = false);
         void _type(Parser::TypeNodePtr node);
         void _binary(Parser::BinOpExprNodePtr node);
         void _unary(Parser::UnOpExprNodePtr node);
@@ -37,6 +39,8 @@ namespace PowerShellTranspiler {
 
         void _increaseIndent();
         void _decreaseIndent();
+        void _indentOn();
+        void _indentOff();
         void _writeLine(const std::string& str);
         void _write(const std::string& str);
     };
