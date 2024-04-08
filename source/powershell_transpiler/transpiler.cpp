@@ -261,6 +261,7 @@ namespace PowerShellTranspiler {
                     _write(")");
                 }
                 _stmt(expr->body);
+                _write("}");
                 break;
             }
             case Parser::CMD_EXPR: {
@@ -296,63 +297,218 @@ namespace PowerShellTranspiler {
     void PowerShellTranspiler::_stmt(const Parser::StmtNodePtr node) {
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::IfStmtNode>(node);
+                _write("if(");
+                _expr(stmt->condition);
+                _writeLine(") {");
+                _stmt(stmt->trueStmt);
+                if (stmt->falseStmt) {
+                    _writeLine("} else {");
+                    _stmt(stmt->falseStmt);
+                    _writeLine("}");
+                } else {
+                    _writeLine("}");
+                }
                 break;
             }
             case Parser::FOR_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::ForStmtNode>(node);
+                _write("for(");
+                _expr(stmt->initial);
+                _write(";");
+                _expr(stmt->condition);
+                _write(";");
+                _expr(stmt->update);
+                _writeLine(") {");
+                _stmt(stmt->body);
+                _writeLine("}");
                 break;
             }
             case Parser::WHILE_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::WhileStmtNode>(node);
+                _write("while(");
+                _expr(stmt->condition);
+                _writeLine("){");
+                _stmt(stmt->body);
+                _writeLine("}");
                 break;
             }
             case Parser::DO_WHILE_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::DoWhileStmtNode>(node);
+                _writeLine("do{");
+                _stmt(stmt->body);
+                _write("} while(");
+                _expr(stmt->condition);
+                _writeLine(")");
                 break;
             }
             case Parser::RETURN_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::ReturnStmtNode>(node);
+                _write("return ");
+                _expr(stmt->retExpr);
+                _writeLine("");
                 break;
             }
             case Parser::SCOPE_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
+                _writeLine("if(1) {");
+                _stmts(stmt->stmts);
+                _writeLine("}");
                 break;
             }
             case Parser::CMD_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::CmdStmtNode>(node);
+                _cmd(stmt->command);
+                _writeLine("");
                 break;
             }
             case Parser::EXPR_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::ExprStmtNode>(node);
+                _expr(stmt->expression);
+                _writeLine("");
                 break;
             }
             case Parser::ALIAS_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::AliasStmtNode>(node);
+                _write("New-Alias -Name " + stmt->alias + "-Value ");
+                _cmd(stmt->command);
+                _writeLine("");
                 break;
             }
             case Parser::IMPORT_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::ImportStmtNode>(node);
+                // TODO: Implement
                 break;
             }
             case Parser::PRINT_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::PrintStmtNode>(node);
+                _write("Write-Output ");
+                _expr(stmt->expression);
+                _writeLine("");
                 break;
             }
             case Parser::PRINTLN_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
+                _write("Write-Output ");
+                _expr(stmt->expression);
+                _writeLine("");
                 break;
             }
             case Parser::WRITE_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::WriteStmtNode>(node);
+                _write("Write-Output ");
+                _expr(stmt->fileData);
+                _write(" | Out-File -FilePath ");
+                _expr(stmt->filePath);
+                _writeLine("");
+
                 break;
             }
-            case Parser::TYPE_STMT:
+            case Parser::TYPE_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::TypeStmtNode>(node);
+                // TODO: Implement
                 break;
-            case Parser::BREAK_STMT:
+            }
+            case Parser::BREAK_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::BreakStmtNode>(node);
+                _writeLine("break");
                 break;
-            case Parser::CONTINUE_STMT:
+            }
+            case Parser::CONTINUE_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::ContinueStmtNode>(node);
+                _writeLine("continue");
                 break;
-            case Parser::TIMEOUT_STMT:
+            }
+            case Parser::TIMEOUT_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::TimeoutStmtNode>(node);
+                std::string var1 = "$timeout" + std::to_string(_timeoutCount);
+                std::string var2 = "$wait" + std::to_string(_timeoutCount);
+                _writeLine(var1 + " = {");
+                _stmt(stmt->stmt);
+                _writeLine("}");
+                _writeLine(var2 + " = Start-Job -ScriptBlock " + var1);
+                _write("if(!(Wait-Job " + var2 + "-Timeout " + std::to_string(stmt->timeout / 1000) + ")){");
+                _write("Write-Output ");
+                _string(stmt->message);
+                _writeLine("}");
+                _timeoutCount++;
                 break;
+            }
             case Parser::ASSERT_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::AssertStmtNode>(node);
+                _write("if(!(");
+                _expr(stmt->expr);
+                _writeLine(")) {");
+                _write("Write-Output ");
+                _string(stmt->message);
+                _writeLine("}");
+
                 break;
             }
             case Parser::FUNCTION_STMT: {
+                auto stmt = std::static_pointer_cast<Parser::FunctionStmtNode>(node);
+                _writeLine("function " + stmt->name + "{");
+                auto bindings = stmt->bindings->bindings;
+                if (bindings.size() > 0) {
+                    _write("param(");
+                    for (int i = 0; i < bindings.size(); i++) {
+                        auto binding = bindings[i];
+                        if (binding->type) {
+                            _write("[");
+                            _type(binding->type);
+                            _write("]");
+                        }
+                        _write("$" + binding->variable);
+                        if (i < bindings.size() - 1) { _write(", "); }
+                    }
+                    _writeLine(")");
+                }
+                _stmt(stmt->body);
+                _write("}");
                 break;
             }
             default: {
             }
         }
     }
-    void PowerShellTranspiler::_type(const Parser::TypeNodePtr node) {}
+    void PowerShellTranspiler::_type(const Parser::TypeNodePtr node) {
+        switch (node->type->getType()) {
+            case TypeChecker::INT: {
+                _write("int");
+                break;
+            }
+            case TypeChecker::FLOAT: {
+                _write("double");
+                break;
+            }
+            case TypeChecker::BOOL: {
+                _write("bool");
+                break;
+            }
+            case TypeChecker::TUPLE: {
+                _write("Array");  // TODO: Fix when tuples are implemented
+                break;
+            }
+            case TypeChecker::ARRAY: {
+                _write("Array");
+                break;
+            }
+            case TypeChecker::FUNCTION: {
+                _write("scriptblock");
+                break;
+            }
+            case TypeChecker::STRING: {
+                _write("string");
+                break;
+            }
+            case TypeChecker::COMMAND: {
+                _write("cmdlet");  // This is probably wrong
+                break;
+            }
+            default: {
+            }
+        }
+    }
 
     void PowerShellTranspiler::_writeLine(const std::string& str) {
         _output.append(str);

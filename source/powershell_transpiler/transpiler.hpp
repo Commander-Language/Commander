@@ -13,6 +13,8 @@ namespace PowerShellTranspiler {
     private:
         Parser::ASTNodeList _ast;
         std::string _output;
+        unsigned int _timeoutCount = 1;
+
         void _binding(Parser::BindingNodePtr node);
         void _bindings(Parser::BindingsNodePtr node);
         void _exprs(Parser::ExprsNodePtr  node);
