@@ -1,6 +1,5 @@
 #include "transpiler.hpp"
 #include "source/parser/parser.hpp"
-#include "source/type_checker/type.hpp"
 #include "source/util/commander_exception.hpp"
 
 #include <utility>
@@ -74,31 +73,31 @@ namespace PowerShellTranspiler {
         }
     }
 
-    void PowerShellTranspiler::_binding(const Parser::BindingNodePtr node) { _write("$" + node->variable + " "); }
-    void PowerShellTranspiler::_bindings(const Parser::BindingsNodePtr node) {
+    void PowerShellTranspiler::_binding(const Parser::BindingNodePtr& node) { _write("$" + node->variable + " "); }
+    void PowerShellTranspiler::_bindings(const Parser::BindingsNodePtr& node) {
         for (auto& binding : node->bindings) { _binding(binding); }
     }
-    void PowerShellTranspiler::_exprs(const Parser::ExprsNodePtr node) {
+    void PowerShellTranspiler::_exprs(const Parser::ExprsNodePtr& node) {
         for (auto& expr : node->exprs) { _expr(expr); }
     }
-    void PowerShellTranspiler::_prgm(const Parser::PrgmNodePtr node) { _stmts(node->stmts); }
-    void PowerShellTranspiler::_stmts(const Parser::StmtsNodePtr node) {
+    void PowerShellTranspiler::_prgm(const Parser::PrgmNodePtr& node) { _stmts(node->stmts); }
+    void PowerShellTranspiler::_stmts(const Parser::StmtsNodePtr& node) {
         for (auto& stmt : node->stmts) { _stmt(stmt); }
     }
-    void PowerShellTranspiler::_string(const Parser::StringNodePtr node) {
+    void PowerShellTranspiler::_string(const Parser::StringNodePtr& node) {
         if (node->isLiteral()) {
             _write("\"" + node->literal + "\"");
         } else {
             _string_exprs(node->expressions);
         }
     }
-    void PowerShellTranspiler::_string_exprs(const Parser::StringExprsNodePtr node) {
+    void PowerShellTranspiler::_string_exprs(const Parser::StringExprsNodePtr& node) {
         for (auto& expr : node->expressions) _expr(expr);
     }
-    void PowerShellTranspiler::_types(const Parser::TypesNodePtr node) {
+    void PowerShellTranspiler::_types(const Parser::TypesNodePtr& node) {
         for (auto& type : node->types) { _type(type); }
     }
-    void PowerShellTranspiler::_cmd(const Parser::CmdNodePtr node) {
+    void PowerShellTranspiler::_cmd(const Parser::CmdNodePtr& node) {
         switch (node->nodeType()) {
             case Parser::BASIC_CMD: {
                 auto basicCommand = std::static_pointer_cast<Parser::BasicCmdNode>(node);
@@ -126,7 +125,7 @@ namespace PowerShellTranspiler {
             }
         }
     }
-    void PowerShellTranspiler::_lvalue(const Parser::LValueNodePtr node) {
+    void PowerShellTranspiler::_lvalue(const Parser::LValueNodePtr& node) {
         switch (node->nodeType()) {
                 //            case Parser::VAR_LVALUE: {
                 //                auto var = std::static_pointer_cast<Parser::VarLValueNode>(node);
@@ -145,7 +144,7 @@ namespace PowerShellTranspiler {
             }
         }
     }
-    void PowerShellTranspiler::_expr(const Parser::ExprNodePtr node) {
+    void PowerShellTranspiler::_expr(const Parser::ExprNodePtr& node) {
         switch (node->nodeType()) {
             case Parser::INT_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::IntExprNode>(node);
@@ -210,7 +209,7 @@ namespace PowerShellTranspiler {
                 auto expr = std::static_pointer_cast<Parser::TupleExprNode>(node);
                 auto exprs = std::static_pointer_cast<Parser::ExprsNode>(expr->expressions);
                 auto array = exprs->exprs;
-                if (array.size() == 0) _write("@()");
+                if (array.empty()) _write("@()");
                 else if (array.size() == 1) {
                     _write(",");
                     _expr(array[0]);
@@ -247,7 +246,7 @@ namespace PowerShellTranspiler {
                 auto expr = std::static_pointer_cast<Parser::LambdaExprNode>(node);
                 _write("{ ");
                 auto bindings = expr->bindings->bindings;
-                if (bindings.size() > 0) {
+                if (!bindings.empty()) {
                     _write("Param(");
                     for (int i = 0; i < bindings.size(); i++) {
                         if (i > 0) { _write("[,"); }
@@ -297,7 +296,7 @@ namespace PowerShellTranspiler {
         }
     }
 
-    void PowerShellTranspiler::_binary(Parser::BinOpExprNodePtr node) {
+    void PowerShellTranspiler::_binary(const Parser::BinOpExprNodePtr& node) {
         switch (node->opType) {
             case Parser::LESSER: {
                 _node(node->left);
@@ -432,7 +431,7 @@ namespace PowerShellTranspiler {
             }
         }
     }
-    void PowerShellTranspiler::_unary(Parser::UnOpExprNodePtr node) {
+    void PowerShellTranspiler::_unary(const Parser::UnOpExprNodePtr& node) {
         switch (node->opType) {
             case Parser::NEGATE: {
                 _write("-");
@@ -466,7 +465,7 @@ namespace PowerShellTranspiler {
         }
     }
 
-    void PowerShellTranspiler::_stmt(const Parser::StmtNodePtr node, bool skipScope) {
+    void PowerShellTranspiler::_stmt(const Parser::StmtNodePtr& node, bool skipScope) {
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::IfStmtNode>(node);
@@ -678,7 +677,7 @@ namespace PowerShellTranspiler {
             }
         }
     }
-    void PowerShellTranspiler::_type(const Parser::TypeNodePtr node) {
+    void PowerShellTranspiler::_type(const Parser::TypeNodePtr& node) {
         switch (node->type->getType()) {
             case TypeChecker::INT: {
                 _write("int");

@@ -20,21 +20,21 @@ namespace PowerShellTranspiler {
 
         bool _indent = true;
 
-        void _binding(Parser::BindingNodePtr node);
-        void _bindings(Parser::BindingsNodePtr node);
-        void _exprs(Parser::ExprsNodePtr node);
-        void _prgm(Parser::PrgmNodePtr node);
-        void _stmts(Parser::StmtsNodePtr node);
-        void _string(Parser::StringNodePtr node);
-        void _string_exprs(Parser::StringExprsNodePtr node);
-        void _types(Parser::TypesNodePtr node);
-        void _cmd(Parser::CmdNodePtr node);
-        void _lvalue(Parser::LValueNodePtr node);
-        void _expr(Parser::ExprNodePtr node);
-        void _stmt(Parser::StmtNodePtr node, bool skipScope = false);
-        void _type(Parser::TypeNodePtr node);
-        void _binary(Parser::BinOpExprNodePtr node);
-        void _unary(Parser::UnOpExprNodePtr node);
+        void _binding(const Parser::BindingNodePtr& node);
+        void _bindings(const Parser::BindingsNodePtr& node);
+        void _exprs(const Parser::ExprsNodePtr& node);
+        void _prgm(const Parser::PrgmNodePtr& node);
+        void _stmts(const Parser::StmtsNodePtr& node);
+        void _string(const Parser::StringNodePtr& node);
+        void _string_exprs(const Parser::StringExprsNodePtr& node);
+        void _types(const Parser::TypesNodePtr& node);
+        void _cmd(const Parser::CmdNodePtr& node);
+        void _lvalue(const Parser::LValueNodePtr& node);
+        void _expr(const Parser::ExprNodePtr& node);
+        void _stmt(const Parser::StmtNodePtr& node, bool skipScope = false);
+        void _type(const Parser::TypeNodePtr& node);
+        void _binary(const Parser::BinOpExprNodePtr& node);
+        void _unary(const Parser::UnOpExprNodePtr& node);
         void _node(const Parser::ASTNodePtr& node);
 
         void _increaseIndent();
