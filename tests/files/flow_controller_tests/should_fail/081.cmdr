@@ -1,0 +1,2 @@
+x = false;
+print arccos(x);
