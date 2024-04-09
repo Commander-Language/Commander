@@ -8,6 +8,7 @@
 #include "source/bash_transpiler/transpiler.hpp"
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/lexer/lexer.hpp"
+#include "source/powershell_transpiler/transpiler.hpp"
 #include "source/type_checker/type_checker.hpp"
 
 #include <fstream>
@@ -83,6 +84,19 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
             std::cout << bashOutput << "\n";
         } else {
             Util::writeToFile(bashOutput, outFile);
+        }
+        return;
+    }
+
+    // Lex, parse, type-check, and transpile to PowerShell:
+    if (hasArgument(arguments, "--powershell")) {
+        std::string outFile = getArgumentValue(arguments, "-o");
+        PowerShellTranspiler::PowerShellTranspiler transpiler(nodes);
+        std::string powerShellOutput = transpiler.transpile();
+        if (outFile.empty()) {
+            std::cout << powerShellOutput << "\n";
+        } else {
+            Util::writeToFile(powerShellOutput, outFile);
         }
         return;
     }

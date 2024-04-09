@@ -1,18 +1,21 @@
 /**
-* @file transpiler.cpp
-* @brief Implements the PowerShellTranspiler class.
-*/
+ * @file transpiler.cpp
+ * @brief Implements the PowerShellTranspiler class.
+ */
 #include "transpiler.hpp"
 #include "source/parser/parser.hpp"
 #include "source/util/commander_exception.hpp"
 
 #include <utility>
+
 namespace PowerShellTranspiler {
     PowerShellTranspiler::PowerShellTranspiler(Parser::ASTNodeList nodes) : _ast(std::move(nodes)) {}
+
     std::string PowerShellTranspiler::transpile() {
         for (auto& node : _ast) { _node(node); }
         return _output;
     }
+
     void PowerShellTranspiler::_node(const Parser::ASTNodePtr& node) {
         switch (Parser::getAbstractNodeType(node->nodeType())) {
             case Parser::BINDING: {
@@ -78,16 +81,21 @@ namespace PowerShellTranspiler {
     }
 
     void PowerShellTranspiler::_binding(const Parser::BindingNodePtr& node) { _write("$" + node->variable); }
+
     void PowerShellTranspiler::_bindings(const Parser::BindingsNodePtr& node) {
         for (auto& binding : node->bindings) { _binding(binding); }
     }
+
     void PowerShellTranspiler::_exprs(const Parser::ExprsNodePtr& node) {
         for (auto& expr : node->exprs) { _expr(expr); }
     }
+
     void PowerShellTranspiler::_prgm(const Parser::PrgmNodePtr& node) { _stmts(node->stmts); }
+
     void PowerShellTranspiler::_stmts(const Parser::StmtsNodePtr& node) {
         for (auto& stmt : node->stmts) { _stmt(stmt); }
     }
+
     void PowerShellTranspiler::_string(const Parser::StringNodePtr& node) {
         if (node->isLiteral()) {
             _write("\"" + node->literal + "\"");
@@ -95,12 +103,15 @@ namespace PowerShellTranspiler {
             _string_exprs(node->expressions);
         }
     }
+
     void PowerShellTranspiler::_string_exprs(const Parser::StringExprsNodePtr& node) {
         for (auto& expr : node->expressions) _expr(expr);
     }
+
     void PowerShellTranspiler::_types(const Parser::TypesNodePtr& node) {
         for (auto& type : node->types) { _type(type); }
     }
+
     void PowerShellTranspiler::_cmd(const Parser::CmdNodePtr& node) {
         switch (node->nodeType()) {
             case Parser::BASIC_CMD: {
@@ -130,26 +141,34 @@ namespace PowerShellTranspiler {
             }
         }
     }
+
     void PowerShellTranspiler::_lvalue(const Parser::LValueNodePtr& node) {
         switch (node->nodeType()) {
-                //            case Parser::VAR_LVALUE: {
-                //                auto var = std::static_pointer_cast<Parser::VarLValueNode>(node);
-                //                _write("$" + var->variable);
-                //                break;
-                //            }
-                //            case Parser::INDEX_LVALUE: {
-                //                auto index = std::static_pointer_cast<Parser::IndexLValueNode>(node);
-                //                break;
-                //            }
-                //            case Parser::LVALUE: {
-                //                break;
-                //            }
+            case Parser::VAR_LVALUE: {
+                auto var = std::static_pointer_cast<Parser::VarLValueNode>(node);
+                _write("$" + var->variable);
+                break;
+            }
+            case Parser::INDEX_LVALUE: {
+                auto index = std::static_pointer_cast<Parser::IndexLValueNode>(node);
+                _lvalue(index->lvalue);
+                _indentOff();
+                _write("[");
+                _expr(index->index);
+                _write("]");
+                _indentOn();
+                break;
+            }
+            case Parser::LVALUE: {
+                break;
+            }
             default: {
                 throw Util::CommanderException("Unknown lvalue type found while transpiling "
                                                + Parser::nodeTypeToString(node->nodeType()));
             }
         }
     }
+
     void PowerShellTranspiler::_expr(const Parser::ExprNodePtr& node) {
         switch (node->nodeType()) {
             case Parser::INT_EXPR: {
@@ -307,166 +326,222 @@ namespace PowerShellTranspiler {
         switch (node->opType) {
             case Parser::LESSER: {
                 _node(node->left);
+                _indentOff();
                 _write(" -lt ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::GREATER: {
                 _node(node->left);
+                _indentOff();
                 _write(" -gt ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::LESSER_EQUAL: {
                 _node(node->left);
+                _indentOff();
                 _write(" -le ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::GREATER_EQUAL: {
                 _node(node->left);
+                _indentOff();
                 _write(" -ge ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::EQUAL: {
                 _node(node->left);
+                _indentOff();
                 _write(" -eq ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::NOT_EQUAL: {
                 _node(node->left);
+                _indentOff();
                 _write(" -ne ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::AND: {
                 _node(node->left);
+                _indentOff();
                 _write(" -and ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::OR: {
                 _node(node->left);
+                _indentOff();
                 _write(" -or ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::EXPONENTIATE: {
                 _write("[Math]::Pow(");
+                _indentOff();
                 _node(node->left);
                 _write(", ");
                 _node(node->right);
                 _write(")");
+                _indentOn();
                 break;
             }
             case Parser::MULTIPLY: {
                 _node(node->left);
+                _indentOff();
                 _write(" * ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::DIVIDE: {
                 _node(node->left);
+                _indentOff();
                 _write(" / ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::MODULO: {
                 _node(node->left);
+                _indentOff();
                 _write(" % ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::ADD: {
                 _node(node->left);
+                _indentOff();
                 _write(" + ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::SUBTRACT: {
                 _node(node->left);
+                _indentOff();
                 _write(" - ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::EXPONENTIATE_SET: {
                 _node(node->left);
+                _indentOff();
                 _write(" = [Math]::Pow(");
                 _node(node->left);
                 _write(", ");
                 _node(node->right);
                 _write(")");
+                _indentOn();
                 break;
             }
             case Parser::MULTIPLY_SET: {
                 _node(node->left);
+                _indentOff();
                 _write(" *= ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::DIVIDE_SET: {
                 _node(node->left);
+                _indentOff();
                 _write(" /= ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::MODULO_SET: {
                 _node(node->left);
+                _indentOff();
                 _write(" %= ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::ADD_SET: {
                 _node(node->left);
+                _indentOff();
                 _write(" += ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::SUBTRACT_SET: {
                 _node(node->left);
+                _indentOff();
                 _write(" -= ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
             case Parser::SET: {
                 _node(node->left);
+                _indentOff();
                 _write(" = ");
                 _node(node->right);
+                _indentOn();
                 break;
             }
         }
     }
+
     void PowerShellTranspiler::_unary(const Parser::UnOpExprNodePtr& node) {
         switch (node->opType) {
             case Parser::NEGATE: {
                 _write("-");
+                _indentOff();
                 _node(node->node);
+                _indentOn();
                 break;
             }
             case Parser::NOT: {
                 _write("!");
+                _indentOff();
                 _node(node->node);
+                _indentOn();
+                break;
             }
             case Parser::PRE_INCREMENT: {
                 _write("++");
+                _indentOff();
                 _node(node->node);
+                _indentOn();
                 break;
             }
             case Parser::POST_INCREMENT: {
                 _node(node->node);
+                _indentOff();
                 _write("++");
+                _indentOn();
                 break;
             }
             case Parser::PRE_DECREMENT: {
                 _write("--");
+                _indentOff();
                 _node(node->node);
+                _indentOn();
                 break;
             }
             case Parser::POST_DECREMENT: {
                 _node(node->node);
+                _indentOff();
                 _write("--");
+                _indentOn();
                 break;
             }
         }
@@ -686,6 +761,7 @@ namespace PowerShellTranspiler {
             }
         }
     }
+
     void PowerShellTranspiler::_type(const Parser::TypeNodePtr& node) {
         switch (node->type->getType()) {
             case TypeChecker::INT: {
@@ -724,18 +800,21 @@ namespace PowerShellTranspiler {
     }
 
     void PowerShellTranspiler::_indentOn() { _indent = true; }
+
     void PowerShellTranspiler::_indentOff() { _indent = false; }
 
     void PowerShellTranspiler::_increaseIndent() { _indentLevel++; }
+
     void PowerShellTranspiler::_decreaseIndent() {
-        if(_indentLevel != 0)
-            _indentLevel--;
+        if (_indentLevel != 0) _indentLevel--;
     }
+
     void PowerShellTranspiler::_writeLine(const std::string& str) {
         if (_indent) _output.append(std::string(_indentLevel * _indentSize, ' '));
         _output.append(str);
         _output.append("\n");
     }
+
     void PowerShellTranspiler::_write(const std::string& str) {
         if (_indent) _output.append(std::string(_indentLevel * _indentSize, ' '));
         _output.append(str);
