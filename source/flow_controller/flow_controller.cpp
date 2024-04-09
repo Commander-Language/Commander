@@ -264,7 +264,7 @@ namespace FlowController {
                     // args and bindings should be lined up 1 to 1
                     const CommanderTypePtr argValue = _expr(arg);
                     std::string const argName = function->bindings->bindings[bindingIndex++]->variable;
-                    _setVariable(argName, argValue);
+                    _setVariable(argName, argValue->copy());
                 }
                 returnValue = _stmt(function->body);
 
@@ -301,7 +301,7 @@ namespace FlowController {
         switch (node->nodeType()) {
             case Parser::IF_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::IfStmtNode>(node);
-                CommanderTypePtr conditionResult = _expr(stmtNode->condition);
+                const CommanderTypePtr conditionResult = _expr(stmtNode->condition);
                 Parser::StmtNodePtr statements;
                 if (std::static_pointer_cast<CommanderBool>(conditionResult)->value) {
                     statements = stmtNode->trueStmt;
@@ -365,7 +365,7 @@ namespace FlowController {
             case Parser::SCOPE_STMT: {
                 auto stmtNode = std::static_pointer_cast<Parser::ScopeStmtNode>(node);
                 _symbolTable.pushSymbolTable();  // new scope
-                CommanderTypePtr returnValue = nullptr;
+                CommanderTypePtr returnValue = std::make_shared<CommanderTuple>(std::vector<CommanderTypePtr> {});
                 for (auto& statement : stmtNode->stmts->stmts) {
                     if (statement->nodeType() == Parser::CONTINUE_STMT || statement->nodeType() == Parser::BREAK_STMT
                         || _break || _continue) {
@@ -709,7 +709,7 @@ namespace FlowController {
                 }
                 Parser::IndexLValueNodePtr indexLValue = std::static_pointer_cast<Parser::IndexLValueNode>(binOp->left);
                 CommanderIntPtr index = std::static_pointer_cast<CommanderInt>(_expr(indexLValue->index));
-                CommanderTypePtr dataStructure = _expr(std::make_shared<Parser::IndexExprNode>(indexLValue));
+                CommanderTypePtr dataStructure = _expr(std::make_shared<Parser::LValueExprNode>(indexLValue->lvalue));
                 std::vector<CommanderTypePtr>& values
                         = dataStructure->getType() == TypeChecker::ARRAY
                                 ? std::static_pointer_cast<CommanderArray>(dataStructure)->values
@@ -772,108 +772,116 @@ namespace FlowController {
             name = apiExpr->func;
             args = apiExpr->args->exprs;
         }
-        if (name == "parseInt") { return Function::parseInt(_expr(args[0])); }
-        if (name == "parseFloat") { return Function::parseFloat(_expr(args[0])); }
-        if (name == "parseBool") { return Function::parseBool(_expr(args[0])); }
-        if (name == "toString") { return Function::toString(_expr(args[0])); }
-        if (name == "sqrt") { return Function::sqrt(_expr(args[0])); }
-        if (name == "ln") { return Function::ln(_expr(args[0])); }
-        if (name == "log") { return Function::log(_expr(args[0])); }
-        if (name == "abs") { return Function::abs(_expr(args[0])); }
-        if (name == "floor") { return Function::floor(_expr(args[0])); }
-        if (name == "ceil") { return Function::ceil(_expr(args[0])); }
-        if (name == "round") { return Function::round(_expr(args[0])); }
-        if (name == "sin") { return Function::sin(_expr(args[0])); }
-        if (name == "cos") { return Function::cos(_expr(args[0])); }
-        if (name == "tan") { return Function::tan(_expr(args[0])); }
-        if (name == "csc") { return Function::csc(_expr(args[0])); }
-        if (name == "sec") { return Function::sec(_expr(args[0])); }
-        if (name == "cot") { return Function::cot(_expr(args[0])); }
-        if (name == "sinh") { return Function::sinh(_expr(args[0])); }
-        if (name == "cosh") { return Function::cosh(_expr(args[0])); }
-        if (name == "tanh") { return Function::tanh(_expr(args[0])); }
-        if (name == "csch") { return Function::csch(_expr(args[0])); }
-        if (name == "sech") { return Function::sech(_expr(args[0])); }
-        if (name == "coth") { return Function::coth(_expr(args[0])); }
-        if (name == "arcsin") { return Function::arcsin(_expr(args[0])); }
-        if (name == "arccos") { return Function::arccos(_expr(args[0])); }
-        if (name == "arctan") { return Function::arctan(_expr(args[0])); }
-        if (name == "arccsc") { return Function::arccsc(_expr(args[0])); }
-        if (name == "arcsec") { return Function::arcsec(_expr(args[0])); }
-        if (name == "arccot") { return Function::arccot(_expr(args[0])); }
-        if (name == "arcsinh") { return Function::arcsinh(_expr(args[0])); }
-        if (name == "arccosh") { return Function::arccosh(_expr(args[0])); }
-        if (name == "arctanh") { return Function::arctanh(_expr(args[0])); }
-        if (name == "arccsch") { return Function::arccsch(_expr(args[0])); }
-        if (name == "arcsech") { return Function::arcsech(_expr(args[0])); }
-        if (name == "arccoth") { return Function::arccoth(_expr(args[0])); }
+        if (name == "parseInt") { return Function::parseInt(_expr(args[0])->copy()); }
+        if (name == "parseFloat") { return Function::parseFloat(_expr(args[0])->copy()); }
+        if (name == "parseBool") { return Function::parseBool(_expr(args[0])->copy()); }
+        if (name == "toString") { return Function::toString(_expr(args[0])->copy()); }
+        if (name == "sqrt") { return Function::sqrt(_expr(args[0])->copy()); }
+        if (name == "ln") { return Function::ln(_expr(args[0])->copy()); }
+        if (name == "log") { return Function::log(_expr(args[0])->copy()); }
+        if (name == "abs") { return Function::abs(_expr(args[0])->copy()); }
+        if (name == "floor") { return Function::floor(_expr(args[0])->copy()); }
+        if (name == "ceil") { return Function::ceil(_expr(args[0])->copy()); }
+        if (name == "round") { return Function::round(_expr(args[0])->copy()); }
+        if (name == "sin") { return Function::sin(_expr(args[0])->copy()); }
+        if (name == "cos") { return Function::cos(_expr(args[0])->copy()); }
+        if (name == "tan") { return Function::tan(_expr(args[0])->copy()); }
+        if (name == "csc") { return Function::csc(_expr(args[0])->copy()); }
+        if (name == "sec") { return Function::sec(_expr(args[0])->copy()); }
+        if (name == "cot") { return Function::cot(_expr(args[0])->copy()); }
+        if (name == "sinh") { return Function::sinh(_expr(args[0])->copy()); }
+        if (name == "cosh") { return Function::cosh(_expr(args[0])->copy()); }
+        if (name == "tanh") { return Function::tanh(_expr(args[0])->copy()); }
+        if (name == "csch") { return Function::csch(_expr(args[0])->copy()); }
+        if (name == "sech") { return Function::sech(_expr(args[0])->copy()); }
+        if (name == "coth") { return Function::coth(_expr(args[0])->copy()); }
+        if (name == "arcsin") { return Function::arcsin(_expr(args[0])->copy()); }
+        if (name == "arccos") { return Function::arccos(_expr(args[0])->copy()); }
+        if (name == "arctan") { return Function::arctan(_expr(args[0])->copy()); }
+        if (name == "arccsc") { return Function::arccsc(_expr(args[0])->copy()); }
+        if (name == "arcsec") { return Function::arcsec(_expr(args[0])->copy()); }
+        if (name == "arccot") { return Function::arccot(_expr(args[0])->copy()); }
+        if (name == "arcsinh") { return Function::arcsinh(_expr(args[0])->copy()); }
+        if (name == "arccosh") { return Function::arccosh(_expr(args[0])->copy()); }
+        if (name == "arctanh") { return Function::arctanh(_expr(args[0])->copy()); }
+        if (name == "arccsch") { return Function::arccsch(_expr(args[0])->copy()); }
+        if (name == "arcsech") { return Function::arcsech(_expr(args[0])->copy()); }
+        if (name == "arccoth") { return Function::arccoth(_expr(args[0])->copy()); }
         if (name == "random") { return Function::randomFloat(); }
         if (name == "time") { return Function::time(); }
         if (name == "date") { return Function::date(); }
-        if (name == "sleep") { return Function::sleep(std::static_pointer_cast<CommanderInt>(_expr(args[0]))); }
+        if (name == "sleep") { return Function::sleep(std::static_pointer_cast<CommanderInt>(_expr(args[0])->copy())); }
         if (name == "charAt") {
-            return Function::charAt(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                    std::static_pointer_cast<CommanderInt>(_expr(args[1])));
+            return Function::charAt(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                    std::static_pointer_cast<CommanderInt>(_expr(args[1])->copy()));
         }
         if (name == "startsWith") {
-            return Function::startsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                        std::static_pointer_cast<CommanderString>(_expr(args[1])));
+            return Function::startsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[1])->copy()));
         }
         if (name == "endsWith") {
-            return Function::endsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                      std::static_pointer_cast<CommanderString>(_expr(args[1])));
+            return Function::endsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                      std::static_pointer_cast<CommanderString>(_expr(args[1])->copy()));
         }
-        if (name == "includes") { return Function::includes(_expr(args[0]), _expr(args[1])); }
-        if (name == "indexOf") { return Function::indexOf(_expr(args[0]), _expr(args[1])); }
-        if (name == "length") { return Function::length(_expr(args[0])); }
+        if (name == "includes") { return Function::includes(_expr(args[0])->copy(), _expr(args[1])->copy()); }
+        if (name == "indexOf") { return Function::indexOf(_expr(args[0])->copy(), _expr(args[1])->copy()); }
+        if (name == "length") { return Function::length(_expr(args[0])->copy()); }
         if (name == "replace") {
-            return Function::replace(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                     std::static_pointer_cast<CommanderString>(_expr(args[1])),
-                                     std::static_pointer_cast<CommanderString>(_expr(args[2])));
+            return Function::replace(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                     std::static_pointer_cast<CommanderString>(_expr(args[1])->copy()),
+                                     std::static_pointer_cast<CommanderString>(_expr(args[2])->copy()));
         }
         if (name == "replaceAll") {
-            return Function::replaceAll(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                        std::static_pointer_cast<CommanderString>(_expr(args[1])),
-                                        std::static_pointer_cast<CommanderString>(_expr(args[2])));
+            return Function::replaceAll(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[1])->copy()),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[2])->copy()));
         }
         if (name == "substring") {
             if (args.size() == 2) {
-                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])));
+                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])->copy()));
             } else {
-                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])),
-                                           std::static_pointer_cast<CommanderInt>(_expr(args[2])));
+                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])->copy()),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[2])->copy()));
             }
         }
-        if (name == "trim") { return Function::trim(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
-        if (name == "lower") { return Function::lower(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
-        if (name == "upper") { return Function::upper(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
+        if (name == "trim") {
+            return Function::trim(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()));
+        }
+        if (name == "lower") {
+            return Function::lower(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()));
+        }
+        if (name == "upper") {
+            return Function::upper(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()));
+        }
         if (name == "split") {
-            return Function::split(std::static_pointer_cast<CommanderString>(_expr(args[0])),
-                                   std::static_pointer_cast<CommanderString>(_expr(args[1])));
+            return Function::split(std::static_pointer_cast<CommanderString>(_expr(args[0])->copy()),
+                                   std::static_pointer_cast<CommanderString>(_expr(args[1])->copy()));
         }
         if (name == "sort") {
-            return Function::sort(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
-                                  std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+            return Function::sort(std::static_pointer_cast<CommanderArray>(_expr(args[0])->copy()),
+                                  std::static_pointer_cast<CommanderLambda>(_expr(args[1])->copy()));
         }
         if (name == "filter") {
-            return Function::filter(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
-                                    std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+            return Function::filter(std::static_pointer_cast<CommanderArray>(_expr(args[0])->copy()),
+                                    std::static_pointer_cast<CommanderLambda>(_expr(args[1])->copy()));
         }
         if (name == "map") {
-            return Function::map(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
-                                 std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+            return Function::map(std::static_pointer_cast<CommanderArray>(_expr(args[0])->copy()),
+                                 std::static_pointer_cast<CommanderLambda>(_expr(args[1])->copy()));
         }
         if (name == "foreach") {
-            return Function::foreach(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
-                                     std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
+            return Function::foreach(std::static_pointer_cast<CommanderArray>(_expr(args[0])->copy()),
+                                     std::static_pointer_cast<CommanderLambda>(_expr(args[1])->copy()));
         }
         if (name == "append") {
-            return Function::append(std::static_pointer_cast<CommanderArray>(_expr(args[0])), _expr(args[1]));
+            return Function::append(std::static_pointer_cast<CommanderArray>(_expr(args[0])->copy()),
+                                    _expr(args[1])->copy());
         }
         if (name == "remove") {
-            return Function::remove(std::static_pointer_cast<CommanderArray>(_expr(args[0])), _expr(args[1]));
+            return Function::remove(std::static_pointer_cast<CommanderArray>(_expr(args[0])->copy()),
+                                    _expr(args[1])->copy());
         }
         return nullptr;
     }

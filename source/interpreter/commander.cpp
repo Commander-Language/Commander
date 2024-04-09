@@ -28,17 +28,16 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
         for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
-    typeChecker.typeCheck(nodes);
+    TypeChecker::VariableTablePtr table = typeChecker.typeCheck(nodes);
     if (hasArgument(arguments, "-t")) {
         for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
         return;
     }
     if (hasArgument(arguments, "-b")) {
         std::string outFile = getArgumentValue(arguments, "-o");
-        if (outFile.empty()) { outFile = "bash-out.sh"; }
-        BashTranspiler::BashTranspiler transpiler;
+        BashTranspiler::BashTranspiler transpiler(table);
         std::string bashOutput = transpiler.transpile(nodes);
-        if (Util::usingNCurses) {
+        if (Util::usingNCurses || outFile.empty()) {
             Util::println(bashOutput);
         } else {
             Util::writeToFile(bashOutput, outFile);
