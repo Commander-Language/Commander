@@ -37,7 +37,7 @@ namespace TypeChecker {
          * @brief Type checks (recursively) a list of AST nodes
          * @param astNodeList The list of AST nodes
          */
-        void typeCheck(const Parser::ASTNodeList& astNodeList);
+        VariableTablePtr typeCheck(const Parser::ASTNodeList& astNodeList);
 
         /**
          * @brief Type checks (recursively) a single AST node

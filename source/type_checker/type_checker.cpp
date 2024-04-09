@@ -17,8 +17,9 @@ namespace TypeChecker {
         _parser = parser;
     }
 
-    void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
+    VariableTablePtr TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
         for (const Parser::ASTNodePtr& node : astNodeList) { typeCheck(node); }
+        return _table;
     }
 
     TyPtr TypeChecker::typeCheck(const Parser::ASTNodePtr& astNode) {
@@ -598,7 +599,7 @@ namespace TypeChecker {
                                 = returnType;
                     }
                 }
-                popScope();
+                exprNode->table = popScope();
                 return (exprNode->type = std::make_shared<FunctionTy>(bindings, returnType));
             }
             case Parser::CMD_EXPR: {
@@ -773,7 +774,7 @@ namespace TypeChecker {
                                 = returnType;
                     }
                 }
-                popScope();
+                stmtNode->table = popScope();
                 _table->addVariable(stmtNode->name, std::make_shared<FunctionInfo>(std::vector<TyPtr> {
                                                             std::make_shared<FunctionTy>(bindings, returnType)}));
                 return nullptr;
@@ -909,7 +910,7 @@ namespace TypeChecker {
     void TypeChecker::pushScope() { _table = std::make_shared<VariableTable>(_table); }
 
     VariableTablePtr TypeChecker::popScope() {
-        VariableTablePtr scope = std::make_shared<VariableTable>(_table);
+        VariableTablePtr scope = _table;
         auto parent = _table->getParent();
         if (parent) { _table = parent; }
         return scope;

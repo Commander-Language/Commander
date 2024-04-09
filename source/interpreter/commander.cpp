@@ -5,6 +5,7 @@
 
 #include "repl.hpp"
 
+#include "source/bash_transpiler/transpiler.hpp"
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/lexer/lexer.hpp"
 #include "source/type_checker/type_checker.hpp"
@@ -67,7 +68,7 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
     }
 
     // Lex, parse, and type-check:
-    typeChecker.typeCheck(nodes);
+    TypeChecker::VariableTablePtr table = typeChecker.typeCheck(nodes);
     if (hasArgument(arguments, "-t")) {
         for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << "\n";
         return;
@@ -76,15 +77,13 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
     // Lex, parse, type-check, and transpile to Bash:
     if (hasArgument(arguments, "-b")) {
         std::string outFile = getArgumentValue(arguments, "-o");
-        if (outFile.empty()) { outFile = "bash-out.sh"; }
-        // TODO: Implement bash transpiler
-        /*BashTranspiler::BashTranspiler transpiler;
+        BashTranspiler::BashTranspiler transpiler(table);
         std::string bashOutput = transpiler.transpile(nodes);
-        if (Util::usingNCurses) {
-            Util::println(bashOutput);
+        if (outFile.empty()) {
+            std::cout << bashOutput << "\n";
         } else {
             Util::writeToFile(bashOutput, outFile);
-        }*/
+        }
         return;
     }
 
