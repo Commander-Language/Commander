@@ -158,6 +158,7 @@ namespace BashTranspiler {
             }
             case Parser::BINOP_EXPR: {
                 Parser::BinOpExprNodePtr binOpExpr = std::static_pointer_cast<Parser::BinOpExprNode>(astNode);
+                bool isFloat = binOpExpr->type && binOpExpr->type->getType() == TypeChecker::FLOAT;
                 switch (binOpExpr->opType) {
                     case Parser::LESSER:
                         // TODO: Handle strings
@@ -247,17 +248,19 @@ namespace BashTranspiler {
                         _buffer << "))";
                         break;
                     case Parser::EXPONENTIATE:
+                        if (!isFloat) { _buffer << "$(echo \"scale=0; ("; }
                         _buffer << "$(echo \"e(l(";
                         _transpile(binOpExpr->left);
                         _buffer << ") * ";
                         _transpile(binOpExpr->right);
                         _buffer << ")\" | bc -l)";
+                        if (!isFloat) { _buffer << " + 0.5) / 1\" | bc -l)"; }
                         break;
                     case Parser::MULTIPLY:
                         _createBCBinopExpression(binOpExpr, "*", true);
                         break;
                     case Parser::DIVIDE:
-                        _createBCBinopExpression(binOpExpr, "/", true);
+                        _createBCBinopExpression(binOpExpr, "/", isFloat);
                         break;
                     case Parser::MODULO:
                         _createBCBinopExpression(binOpExpr, "%", false);
@@ -278,41 +281,12 @@ namespace BashTranspiler {
                         _createBCBinopExpression(binOpExpr, "-", false);
                         break;
                     case Parser::EXPONENTIATE_SET:
-                        _transpile(std::make_shared<Parser::BinOpExprNode>(
-                                binOpExpr->left, Parser::SET,
-                                std::make_shared<Parser::BinOpExprNode>(binOpExpr->left, Parser::EXPONENTIATE,
-                                                                        binOpExpr->right)));
-                        break;
                     case Parser::MULTIPLY_SET:
-                        _transpile(std::make_shared<Parser::BinOpExprNode>(
-                                binOpExpr->left, Parser::SET,
-                                std::make_shared<Parser::BinOpExprNode>(binOpExpr->left, Parser::MULTIPLY,
-                                                                        binOpExpr->right)));
-                        break;
                     case Parser::DIVIDE_SET:
-                        _transpile(std::make_shared<Parser::BinOpExprNode>(
-                                binOpExpr->left, Parser::SET,
-                                std::make_shared<Parser::BinOpExprNode>(binOpExpr->left, Parser::DIVIDE,
-                                                                        binOpExpr->right)));
-                        break;
                     case Parser::MODULO_SET:
-                        _transpile(std::make_shared<Parser::BinOpExprNode>(
-                                binOpExpr->left, Parser::SET,
-                                std::make_shared<Parser::BinOpExprNode>(binOpExpr->left, Parser::MODULO,
-                                                                        binOpExpr->right)));
-                        break;
-                    case Parser::ADD_SET: {
-                        Parser::BinOpExprNodePtr newBinop = std::make_shared<Parser::BinOpExprNode>(
-                                binOpExpr->left, Parser::ADD, binOpExpr->right);
-                        newBinop->type = binOpExpr->type;
-                        _transpile(std::make_shared<Parser::BinOpExprNode>(binOpExpr->left, Parser::SET, newBinop));
-                        break;
-                    }
+                    case Parser::ADD_SET:
                     case Parser::SUBTRACT_SET:
-                        _transpile(std::make_shared<Parser::BinOpExprNode>(
-                                binOpExpr->left, Parser::SET,
-                                std::make_shared<Parser::BinOpExprNode>(binOpExpr->left, Parser::SUBTRACT,
-                                                                        binOpExpr->right)));
+                        _transpileOpSetNode(binOpExpr);
                         break;
                     case Parser::SET: {
                         if (binOpExpr->left->nodeType() == Parser::VAR_LVALUE
@@ -325,14 +299,18 @@ namespace BashTranspiler {
                                         binOpExpr->left->position,
                                         std::static_pointer_cast<Parser::BindingNode>(binOpExpr->left)->variable);
                             }
+                            std::string varName = lvalue->variable;
+                            if (_scopes.top().find(varName) != _scopes.top().end()) {
+                                varName = _scopes.top()[varName];
+                            }
                             std::string backupBuffer = _buffer.str();
                             _resetLine();
-                            _transpile(lvalue);
+                            _buffer << varName;
                             _buffer << "=";
                             _transpile(binOpExpr->right);
                             _writeLine();
                             _buffer.str("");
-                            _buffer << backupBuffer << "$";
+                            _buffer << backupBuffer;
                             _transpile(lvalue);
                         } else {
                             // TODO: Handle the index lvalue case
@@ -605,9 +583,10 @@ namespace BashTranspiler {
                         _buffer << "$(echo ";
                         _transpile(args[0]);
                         _buffer << " | cut -c";
-                        _transpile(std::make_shared<Parser::BinOpExprNode>(
-                                args[1], Parser::SUBTRACT,
-                                std::make_shared<Parser::IntExprNode>(args[1]->position, 1)));
+                        Parser::BinOpExprNodePtr bin = std::make_shared<Parser::BinOpExprNode>(
+                                args[1], Parser::SUBTRACT, std::make_shared<Parser::IntExprNode>(args[1]->position, 1));
+                        bin->type = TypeChecker::INT_TY;
+                        _transpile(bin);
                         _buffer << ")";
                         return;
                     }
@@ -699,21 +678,27 @@ namespace BashTranspiler {
                             _buffer << "$(echo ";
                             _transpile(args[0]);
                             _buffer << " | cut -c";
-                            _transpile(std::make_shared<Parser::BinOpExprNode>(
+                            Parser::BinOpExprNodePtr bin = std::make_shared<Parser::BinOpExprNode>(
                                     args[1], Parser::SUBTRACT,
-                                    std::make_shared<Parser::IntExprNode>(args[1]->position, 1)));
+                                    std::make_shared<Parser::IntExprNode>(args[1]->position, 1));
+                            bin->type = TypeChecker::INT_TY;
+                            _transpile(bin);
                             _buffer << "-)";
                         } else {
                             _buffer << "$(echo ";
                             _transpile(args[0]);
                             _buffer << " | cut -c";
-                            _transpile(std::make_shared<Parser::BinOpExprNode>(
+                            Parser::BinOpExprNodePtr bin1 = std::make_shared<Parser::BinOpExprNode>(
                                     args[1], Parser::SUBTRACT,
-                                    std::make_shared<Parser::IntExprNode>(args[1]->position, 1)));
+                                    std::make_shared<Parser::IntExprNode>(args[1]->position, 1));
+                            bin1->type = TypeChecker::INT_TY;
+                            _transpile(bin1);
                             _buffer << "-";
-                            _transpile(std::make_shared<Parser::BinOpExprNode>(
+                            Parser::BinOpExprNodePtr bin2 = std::make_shared<Parser::BinOpExprNode>(
                                     args[2], Parser::SUBTRACT,
-                                    std::make_shared<Parser::IntExprNode>(args[2]->position, 2)));
+                                    std::make_shared<Parser::IntExprNode>(args[2]->position, 2));
+                            bin2->type = TypeChecker::INT_TY;
+                            _transpile(bin2);
                             _buffer << ")";
                         }
                     }
@@ -1054,6 +1039,40 @@ namespace BashTranspiler {
         _scopes.pop();
         auto parent = _table->getParent();
         if (parent) { _table = parent; }
+    }
+
+    void BashTranspiler::_transpileOpSetNode(const Parser::BinOpExprNodePtr& binop) {
+        Parser::BinOpType opr;
+        switch (binop->opType) {
+            case Parser::ADD_SET:
+                opr = Parser::ADD;
+                break;
+            case Parser::SUBTRACT_SET:
+                opr = Parser::SUBTRACT;
+                break;
+            case Parser::MULTIPLY_SET:
+                opr = Parser::MULTIPLY;
+                break;
+            case Parser::DIVIDE_SET:
+                opr = Parser::DIVIDE;
+                break;
+            case Parser::MODULO_SET:
+                opr = Parser::MODULO;
+                break;
+            case Parser::EXPONENTIATE_SET:
+                opr = Parser::EXPONENTIATE;
+                break;
+            default:
+                throw Util::CommanderException("Unexpected binop in _transpileOpSetNode(): "
+                                               + Parser::binOpToString(binop->opType));
+        }
+        const Parser::BinOpExprNodePtr newBinop = std::make_shared<Parser::BinOpExprNode>(binop->left, opr,
+                                                                                          binop->right);
+        newBinop->type = binop->type;
+        const Parser::BinOpExprNodePtr newBinopTwo = std::make_shared<Parser::BinOpExprNode>(binop->left, Parser::SET,
+                                                                                             newBinop);
+        newBinopTwo->type = binop->type;
+        _transpile(newBinopTwo);
     }
 
     void BashTranspiler::_createBCBinopExpression(const Parser::BinOpExprNodePtr& binop, const std::string& op,

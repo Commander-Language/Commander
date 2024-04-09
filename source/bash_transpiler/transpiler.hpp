@@ -9,6 +9,7 @@
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
 #include "source/type_checker/variable_table.hpp"
+#include "source/util/commander_exception.hpp"
 #include <cmath>
 #include <map>
 #include <set>
@@ -105,6 +106,12 @@ namespace BashTranspiler {
          * @brief Pops top scope of variables off the stack
          */
         void _popScope();
+
+        /**
+         * @biref Transpiles op set nodes
+         * @param binop Binop op set node
+         */
+        void _transpileOpSetNode(const Parser::BinOpExprNodePtr& binop);
 
         /**
          * @brief Create BC binop expression

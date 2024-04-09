@@ -28,6 +28,11 @@ namespace FlowController {
          * @return The string representation.
          */
         [[nodiscard]] virtual std::string getStringRepresentation() const = 0;
+
+        /**
+         * @brief Makes a copy of the type
+         */
+        [[nodiscard]] virtual std::shared_ptr<CommanderType> copy() const = 0;
     };
     /**
      * @brief A pointer to a Commander Type.
@@ -64,6 +69,11 @@ namespace FlowController {
          * @return `ARRAY` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by reference
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander array.
@@ -100,6 +110,11 @@ namespace FlowController {
          * @return `BOOL` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by value
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander bool.
@@ -136,6 +151,11 @@ namespace FlowController {
          * @return `TUPLE` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by reference
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander tuple.
@@ -172,6 +192,11 @@ namespace FlowController {
          * @return `STRING` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by reference
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander string.
@@ -208,6 +233,11 @@ namespace FlowController {
          * @return `INT` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by value
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander int.
@@ -244,6 +274,11 @@ namespace FlowController {
          * @return `FLOAT` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by value
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander float.
@@ -283,6 +318,11 @@ namespace FlowController {
          * @return `FUNCTION` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by reference
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander lambda.
@@ -317,6 +357,11 @@ namespace FlowController {
          * @return `COMMAND` always.
          */
         [[nodiscard]] TypeChecker::Type getType() const override;
+
+        /**
+         * @brief Makes a copy of the type by reference
+         */
+        [[nodiscard]] std::shared_ptr<CommanderType> copy() const override;
     };
     /**
      * @brief A pointer to a Commander lambda.

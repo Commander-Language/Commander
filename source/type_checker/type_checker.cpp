@@ -17,8 +17,9 @@ namespace TypeChecker {
         _parser = parser;
     }
 
-    void TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
+    VariableTablePtr TypeChecker::typeCheck(const Parser::ASTNodeList& astNodeList) {
         for (const Parser::ASTNodePtr& node : astNodeList) { typeCheck(node); }
+        return _table;
     }
 
     TyPtr TypeChecker::typeCheck(const Parser::ASTNodePtr& astNode) {

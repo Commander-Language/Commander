@@ -8,22 +8,42 @@
 #include "source/util/commander_exception.hpp"
 #include <cstdlib>
 
+/**
+ * Copied directly from
+ * https://stackoverflow.com/questions/32039852/returning-output-from-bash-script-to-calling-c-function Big thanks to
+ * user MeetTitan who originally wrote it!
+ *
+ * The helper essentially takes in a command as a string and returns the output as a string.
+ * @param cmd The command to run
+ * @return The string output
+ */
+std::string exec(const char* cmd) {
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    std::string result = "";
+    while (!feof(pipe)) {
+        if (fgets(buffer, 128, pipe) != NULL) result += buffer;
+    }
+    pclose(pipe);
+    return result;
+}
+
 void transpileAndRunFile(const std::string& filePath) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, filePath);
     Parser::ASTNodeList nodes = parser.parse(tokens);
     TypeChecker::TypeChecker typeChecker(parser);
-    typeChecker.typeCheck(nodes);
-    BashTranspiler::BashTranspiler transpiler;
+    TypeChecker::VariableTablePtr table = typeChecker.typeCheck(nodes);
+    BashTranspiler::BashTranspiler transpiler(table);
     std::string const bashScript = transpiler.transpile(nodes);
     std::string const tmpFileName = std::tmpnam(nullptr);
     std::ofstream tmp(tmpFileName);
     tmp << bashScript;
     tmp.close();
-    std::string const command = "bash " + tmpFileName;
-    int returnCode = system(command.c_str());
+    std::string const command = "bash " + tmpFileName + " 2>&1";
+    exec(command.c_str());
     std::remove(tmpFileName.c_str());
-    if (returnCode != 0) { throw Util::CommanderException("Bash Transpiler Error: Got status code " + returnCode); }
 }
 
 /**
@@ -55,38 +75,31 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamplesBash) {
 
     // Type Check
     TypeChecker::TypeChecker typeChecker(parser);
+    TypeChecker::VariableTablePtr table;
     try {
-        typeChecker.typeCheck(nodes);
+        table = typeChecker.typeCheck(nodes);
     } catch (const Util::CommanderException& e) {
         std::cout << "Type Checker Error: " << e.what() << "\n";
         FAIL();
     }
 
     // Transpile
-    BashTranspiler::BashTranspiler transpiler;
+    BashTranspiler::BashTranspiler transpiler(table);
     std::string bashScript = transpiler.transpile(nodes);
     std::string tmpFileName = std::tmpnam(nullptr);
     std::ofstream tmp(tmpFileName);
     tmp << bashScript;
     tmp.close();
 
-    // Set up std out to a stream
-    std::stringstream buffer;
-    std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
-
     // Run
-    std::string command = "bash " + tmpFileName;
-    int returnCode = system(command.c_str());
-    if (returnCode != 0) {
+    std::string command = "bash " + tmpFileName + " 2>&1";
+
+    std::string output = exec(command.c_str());
+    if (output == "ERROR") {
         std::remove(tmpFileName.c_str());
-        std::cout.rdbuf(old);
-        std::cout << "Bash Transpiler Error: Got status code " << returnCode << "\n";
+        std::cout << "Bash Transpiler Error: Something went wrong running the script using popen()";
         FAIL();
     }
-
-    // Get output
-    std::cout.rdbuf(old);
-    std::string output = buffer.str();
 
     // Delete file
     std::remove(tmpFileName.c_str());

@@ -7,5 +7,3 @@ z = 4.2 - y;
 println z;
 x -= 2;
 println x;
-y -= 3.3;
-println y;

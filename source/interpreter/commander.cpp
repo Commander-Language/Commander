@@ -68,7 +68,7 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
     }
 
     // Lex, parse, and type-check:
-    typeChecker.typeCheck(nodes);
+    TypeChecker::VariableTablePtr table = typeChecker.typeCheck(nodes);
     if (hasArgument(arguments, "-t")) {
         for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << "\n";
         return;
@@ -77,10 +77,9 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
     // Lex, parse, type-check, and transpile to Bash:
     if (hasArgument(arguments, "-b")) {
         std::string outFile = getArgumentValue(arguments, "-o");
-        if (outFile.empty()) { outFile = "bash-out.sh"; }
-        BashTranspiler::BashTranspiler transpiler;
+        BashTranspiler::BashTranspiler transpiler(table);
         std::string bashOutput = transpiler.transpile(nodes);
-        if (Util::usingNCurses) {
+        if (Util::usingNCurses || outFile.empty()) {
             Util::println(bashOutput);
         } else {
             Util::writeToFile(bashOutput, outFile);
