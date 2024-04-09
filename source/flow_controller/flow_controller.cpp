@@ -13,7 +13,6 @@
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/flow_controller/operations.hpp"
 
-
 #include "source/flow_controller/types.hpp"
 #if defined(__APPLE__) || defined(__linux__) || defined(__unix__)
 #include "source/job_runner/job_runner_linux.hpp"
@@ -22,17 +21,17 @@ using Runner = JobRunner::JobRunnerLinux;
 #include "source/job_runner/job_runner_windows.hpp"
 using Runner = JobRunner::JobRunnerWindows;
 #else
-# error OS/Compiler not supported
+#error OS/Compiler not supported
 #endif
 
 
+#include "source/console/console.hpp"
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type.hpp"
 #include "source/util/commander_exception.hpp"
-#include "source/util/scan.hpp"
-#include <cmath>
 
+#include <cmath>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -126,7 +125,7 @@ namespace FlowController {
                 args = _parseArguments(cmd->arguments);
                 // Run the command
                 auto job = std::make_shared<Process::Process>(args, Process::ProcessType::EXTERNAL, isBackground,
-                                                                !isBackground && saveInfo);
+                                                              !isBackground && saveInfo);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
@@ -136,7 +135,7 @@ namespace FlowController {
                 args = _parseArguments(cmd->arguments);
                 // Run the command
                 auto job = std::make_shared<Process::Process>(args, Process::ProcessType::EXTERNAL, isBackground,
-                                                                !isBackground && saveInfo);
+                                                              !isBackground && saveInfo);
                 auto jobResult = _runCommand(job);
                 return std::make_shared<CommanderTuple>(_parseJobReturnInfo(jobResult));
             }
@@ -152,7 +151,7 @@ namespace FlowController {
                 for (const auto& job : jobs) {
                     pArgs = _parseArguments(job->arguments);
                     auto process = std::make_shared<Process::Process>(pArgs, Process::ProcessType::EXTERNAL,
-                                                                        isBackground, !isBackground && saveInfo);
+                                                                      isBackground, !isBackground && saveInfo);
                     processes.emplace_back(process);
                 }
 
@@ -284,7 +283,7 @@ namespace FlowController {
             case Parser::SCAN_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ScanExprNode>(node);
                 auto prompt = std::static_pointer_cast<CommanderString>(_expr(expr->prompt));
-                return std::make_shared<CommanderString>(Util::scan(prompt->value));
+                return std::make_shared<CommanderString>(Console::readLine(prompt->value));
             }
             case Parser::READ_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::ReadExprNode>(node);
@@ -394,14 +393,6 @@ namespace FlowController {
             }
             case Parser::CMD_STMT: {
                 auto cmd = std::static_pointer_cast<Parser::CmdStmtNode>(node);
-                if (Util::usingNCurses) {
-                    auto returnInfo = _cmd(cmd->command, true);
-                    auto tuple = std::static_pointer_cast<CommanderTuple>(returnInfo);
-
-                    Util::print(tuple->values[0]->getStringRepresentation());
-                    Util::print(tuple->values[1]->getStringRepresentation());
-                    return returnInfo;
-                }
                 return _cmd(cmd->command);
             }
             case Parser::EXPR_STMT: {
@@ -422,13 +413,13 @@ namespace FlowController {
             case Parser::PRINT_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::PrintStmtNode>(node);
                 const CommanderTypePtr value = _expr(stmt->expression);
-                Util::print(value->getStringRepresentation());
+                std::cout << value->getStringRepresentation();
                 return nullptr;
             }
             case Parser::PRINTLN_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::PrintlnStmtNode>(node);
                 const CommanderTypePtr value = _expr(stmt->expression);
-                Util::println(value->getStringRepresentation());
+                std::cout << value->getStringRepresentation() << "\n";
                 return nullptr;
             }
             case Parser::WRITE_STMT: {

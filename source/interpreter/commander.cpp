@@ -1,46 +1,79 @@
+/**
+ * @file commander.cpp
+ * @brief This file contains the main program entry point for the Commander interpreter.
+ */
+
+#include "repl.hpp"
+
 #include "source/flow_controller/flow_controller.hpp"
 #include "source/lexer/lexer.hpp"
 #include "source/type_checker/type_checker.hpp"
+
 #include <fstream>
 #include <iostream>
 
-#if defined(_MSC_VER)
-#define WINDOWS_DEBUG
-#endif
-#ifdef WINDOWS_DEBUG
-#include <Windows.h>
-#endif
-#ifndef WINDOWS_DEBUG
-#include <ncurses.h>
-#endif
-
-bool hasArgument(std::vector<std::string>& arguments, std::string argument) {
+/**
+ * @brief Reports whether the given string argument is present within the list of command-line arguments.
+ *
+ * @param arguments The command-line arguments from the user.
+ * @param argument The argument to search for.
+ * @return True if the given argument is in the given list of arguments.
+ */
+bool hasArgument(std::vector<std::string>& arguments, const std::string& argument) {
     return std::find(arguments.begin(), arguments.end(), argument) != arguments.end();
 }
 
-std::string getArgumentValue(std::vector<std::string>& arguments, std::string argument) {
+/**
+ * @brief Reports the value of the given argument from a command-line invocation.
+ * @details For example, in `program --foo bar`, the value of argument `--foo` is `bar`.
+ *
+ * @param arguments The command-line arguments from the user.
+ * @param argument The argument to find and report its value.
+ * @return The value of the given argument.
+ */
+std::string getArgumentValue(std::vector<std::string>& arguments, const std::string& argument) {
     auto iter = std::find(arguments.begin(), arguments.end(), argument);
-    return iter != arguments.end() && ++iter != arguments.end() ? *iter : "";
+    if (iter == arguments.end()) return {};
+    ++iter;
+    if (iter == arguments.end()) return {};
+    return *iter;
 }
 
-void interpretFile(std::string& fileName, std::vector<std::string>& arguments, Parser::Parser& parser,
+/**
+ * @brief Interprets the given file using the given parser, type-checker, and flow controller.
+ *
+ * @param fileName The name of the file to interpret.
+ * @param arguments The command-line arguments from the user.
+ * @param parser The Commander parser.
+ * @param typeChecker The Commander type-checker.
+ * @param controller The Commander flow controller (logic interpreter).
+ */
+void interpretFile(const std::string& fileName, std::vector<std::string>& arguments, Parser::Parser& parser,
                    TypeChecker::TypeChecker& typeChecker, FlowController::FlowController& controller) {
     Lexer::TokenList tokens;
     Lexer::tokenize(tokens, fileName);
+
+    // Lex only:
     if (hasArgument(arguments, "-l")) {
-        for (const Lexer::TokenPtr& token : tokens) Util::println(token->toString());
+        for (const Lexer::TokenPtr& token : tokens) std::cout << token->toString() << "\n";
         return;
     }
+
+    // Lex and parse:
     Parser::ASTNodeList nodes = parser.parse(tokens);
     if (hasArgument(arguments, "-p")) {
-        for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
+        for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << "\n";
         return;
     }
+
+    // Lex, parse, and type-check:
     typeChecker.typeCheck(nodes);
     if (hasArgument(arguments, "-t")) {
-        for (const Parser::ASTNodePtr& node : nodes) Util::println(node->sExpression());
+        for (const Parser::ASTNodePtr& node : nodes) std::cout << node->sExpression() << "\n";
         return;
     }
+
+    // Lex, parse, type-check, and transpile to Bash:
     if (hasArgument(arguments, "-b")) {
         std::string outFile = getArgumentValue(arguments, "-o");
         if (outFile.empty()) { outFile = "bash-out.sh"; }
@@ -54,143 +87,54 @@ void interpretFile(std::string& fileName, std::vector<std::string>& arguments, P
         }*/
         return;
     }
+
+    // Interpret the file:
     controller.runtime(nodes);
 }
 
-int main(int argc, char** argv) {
+/**
+ * @brief Main program entry point.
+ *
+ * @param argc The number of provided command-line arguments.
+ * @param argv The command-line arguments from the user.
+ * @return 0 on success; 1 on error.
+ */
+int main(const int argc, const char** argv) {
     std::vector<std::string> arguments;
-    for (int i = 1; i < argc; i++) { arguments.emplace_back(argv[i]); }
+    for (int i = 1; i < argc; i++) arguments.emplace_back(argv[i]);
+
     try {
         Parser::Parser parser;
         TypeChecker::TypeChecker typeChecker(parser);
         FlowController::FlowController controller;
+
+        // If the user provided a file with the `-f` argument, interpret that file:
         if (hasArgument(arguments, "-f")) {
-            std::string file = getArgumentValue(arguments, "-f");
+            const std::string file = getArgumentValue(arguments, "-f");
             if (file.empty()) { throw Util::CommanderException("No file provided for -f flag"); }
             interpretFile(file, arguments, parser, typeChecker, controller);
             return 0;
         }
-#ifdef WINDOWS_DEBUG
-        Util::usingNCurses = false;
-        Util::println("Commander Language Version Beta");
-        Util::println("Basic REPL for Commander scripting language");
-        while (true) {
-            Util::print(">> ");
-            std::string source;
-            std::getline(std::cin, source);
-            try {
-                // Make a temporary file for the lexer
-                std::string tmpFileName = "test.cmdr";  // Not thread safe!!
-                std::ofstream tmp(tmpFileName);
-                tmp << source;
-                tmp.close();  // close file here to save changes
-                interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
-                std::remove(tmpFileName.c_str());
-            } catch (const Util::CommanderException& err) { Util::println(err.what()); }
-        }
-#endif
-#ifndef WINDOWS_DEBUG
-        Util::usingNCurses = true;
-        initscr();
-        cbreak();
-        noecho();
-        keypad(stdscr, TRUE);
-        curs_set(2);
-        Util::println("Commander Language Version Beta");
-        Util::println("Basic REPL for Commander scripting language");
-        Util::print(">> ");
-        refresh();
-        std::string currentLine;
-        std::vector<std::string> lines;
-        int line = 0;
-        int idx = 0;
-        while (true) {
-            int chr = getch();
-            switch (chr) {
-                case KEY_ENTER:
-                case '\n':
-                    move(getcury(stdscr), 3);
-                    Util::println(currentLine);
-                    if (currentLine == "exit") {
-                        endwin();
-                        return 0;
-                    }
-                    if (currentLine == "clear") {
-                        clear();
-                    } else {
-                        try {
-                            // Make a temporary file for the lexer
-                            std::string tmpFileName = std::tmpnam(nullptr);  // Not thread safe!!
-                            std::ofstream tmp(tmpFileName);
-                            tmp << currentLine;
-                            tmp.close();  // close file here to save changes
-                            interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
-                            std::remove(tmpFileName.c_str());
-                        } catch (const Util::CommanderException& err) { Util::println(err.what()); }
-                    }
-                    idx = 0;
-                    if (getcurx(stdscr) > 0) { Util::print("\n"); }
-                    Util::print(">> ");
 
-                    if (lines.empty() || lines.back() != currentLine) { lines.push_back(currentLine); }
-                    line = (int)lines.size();
-                    currentLine.clear();
-                    break;
-                case KEY_BACKSPACE:
-                    if (getcurx(stdscr) > 3) {
-                        move(getcury(stdscr), getcurx(stdscr) - 1);  // Move cursor back
-                        delch();                                     // Delete character
-                        currentLine.erase(currentLine.begin() + --idx);
-                    }
-                    break;
-                case KEY_UP:
-                    if (line == 0) { break; }
-                    currentLine = lines[--line];
-                    move(getcury(stdscr), 3);
-                    clrtoeol();
-                    Util::print(currentLine);
-                    idx = (int)currentLine.size();
-                    break;
-                case KEY_DOWN:
-                    if (line == lines.size()) { break; }
-                    if (++line == lines.size()) {
-                        currentLine = "";
-                    } else {
-                        currentLine = lines[line];
-                    }
-                    move(getcury(stdscr), 3);
-                    clrtoeol();
-                    Util::print(currentLine);
-                    idx = (int)currentLine.size();
-                    break;
-                case KEY_LEFT:
-                    if (getcurx(stdscr) > 3) {
-                        move(getcury(stdscr), getcurx(stdscr) - 1);
-                        idx--;
-                    }
-                    break;
-                case KEY_RIGHT:
-                    if (getcurx(stdscr) - 3 < currentLine.size()) {
-                        move(getcury(stdscr), getcurx(stdscr) + 1);
-                        idx++;
-                    }
-                    break;
-                default:
-                    if (getcurx(stdscr) < getmaxx(stdscr)) {
-                        insch(chr);
-                        currentLine.insert(idx++, std::string(1, (char)chr));
-                        move(getcury(stdscr), getcurx(stdscr) + 1);
-                    }
+        // Otherwise, run the REPL:
+        const auto runProgram = [&](const std::string& programText) {
+            // Make a temporary file for the lexer.
+            const std::string tmpFileName = std::tmpnam(nullptr);  // NOLINT(*-mt-unsafe)
+            std::ofstream tmp(tmpFileName);
+            tmp << programText;
+            tmp.close();  // Close file here to save changes
+
+            interpretFile(tmpFileName, arguments, parser, typeChecker, controller);
+
+            if (std::remove(tmpFileName.c_str()) != 0) {  // NOLINT(*-mt-unsafe)
+                throw Util::CommanderException("I/O error: could not delete temporary file");
             }
-            refresh();
-        }
-        endwin();
-#endif
+        };
+        REPL {runProgram}.run();
+
         return 0;
     } catch (const Util::CommanderException& e) {
-#ifndef WINDOWS_DEBUG
-        endwin();
-#endif
+        // Report the error and exit.
         std::cout << e.what() << '\n';
         return 1;
     }
