@@ -20,7 +20,6 @@
 #include "source/symbol_table/symbol_table_organizer.hpp"
 #include "source/type_checker/type.hpp"
 #include "source/util/io.hpp"
-#include "source/util/print.hpp"
 
 #include <cmath>
 #include <memory>

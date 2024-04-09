@@ -30,8 +30,6 @@ void REPL::run() {
         // Special built-in command: "quit" or "exit" exits the REPL.
         if (line == "quit" || line == "exit") break;
 
-        std::cout << "\"" << line << "\"\n";
-
         _history.push_back(line);
 
         // Special built-in command: "clear" to clear the screen.
