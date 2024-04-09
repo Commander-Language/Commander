@@ -16,7 +16,6 @@
 Console::Character Console::getChar() {
     // Inspiration: https://github.com/antirez/linenoise/blob/master/linenoise.c
     constexpr int stdinFD = 0;
-    exit(0);
 
     std::cout << std::flush;
 

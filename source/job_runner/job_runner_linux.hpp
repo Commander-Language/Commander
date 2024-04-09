@@ -9,7 +9,6 @@
 #include "job_runner_interface.hpp"
 #include "builtins/builtins.hpp"
 #include "process.hpp"
-#include "source/util/print.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
