@@ -16,33 +16,6 @@ void runFile(const std::string& filePath) {
 }
 
 /**
- * @brief Test that check if saving expressions to variables works
- */
-TEST(FlowControllerTests, SaveIntToVariable) {
-    //    Lexer::TokenList tokens;
-    //    Lexer::tokenize(tokens, "../tests/files/flow_controller_tests/script001.cmdr");
-    //    Parser::ASTNodeList nodes = parser.parse(tokens);
-    //    FlowController::FlowController controller(nodes);
-    //    controller.runtime();
-    //
-    //    EXPECT_TRUE(controller.hasVariable("one"));
-    //    EXPECT_TRUE(controller.hasVariable("two"));
-    //    EXPECT_TRUE(controller.hasVariable("three"));
-    //    EXPECT_TRUE(controller.hasVariable("nine"));
-    //    EXPECT_TRUE(controller.hasVariable("twenty"));
-    //    EXPECT_TRUE(controller.hasVariable("eight_one"));
-    //    EXPECT_TRUE(controller.hasVariable("mod5_2"));
-    //
-    //    EXPECT_EQ(controller.getVariableValue("one"), 1);
-    //    EXPECT_EQ(controller.getVariableValue("two"), 2);
-    //    EXPECT_EQ(controller.getVariableValue("three"), 3);
-    //    EXPECT_EQ(controller.getVariableValue("nine"), 9);
-    //    EXPECT_EQ(controller.getVariableValue("twenty"), 20);
-    //    EXPECT_EQ(controller.getVariableValue("eight_one"), 81);
-    //    EXPECT_EQ(controller.getVariableValue("mod5_2"), 1);
-}
-
-/**
  * Runs the flow controller tests from the tests/files/flow_controller_tests/should_run directory
  */
 TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
@@ -111,6 +84,5 @@ TEST_P(FlowControllerFailTests, ShouldFailRun) {
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
-    typeChecker = TypeChecker::TypeChecker(parser);
     return RUN_ALL_TESTS();
 }
