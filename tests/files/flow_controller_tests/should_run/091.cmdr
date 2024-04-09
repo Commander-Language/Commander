@@ -1,0 +1,2 @@
+x = sin(8);
+print arcsin(x);
