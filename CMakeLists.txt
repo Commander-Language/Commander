@@ -140,6 +140,10 @@ include(GoogleTest)
 #  Main build configurations:
 #  --------------------------
 
+# powershell transpiler ----
+add_library(powershell_transpiler source/powershell_transpiler/transpiler.cpp)
+# powershell transpiler end-
+
 add_library(lexer source/lexer/lexer.cpp source/util/commander_exception.cpp)
 
 add_executable(parseTableGenerator
@@ -201,7 +205,7 @@ add_executable(commander
         source/interpreter/commander.cpp
         source/interpreter/repl.cpp
 )
-target_link_libraries(commander lexer parser type_checker flow_controller symbol_table bash_transpiler)
+target_link_libraries(commander lexer parser type_checker flow_controller symbol_table bash_transpiler powershell_transpiler)
 if (MSVC)
     target_link_libraries(commander job_runner_windows)
 else ()
