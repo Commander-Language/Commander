@@ -103,7 +103,8 @@ namespace JobRunner {
         startupInfo.dwFlags |= STARTF_USESTDHANDLES;
 
         std::string name = "powershell -Command " + _setupCommandString(process, partOfPipe);
-        if (!CreateProcess(nullptr, name.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &startupInfo, &processInfo)) {
+        if (!CreateProcess(nullptr, name.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &startupInfo,
+                           &processInfo)) {
             CloseHandle(stdRead);
             CloseHandle(stdWrite);
             throw Util::CommanderException("");

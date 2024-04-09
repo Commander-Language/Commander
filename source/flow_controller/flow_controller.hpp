@@ -13,7 +13,7 @@
 #elif defined(_MSC_VER)
 #include "source/job_runner/job_runner_windows.hpp"
 #else
-# error OS/Compiler not supported
+#error OS/Compiler not supported
 #endif
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
@@ -190,6 +190,14 @@ namespace FlowController {
          * @return The string representation
          */
         std::string _getCommandString(const Parser::CmdNodePtr& command);
+
+        /**
+         * Copies a commander type
+         *
+         * @param commanderTypePtr The commander type
+         * @return The commander type copy
+         */
+        CommanderTypePtr _copy(const CommanderTypePtr& commanderTypePtr);
     };
 
 }  // namespace FlowController

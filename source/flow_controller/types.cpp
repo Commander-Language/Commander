@@ -71,6 +71,8 @@ namespace FlowController {
         return output;
     }
 
+    [[nodiscard]] TypeChecker::Type CommanderTuple::getType() const { return TypeChecker::TUPLE; }
+
     //  =================
     //  ||   Lambda    ||
     //  =================
@@ -78,8 +80,6 @@ namespace FlowController {
                                      TypeChecker::TyPtr returnType, std::string name)
         : bindings(std::move(bindings)), body(std::move(body)), name(std::move(name)),
           returnType(std::move(returnType)) {}
-
-    [[nodiscard]] TypeChecker::Type CommanderTuple::getType() const { return TypeChecker::TUPLE; }
 
     [[nodiscard]] std::string CommanderLambda::getStringRepresentation() const {
         std::stringstream builder;

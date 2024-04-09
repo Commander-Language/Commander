@@ -9,6 +9,7 @@
 
 #include "source/lexer/lexer.hpp"
 #include "source/type_checker/type.hpp"
+#include "source/type_checker/variable_table.hpp"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -1642,6 +1643,11 @@ namespace Parser {
         TypeNodePtr returnType;
 
         /**
+         * The symbol table of the function
+         */
+        TypeChecker::VariableTablePtr table;
+
+        /**
          * @brief Class constructor with a statement body (the default) and no bindings
          *
          * @param position The position of the node
@@ -2528,6 +2534,11 @@ namespace Parser {
          * The (optional) return type of the function
          */
         TypeNodePtr returnType;
+
+        /**
+         * The symbol table of the function
+         */
+        TypeChecker::VariableTablePtr table;
 
         /**
          * @brief Class constructor with a statement body (the default), and no bindings
