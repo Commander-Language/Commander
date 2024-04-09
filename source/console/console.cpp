@@ -1,5 +1,5 @@
 /**
- * @file console-unix.cpp
+ * @file console.cpp
  * @brief Implementation of the `Console` class for methods that are shared between systems.
  */
 
@@ -54,10 +54,12 @@ std::string Console::readLine(const std::string& prompt, const std::vector<std::
                 refreshLine();
                 break;
             case Character::ARROW_LEFT:
+                if (position == 0) break;
                 --position;
                 moveCursorHorizontal(-1);
                 break;
             case Character::ARROW_RIGHT:
+                if (position == displayedLine.size()) break;
                 ++position;
                 moveCursorHorizontal(1);
                 break;

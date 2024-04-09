@@ -30,7 +30,6 @@ using Runner = JobRunner::JobRunnerWindows;
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type.hpp"
 #include "source/util/commander_exception.hpp"
-#include "source/util/scan.hpp"
 
 #include <cmath>
 #include <iostream>
