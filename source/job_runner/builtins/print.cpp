@@ -7,6 +7,4 @@
 #include "print.hpp"
 #include "shared.hpp"
 
-ReturnInfo print(const List& args, int in, int out) {
-    return {"", "", ERROR};
-}
+ReturnInfo print(const List& args, int in, int out) { return {"", "", ERROR}; }

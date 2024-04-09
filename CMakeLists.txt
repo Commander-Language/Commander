@@ -229,6 +229,7 @@ gtest_discover_tests(symbolTableTests)
 
 
 add_executable(jobRunnerTests tests/job_runner_tests.cpp)
+add_executable(bashTranspilerTests tests/bash_transpiler_tests.cpp)
 add_executable(flowControllerTests tests/flow_controller_tests.cpp)
 
 if (MSVC)

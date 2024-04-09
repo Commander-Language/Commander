@@ -8,8 +8,7 @@
 
 namespace Builtins {
 
-    std::unordered_map<std::string, Function> builtins = {
-    };
+    std::unordered_map<std::string, Function> builtins = {};
 
     Function getBuiltinFunction(const std::string& name) {
         if (builtins.find(name) == builtins.end()) {

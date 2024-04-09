@@ -26,8 +26,6 @@ namespace FlowController {
 
     [[nodiscard]] TypeChecker::Type CommanderArray::getType() const { return TypeChecker::ARRAY; }
 
-    [[nodiscard]] CommanderTypePtr CommanderArray::copy() const { return std::make_shared<CommanderArray>(*this); }
-
     //  =================
     //  ||     Bool    ||
     //  =================
@@ -38,8 +36,6 @@ namespace FlowController {
 
     [[nodiscard]] TypeChecker::Type CommanderBool::getType() const { return TypeChecker::BOOL; }
 
-    [[nodiscard]] CommanderTypePtr CommanderBool::copy() const { return std::make_shared<CommanderBool>(value); }
-
     //  =================
     //  ||     Int     ||
     //  =================
@@ -48,8 +44,6 @@ namespace FlowController {
     [[nodiscard]] std::string CommanderInt::getStringRepresentation() const { return std::to_string(value); }
 
     [[nodiscard]] TypeChecker::Type CommanderInt::getType() const { return TypeChecker::INT; }
-
-    [[nodiscard]] CommanderTypePtr CommanderInt::copy() const { return std::make_shared<CommanderInt>(value); }
 
     //  =================
     //  ||    Float    ||
@@ -60,8 +54,6 @@ namespace FlowController {
     [[nodiscard]] std::string CommanderFloat::getStringRepresentation() const { return std::to_string(value); }
 
     [[nodiscard]] TypeChecker::Type CommanderFloat::getType() const { return TypeChecker::FLOAT; }
-
-    [[nodiscard]] CommanderTypePtr CommanderFloat::copy() const { return std::make_shared<CommanderFloat>(value); }
 
     //  =================
     //  ||    Tuple    ||
@@ -80,8 +72,6 @@ namespace FlowController {
     }
 
     [[nodiscard]] TypeChecker::Type CommanderTuple::getType() const { return TypeChecker::TUPLE; }
-
-    [[nodiscard]] CommanderTypePtr CommanderTuple::copy() const { return std::make_shared<CommanderTuple>(*this); }
 
     //  =================
     //  ||   Lambda    ||
@@ -107,8 +97,6 @@ namespace FlowController {
 
     [[nodiscard]] TypeChecker::Type CommanderLambda::getType() const { return TypeChecker::FUNCTION; }
 
-    [[nodiscard]] CommanderTypePtr CommanderLambda::copy() const { return std::make_shared<CommanderLambda>(*this); }
-
     //  =================
     //  ||   String    ||
     //  =================
@@ -118,8 +106,6 @@ namespace FlowController {
     [[nodiscard]] std::string CommanderString::getStringRepresentation() const { return value; }
 
     [[nodiscard]] TypeChecker::Type CommanderString::getType() const { return TypeChecker::STRING; }
-
-    [[nodiscard]] CommanderTypePtr CommanderString::copy() const { return std::make_shared<CommanderString>(*this); }
 
     //  ==================
     //  ||   Command    ||
@@ -131,7 +117,5 @@ namespace FlowController {
     std::string CommanderCommand::getStringRepresentation() const { return command; }
 
     TypeChecker::Type CommanderCommand::getType() const { return TypeChecker::COMMAND; }
-
-    [[nodiscard]] CommanderTypePtr CommanderCommand::copy() const { return std::make_shared<CommanderCommand>(*this); }
 
 }  // namespace FlowController

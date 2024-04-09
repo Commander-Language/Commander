@@ -79,8 +79,8 @@ void interpretFile(const std::string& fileName, std::vector<std::string>& argume
         std::string outFile = getArgumentValue(arguments, "-o");
         BashTranspiler::BashTranspiler transpiler(table);
         std::string bashOutput = transpiler.transpile(nodes);
-        if (Util::usingNCurses || outFile.empty()) {
-            Util::println(bashOutput);
+        if (outFile.empty()) {
+            std::cout << bashOutput << "\n";
         } else {
             Util::writeToFile(bashOutput, outFile);
         }
