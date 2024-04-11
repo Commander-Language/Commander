@@ -2,8 +2,6 @@
  * @file flow_controller.cpp
  * @brief Implements the Flow Controller and runtime
  *
- * Statements:
- *      TODO: Finish the following: Alias
  */
 
 /*
@@ -107,8 +105,43 @@ namespace FlowController {
     //  ||    Node Evaluation   ||
     //  ==========================
     void FlowController::_binding(const Parser::BindingNodePtr& node) {
-        // TODO: Find better default value for each type
-        _setVariable(node->variable, nullptr);
+        CommanderTypePtr defaultVal = nullptr;
+        if (node->type) {
+            switch (node->type->type->getType()) {
+                case TypeChecker::INT:
+                    defaultVal = std::make_shared<CommanderInt>(0);
+                    break;
+                case TypeChecker::FLOAT:
+                    defaultVal = std::make_shared<CommanderFloat>(0.0);
+                    break;
+                case TypeChecker::BOOL:
+                    defaultVal = std::make_shared<CommanderBool>(false);
+                    break;
+                case TypeChecker::TUPLE:
+                    defaultVal = std::make_shared<CommanderTuple>();
+                    break;
+                case TypeChecker::ARRAY:
+                    defaultVal = std::make_shared<CommanderArray>();
+                    break;
+                case TypeChecker::FUNCTION:
+                    defaultVal = std::make_shared<CommanderLambda>(
+                            std::make_shared<Parser::BindingsNode>(node->position),
+                            std::make_shared<Parser::ReturnStmtNode>(
+                                    node->position, std::make_shared<Parser::TupleExprNode>(node->position)),
+                            TypeChecker::VOID_TY);
+                    break;
+                case TypeChecker::STRING:
+                    defaultVal = std::make_shared<CommanderString>("");
+                    break;
+                default:
+                    defaultVal = std::make_shared<CommanderCommand>(
+                            std::make_shared<Parser::BasicCmdNode>(
+                                    std::make_shared<Parser::StringNode>(node->position, "")),
+                            "");
+                    break;
+            }
+        }
+        _setVariable(node->variable, defaultVal);
     }
 
     void FlowController::_bindings(const Parser::BindingsNodePtr& nodes) {

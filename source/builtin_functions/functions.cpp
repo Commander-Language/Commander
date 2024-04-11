@@ -439,7 +439,6 @@ namespace Function {
 
     FlowController::CommanderFloatPtr randomFloat() {
         return std::make_shared<FlowController::CommanderFloat>(((double)rand()) / ((double)RAND_MAX));
-        // TODO: may generate an identical value every run
     }
 
     FlowController::CommanderIntPtr time() {

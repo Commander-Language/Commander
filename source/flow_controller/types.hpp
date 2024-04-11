@@ -43,6 +43,11 @@ namespace FlowController {
      */
     struct CommanderArray : public CommanderType {
         /**
+         * @brief Default constructor
+         */
+        CommanderArray() = default;
+
+        /**
          * @brief Class Constructor
          * @param values The values to set the array.
          */
@@ -114,6 +119,11 @@ namespace FlowController {
      * @brief A Commander tuple representation.
      */
     struct CommanderTuple : public CommanderType {
+        /**
+         * @brief Default constructor
+         */
+        CommanderTuple() = default;
+
         /**
          * @brief Class Constructor
          * @param values The values of the tuple to set

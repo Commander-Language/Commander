@@ -15,6 +15,9 @@ void runFile(const std::string& filePath) {
     controller.runtime(nodes);
 }
 
+// TODO: Add tests for builtin functions that can't be tested using files due to changing values (e.g. random(), time(),
+// date(), etc.)
+
 /**
  * Runs the flow controller tests from the tests/files/flow_controller_tests/should_run directory
  */
