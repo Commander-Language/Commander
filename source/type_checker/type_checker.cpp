@@ -323,9 +323,9 @@ namespace TypeChecker {
                             } else {
                                 Parser::IndexLValueNodePtr const lvalue
                                         = std::static_pointer_cast<Parser::IndexLValueNode>(exprNode->left);
-                                if (lvalue->lvalue->type->getType() == ARRAY) {
+                                if (lvalue->lvalue->type && lvalue->lvalue->type->getType() == ARRAY) {
                                     std::static_pointer_cast<ArrayTy>(lvalue->lvalue->type)->baseType = rightTy;
-                                } else if (lvalue->index->nodeType() == Parser::INT_EXPR) {
+                                } else if (lvalue->lvalue->type && lvalue->index->nodeType() == Parser::INT_EXPR) {
                                     int64_t const index
                                             = std::static_pointer_cast<Parser::IntExprNode>(lvalue->index)->value;
                                     TupleTyPtr const tupleTy = std::static_pointer_cast<TupleTy>(lvalue->lvalue->type);
