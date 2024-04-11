@@ -266,7 +266,7 @@ namespace BashTranspiler {
                         _createBCBinopExpression(binOpExpr, "%", false);
                         break;
                     case Parser::ADD: {
-                        if (binOpExpr->type->getType() != TypeChecker::STRING) {
+                        if (!binOpExpr->type || binOpExpr->type->getType() != TypeChecker::STRING) {
                             _createBCBinopExpression(binOpExpr, "+", false);
                             return;
                         }
@@ -331,6 +331,15 @@ namespace BashTranspiler {
                     if (_scopes.top().find(name) != _scopes.top().end()) { name = _scopes.top()[name]; }
                     std::vector<Parser::ExprNodePtr> args = callExpr->args->exprs;
                     if (name == "parseInt" || name == "parseFloat" || name == "parseBool" || name == "toString") {
+                        if (args[0]->type && args[0]->type->getType() == TypeChecker::FLOAT && name == "parseInt") {
+                            _buffer << "$(echo \"scale=0; ";
+                            _transpile(args[0]);
+                            _buffer << " / 1\" | bc -l)";
+                            return;
+                        }
+                        if (name == "parseBool") {
+                            // TODO: Handle parsing strings to bools
+                        }
                         _transpile(args[0]);
                         return;
                     }
@@ -648,9 +657,21 @@ namespace BashTranspiler {
                         return;
                     }
                     if (name == "length") {
-                        _buffer << "$(echo ";
-                        _transpile(args[0]);
-                        _buffer << " | wc -c)";
+                        switch (args[0]->type->getType()) {
+                            case TypeChecker::TUPLE:
+                                // TODO
+                                break;
+                            case TypeChecker::ARRAY:
+                                // TODO
+                                break;
+                            case TypeChecker::STRING:
+                                _buffer << "$(echo ";
+                                _transpile(args[0]);
+                                _buffer << " | wc -c)";
+                                break;
+                            default:
+                                break;
+                        }
                         return;
                     }
                     if (name == "replace") {
