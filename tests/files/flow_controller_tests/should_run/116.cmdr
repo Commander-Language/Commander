@@ -1,0 +1,4 @@
+//Should correctly run ceil
+println ceil(5);
+println ceil(3.141);
+println ceil(3.6141);
