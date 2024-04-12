@@ -219,7 +219,7 @@ namespace FlowController {
             case Parser::VAR_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::VarExprNode>(node);
                 CommanderTypePtr value = _getVariable(expr->variable);
-                return value;
+                return copy(value);
             }
             case Parser::LVALUE_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::LValueExprNode>(node);

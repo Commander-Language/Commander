@@ -98,7 +98,8 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("110.cmdr", "110.cmdr.expected"), std::make_tuple("111.cmdr", "111.cmdr.expected"),
                 std::make_tuple("112.cmdr", "112.cmdr.expected"), std::make_tuple("113.cmdr", "113.cmdr.expected"),
                 std::make_tuple("114.cmdr", "114.cmdr.expected"), std::make_tuple("115.cmdr", "115.cmdr.expected"),
-                std::make_tuple("116.cmdr", "116.cmdr.expected"), std::make_tuple("117.cmdr", "117.cmdr.expected")));
+                std::make_tuple("116.cmdr", "116.cmdr.expected"), std::make_tuple("117.cmdr", "117.cmdr.expected"),
+                std::make_tuple("118.cmdr", "118.cmdr.expected"), std::make_tuple("119.cmdr", "119.cmdr.expected")));
 
 /**
  * Creates test suite, with list of all the files that need to be ran that are expected to fail (as a result of a

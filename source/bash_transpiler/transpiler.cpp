@@ -95,9 +95,9 @@ namespace BashTranspiler {
             case Parser::TERNARY_EXPR: {
                 const Parser::TernaryExprNodePtr ternaryExpr = std::static_pointer_cast<Parser::TernaryExprNode>(
                         astNode);
-                _buffer << "$(if [ ";
+                _buffer << "$(if [ \"";
                 _transpile(ternaryExpr->condition);
-                _buffer << " ]; then echo ";
+                _buffer << "\" -eq 1 ]; then echo ";
                 _transpile(ternaryExpr->trueExpr);
                 _buffer << "; else echo ";
                 _transpile(ternaryExpr->falseExpr);
@@ -808,9 +808,9 @@ namespace BashTranspiler {
             }
             case Parser::IF_STMT: {
                 const Parser::IfStmtNodePtr ifStmtNode = std::static_pointer_cast<Parser::IfStmtNode>(astNode);
-                _buffer << "if [ ";
+                _buffer << "if [ \"";
                 _transpile(ifStmtNode->condition);
-                _buffer << " ]; then";
+                _buffer << " \" -eq 1 ]; then";
                 _incrementIndent();
                 _writeLine();
                 _transpile(ifStmtNode->trueStmt);
@@ -830,8 +830,8 @@ namespace BashTranspiler {
             }
             case Parser::FOR_STMT: {
                 const Parser::ForStmtNodePtr forStmtNode = std::static_pointer_cast<Parser::ForStmtNode>(astNode);
-                _transpile(forStmtNode->initial);
-                Parser::ScopeStmtNodePtr body;
+                _transpile(std::make_shared<Parser::ExprStmtNode>(forStmtNode->initial));
+                Parser::ScopeStmtNodePtr body = std::make_shared<Parser::ScopeStmtNode>(forStmtNode->body->position);
                 if (forStmtNode->body->nodeType() == Parser::SCOPE_STMT) {
                     Parser::ScopeStmtNodePtr forBody = std::static_pointer_cast<Parser::ScopeStmtNode>(
                             forStmtNode->body);
@@ -847,9 +847,9 @@ namespace BashTranspiler {
             }
             case Parser::WHILE_STMT: {
                 const Parser::WhileStmtNodePtr whileStmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(astNode);
-                _buffer << "while [ ";
+                _buffer << "while [ \"";
                 _transpile(whileStmtNode->condition);
-                _buffer << " ]; do";
+                _buffer << "\" -eq 1 ]; do";
                 _incrementIndent();
                 _writeLine();
                 _transpile(whileStmtNode->body);
@@ -866,9 +866,9 @@ namespace BashTranspiler {
                 _incrementIndent();
                 _writeLine();
                 _transpile(doWhileStmtNode->body);
-                _buffer << "[ ";
+                _buffer << "[ \"";
                 _transpile(doWhileStmtNode->condition);
-                _buffer << " ] || break";
+                _buffer << "\" -eq 1 ] || break";
                 _decrementIndent();
                 _writeLine();
                 return;
@@ -988,9 +988,9 @@ namespace BashTranspiler {
             case Parser::ASSERT_STMT: {
                 const Parser::AssertStmtNodePtr assertStmtNode = std::static_pointer_cast<Parser::AssertStmtNode>(
                         astNode);
-                _buffer << "if ! [ ";
+                _buffer << "if [ \"";
                 _transpile(assertStmtNode->expr);
-                _buffer << " ]; then";
+                _buffer << "\" -eq 0 ]; then";
                 _incrementIndent();
                 _writeLine();
                 _buffer << "echo ";
