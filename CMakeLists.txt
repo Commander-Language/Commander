@@ -144,7 +144,10 @@ include(GoogleTest)
 add_library(powershell_transpiler source/powershell_transpiler/transpiler.cpp)
 # powershell transpiler end-
 
-add_library(lexer source/lexer/lexer.cpp source/util/commander_exception.cpp)
+add_library(lexer source/lexer/lexer.cpp
+        source/lexer/file_position.cpp
+        source/util/commander_exception.cpp
+        source/util/io.cpp)
 
 add_executable(parseTableGenerator
         source/parser/generator/generator.cpp
@@ -156,6 +159,7 @@ add_executable(parseTableGenerator
 
         source/type_checker/type.cpp
         source/util/thread_queue.cpp
+        source/lexer/file_position.cpp
 )
 target_link_libraries(parseTableGenerator lexer)
 
@@ -170,10 +174,10 @@ add_library(parser source/parser/parser.cpp
         source/parser/parser_action.cpp
         source/parser/production_item.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/parse_table.cpp
-
+        source/lexer/file_position.cpp
         source/util/commander_exception.cpp
 )
-add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/type_checker/var_info.cpp source/type_checker/variable_table.cpp source/lexer/lexer.cpp source/util/commander_exception.cpp source/builtin_functions/functions.cpp)
+add_library(type_checker source/type_checker/type_checker.cpp source/type_checker/type.cpp source/type_checker/var_info.cpp source/type_checker/variable_table.cpp source/lexer/lexer.cpp source/lexer/file_position.cpp source/util/commander_exception.cpp source/builtin_functions/functions.cpp)
 
 add_library(flow_controller
         source/flow_controller/flow_controller.cpp

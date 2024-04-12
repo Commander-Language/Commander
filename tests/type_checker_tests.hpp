@@ -9,6 +9,7 @@
 
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type_checker.hpp"
+#include "source/util/io.hpp"
 #include <gtest/gtest.h>
 
 /**

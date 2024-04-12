@@ -189,14 +189,6 @@ namespace FlowController {
          * @return The string representation
          */
         std::string _getCommandString(const Parser::CmdNodePtr& command);
-
-        /**
-         * Copies a commander type
-         *
-         * @param commanderTypePtr The commander type
-         * @return The commander type copy
-         */
-        CommanderTypePtr _copy(const CommanderTypePtr& commanderTypePtr);
     };
 
 }  // namespace FlowController

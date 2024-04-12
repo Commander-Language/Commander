@@ -9,6 +9,7 @@
 
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
+#include "source/util/io.hpp"
 #include <gtest/gtest.h>
 
 /**

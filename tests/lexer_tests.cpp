@@ -29,7 +29,7 @@ TEST_P(LexerLexTests, ShouldLexFileAndMatchExpectedExamples) {
     try {
         Lexer::TokenList tokens;
         Lexer::tokenize(tokens, filePath);
-        const std::string expectedOutput = Lexer::readFile(expectedFilePath);
+        const std::string expectedOutput = Util::readFile(expectedFilePath);
 
         expectOutputEqualsTokens(tokens, expectedOutput);
     } catch (const Util::CommanderException& e) {

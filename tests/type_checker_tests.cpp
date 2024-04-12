@@ -124,7 +124,7 @@ TEST_P(TypeCheckerPassTests, ShouldTypeCheckFileAndMatchExpectedExamples) {
     TypeChecker::TypeChecker typeChecker(parser);
     try {
         typeChecker.typeCheck(nodes);
-        const std::string expectedOutput = Lexer::readFile(expectedFilePath);
+        const std::string expectedOutput = Util::readFile(expectedFilePath);
         expectOutputEqualsSExpressions(nodes, expectedOutput);
     } catch (const Util::CommanderException& e) {
         std::cout << "Type Checker Error: " << e.what() << "\n";

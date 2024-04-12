@@ -13,6 +13,7 @@
 #include "source/parser/parser.hpp"
 #include "source/type_checker/type_checker.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/util/io.hpp"
 #include <fstream>
 #include <gtest/gtest.h>
 

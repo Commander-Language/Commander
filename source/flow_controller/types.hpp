@@ -336,6 +336,14 @@ namespace FlowController {
     // Primitive representation of Commander Types
     using PrimitiveInt = int64_t;
     using PrimitiveFloat = double;
+
+    /**
+     * Copies a commander type
+     *
+     * @param commanderTypePtr The commander type
+     * @return The commander type copy
+     */
+    CommanderTypePtr copy(const CommanderTypePtr& commanderTypePtr);
 }  // namespace FlowController
 
 #endif

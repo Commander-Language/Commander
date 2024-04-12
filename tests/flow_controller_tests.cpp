@@ -73,7 +73,7 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamples) {
     std::string output = buffer.str();
 
     // Check that output is equal to expected
-    EXPECT_EQ(Lexer::readFile(expectedFilePath), output);
+    EXPECT_EQ(Util::readFile(expectedFilePath), output);
 }
 
 /**

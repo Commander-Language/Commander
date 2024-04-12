@@ -9,6 +9,7 @@
 
 #include "source/lexer/lexer.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/util/io.hpp"
 #include <gtest/gtest.h>
 
 /**

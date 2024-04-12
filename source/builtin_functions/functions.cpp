@@ -18,7 +18,7 @@ namespace Function {
     FlowController::CommanderIntPtr parseInt(FlowController::CommanderTypePtr intValue) {
         switch (intValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(intValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(intValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::static_pointer_cast<FlowController::CommanderFloat>(intValue)->value);
@@ -39,7 +39,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::static_pointer_cast<FlowController::CommanderInt>(floatValue)->value);
             case TypeChecker::FLOAT:
-                return std::static_pointer_cast<FlowController::CommanderFloat>(floatValue);
+                return std::static_pointer_cast<FlowController::CommanderFloat>(copy(floatValue));
             case TypeChecker::BOOL:
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::static_pointer_cast<FlowController::CommanderBool>(floatValue)->value ? 1.0 : 0.0);
@@ -60,7 +60,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderBool>(
                         std::static_pointer_cast<FlowController::CommanderFloat>(boolValue)->value != 0);
             case TypeChecker::BOOL:
-                return std::static_pointer_cast<FlowController::CommanderBool>(boolValue);
+                return std::static_pointer_cast<FlowController::CommanderBool>(copy(boolValue));
             case TypeChecker::STRING:
                 return std::make_shared<FlowController::CommanderBool>(
                         std::static_pointer_cast<FlowController::CommanderString>(boolValue)->value == "true");
@@ -128,7 +128,7 @@ namespace Function {
     FlowController::CommanderIntPtr floor(FlowController::CommanderTypePtr numberValue) {
         switch (numberValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(numberValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(numberValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::floor(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
@@ -140,7 +140,7 @@ namespace Function {
     FlowController::CommanderIntPtr ceil(FlowController::CommanderTypePtr numberValue) {
         switch (numberValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(numberValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(numberValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::ceil(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
@@ -152,7 +152,7 @@ namespace Function {
     FlowController::CommanderIntPtr round(FlowController::CommanderTypePtr numberValue) {
         switch (numberValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(numberValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(numberValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::round(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
