@@ -113,7 +113,7 @@ namespace JobRunner {
         CloseHandle(stdWrite);
         CloseHandle(errWrite);
 
-        const int bufferSize = 1024;
+        const int bufferSize = _bufSize;
         DWORD bytesRead;
 
         char stdBuffer[bufferSize];
