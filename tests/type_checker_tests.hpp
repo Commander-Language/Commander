@@ -225,7 +225,10 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("354.cmdr", "354.cmdr.expected"), std::make_tuple("355.cmdr", "355.cmdr.expected"),
                 std::make_tuple("356.cmdr", "356.cmdr.expected"), std::make_tuple("357.cmdr", "357.cmdr.expected"),
                 std::make_tuple("358.cmdr", "358.cmdr.expected"), std::make_tuple("359.cmdr", "359.cmdr.expected"),
-                std::make_tuple("360.cmdr", "360.cmdr.expected"), std::make_tuple("361.cmdr", "361.cmdr.expected")));
+                std::make_tuple("360.cmdr", "360.cmdr.expected"), std::make_tuple("361.cmdr", "361.cmdr.expected"),
+                std::make_tuple("362.cmdr", "362.cmdr.expected"), std::make_tuple("363.cmdr", "363.cmdr.expected"),
+                std::make_tuple("364.cmdr", "364.cmdr.expected"), std::make_tuple("365.cmdr", "365.cmdr.expected"),
+                std::make_tuple("366.cmdr", "366.cmdr.expected")));
 
 /**
  * Creates test suite, with list of all the files that need to be type checked that are expected to fail (as a result of
@@ -262,7 +265,7 @@ INSTANTIATE_TEST_SUITE_P(
                 "200.cmdr", "201.cmdr", "202.cmdr", "203.cmdr", "204.cmdr", "205.cmdr", "206.cmdr", "207.cmdr",
                 "208.cmdr", "209.cmdr", "210.cmdr", "211.cmdr", "212.cmdr", "213.cmdr", "214.cmdr", "215.cmdr",
                 "216.cmdr", "217.cmdr", "218.cmdr", "219.cmdr", "220.cmdr", "221.cmdr", "222.cmdr", "223.cmdr",
-                "224.cmdr", "225.cmdr", "226.cmdr", "227.cmdr", "228.cmdr"));
+                "224.cmdr", "225.cmdr", "226.cmdr", "227.cmdr", "228.cmdr", "229.cmdr"));
 
 /**
  * @brief Takes in a file path, and goes through lexing, parsing, and type checking it

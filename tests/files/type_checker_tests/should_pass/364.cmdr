@@ -1,0 +1,5 @@
+//Should allow recursion
+fn a(): float {
+	return a();
+}
+x = a();

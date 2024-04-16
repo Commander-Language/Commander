@@ -1,0 +1,4 @@
+(PrgmNode
+	(ExprStmtNode (BinOpExprNode (BindingNode a) SET (LambdaExprNode (BindingsNode (BindingNode b)) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (CallExprNode (LValueExprNode (VarExprNode b)) (ExprsNode))))) (fn (ANY) -> ANY)) (fn (ANY) -> ANY)))
+	(ExprStmtNode (CallExprNode (LValueExprNode (VarExprNode a (fn (ANY) -> ANY)) (fn (ANY) -> ANY)) (ExprsNode (LValueExprNode (VarExprNode a (fn (ANY) -> ANY)) (fn (ANY) -> ANY))))))

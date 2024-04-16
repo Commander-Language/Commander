@@ -95,7 +95,7 @@ namespace FlowController {
                     // _expr
                     break;
                 default: {
-                    throw Util::CommanderException("Flow Controller: Encountered unknown node type");
+                    throw Util::CommanderException("Flow Controller: Encountered unknown node type", node->position);
                 }
             }
         }
@@ -194,7 +194,8 @@ namespace FlowController {
             }
             default:
                 throw Util::CommanderException("Unknown command type encountered: "
-                                               + Parser::nodeTypeToString(node->nodeType()));
+                                                       + Parser::nodeTypeToString(node->nodeType()),
+                                               node->position);
         }
     }
 
@@ -238,16 +239,18 @@ namespace FlowController {
                 if (dataStructure->getType() == TypeChecker::ARRAY) {
                     const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(dataStructure);
                     if (index->value >= array->values.size()) {
-                        throw Util::CommanderException("Index array out of bounds. Index: "
-                                                       + std::to_string(index->value)
-                                                       + ", Array Length: " + std::to_string(array->values.size()));
+                        throw Util::CommanderException(
+                                "Index array out of bounds. Index: " + std::to_string(index->value)
+                                        + ", Array Length: " + std::to_string(array->values.size()),
+                                expr->position);
                     }
                     return array->values[index->value];
                 }
                 const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(dataStructure);
                 if (index->value >= tuple->values.size()) {
                     throw Util::CommanderException("Index tuple out of bounds. Index: " + std::to_string(index->value)
-                                                   + ", Tuple Length: " + std::to_string(tuple->values.size()));
+                                                           + ", Tuple Length: " + std::to_string(tuple->values.size()),
+                                                   expr->position);
                 }
                 return tuple->values[index->value];
             }
@@ -324,7 +327,7 @@ namespace FlowController {
                 return std::make_shared<CommanderString>(CommanderString {Util::readFile(path->value)});
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown expression encountered", node->position);
             }
         }
     }
@@ -473,7 +476,9 @@ namespace FlowController {
             case Parser::ASSERT_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::AssertStmtNode>(node);
                 const CommanderBoolPtr value = std::static_pointer_cast<CommanderBool>(_expr(stmt->expr));
-                if (!value->value) { throw Util::CommanderException("Assertion Error: " + _string(stmt->message)); }
+                if (!value->value) {
+                    throw Util::CommanderException("Assertion Error: " + _string(stmt->message), stmt->position);
+                }
                 return nullptr;
             }
             case Parser::FUNCTION_STMT: {
@@ -483,7 +488,7 @@ namespace FlowController {
                 return nullptr;
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown statement encountered");
+                throw Util::CommanderException("Flow Controller: Unknown statement encountered", node->position);
             }
         }
     }
@@ -513,7 +518,8 @@ namespace FlowController {
                     }
                     default:
                         throw Util::CommanderException("Trying to negate bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
+                                                               + TypeChecker::typeToString(expr->getType()),
+                                                       unOp->position);
                 }
             }
             case Parser::NOT: {
@@ -525,7 +531,8 @@ namespace FlowController {
                     }
                     default:
                         throw Util::CommanderException("Trying to use ! operator on bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
+                                                               + TypeChecker::typeToString(expr->getType()),
+                                                       unOp->position);
                 }
             }
             case Parser::PRE_INCREMENT:
@@ -584,7 +591,8 @@ namespace FlowController {
                         }
                         default:
                             throw Util::CommanderException("Trying to increment or decrement bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
+                                                                   + TypeChecker::typeToString(value->getType()),
+                                                           unOp->position);
                     }
                 }
                 Parser::IndexLValueNodePtr indexLValue = std::static_pointer_cast<Parser::IndexLValueNode>(unOp->node);
@@ -644,11 +652,12 @@ namespace FlowController {
                     }
                     default:
                         throw Util::CommanderException("Trying to increment or decrement bad type "
-                                                       + TypeChecker::typeToString(value->getType()));
+                                                               + TypeChecker::typeToString(value->getType()),
+                                                       unOp->position);
                 }
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown unary expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown unary expression encountered", unOp->position);
             }
         }
     }
@@ -779,7 +788,8 @@ namespace FlowController {
                 return result;
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown binary expression encountered",
+                                               binOp->position);
             }
         }
     }

@@ -564,14 +564,19 @@ namespace Function {
     FlowController::CommanderArrayPtr split(FlowController::CommanderStringPtr sourceString,
                                             FlowController::CommanderStringPtr splitToken) {
         std::vector<FlowController::CommanderTypePtr> values;
-        std::string workingString = std::string(sourceString->value);
-        size_t currentTokenLocation = 1;  // temp value
-
-        while (currentTokenLocation != 0) {
-            currentTokenLocation = workingString.find(splitToken->value);
-            // TODO: incomplete
-            // find an occurrence of the token to remove, make a substring, and remove from workingString
+        if (splitToken->value.empty()) {
+            values.push_back(sourceString);
+            return std::make_shared<FlowController::CommanderArray>(values);
         }
+        std::string workingString = std::string(sourceString->value);
+        size_t start = 0;
+        size_t end = 0;
+        while ((end = sourceString->value.find(splitToken->value, start)) != std::string::npos) {
+            values.push_back(
+                    std::make_shared<FlowController::CommanderString>(sourceString->value.substr(start, end - start)));
+            start = end + splitToken->value.length();
+        }
+        values.push_back(std::make_shared<FlowController::CommanderString>(sourceString->value.substr(start)));
         return std::make_shared<FlowController::CommanderArray>(values);
     }
 

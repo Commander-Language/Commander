@@ -1,0 +1,27 @@
+println "Welcome to PokeDiscover!";
+directory = scan "Where do you want to store your Pokemon?: ";
+
+fn apiRequest(url) {
+	response = `curl -s $url`;
+	assert response[2] == 0, "Error occurred while running curl command";
+	assert response[0] == "Not Found" || response[0].startsWith("404"), "Url '$url' not found!";
+	return response[0];
+}
+
+fn processPokemon(name, url) {
+	id = `curl -s $url | jq -r '.id' | tr -d '\n'`[0];
+	png = apiRequest("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png");
+	echo $png | imgcat;
+	if ((read "Do you want to keep $name? (y/n): ") == "y") {
+		write png to directory + "/$id.png";
+	}
+}
+
+all = apiRequest("https://pokeapi.co/api/v2/pokemon?limit=-1");
+values = `echo $all | jq -r '.results[] | "\(.name) \(.url)"'`[0].split("\n");
+for (i = 0; i < values.length(); i += 2) {
+	pair = values[i].split(" ");
+	processPokemon(pair[0], pair[1]);
+}
+
+println "That is all of them. Goodbye!";

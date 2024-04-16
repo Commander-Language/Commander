@@ -1,0 +1,6 @@
+//Test split() function works
+println "Hello World!".split(" ");
+println "Hi".split(" ");
+println "Hi".split("");
+println "1:2:3:4".split(":");
+println "".split("hi");

@@ -222,7 +222,8 @@ namespace TypeChecker {
             }
             case Parser::BINOP_EXPR: {
                 Parser::BinOpExprNodePtr const exprNode = std::static_pointer_cast<Parser::BinOpExprNode>(astNode);
-                if (exprNode->type) { return exprNode->type; }
+                // DON'T do this, in case variables need to be set again for functions: if (exprNode->type) { return
+                // exprNode->type; }
                 bool const isVarLValue = exprNode->left->nodeType() == Parser::VAR_LVALUE;
                 bool const isLvalue = isVarLValue || exprNode->left->nodeType() == Parser::INDEX_LVALUE;
                 bool const isBinding = exprNode->left->nodeType() == Parser::BINDING;
@@ -234,7 +235,7 @@ namespace TypeChecker {
                                   && !_table->hasVariable(
                                           std::static_pointer_cast<Parser::VarLValueNode>(exprNode->left)->variable);
                 TyPtr leftTy = nullptr;
-                if (isBinding && isFirst || !isBinding && !isFirst) {
+                if (isBinding == isFirst) {
                     leftTy = typeCheck(exprNode->left);
                 } else if (!isFirst && (isBinding || isVarLValue)) {
                     leftTy = getVarType(
@@ -416,9 +417,9 @@ namespace TypeChecker {
                         } else if (!leftTy) {
                             Parser::IndexLValueNodePtr const lvalue = std::static_pointer_cast<Parser::IndexLValueNode>(
                                     exprNode->left);
-                            if (lvalue->lvalue->type->getType() == ARRAY) {
+                            if (lvalue->lvalue->type && lvalue->lvalue->type->getType() == ARRAY) {
                                 std::static_pointer_cast<ArrayTy>(lvalue->lvalue->type)->baseType = rightTy;
-                            } else if (lvalue->index->nodeType() == Parser::INT_EXPR) {
+                            } else if (lvalue->lvalue->type && lvalue->index->nodeType() == Parser::INT_EXPR) {
                                 int64_t const index
                                         = std::static_pointer_cast<Parser::IntExprNode>(lvalue->index)->value;
                                 TupleTyPtr const tupleTy = std::static_pointer_cast<TupleTy>(lvalue->lvalue->type);
@@ -442,6 +443,7 @@ namespace TypeChecker {
                             = std::static_pointer_cast<Parser::VarExprNode>(
                                       std::static_pointer_cast<Parser::LValueExprNode>(exprNode->func)->expr)
                                       ->variable;
+                    if (std::find(_funcs.begin(), _funcs.end(), varName) != _funcs.end()) { return nullptr; }
                     assertVariableExists(varName, exprNode->func->position);
                     VarInfoPtr const functionInfo = _table->getVariable(varName);
                     type = functionInfo->types[0];
@@ -738,6 +740,7 @@ namespace TypeChecker {
                         astNode);
                 assertVariableNotExists(stmtNode->name, stmtNode->position);
                 pushScope();
+                _funcs.push_back(stmtNode->name);
                 std::vector<TyPtr> bindings;
                 for (const Parser::BindingNodePtr& binding : stmtNode->bindings->bindings) {
                     bindings.push_back(typeCheck(binding));
@@ -774,9 +777,14 @@ namespace TypeChecker {
                                 = returnType;
                     }
                 }
-                stmtNode->table = popScope();
+                _funcs.pop_back();
+                popScope();
                 _table->addVariable(stmtNode->name, std::make_shared<FunctionInfo>(std::vector<TyPtr> {
                                                             std::make_shared<FunctionTy>(bindings, returnType)}));
+                pushScope();
+                typeCheck(stmtNode->bindings);
+                typeCheck(stmtNode->body);
+                stmtNode->table = popScope();
                 return nullptr;
             }
             case Parser::TIMEOUT_STMT: {

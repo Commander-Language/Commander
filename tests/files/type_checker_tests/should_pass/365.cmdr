@@ -1,0 +1,4 @@
+//Should type check
+a = 1;
+b = (1.0,false)[a];
+b[a] = 3;

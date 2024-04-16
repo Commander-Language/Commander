@@ -1,0 +1,4 @@
+(PrgmNode
+	(FunctionStmtNode a (BindingsNode) (FloatTypeNode FLOAT) (ScopeStmtNode (StmtsNode
+	(ReturnStmtNode (CallExprNode (LValueExprNode (VarExprNode a)) (ExprsNode) FLOAT)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode a (fn () -> FLOAT)) (fn () -> FLOAT)) (ExprsNode) FLOAT) FLOAT)))

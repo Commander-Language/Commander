@@ -97,6 +97,7 @@ namespace TypeChecker {
 
     private:
         VariableTablePtr _table;
+        std::vector<std::string> _funcs;
     };
 }  //  namespace TypeChecker
 
