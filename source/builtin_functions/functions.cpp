@@ -481,16 +481,16 @@ namespace Function {
     FlowController::CommanderBoolPtr startsWith(FlowController::CommanderStringPtr sourceString,
                                                 FlowController::CommanderStringPtr expected) {
         return std::make_shared<FlowController::CommanderBool>(
-                sourceString->value.rfind(expected->value, 0));  // rfind(str, 0) checks the beginning of the string
+                sourceString->value.compare(0, expected->value.size(), expected->value) == 0);
     }
 
     FlowController::CommanderBoolPtr endsWith(FlowController::CommanderStringPtr sourceString,
                                               FlowController::CommanderStringPtr expected) {
-        if (expected->value.size() == sourceString->value.size()) {
-            return std::make_shared<FlowController::CommanderBool>(sourceString->value == expected->value);
-        }
-        return std::make_shared<FlowController::CommanderBool>(sourceString->value.find_last_of(expected->value)
-                                                               != std::string::npos);
+        return std::make_shared<FlowController::CommanderBool>(
+                sourceString->value.length() >= expected->value.length()
+                && sourceString->value.compare(sourceString->value.length() - expected->value.length(),
+                                               expected->value.length(), expected->value)
+                           == 0);
     }
 
     FlowController::CommanderIntPtr length(FlowController::CommanderTypePtr source) {

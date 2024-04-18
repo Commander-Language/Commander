@@ -1,0 +1,20 @@
+//Test endsWith works
+s = "Hello World!";
+//These ones should be false
+println s.endsWith("!d");
+println s.endsWith(" ");
+println s.endsWith("D!");
+println s.endsWith("world!");
+println s.endsWith("hello World!");
+println s.endsWith("Definitely doesn't end with this");
+println s.endsWith("1");
+println s.endsWith("SHello World!");
+//These ones should be true
+println s.endsWith("");
+println s.endsWith("!");
+println s.endsWith("d!");
+println s.endsWith("ld!");
+println s.endsWith("World!");
+println s.endsWith(" World!");
+println s.endsWith("ello World!");
+println s.endsWith("Hello World!");

@@ -1,0 +1,5 @@
+(PrgmNode
+	(FunctionStmtNode hi (BindingsNode) (TupleTypeNode (TypesNode) VOID) (ScopeStmtNode (StmtsNode
+	(PrintlnStmtNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi') STRING))) STRING))
+	(ReturnStmtNode (TupleExprNode (ExprsNode) VOID)))))
+	(ExprStmtNode (BinOpExprNode (BindingNode x) SET (CallExprNode (LValueExprNode (VarExprNode hi (fn () -> VOID)) (fn () -> VOID)) (ExprsNode) VOID) VOID)))

@@ -228,7 +228,7 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("360.cmdr", "360.cmdr.expected"), std::make_tuple("361.cmdr", "361.cmdr.expected"),
                 std::make_tuple("362.cmdr", "362.cmdr.expected"), std::make_tuple("363.cmdr", "363.cmdr.expected"),
                 std::make_tuple("364.cmdr", "364.cmdr.expected"), std::make_tuple("365.cmdr", "365.cmdr.expected"),
-                std::make_tuple("366.cmdr", "366.cmdr.expected")));
+                std::make_tuple("366.cmdr", "366.cmdr.expected"), std::make_tuple("367.cmdr", "367.cmdr.expected")));
 
 /**
  * Creates test suite, with list of all the files that need to be type checked that are expected to fail (as a result of
