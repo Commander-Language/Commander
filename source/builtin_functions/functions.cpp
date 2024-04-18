@@ -475,7 +475,7 @@ namespace Function {
 
     FlowController::CommanderStringPtr charAt(FlowController::CommanderStringPtr sourceString,
                                               FlowController::CommanderIntPtr index) {
-        return std::make_shared<FlowController::CommanderString>(std::to_string(sourceString->value[index->value]));
+        return std::make_shared<FlowController::CommanderString>(std::string(1, sourceString->value[index->value]));
     }
 
     FlowController::CommanderBoolPtr startsWith(FlowController::CommanderStringPtr sourceString,
