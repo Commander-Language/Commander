@@ -95,9 +95,9 @@ namespace BashTranspiler {
             case Parser::TERNARY_EXPR: {
                 const Parser::TernaryExprNodePtr ternaryExpr = std::static_pointer_cast<Parser::TernaryExprNode>(
                         astNode);
-                _buffer << "$(if [ ";
+                _buffer << "$(if [ \"";
                 _transpile(ternaryExpr->condition);
-                _buffer << " ]; then echo ";
+                _buffer << "\" -eq 1 ]; then echo ";
                 _transpile(ternaryExpr->trueExpr);
                 _buffer << "; else echo ";
                 _transpile(ternaryExpr->falseExpr);
@@ -266,7 +266,7 @@ namespace BashTranspiler {
                         _createBCBinopExpression(binOpExpr, "%", false);
                         break;
                     case Parser::ADD: {
-                        if (binOpExpr->type->getType() != TypeChecker::STRING) {
+                        if (!binOpExpr->type || binOpExpr->type->getType() != TypeChecker::STRING) {
                             _createBCBinopExpression(binOpExpr, "+", false);
                             return;
                         }
@@ -322,15 +322,25 @@ namespace BashTranspiler {
             }
             case Parser::CALL_EXPR: {
                 Parser::CallExprNodePtr callExpr = std::static_pointer_cast<Parser::CallExprNode>(astNode);
-                if (callExpr->func->nodeType() == Parser::LVALUE_EXPR
-                    && std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr->nodeType()
-                               == Parser::VAR_EXPR) {
+                bool isVariable = callExpr->func->nodeType() == Parser::LVALUE_EXPR
+                               && std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr->nodeType()
+                                          == Parser::VAR_EXPR;
+                if (isVariable) {
                     std::string name = std::static_pointer_cast<Parser::VarExprNode>(
                                                std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr)
                                                ->variable;
                     if (_scopes.top().find(name) != _scopes.top().end()) { name = _scopes.top()[name]; }
                     std::vector<Parser::ExprNodePtr> args = callExpr->args->exprs;
                     if (name == "parseInt" || name == "parseFloat" || name == "parseBool" || name == "toString") {
+                        if (args[0]->type && args[0]->type->getType() == TypeChecker::FLOAT && name == "parseInt") {
+                            _buffer << "$(echo \"scale=0; ";
+                            _transpile(args[0]);
+                            _buffer << " / 1\" | bc -l)";
+                            return;
+                        }
+                        if (name == "parseBool") {
+                            // TODO: Handle parsing strings to bools
+                        }
                         _transpile(args[0]);
                         return;
                     }
@@ -477,13 +487,13 @@ namespace BashTranspiler {
                     if (name == "arccos") {
                         _buffer << "$(echo \"if (";
                         _transpile(args[0]);
-                        _buffer << " == 0) " << M_PI << " / 2 else a(sqrt(1 - e(2 * l(";
+                        _buffer << " == 0) " << Util::PI << " / 2 else a(sqrt(1 - e(2 * l(";
                         _transpile(args[0]);
                         _buffer << "))) / ";
                         _transpile(args[0]);
                         _buffer << ") + (if (";
                         _transpile(args[0]);
-                        _buffer << " < 0) " << M_PI << " else 0)\" | bc -l)";
+                        _buffer << " < 0) " << Util::PI << " else 0)\" | bc -l)";
                         return;
                     }
                     if (name == "arctan") {
@@ -505,11 +515,11 @@ namespace BashTranspiler {
                         _transpile(args[0]);
                         _buffer << ") + (if (";
                         _transpile(args[0]);
-                        _buffer << " < 0) " << M_PI << " else 0)\" | bc -l)";
+                        _buffer << " < 0) " << Util::PI << " else 0)\" | bc -l)";
                         return;
                     }
                     if (name == "arccot") {
-                        _buffer << "$(echo \"" << M_PI << " / 2 - a(";
+                        _buffer << "$(echo \"" << Util::PI << " / 2 - a(";
                         _transpile(args[0]);
                         _buffer << ")\" | bc -l)";
                         return;
@@ -648,9 +658,21 @@ namespace BashTranspiler {
                         return;
                     }
                     if (name == "length") {
-                        _buffer << "$(echo ";
-                        _transpile(args[0]);
-                        _buffer << " | wc -c)";
+                        switch (args[0]->type->getType()) {
+                            case TypeChecker::TUPLE:
+                                // TODO
+                                break;
+                            case TypeChecker::ARRAY:
+                                // TODO
+                                break;
+                            case TypeChecker::STRING:
+                                _buffer << "$(echo ";
+                                _transpile(args[0]);
+                                _buffer << " | wc -c)";
+                                break;
+                            default:
+                                break;
+                        }
                         return;
                     }
                     if (name == "replace") {
@@ -742,7 +764,14 @@ namespace BashTranspiler {
                     }
                 }
                 _buffer << "$(";
-                _transpile(callExpr->func);
+                if (isVariable) {
+                    std::string name = std::static_pointer_cast<Parser::VarExprNode>(
+                                               std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr)
+                                               ->variable;
+                    _buffer << name;
+                } else {
+                    _transpile(callExpr->func);
+                }
                 _transpile(callExpr->args);
                 _buffer << ")";
                 return;
@@ -787,9 +816,9 @@ namespace BashTranspiler {
             }
             case Parser::IF_STMT: {
                 const Parser::IfStmtNodePtr ifStmtNode = std::static_pointer_cast<Parser::IfStmtNode>(astNode);
-                _buffer << "if [ ";
+                _buffer << "if [ \"";
                 _transpile(ifStmtNode->condition);
-                _buffer << " ]; then";
+                _buffer << " \" -eq 1 ]; then";
                 _incrementIndent();
                 _writeLine();
                 _transpile(ifStmtNode->trueStmt);
@@ -809,8 +838,8 @@ namespace BashTranspiler {
             }
             case Parser::FOR_STMT: {
                 const Parser::ForStmtNodePtr forStmtNode = std::static_pointer_cast<Parser::ForStmtNode>(astNode);
-                _transpile(forStmtNode->initial);
-                Parser::ScopeStmtNodePtr body;
+                _transpile(std::make_shared<Parser::ExprStmtNode>(forStmtNode->initial));
+                Parser::ScopeStmtNodePtr body = std::make_shared<Parser::ScopeStmtNode>(forStmtNode->body->position);
                 if (forStmtNode->body->nodeType() == Parser::SCOPE_STMT) {
                     Parser::ScopeStmtNodePtr forBody = std::static_pointer_cast<Parser::ScopeStmtNode>(
                             forStmtNode->body);
@@ -826,9 +855,9 @@ namespace BashTranspiler {
             }
             case Parser::WHILE_STMT: {
                 const Parser::WhileStmtNodePtr whileStmtNode = std::static_pointer_cast<Parser::WhileStmtNode>(astNode);
-                _buffer << "while [ ";
+                _buffer << "while [ \"";
                 _transpile(whileStmtNode->condition);
-                _buffer << " ]; do";
+                _buffer << "\" -eq 1 ]; do";
                 _incrementIndent();
                 _writeLine();
                 _transpile(whileStmtNode->body);
@@ -845,9 +874,9 @@ namespace BashTranspiler {
                 _incrementIndent();
                 _writeLine();
                 _transpile(doWhileStmtNode->body);
-                _buffer << "[ ";
+                _buffer << "[ \"";
                 _transpile(doWhileStmtNode->condition);
-                _buffer << " ] || break";
+                _buffer << "\" -eq 1 ] || break";
                 _decrementIndent();
                 _writeLine();
                 return;
@@ -929,7 +958,7 @@ namespace BashTranspiler {
                 std::map<std::string, std::string> newScope;
                 int i = 1;
                 for (Parser::BindingNodePtr bindingNode : functionStmt->bindings->bindings) {
-                    newScope[bindingNode->variable] = std::to_string(i);
+                    newScope[bindingNode->variable] = std::to_string(i++);
                 }
                 _pushScope(newScope, functionStmt->table);
                 _transpile(functionStmt->body);
@@ -967,9 +996,9 @@ namespace BashTranspiler {
             case Parser::ASSERT_STMT: {
                 const Parser::AssertStmtNodePtr assertStmtNode = std::static_pointer_cast<Parser::AssertStmtNode>(
                         astNode);
-                _buffer << "if ! [ ";
+                _buffer << "if [ \"";
                 _transpile(assertStmtNode->expr);
-                _buffer << " ]; then";
+                _buffer << "\" -eq 0 ]; then";
                 _incrementIndent();
                 _writeLine();
                 _buffer << "echo ";

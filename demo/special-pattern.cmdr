@@ -1,0 +1,27 @@
+MAX_NO = parseInt(scan "Enter Number between (5 to 9) : ");
+
+if (MAX_NO >= 5 && MAX_NO <= 9) {
+    clear;
+    for (i = 1; i <= MAX_NO; i++) {
+    	for (s = MAX_NO; s >= i; s--) {
+    		print " ";
+    	}
+    	for (j = 1; j <= i; j++) {
+    		print " .";
+    	}
+    	println "";
+    }
+    /*========= Second stage =========*/
+    for (i = MAX_NO; i >= 1; i--) {
+    	for (s = i; s <= MAX_NO; s++) {
+    		print " ";
+    	}
+    	for (j = 1; j <= i; j++) {
+    		print " .";
+    	}
+    	println "";
+    }
+    println "\n\n\tSee ya later!";
+} else {
+    println "I asked you to enter a number between 5 and 9, Try Again";
+}

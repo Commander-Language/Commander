@@ -9,6 +9,7 @@
 
 #include "source/parser/ast_node.hpp"
 #include "source/parser/parser.hpp"
+#include "source/util/io.hpp"
 #include <gtest/gtest.h>
 
 /**
@@ -183,7 +184,7 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_tuple("292.cmdr", "292.cmdr.expected"), std::make_tuple("293.cmdr", "293.cmdr.expected"),
                 std::make_tuple("294.cmdr", "294.cmdr.expected"), std::make_tuple("295.cmdr", "295.cmdr.expected"),
                 std::make_tuple("296.cmdr", "296.cmdr.expected"), std::make_tuple("297.cmdr", "297.cmdr.expected"),
-                std::make_tuple("298.cmdr", "298.cmdr.expected")));
+                std::make_tuple("298.cmdr", "298.cmdr.expected"), std::make_tuple("299.cmdr", "299.cmdr.expected")));
 
 /**
  * Creates test suite, with list of all the files that need to be parsed that are expected to fail (as a result of a

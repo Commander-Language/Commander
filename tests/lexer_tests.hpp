@@ -9,6 +9,7 @@
 
 #include "source/lexer/lexer.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/util/io.hpp"
 #include <gtest/gtest.h>
 
 /**
@@ -28,6 +29,7 @@ struct LexerFailTests : ::testing::TestWithParam<std::string> {};
 INSTANTIATE_TEST_SUITE_P(
         LexerTestFiles, LexerLexTests,
         ::testing::Values(
+                // TODO: Add helper (to test utils library) to generate these tuples automatically
                 std::make_tuple("000.cmdr", "000.cmdr.expected"), std::make_tuple("001.cmdr", "001.cmdr.expected"),
                 std::make_tuple("002.cmdr", "002.cmdr.expected"), std::make_tuple("003.cmdr", "003.cmdr.expected"),
                 std::make_tuple("004.cmdr", "004.cmdr.expected"), std::make_tuple("005.cmdr", "005.cmdr.expected"),

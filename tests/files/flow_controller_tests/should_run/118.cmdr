@@ -1,0 +1,12 @@
+//Test printing
+fn printChar(char, num) {
+	for (i=0; i<num; i++) {
+		print char;
+	}
+}
+for (i=5; i >= 0; i--) {
+	printChar("a", i);
+    print ".";
+    printChar("b", i);
+    println "";
+}

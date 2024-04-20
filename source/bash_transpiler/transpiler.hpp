@@ -10,6 +10,7 @@
 #include "source/parser/parser.hpp"
 #include "source/type_checker/variable_table.hpp"
 #include "source/util/commander_exception.hpp"
+#include "source/util/constants.hpp"
 #include <cmath>
 #include <map>
 #include <set>

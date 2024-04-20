@@ -105,7 +105,7 @@ TEST_P(FlowControllerPassTests, ShouldRunFileAndMatchExpectedExamplesBash) {
     std::remove(tmpFileName.c_str());
 
     // Check that output is equal to expected
-    EXPECT_EQ(Lexer::readFile(expectedFilePath), output);
+    EXPECT_EQ(Util::readFile(expectedFilePath), output);
 }
 
 /**

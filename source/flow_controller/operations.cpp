@@ -290,13 +290,9 @@ namespace FlowController {
     CommanderTypePtr divideOperation(const CommanderTypePtr& left, const CommanderTypePtr& right) {
         const Type leftType = left->getType();
         const Type rightType = right->getType();
-        if (rightType == Type::INT) {
-            if (std::static_pointer_cast<CommanderInt>(right)->value == 0)
-                throw Util::CommanderException("DivisionError: unable to divide by zero");
-        }
-        if (rightType == Type::FLOAT) {
-            if (std::static_pointer_cast<CommanderFloat>(right)->value == 0)
-                throw Util::CommanderException("DivisionError: unable to divide by zero");
+        if (rightType == Type::INT && std::static_pointer_cast<CommanderInt>(right)->value == 0
+            || rightType == Type::FLOAT && std::static_pointer_cast<CommanderFloat>(right)->value == 0) {
+            throw Util::CommanderException("DivisionError: unable to divide by zero");
         }
 
         if (leftType == Type::INT && rightType == Type::INT) {
@@ -330,6 +326,10 @@ namespace FlowController {
     CommanderTypePtr moduloOperation(const CommanderTypePtr& left, const CommanderTypePtr& right) {
         const Type leftType = left->getType();
         const Type rightType = right->getType();
+        if (rightType == Type::INT && std::static_pointer_cast<CommanderInt>(right)->value == 0
+            || rightType == Type::FLOAT && std::static_pointer_cast<CommanderFloat>(right)->value == 0) {
+            throw Util::CommanderException("DivisionError: unable to modulo by zero");
+        }
         if (leftType == Type::INT && rightType == Type::INT) {
             auto leftInt = std::static_pointer_cast<CommanderInt>(left);
             auto rightInt = std::static_pointer_cast<CommanderInt>(right);

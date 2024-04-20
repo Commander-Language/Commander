@@ -118,4 +118,19 @@ namespace FlowController {
 
     TypeChecker::Type CommanderCommand::getType() const { return TypeChecker::COMMAND; }
 
+    CommanderTypePtr copy(const CommanderTypePtr& commanderTypePtr) {
+        switch (commanderTypePtr->getType()) {
+            case TypeChecker::INT:
+                return std::make_shared<CommanderInt>(std::static_pointer_cast<CommanderInt>(commanderTypePtr)->value);
+            case TypeChecker::FLOAT:
+                return std::make_shared<CommanderFloat>(
+                        std::static_pointer_cast<CommanderFloat>(commanderTypePtr)->value);
+            case TypeChecker::BOOL:
+                return std::make_shared<CommanderBool>(
+                        std::static_pointer_cast<CommanderBool>(commanderTypePtr)->value);
+            default:
+                return commanderTypePtr;
+        }
+    }
+
 }  // namespace FlowController

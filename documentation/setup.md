@@ -47,7 +47,11 @@ Here's an example of how this might look like via the terminal on a Linux Ubuntu
    ```
 With CLion, it should automatically detect the CMakeList.txt file when you open the project directory in CLion (the "commander" directory in the example above). This means that it will know how to build everything when you try to run the interpreter or tests within CLion. Note that dependencies such as GoogleTest will be automatically downloaded when building using CMake.
 
-## Windows
+Note that you may need to download the ncurses library for Linux if it isn't already included in your system.
+
+Additionally, if you are compiling on Windows, there is special documentation on how to specifically do that [here](compiling.md).
+
+## Windows CLion
 
 When using CLion on Windows, we have run into some known issues with getting it to work well for the project, so here are those issues and the solutions to them:
 
@@ -55,5 +59,5 @@ When using CLion on Windows, we have run into some known issues with getting it 
 ![MinGW Settings](MinGW.png)
 ![Cmake Settings](CMake.png)
 
-2. When you use WSL in CLion, make sure to create a WSL toolchain in the settings for best results. Do NOT use remote development, as this requires installing CLion onto WSL and running it there instead of on the Windows host machine, which turns out to be much slower. See screenshot below for what this looks like in the settings:
+2. If keeping your project in WSL, make sure to create a WSL toolchain in the settings for best results. Do NOT use remote development, as this requires installing CLion onto WSL and running it there instead of on the Windows host machine, which turns out to be much slower. See screenshot below for what this looks like in the settings:
 ![WSL Toolchain Settings](WSL.png)

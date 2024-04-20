@@ -2,8 +2,6 @@
  * @file flow_controller.cpp
  * @brief Implements the Flow Controller and runtime
  *
- * Statements:
- *      TODO: Finish the following: Alias
  */
 
 /*
@@ -97,7 +95,7 @@ namespace FlowController {
                     // _expr
                     break;
                 default: {
-                    throw Util::CommanderException("Flow Controller: Encountered unknown node type");
+                    throw Util::CommanderException("Flow Controller: Encountered unknown node type", node->position);
                 }
             }
         }
@@ -107,8 +105,43 @@ namespace FlowController {
     //  ||    Node Evaluation   ||
     //  ==========================
     void FlowController::_binding(const Parser::BindingNodePtr& node) {
-        // TODO: Find better default value for each type
-        _setVariable(node->variable, nullptr);
+        CommanderTypePtr defaultVal = nullptr;
+        if (node->type) {
+            switch (node->type->type->getType()) {
+                case TypeChecker::INT:
+                    defaultVal = std::make_shared<CommanderInt>(0);
+                    break;
+                case TypeChecker::FLOAT:
+                    defaultVal = std::make_shared<CommanderFloat>(0.0);
+                    break;
+                case TypeChecker::BOOL:
+                    defaultVal = std::make_shared<CommanderBool>(false);
+                    break;
+                case TypeChecker::TUPLE:
+                    defaultVal = std::make_shared<CommanderTuple>();
+                    break;
+                case TypeChecker::ARRAY:
+                    defaultVal = std::make_shared<CommanderArray>();
+                    break;
+                case TypeChecker::FUNCTION:
+                    defaultVal = std::make_shared<CommanderLambda>(
+                            std::make_shared<Parser::BindingsNode>(node->position),
+                            std::make_shared<Parser::ReturnStmtNode>(
+                                    node->position, std::make_shared<Parser::TupleExprNode>(node->position)),
+                            TypeChecker::VOID_TY);
+                    break;
+                case TypeChecker::STRING:
+                    defaultVal = std::make_shared<CommanderString>("");
+                    break;
+                default:
+                    defaultVal = std::make_shared<CommanderCommand>(
+                            std::make_shared<Parser::BasicCmdNode>(
+                                    std::make_shared<Parser::StringNode>(node->position, "")),
+                            "");
+                    break;
+            }
+        }
+        _setVariable(node->variable, defaultVal);
     }
 
     void FlowController::_bindings(const Parser::BindingsNodePtr& nodes) {
@@ -161,7 +194,8 @@ namespace FlowController {
             }
             default:
                 throw Util::CommanderException("Unknown command type encountered: "
-                                               + Parser::nodeTypeToString(node->nodeType()));
+                                                       + Parser::nodeTypeToString(node->nodeType()),
+                                               node->position);
         }
     }
 
@@ -186,7 +220,7 @@ namespace FlowController {
             case Parser::VAR_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::VarExprNode>(node);
                 CommanderTypePtr value = _getVariable(expr->variable);
-                return value;
+                return copy(value);
             }
             case Parser::LVALUE_EXPR: {
                 auto expr = std::static_pointer_cast<Parser::LValueExprNode>(node);
@@ -205,16 +239,18 @@ namespace FlowController {
                 if (dataStructure->getType() == TypeChecker::ARRAY) {
                     const CommanderArrayPtr array = std::static_pointer_cast<CommanderArray>(dataStructure);
                     if (index->value >= array->values.size()) {
-                        throw Util::CommanderException("Index array out of bounds. Index: "
-                                                       + std::to_string(index->value)
-                                                       + ", Array Length: " + std::to_string(array->values.size()));
+                        throw Util::CommanderException(
+                                "Index array out of bounds. Index: " + std::to_string(index->value)
+                                        + ", Array Length: " + std::to_string(array->values.size()),
+                                expr->position);
                     }
                     return array->values[index->value];
                 }
                 const CommanderTuplePtr tuple = std::static_pointer_cast<CommanderTuple>(dataStructure);
                 if (index->value >= tuple->values.size()) {
                     throw Util::CommanderException("Index tuple out of bounds. Index: " + std::to_string(index->value)
-                                                   + ", Tuple Length: " + std::to_string(tuple->values.size()));
+                                                           + ", Tuple Length: " + std::to_string(tuple->values.size()),
+                                                   expr->position);
                 }
                 return tuple->values[index->value];
             }
@@ -273,7 +309,7 @@ namespace FlowController {
                     // args and bindings should be lined up 1 to 1
                     const CommanderTypePtr argValue = _expr(arg);
                     std::string const argName = function->bindings->bindings[bindingIndex++]->variable;
-                    _setVariable(argName, _copy(argValue));
+                    _setVariable(argName, copy(argValue));
                 }
                 returnValue = _stmt(function->body);
 
@@ -291,7 +327,7 @@ namespace FlowController {
                 return std::make_shared<CommanderString>(CommanderString {Util::readFile(path->value)});
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown expression encountered", node->position);
             }
         }
     }
@@ -440,7 +476,9 @@ namespace FlowController {
             case Parser::ASSERT_STMT: {
                 auto stmt = std::static_pointer_cast<Parser::AssertStmtNode>(node);
                 const CommanderBoolPtr value = std::static_pointer_cast<CommanderBool>(_expr(stmt->expr));
-                if (!value->value) { throw Util::CommanderException("Assertion Error: " + _string(stmt->message)); }
+                if (!value->value) {
+                    throw Util::CommanderException("Assertion Error: " + _string(stmt->message), stmt->position);
+                }
                 return nullptr;
             }
             case Parser::FUNCTION_STMT: {
@@ -450,7 +488,7 @@ namespace FlowController {
                 return nullptr;
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown statement encountered");
+                throw Util::CommanderException("Flow Controller: Unknown statement encountered", node->position);
             }
         }
     }
@@ -480,7 +518,8 @@ namespace FlowController {
                     }
                     default:
                         throw Util::CommanderException("Trying to negate bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
+                                                               + TypeChecker::typeToString(expr->getType()),
+                                                       unOp->position);
                 }
             }
             case Parser::NOT: {
@@ -492,7 +531,8 @@ namespace FlowController {
                     }
                     default:
                         throw Util::CommanderException("Trying to use ! operator on bad type "
-                                                       + TypeChecker::typeToString(expr->getType()));
+                                                               + TypeChecker::typeToString(expr->getType()),
+                                                       unOp->position);
                 }
             }
             case Parser::PRE_INCREMENT:
@@ -551,7 +591,8 @@ namespace FlowController {
                         }
                         default:
                             throw Util::CommanderException("Trying to increment or decrement bad type "
-                                                           + TypeChecker::typeToString(value->getType()));
+                                                                   + TypeChecker::typeToString(value->getType()),
+                                                           unOp->position);
                     }
                 }
                 Parser::IndexLValueNodePtr indexLValue = std::static_pointer_cast<Parser::IndexLValueNode>(unOp->node);
@@ -611,11 +652,12 @@ namespace FlowController {
                     }
                     default:
                         throw Util::CommanderException("Trying to increment or decrement bad type "
-                                                       + TypeChecker::typeToString(value->getType()));
+                                                               + TypeChecker::typeToString(value->getType()),
+                                                       unOp->position);
                 }
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown unary expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown unary expression encountered", unOp->position);
             }
         }
     }
@@ -746,7 +788,8 @@ namespace FlowController {
                 return result;
             }
             default: {
-                throw Util::CommanderException("Flow Controller: Unknown binary expression encountered");
+                throw Util::CommanderException("Flow Controller: Unknown binary expression encountered",
+                                               binOp->position);
             }
         }
     }
@@ -773,114 +816,108 @@ namespace FlowController {
             name = apiExpr->func;
             args = apiExpr->args->exprs;
         }
-        if (name == "parseInt") { return Function::parseInt(_copy(_expr(args[0]))); }
-        if (name == "parseFloat") { return Function::parseFloat(_copy(_expr(args[0]))); }
-        if (name == "parseBool") { return Function::parseBool(_copy(_expr(args[0]))); }
-        if (name == "toString") { return Function::toString(_copy(_expr(args[0]))); }
-        if (name == "sqrt") { return Function::sqrt(_copy(_expr(args[0]))); }
-        if (name == "ln") { return Function::ln(_copy(_expr(args[0]))); }
-        if (name == "log") { return Function::log(_copy(_expr(args[0]))); }
-        if (name == "abs") { return Function::abs(_copy(_expr(args[0]))); }
-        if (name == "floor") { return Function::floor(_copy(_expr(args[0]))); }
-        if (name == "ceil") { return Function::ceil(_copy(_expr(args[0]))); }
-        if (name == "round") { return Function::round(_copy(_expr(args[0]))); }
-        if (name == "sin") { return Function::sin(_copy(_expr(args[0]))); }
-        if (name == "cos") { return Function::cos(_copy(_expr(args[0]))); }
-        if (name == "tan") { return Function::tan(_copy(_expr(args[0]))); }
-        if (name == "csc") { return Function::csc(_copy(_expr(args[0]))); }
-        if (name == "sec") { return Function::sec(_copy(_expr(args[0]))); }
-        if (name == "cot") { return Function::cot(_copy(_expr(args[0]))); }
-        if (name == "sinh") { return Function::sinh(_copy(_expr(args[0]))); }
-        if (name == "cosh") { return Function::cosh(_copy(_expr(args[0]))); }
-        if (name == "tanh") { return Function::tanh(_copy(_expr(args[0]))); }
-        if (name == "csch") { return Function::csch(_copy(_expr(args[0]))); }
-        if (name == "sech") { return Function::sech(_copy(_expr(args[0]))); }
-        if (name == "coth") { return Function::coth(_copy(_expr(args[0]))); }
-        if (name == "arcsin") { return Function::arcsin(_copy(_expr(args[0]))); }
-        if (name == "arccos") { return Function::arccos(_copy(_expr(args[0]))); }
-        if (name == "arctan") { return Function::arctan(_copy(_expr(args[0]))); }
-        if (name == "arccsc") { return Function::arccsc(_copy(_expr(args[0]))); }
-        if (name == "arcsec") { return Function::arcsec(_copy(_expr(args[0]))); }
-        if (name == "arccot") { return Function::arccot(_copy(_expr(args[0]))); }
-        if (name == "arcsinh") { return Function::arcsinh(_copy(_expr(args[0]))); }
-        if (name == "arccosh") { return Function::arccosh(_copy(_expr(args[0]))); }
-        if (name == "arctanh") { return Function::arctanh(_copy(_expr(args[0]))); }
-        if (name == "arccsch") { return Function::arccsch(_copy(_expr(args[0]))); }
-        if (name == "arcsech") { return Function::arcsech(_copy(_expr(args[0]))); }
-        if (name == "arccoth") { return Function::arccoth(_copy(_expr(args[0]))); }
+        if (name == "parseInt") { return Function::parseInt(_expr(args[0])); }
+        if (name == "parseFloat") { return Function::parseFloat(_expr(args[0])); }
+        if (name == "parseBool") { return Function::parseBool(_expr(args[0])); }
+        if (name == "toString") { return Function::toString(_expr(args[0])); }
+        if (name == "sqrt") { return Function::sqrt(_expr(args[0])); }
+        if (name == "ln") { return Function::ln(_expr(args[0])); }
+        if (name == "log") { return Function::log(_expr(args[0])); }
+        if (name == "abs") { return Function::abs(_expr(args[0])); }
+        if (name == "floor") { return Function::floor(_expr(args[0])); }
+        if (name == "ceil") { return Function::ceil(_expr(args[0])); }
+        if (name == "round") { return Function::round(_expr(args[0])); }
+        if (name == "sin") { return Function::sin(_expr(args[0])); }
+        if (name == "cos") { return Function::cos(_expr(args[0])); }
+        if (name == "tan") { return Function::tan(_expr(args[0])); }
+        if (name == "csc") { return Function::csc(_expr(args[0])); }
+        if (name == "sec") { return Function::sec(_expr(args[0])); }
+        if (name == "cot") { return Function::cot(_expr(args[0])); }
+        if (name == "sinh") { return Function::sinh(_expr(args[0])); }
+        if (name == "cosh") { return Function::cosh(_expr(args[0])); }
+        if (name == "tanh") { return Function::tanh(_expr(args[0])); }
+        if (name == "csch") { return Function::csch(_expr(args[0])); }
+        if (name == "sech") { return Function::sech(_expr(args[0])); }
+        if (name == "coth") { return Function::coth(_expr(args[0])); }
+        if (name == "arcsin") { return Function::arcsin(_expr(args[0])); }
+        if (name == "arccos") { return Function::arccos(_expr(args[0])); }
+        if (name == "arctan") { return Function::arctan(_expr(args[0])); }
+        if (name == "arccsc") { return Function::arccsc(_expr(args[0])); }
+        if (name == "arcsec") { return Function::arcsec(_expr(args[0])); }
+        if (name == "arccot") { return Function::arccot(_expr(args[0])); }
+        if (name == "arcsinh") { return Function::arcsinh(_expr(args[0])); }
+        if (name == "arccosh") { return Function::arccosh(_expr(args[0])); }
+        if (name == "arctanh") { return Function::arctanh(_expr(args[0])); }
+        if (name == "arccsch") { return Function::arccsch(_expr(args[0])); }
+        if (name == "arcsech") { return Function::arcsech(_expr(args[0])); }
+        if (name == "arccoth") { return Function::arccoth(_expr(args[0])); }
         if (name == "random") { return Function::randomFloat(); }
         if (name == "time") { return Function::time(); }
         if (name == "date") { return Function::date(); }
-        if (name == "sleep") { return Function::sleep(std::static_pointer_cast<CommanderInt>(_copy(_expr(args[0])))); }
+        if (name == "sleep") { return Function::sleep(std::static_pointer_cast<CommanderInt>(_expr(args[0]))); }
         if (name == "charAt") {
-            return Function::charAt(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                    std::static_pointer_cast<CommanderInt>(_copy(_expr(args[1]))));
+            return Function::charAt(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                    std::static_pointer_cast<CommanderInt>(_expr(args[1])));
         }
         if (name == "startsWith") {
-            return Function::startsWith(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                        std::static_pointer_cast<CommanderString>(_copy(_expr(args[1]))));
+            return Function::startsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[1])));
         }
         if (name == "endsWith") {
-            return Function::endsWith(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                      std::static_pointer_cast<CommanderString>(_copy(_expr(args[1]))));
+            return Function::endsWith(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                      std::static_pointer_cast<CommanderString>(_expr(args[1])));
         }
-        if (name == "includes") { return Function::includes(_copy(_expr(args[0])), _copy(_expr(args[1]))); }
-        if (name == "indexOf") { return Function::indexOf(_copy(_expr(args[0])), _copy(_expr(args[1]))); }
-        if (name == "length") { return Function::length(_copy(_expr(args[0]))); }
+        if (name == "includes") { return Function::includes(_expr(args[0]), _expr(args[1])); }
+        if (name == "indexOf") { return Function::indexOf(_expr(args[0]), _expr(args[1])); }
+        if (name == "length") { return Function::length(_expr(args[0])); }
         if (name == "replace") {
-            return Function::replace(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                     std::static_pointer_cast<CommanderString>(_copy(_expr(args[1]))),
-                                     std::static_pointer_cast<CommanderString>(_copy(_expr(args[2]))));
+            return Function::replace(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                     std::static_pointer_cast<CommanderString>(_expr(args[1])),
+                                     std::static_pointer_cast<CommanderString>(_expr(args[2])));
         }
         if (name == "replaceAll") {
-            return Function::replaceAll(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                        std::static_pointer_cast<CommanderString>(_copy(_expr(args[1]))),
-                                        std::static_pointer_cast<CommanderString>(_copy(_expr(args[2]))));
+            return Function::replaceAll(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[1])),
+                                        std::static_pointer_cast<CommanderString>(_expr(args[2])));
         }
         if (name == "substring") {
             if (args.size() == 2) {
-                return Function::substring(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                           std::static_pointer_cast<CommanderInt>(_copy(_expr(args[1]))));
+                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])));
             } else {
-                return Function::substring(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                           std::static_pointer_cast<CommanderInt>(_copy(_expr(args[1]))),
-                                           std::static_pointer_cast<CommanderInt>(_copy(_expr(args[2]))));
+                return Function::substring(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[1])),
+                                           std::static_pointer_cast<CommanderInt>(_expr(args[2])));
             }
         }
-        if (name == "trim") { return Function::trim(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0])))); }
-        if (name == "lower") {
-            return Function::lower(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))));
-        }
-        if (name == "upper") {
-            return Function::upper(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))));
-        }
+        if (name == "trim") { return Function::trim(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
+        if (name == "lower") { return Function::lower(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
+        if (name == "upper") { return Function::upper(std::static_pointer_cast<CommanderString>(_expr(args[0]))); }
         if (name == "split") {
-            return Function::split(std::static_pointer_cast<CommanderString>(_copy(_expr(args[0]))),
-                                   std::static_pointer_cast<CommanderString>(_copy(_expr(args[1]))));
+            return Function::split(std::static_pointer_cast<CommanderString>(_expr(args[0])),
+                                   std::static_pointer_cast<CommanderString>(_expr(args[1])));
         }
         if (name == "sort") {
-            return Function::sort(std::static_pointer_cast<CommanderArray>(_copy(_expr(args[0]))),
-                                  std::static_pointer_cast<CommanderLambda>(_copy(_expr(args[1]))));
+            return Function::sort(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                  std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
         }
         if (name == "filter") {
-            return Function::filter(std::static_pointer_cast<CommanderArray>(_copy(_expr(args[0]))),
-                                    std::static_pointer_cast<CommanderLambda>(_copy(_expr(args[1]))));
+            return Function::filter(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                    std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
         }
         if (name == "map") {
-            return Function::map(std::static_pointer_cast<CommanderArray>(_copy(_expr(args[0]))),
-                                 std::static_pointer_cast<CommanderLambda>(_copy(_expr(args[1]))));
+            return Function::map(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                 std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
         }
         if (name == "foreach") {
-            return Function::foreach(std::static_pointer_cast<CommanderArray>(_copy(_expr(args[0]))),
-                                     std::static_pointer_cast<CommanderLambda>(_copy(_expr(args[1]))));
+            return Function::foreach(std::static_pointer_cast<CommanderArray>(_expr(args[0])),
+                                     std::static_pointer_cast<CommanderLambda>(_expr(args[1])));
         }
         if (name == "append") {
-            return Function::append(std::static_pointer_cast<CommanderArray>(_copy(_expr(args[0]))),
-                                    _copy(_expr(args[1])));
+            return Function::append(std::static_pointer_cast<CommanderArray>(_expr(args[0])), _expr(args[1]));
         }
         if (name == "remove") {
-            return Function::remove(std::static_pointer_cast<CommanderArray>(_copy(_expr(args[0]))),
-                                    _copy(_expr(args[1])));
+            return Function::remove(std::static_pointer_cast<CommanderArray>(_expr(args[0])), _expr(args[1]));
         }
         return nullptr;
     }
@@ -972,21 +1009,6 @@ namespace FlowController {
                 auto asyncCmd = std::static_pointer_cast<Parser::AsyncCmdNode>(command);
                 return _getCommandString(asyncCmd->cmd) + " &";
             }
-        }
-    }
-
-    CommanderTypePtr FlowController::_copy(const CommanderTypePtr& commanderTypePtr) {
-        switch (commanderTypePtr->getType()) {
-            case TypeChecker::INT:
-                return std::make_shared<CommanderInt>(std::static_pointer_cast<CommanderInt>(commanderTypePtr)->value);
-            case TypeChecker::FLOAT:
-                return std::make_shared<CommanderFloat>(
-                        std::static_pointer_cast<CommanderFloat>(commanderTypePtr)->value);
-            case TypeChecker::BOOL:
-                return std::make_shared<CommanderBool>(
-                        std::static_pointer_cast<CommanderBool>(commanderTypePtr)->value);
-            default:
-                return commanderTypePtr;
         }
     }
 }  // namespace FlowController

@@ -1,0 +1,2 @@
+//Should typecheck changing an array inside of a function
+fn add(a) { a[0] += 1; }

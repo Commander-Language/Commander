@@ -573,7 +573,9 @@ TEST(GARBAGE_COLLECTION_SYMBOL_TABLE_ORGANIZER, expirationTest) {
 }
 
 // GENERIC DATA TYPE TESTS
-// TODO: document
+/**
+ * @brief scopeAlternateIntTest() checks singular scope works
+ */
 TEST(ANY_DATA, scopeAlternateIntTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
@@ -582,6 +584,9 @@ TEST(ANY_DATA, scopeAlternateIntTest) {
     EXPECT_EQ(*testScope.getVariable<int>("cat"), 8);
 }
 
+/**
+ * @brief scopeAlternateIntMultiScopeTest() checks multiple scopes work
+ */
 TEST(ANY_DATA, scopeAlternateIntMultiScopeTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
@@ -599,6 +604,9 @@ TEST(ANY_DATA, scopeAlternateIntMultiScopeTest) {
     EXPECT_EQ(*finalScope.getVariable<int>("cat"), 8);
 }
 
+/**
+ * @brief scopeNoBadCastsTest() checks that bad casts throw
+ */
 TEST(ANY_DATA, scopeNoBadCastsTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
@@ -617,6 +625,9 @@ TEST(ANY_DATA, scopeNoBadCastsTest) {
     EXPECT_NO_THROW(EXPECT_TRUE(testScope.getVariable<bool>("bird")));
 }
 
+/**
+ * @brief scopeCastTest() checks that ok casts work
+ */
 TEST(ANY_DATA, scopeCastTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
@@ -643,6 +654,9 @@ TEST(ANY_DATA, scopeCastTest) {
     EXPECT_TRUE(*testScope.getVariable<bool>("bird") + catAsBool + dogAsBool);
 }
 
+/**
+ * @brief scopeStringTest() checks that getting strings works
+ */
 TEST(ANY_DATA, scopeStringTest) {
     std::string catAsString = "meow";
     Scope testScope = Scope();
@@ -650,6 +664,9 @@ TEST(ANY_DATA, scopeStringTest) {
     EXPECT_EQ(*testScope.getVariable<std::string>("cat"), "meow");
 }
 
+/**
+ * @brief scopeAddOrUpdateTest() checks that scope variables update correctly
+ */
 TEST(ANY_DATA, scopeAddOrUpdateTest) {
     Scope testScope = Scope();
     testScope.addOrUpdateVariable("cat", 8);
@@ -662,6 +679,9 @@ TEST(ANY_DATA, scopeAddOrUpdateTest) {
     EXPECT_NE((int)*testScope.getVariable<float>("cat"), 8);
 }
 
+/**
+ * @brief symbolTableAlternateIntTest() checks that multiple scopes work with ints
+ */
 TEST(ANY_DATA, symbolTableAlternateIntTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();
@@ -674,6 +694,9 @@ TEST(ANY_DATA, symbolTableAlternateIntTest) {
     EXPECT_NO_THROW(EXPECT_EQ(*testOrg.getVariable<int>("cat"), 8));
 }
 
+/**
+ * @brief symbolTableCastTest() checks that casting works
+ */
 TEST(ANY_DATA, symbolTableCastTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
 
@@ -702,6 +725,9 @@ TEST(ANY_DATA, symbolTableCastTest) {
     EXPECT_TRUE(*testOrg.getVariable<bool>("bird") + catAsBool + dogAsBool);
 }
 
+/**
+ * @brief symbolTableStringTest() checks that string casting works
+ */
 TEST(ANY_DATA, symbolTableStringTest) {
     SymbolTableOrganizer testOrg = SymbolTableOrganizer();
     testOrg.pushSymbolTable();

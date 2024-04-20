@@ -1,0 +1,36 @@
+// Gets random number between a and b (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
+fn randInt(a, b) {
+    return floor(random() * (b - a) + a);
+}
+
+//Swaps two values in an array
+fn swap(arr, i, j) {
+	tmp = arr[i];
+	arr[i] = arr[j];
+	arr[j] = tmp;
+}
+
+fn partition(arr, l, r, p) {
+	swap(arr, p, r);
+	j = l - 1;
+	for (i = l; i < r; i++) {
+		if (arr[i] < arr[r]) {
+			swap(arr, ++j, i);
+		}
+	}
+	swap(arr, r, ++j);
+	return j;
+}
+
+fn quicksort(arr, l, r) {
+	if (r - l > 0) {
+		p = randInt(l, r + 1);
+		m = partition(arr, l, r, p);
+		quicksort(arr, l, m - 1);
+		quicksort(arr, m + 1, r);
+	}
+}
+
+arr = [5, 7, 2, 1, 10, 3, 8, 9, 6, 4];
+quicksort(arr, 0, arr.length() - 1);
+println arr;

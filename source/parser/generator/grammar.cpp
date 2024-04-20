@@ -544,6 +544,9 @@ namespace Parser {
                 // (STMT) -> [RETURN] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::RETURN, ASTNodeType::EXPR, TokenType::SEMICOLON}},
                   makeNode("ReturnStmt", {firstTokenPosition, castNode("Expr", 1)})}},
+                // (STMT) -> [RETURN] [SEMICOLON]
+                {{{ASTNodeType::STMT, {TokenType::RETURN, TokenType::SEMICOLON}},
+                  makeNode("ReturnStmt", {firstTokenPosition, makeNode("TupleExpr", {tokenPosition(1)})})}},
 
                 // (STMT) -> [PRINT] (EXPR) [SEMICOLON]
                 {{{ASTNodeType::STMT, {TokenType::PRINT, ASTNodeType::EXPR, TokenType::SEMICOLON}},

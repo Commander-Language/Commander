@@ -1,0 +1,4 @@
+//Should correctly run round
+println round(5);
+println round(3.141);
+println round(3.6141);

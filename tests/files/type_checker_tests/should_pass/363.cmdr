@@ -1,0 +1,5 @@
+//Should allow recursion
+fn a() {
+	return a();
+}
+x = a();

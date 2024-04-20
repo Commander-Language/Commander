@@ -7,12 +7,14 @@
 #ifndef AST_NODE_HPP
 #define AST_NODE_HPP
 
-#include "source/lexer/lexer.hpp"
+#include "source/lexer/file_position.hpp"
 #include "source/type_checker/type.hpp"
 #include "source/type_checker/variable_table.hpp"
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Parser {

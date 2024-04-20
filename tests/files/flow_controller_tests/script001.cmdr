@@ -1,8 +1,0 @@
-// test math operations on ints
-one = 1;
-two = 2;
-three = one + two;
-nine = three**2;
-eight_one = 9 * 9;
-twenty = 100 / 5;
-mod5_2 = 5 % 2;

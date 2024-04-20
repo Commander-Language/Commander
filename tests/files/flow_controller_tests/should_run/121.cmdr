@@ -1,0 +1,12 @@
+//Test that a swap function works
+fn swap(arr, i, j) {
+	tmp = arr[i];
+	arr[i] = arr[j];
+	arr[j] = tmp;
+}
+
+a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+for (i = 0; i < a.length() / 2; i++) {
+	swap(a, i, a.length() - 1 - i);
+}
+println a;
