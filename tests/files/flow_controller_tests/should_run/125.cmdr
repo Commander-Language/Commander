@@ -1,0 +1,6 @@
+//Test that return by itself works
+fn hi() {
+	println "hi";
+	return;
+}
+hi();

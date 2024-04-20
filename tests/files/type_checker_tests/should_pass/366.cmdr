@@ -1,0 +1,5 @@
+//Should type check
+fn b(c) {
+	m = 1;
+	b(m + 1);
+}

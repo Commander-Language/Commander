@@ -1,0 +1,20 @@
+//Test startsWith works
+s = "Hello World!";
+//These ones should be false
+println s.startsWith("Hi");
+println s.startsWith("Bye");
+println s.startsWith("Helli");
+println s.startsWith("Hello World!!!");
+println s.startsWith("hello");
+println s.startsWith("Definitely doesn't start with this");
+println s.startsWith("h");
+println s.startsWith(" ");
+//These ones should be true
+println s.startsWith("");
+println s.startsWith("H");
+println s.startsWith("He");
+println s.startsWith("Hel");
+println s.startsWith("Hello");
+println s.startsWith("Hello ");
+println s.startsWith("Hello World");
+println s.startsWith("Hello World!");

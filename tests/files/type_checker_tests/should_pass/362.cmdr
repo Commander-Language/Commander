@@ -1,0 +1,5 @@
+//Should allow lambda recursion
+a = fn (b) -> {
+	return b();
+};
+a(a);

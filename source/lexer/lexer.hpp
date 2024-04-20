@@ -10,9 +10,14 @@
 #ifndef COMMANDER_LEXER_HPP
 #define COMMANDER_LEXER_HPP
 
+#include "file_position.hpp"
+#include "source/util/commander_exception.hpp"
+#include "source/util/io.hpp"
 #include <cstdint>
+#include <fstream>
 #include <functional>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -101,37 +106,6 @@ namespace Lexer {
         VOID,
         WHILE,
         WRITE
-    };
-
-    /**
-     * @brief Represents a position in a file
-     */
-    struct FilePosition {
-        /**
-         * The file name and path
-         */
-        std::string fileName;
-
-        /**
-         * The line position in the file
-         */
-        int line;
-
-        /**
-         * The column position in the file
-         */
-        int column;
-
-        /**
-         * The index position in the file
-         */
-        int index;
-
-        /**
-         * @brief Returns the string representation of the FilePosition
-         * @return The string representation of the FilePosition
-         */
-        [[nodiscard]] std::string toString() const;
     };
 
     /**
@@ -261,13 +235,6 @@ namespace Lexer {
      * @param filePath The path to the file.
      */
     void tokenize(TokenList& tokens, const std::string& filePath);
-
-    /**
-     * @brief Helper that reads in a file given a path and returns it as a string.
-     * @param filePath Path to the file
-     * @return The string representing the file contents
-     */
-    std::string readFile(const std::string& filePath);
 
     /**
      * @brief Skips whitespace

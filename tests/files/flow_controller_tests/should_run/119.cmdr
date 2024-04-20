@@ -1,0 +1,6 @@
+//Make sure that variables copy by value
+x = 10;
+y = x;
+y -= 4;
+println x; // Should print 10
+println y; // Should print 6

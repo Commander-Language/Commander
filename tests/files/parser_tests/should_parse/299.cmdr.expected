@@ -1,0 +1,4 @@
+(PrgmNode
+	(FunctionStmtNode hi (BindingsNode) (ScopeStmtNode (StmtsNode
+	(PrintlnStmtNode (StringExpressionNode (StringNode (StringExprsNode (StringExpressionNode (StringNode 'hi'))))))
+	(ReturnStmtNode (TupleExprNode (ExprsNode)))))))

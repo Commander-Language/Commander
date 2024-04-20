@@ -1,0 +1,9 @@
+//Test that recursion with void method works
+fn countdown(x) {
+	println x;
+	if (x == 1) {
+		return;
+	}
+	countdown(x - 1);
+}
+countdown(10);

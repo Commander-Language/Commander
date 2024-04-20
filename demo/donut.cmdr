@@ -1,0 +1,38 @@
+//Translated from Java program written by stephan plus: https://www.reddit.com/r/ProgrammerHumor/comments/hvvrx7/i_translated_the_c_donut_source_code_into_java/
+A = 0.0;
+B = 0.0;
+z: float[] = [];
+b: string[] = [];
+chars: string[] = ['.', ',', '-', '~', ':', ';', '=', '!', '*', '#', '$', '@'];
+clear;
+while (true) {
+	for (i = 0; i < 1760; i++) {
+		b.append(" ");
+		z.append(0.0);
+	}
+	for (j = 0.0; 6.28 > j; j += 0.07) for (i = 0.0; 6.28 > i; i += 0.02) {
+		c = sin(i);
+		d = cos(j);
+		e = sin(A);
+		f = sin(j);
+		g = cos(A);
+		h = d + 2;
+		D = 1 / (c * h * e + f * g + 5);
+		l = cos(i);
+		m = cos(B);
+		n = sin(B);
+		t = c * h * g - f * e;
+		x = parseInt(40 + 30 * D * (l * h * m - t * n));
+		y = parseInt(12 + 15 * D * (l * h * n + t * m));
+		o = x + 80 * y;
+		N = parseInt(8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n));
+		if (y < 22 && y > 0 && x > 0 && x < 80 && D > z[o]) {
+			z[o] = D;
+			b[o] = chars[if N >= 0 then N else 0];
+		}
+	}
+	clear;
+	for (k = 0; k < 1760; k++) print(if k % 80 > 0 then b[k] else "\n");
+	A += 0.04;
+	B += 0.02;
+}

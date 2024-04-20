@@ -173,6 +173,7 @@ namespace JobRunner {
                 dup2(fds[count - 2], STDIN_FILENO);
                 for (int i = 0; i < count; i++) { close(fds[i]); }
             }
+
             dup2(pipeOut[1], STDOUT_FILENO);
             dup2(pipeErr[1], STDERR_FILENO);
 
@@ -183,18 +184,17 @@ namespace JobRunner {
 
             _exec(process);
         }
+        // close write ends
+        close(pipeOut[1]);
+        close(pipeErr[1]);
 
         // don't forget to close pipes
         if (partOfPipe)
             for (int i = 0; i < count; i++) { close(fds[i]); }
 
-        // close write ends
-        close(pipeOut[1]);
-        close(pipeErr[1]);
-
         // size of buffer
-        size_t stdoutBufSize = 2048;
-        size_t stderrBufSize = 2048;
+        size_t stdoutBufSize = _bufSize;
+        size_t stderrBufSize = _bufSize;
 
         auto stdoutOutput = std::make_unique<char[]>(stdoutBufSize);
         auto stderrOutput = std::make_unique<char[]>(stderrBufSize);
@@ -205,6 +205,8 @@ namespace JobRunner {
         // number of bytes read
         size_t stdoutRead = 0;
         size_t stderrRead = 0;
+
+        fcntl(pipeErr[0], F_SETFL, O_NONBLOCK);  // set to not block if blocking
 
         bool reading = true;
         while (reading) {
@@ -228,13 +230,13 @@ namespace JobRunner {
         close(pipeOut[0]);
         close(pipeErr[0]);
 
+        int stat;
+        waitpid(pid, &stat, 0);
+
         if (stdoutSize >= stdoutBufSize) _resize(stdoutOutput, stdoutBufSize);
         stdoutOutput[stdoutSize] = '\0';
         if (stderrSize >= stderrBufSize) _resize(stderrOutput, stderrBufSize);
         stderrOutput[stderrSize] = '\0';
-
-        int stat;
-        waitpid(pid, &stat, 0);
 
         std::string out(stdoutOutput.get());
         std::string err(stderrOutput.get());

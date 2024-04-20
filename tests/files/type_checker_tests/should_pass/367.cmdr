@@ -1,0 +1,6 @@
+//Should type check empty return statements
+fn hi() {
+	println "hi";
+	return;
+}
+x = hi();

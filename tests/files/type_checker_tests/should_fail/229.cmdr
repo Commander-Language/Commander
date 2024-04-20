@@ -1,0 +1,4 @@
+//Should fail on calling undeclared lambda
+a = fn () -> {
+	return a();
+}

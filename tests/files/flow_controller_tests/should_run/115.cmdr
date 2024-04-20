@@ -1,0 +1,4 @@
+//Should correctly run floor
+println floor(5);
+println floor(3.141);
+println floor(3.6141);

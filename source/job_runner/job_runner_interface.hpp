@@ -41,6 +41,8 @@ namespace JobRunner {
          * @details The process to execute
          */
         Process::ProcessPtr _process;
+
+        const size_t _bufSize = 8192;
     };
 
 }  // namespace JobRunner

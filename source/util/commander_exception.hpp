@@ -7,7 +7,7 @@
 #ifndef COMMANDER_COMMANDER_EXCEPTION_HPP
 #define COMMANDER_COMMANDER_EXCEPTION_HPP
 
-#include "source/lexer/lexer.hpp"
+#include "source/lexer/file_position.hpp"
 #include <string>
 #include <utility>
 

@@ -1,0 +1,3 @@
+(PrgmNode
+	(FunctionStmtNode add (BindingsNode (BindingNode a)) (TupleTypeNode (TypesNode) VOID) (ScopeStmtNode (StmtsNode
+	(ExprStmtNode (BinOpExprNode (IndexLValueNode (VarLValueNode a) (IntExprNode 0 INT) INT) ADD_SET (IntExprNode 1 INT) INT))))))

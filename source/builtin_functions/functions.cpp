@@ -18,7 +18,7 @@ namespace Function {
     FlowController::CommanderIntPtr parseInt(FlowController::CommanderTypePtr intValue) {
         switch (intValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(intValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(intValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::static_pointer_cast<FlowController::CommanderFloat>(intValue)->value);
@@ -39,7 +39,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::static_pointer_cast<FlowController::CommanderInt>(floatValue)->value);
             case TypeChecker::FLOAT:
-                return std::static_pointer_cast<FlowController::CommanderFloat>(floatValue);
+                return std::static_pointer_cast<FlowController::CommanderFloat>(copy(floatValue));
             case TypeChecker::BOOL:
                 return std::make_shared<FlowController::CommanderFloat>(
                         std::static_pointer_cast<FlowController::CommanderBool>(floatValue)->value ? 1.0 : 0.0);
@@ -60,7 +60,7 @@ namespace Function {
                 return std::make_shared<FlowController::CommanderBool>(
                         std::static_pointer_cast<FlowController::CommanderFloat>(boolValue)->value != 0);
             case TypeChecker::BOOL:
-                return std::static_pointer_cast<FlowController::CommanderBool>(boolValue);
+                return std::static_pointer_cast<FlowController::CommanderBool>(copy(boolValue));
             case TypeChecker::STRING:
                 return std::make_shared<FlowController::CommanderBool>(
                         std::static_pointer_cast<FlowController::CommanderString>(boolValue)->value == "true");
@@ -128,7 +128,7 @@ namespace Function {
     FlowController::CommanderIntPtr floor(FlowController::CommanderTypePtr numberValue) {
         switch (numberValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(numberValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(numberValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::floor(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
@@ -140,7 +140,7 @@ namespace Function {
     FlowController::CommanderIntPtr ceil(FlowController::CommanderTypePtr numberValue) {
         switch (numberValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(numberValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(numberValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::ceil(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
@@ -152,7 +152,7 @@ namespace Function {
     FlowController::CommanderIntPtr round(FlowController::CommanderTypePtr numberValue) {
         switch (numberValue->getType()) {
             case TypeChecker::INT:
-                return std::static_pointer_cast<FlowController::CommanderInt>(numberValue);
+                return std::static_pointer_cast<FlowController::CommanderInt>(copy(numberValue));
             case TypeChecker::FLOAT:
                 return std::make_shared<FlowController::CommanderInt>(
                         std::round(std::static_pointer_cast<FlowController::CommanderFloat>(numberValue)->value));
@@ -439,7 +439,6 @@ namespace Function {
 
     FlowController::CommanderFloatPtr randomFloat() {
         return std::make_shared<FlowController::CommanderFloat>(((double)rand()) / ((double)RAND_MAX));
-        // TODO: may generate an identical value every run
     }
 
     FlowController::CommanderIntPtr time() {
@@ -476,22 +475,22 @@ namespace Function {
 
     FlowController::CommanderStringPtr charAt(FlowController::CommanderStringPtr sourceString,
                                               FlowController::CommanderIntPtr index) {
-        return std::make_shared<FlowController::CommanderString>(std::to_string(sourceString->value[index->value]));
+        return std::make_shared<FlowController::CommanderString>(std::string(1, sourceString->value[index->value]));
     }
 
     FlowController::CommanderBoolPtr startsWith(FlowController::CommanderStringPtr sourceString,
                                                 FlowController::CommanderStringPtr expected) {
         return std::make_shared<FlowController::CommanderBool>(
-                sourceString->value.rfind(expected->value, 0));  // rfind(str, 0) checks the beginning of the string
+                sourceString->value.compare(0, expected->value.size(), expected->value) == 0);
     }
 
     FlowController::CommanderBoolPtr endsWith(FlowController::CommanderStringPtr sourceString,
                                               FlowController::CommanderStringPtr expected) {
-        if (expected->value.size() == sourceString->value.size()) {
-            return std::make_shared<FlowController::CommanderBool>(sourceString->value == expected->value);
-        }
-        return std::make_shared<FlowController::CommanderBool>(sourceString->value.find_last_of(expected->value)
-                                                               != std::string::npos);
+        return std::make_shared<FlowController::CommanderBool>(
+                sourceString->value.length() >= expected->value.length()
+                && sourceString->value.compare(sourceString->value.length() - expected->value.length(),
+                                               expected->value.length(), expected->value)
+                           == 0);
     }
 
     FlowController::CommanderIntPtr length(FlowController::CommanderTypePtr source) {
@@ -565,14 +564,19 @@ namespace Function {
     FlowController::CommanderArrayPtr split(FlowController::CommanderStringPtr sourceString,
                                             FlowController::CommanderStringPtr splitToken) {
         std::vector<FlowController::CommanderTypePtr> values;
-        std::string workingString = std::string(sourceString->value);
-        size_t currentTokenLocation = 1;  // temp value
-
-        while (currentTokenLocation != 0) {
-            currentTokenLocation = workingString.find(splitToken->value);
-            // TODO: incomplete
-            // find an occurrence of the token to remove, make a substring, and remove from workingString
+        if (splitToken->value.empty()) {
+            values.push_back(sourceString);
+            return std::make_shared<FlowController::CommanderArray>(values);
         }
+        std::string workingString = std::string(sourceString->value);
+        size_t start = 0;
+        size_t end = 0;
+        while ((end = sourceString->value.find(splitToken->value, start)) != std::string::npos) {
+            values.push_back(
+                    std::make_shared<FlowController::CommanderString>(sourceString->value.substr(start, end - start)));
+            start = end + splitToken->value.length();
+        }
+        values.push_back(std::make_shared<FlowController::CommanderString>(sourceString->value.substr(start)));
         return std::make_shared<FlowController::CommanderArray>(values);
     }
 

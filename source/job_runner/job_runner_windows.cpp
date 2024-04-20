@@ -113,21 +113,22 @@ namespace JobRunner {
         CloseHandle(stdWrite);
         CloseHandle(errWrite);
 
-        const int bufferSize = 1024;
         DWORD bytesRead;
 
-        char stdBuffer[bufferSize];
+        const size_t bufSize = 4096;
+        char stdBuffer[bufSize];
+
         std::string stdOutput;
 
-        while ((ReadFile(stdRead, stdBuffer, bufferSize, &bytesRead, nullptr) != 0) && bytesRead != 0) {
+        while ((ReadFile(stdRead, stdBuffer, bufSize, &bytesRead, nullptr) != 0) && bytesRead != 0) {
             stdOutput.append(stdBuffer, bytesRead);
         }
 
         bytesRead = 0;
-        char errBuffer[bufferSize];
+        char errBuffer[bufSize];
         std::string errOutput;
 
-        while ((ReadFile(errRead, errBuffer, bufferSize, &bytesRead, nullptr) != 0) && bytesRead != 0) {
+        while ((ReadFile(errRead, errBuffer, bufSize, &bytesRead, nullptr) != 0) && bytesRead != 0) {
             errOutput.append(errBuffer, bytesRead);
         }
 

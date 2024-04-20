@@ -1,6 +1,6 @@
 # Commander
 
-#### Last Updated: 12/16/23
+#### Last Updated: 04/11/24
 
 ## Overview
 
@@ -14,6 +14,10 @@ All documentation for the language, which includes the language specification, g
 
 The only way to use Commander as of now is to build the REPL or run the tests. In the future, we will have version releases of the language interpreter and REPL for download on various operating systems.
 
+## Build
+
+See the [setup](documentation/setup.md) documentation for instructions on how to build in Linux (and also how to set up CLion for development). MacOS would likely build the same way as Linux, but we have not tested building on MacOS so we can't confirm. For details on how to build for Windows, see the [compiling](documentation/compiling.md) documentation.
+
 ## Support
 
 Any questions or feedback? Feel feel to fill out this simple [form](https://forms.gle/oLWJfTRdvyxdQvwA7). Thanks for all the support!
@@ -24,7 +28,7 @@ Alpha Release - 2/2/24
 
 Beta Release - 3/1/24
 
-Final (v1.0) Release - 4/5/24
+Final (v1.0) Release - 4/8/24
 
 ## Contributing
 

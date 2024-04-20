@@ -4,11 +4,7 @@
  *
  */
 
-#include <fstream>
-#include <sstream>
-
 #include "lexer.hpp"
-#include "source/util/commander_exception.hpp"
 
 namespace Lexer {
 
@@ -173,10 +169,6 @@ namespace Lexer {
         }
     }
 
-    std::string FilePosition::toString() const {
-        return fileName + ":" + std::to_string(line) + ":" + std::to_string(column);
-    }
-
     Token::Token() : type(UNKNOWN), position({"", -1, -1, -1}) {}
 
     Token::Token(std::string contents, TokenType type, FilePosition position)
@@ -188,14 +180,8 @@ namespace Lexer {
              + std::to_string(position.line) + ":" + std::to_string(position.column);
     }
 
-    std::string readFile(const std::string& filePath) {
-        std::ifstream input(filePath);
-        if (!input.is_open()) { throw Util::CommanderException("File not found at " + filePath); }
-        return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
-    }
-
     void tokenize(TokenList& tokens, const std::string& filePath) {
-        const std::string file = readFile(filePath);
+        const std::string file = Util::readFile(filePath);
         FilePosition position = {filePath, 1, 1, 0};
         skipWhitespace(file, position);
         while (position.index < file.length()) {

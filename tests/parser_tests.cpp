@@ -41,7 +41,7 @@ TEST_P(ParserParseTests, ShouldParseFileAndMatchExpectedExamples) {
     // Parse
     try {
         Parser::ASTNodeList const nodes = parser.parse(tokens);
-        const std::string expectedOutput = Lexer::readFile(expectedFilePath);
+        const std::string expectedOutput = Util::readFile(expectedFilePath);
         expectOutputEqualsSExpressions(nodes, expectedOutput);
     } catch (const Util::CommanderException& e) {
         std::cout << "Parser Error: " << e.what() << "\n";
