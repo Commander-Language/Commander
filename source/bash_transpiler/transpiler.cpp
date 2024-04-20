@@ -322,9 +322,10 @@ namespace BashTranspiler {
             }
             case Parser::CALL_EXPR: {
                 Parser::CallExprNodePtr callExpr = std::static_pointer_cast<Parser::CallExprNode>(astNode);
-                if (callExpr->func->nodeType() == Parser::LVALUE_EXPR
-                    && std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr->nodeType()
-                               == Parser::VAR_EXPR) {
+                bool isVariable = callExpr->func->nodeType() == Parser::LVALUE_EXPR
+                               && std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr->nodeType()
+                                          == Parser::VAR_EXPR;
+                if (isVariable) {
                     std::string name = std::static_pointer_cast<Parser::VarExprNode>(
                                                std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr)
                                                ->variable;
@@ -763,7 +764,14 @@ namespace BashTranspiler {
                     }
                 }
                 _buffer << "$(";
-                _transpile(callExpr->func);
+                if (isVariable) {
+                    std::string name = std::static_pointer_cast<Parser::VarExprNode>(
+                                               std::static_pointer_cast<Parser::LValueExprNode>(callExpr->func)->expr)
+                                               ->variable;
+                    _buffer << name;
+                } else {
+                    _transpile(callExpr->func);
+                }
                 _transpile(callExpr->args);
                 _buffer << ")";
                 return;
@@ -950,7 +958,7 @@ namespace BashTranspiler {
                 std::map<std::string, std::string> newScope;
                 int i = 1;
                 for (Parser::BindingNodePtr bindingNode : functionStmt->bindings->bindings) {
-                    newScope[bindingNode->variable] = std::to_string(i);
+                    newScope[bindingNode->variable] = std::to_string(i++);
                 }
                 _pushScope(newScope, functionStmt->table);
                 _transpile(functionStmt->body);
