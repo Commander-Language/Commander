@@ -487,13 +487,13 @@ namespace BashTranspiler {
                     if (name == "arccos") {
                         _buffer << "$(echo \"if (";
                         _transpile(args[0]);
-                        _buffer << " == 0) " << M_PI << " / 2 else a(sqrt(1 - e(2 * l(";
+                        _buffer << " == 0) " << Util::PI << " / 2 else a(sqrt(1 - e(2 * l(";
                         _transpile(args[0]);
                         _buffer << "))) / ";
                         _transpile(args[0]);
                         _buffer << ") + (if (";
                         _transpile(args[0]);
-                        _buffer << " < 0) " << M_PI << " else 0)\" | bc -l)";
+                        _buffer << " < 0) " << Util::PI << " else 0)\" | bc -l)";
                         return;
                     }
                     if (name == "arctan") {
@@ -515,11 +515,11 @@ namespace BashTranspiler {
                         _transpile(args[0]);
                         _buffer << ") + (if (";
                         _transpile(args[0]);
-                        _buffer << " < 0) " << M_PI << " else 0)\" | bc -l)";
+                        _buffer << " < 0) " << Util::PI << " else 0)\" | bc -l)";
                         return;
                     }
                     if (name == "arccot") {
-                        _buffer << "$(echo \"" << M_PI << " / 2 - a(";
+                        _buffer << "$(echo \"" << Util::PI << " / 2 - a(";
                         _transpile(args[0]);
                         _buffer << ")\" | bc -l)";
                         return;
