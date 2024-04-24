@@ -541,22 +541,26 @@ Functions contain statements that can be called anywhere after it is defined. Yo
 fn hello() {
     echo “Hello World!”;
 }
+hello();
 ```
 ```
 fn goodbye(): void {
     echo “Goodbye!”;
 }
+goodbye();
 ```
 ```
 fn add(a, b) {
     echo f"Performing {a} + {b} ...";
     return a + b;
 }
+println add(9, 10);
 ```
 ```
 fn factorial(n: int): int {
     return n == 1 ? 1 : factorial(n - 1) * n;
 }
+println factorial(8);
 ```
 
 ## Math Operations
